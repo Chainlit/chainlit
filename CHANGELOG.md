@@ -4,6 +4,28 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.3] - 2025-07-25
+
+### Added
+- Ability to send empty commands
+- Wider element view in copilot and improved styling
+- Support signed urls for elements using dynamoDB persistence
+- Support additional connection arguments in SQLAlchemy data layer
+- Added `CHAINLIT_COOKIE_PATH` environment variable to set the cookie path
+
+### Fixed
+- Message inputs formatting
+- Language pattern to allow `tzm-Latn-DZ`
+- Properly encode parentheses in markdown links
+- Fix chainlit data layer metadata upserts
+- Improve database connection handling
+- Fixed cookie path 
+- Improve lanchain callbacks
+
+### Other
+- Improve robustness of E2E tests
+- Removed watermark "Built with Chainlit"
+
 ## [2.6.2] - 2025-07-16
 
 Technical release due to missed `frontend` and `copilot` folders in previous one.
