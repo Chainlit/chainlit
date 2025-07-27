@@ -5,4 +5,6 @@ export interface IMcp {
   clientType: 'sse' | 'stdio' | 'streamable-http';
   command?: string;
   url?: string;
+  /** Optional HTTP headers used when connecting (SSE or streamable-http) */
+  headers?: Record<string, string>;
 }

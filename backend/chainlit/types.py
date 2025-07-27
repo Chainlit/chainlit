@@ -241,6 +241,8 @@ class ConnectSseMCPRequest(BaseModel):
     clientType: Literal["sse"]
     name: str
     url: str
+    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    headers: Optional[Dict[str, str]] = None
 
 
 class ConnectStreamableHttpMCPRequest(BaseModel):
@@ -248,6 +250,8 @@ class ConnectStreamableHttpMCPRequest(BaseModel):
     clientType: Literal["streamable-http"]
     name: str
     url: str
+    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    headers: Optional[Dict[str, str]] = None
 
 
 ConnectMCPRequest = Union[

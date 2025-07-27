@@ -1152,10 +1152,17 @@ async def connect_mcp(
                         detail="SSE MCP is not enabled",
                     )
 
-                mcp_connection = SseMcpConnection(url=payload.url, name=payload.name)
+                mcp_connection = SseMcpConnection(
+                    url=payload.url,
+                    name=payload.name,
+                    headers=getattr(payload, "headers", None),
+                )
 
                 transport = await exit_stack.enter_async_context(
-                    sse_client(url=mcp_connection.url)
+                    sse_client(
+                        url=mcp_connection.url,
+                        headers=mcp_connection.headers,
+                    )
                 )
             elif payload.clientType == "stdio":
                 if not config.features.mcp.stdio.enabled:
@@ -1186,9 +1193,16 @@ async def connect_mcp(
                         status_code=400,
                         detail="HTTP MCP is not enabled",
                     )
-                mcp_connection = HttpMcpConnection(url=payload.url, name=payload.name)
+                mcp_connection = HttpMcpConnection(
+                    url=payload.url,
+                    name=payload.name,
+                    headers=getattr(payload, "headers", None),
+                )
                 transport = await exit_stack.enter_async_context(
-                    streamablehttp_client(url=mcp_connection.url)
+                    streamablehttp_client(
+                        url=mcp_connection.url,
+                        headers=mcp_connection.headers,
+                    )
                 )
 
             # The transport can return (read, write) for stdio, sse
@@ -1235,6 +1249,10 @@ async def connect_mcp(
                 if payload.clientType == "stdio"
                 else None,
                 "url": getattr(payload, "url", None)
+                if payload.clientType in ["sse", "streamable-http"]
+                else None,
+                # Include optional headers for SSE and streamable-http connections
+                "headers": getattr(payload, "headers", None)
                 if payload.clientType in ["sse", "streamable-http"]
                 else None,
             },
