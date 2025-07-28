@@ -54,6 +54,7 @@ export const runChainlit = async (
     chainlit.stdout.on('data', (data) => {
       const output = data.toString();
       if (output.includes('Your app is available at')) {
+        console.log('Chainlit server is ready.');
         resolve(chainlit);
       }
     });
@@ -64,6 +65,10 @@ export const runChainlit = async (
 
     chainlit.on('error', (error) => {
       reject(error.message);
+    });
+
+    chainlit.on('close', () => {
+      console.log('Chainlit server is killed.');
     });
 
     chainlit.on('exit', function (code) {
