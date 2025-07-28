@@ -9,7 +9,7 @@
     "dotenv": "^16.3.1",
     "eslint": "^8.57.1",
     "husky": "^9.1.6",
-    "kill-port": "^2.0.1",
+    "fkill": "^9.0.0",
     "lint-staged": "^13.3.0",
     "prettier": "^2.8.8",
     "shell-exec": "^1.1.2",
