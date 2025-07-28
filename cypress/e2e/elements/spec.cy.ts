@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('Elements', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to display inlined, side and page elements', () => {
     cy.get('.step').eq(0).find('.inline-image').should('have.length', 0);
     cy.get('.step').eq(0).find('.element-link').should('have.length', 0);

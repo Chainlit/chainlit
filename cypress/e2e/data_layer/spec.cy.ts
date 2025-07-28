@@ -1,7 +1,6 @@
 import { sep } from 'path';
 
-import { runTestServer, submitMessage } from '../../support/testUtils';
-import { ExecutionMode } from '../../support/utils';
+import { submitMessage } from '../../support/testUtils';
 
 // Constants for selectors and timeouts
 const SELECTORS = {
@@ -24,14 +23,8 @@ const SELECTORS = {
 const TIMEOUTS = {
   SHORT: 100,
   MEDIUM: 1000,
-  LONG: 2000
+  LONG: 3000
 } as const;
-
-// Types
-interface ServerEnv {
-  THREAD_HISTORY_PICKLE_PATH: string;
-  [key: string]: string;
-}
 
 // Utility functions
 const login = () => {
@@ -43,6 +36,8 @@ const verifyFeedback = () => {
   cy.location('pathname').should('eq', '/');
   submitMessage('Hello');
   cy.location('pathname').should('match', /^\/thread\//);
+
+  cy.wait(TIMEOUTS.MEDIUM);
 
   cy.get(SELECTORS.NEGATIVE_FEEDBACK).should('have.length', 1);
   cy.get(SELECTORS.POSITIVE_FEEDBACK).should('have.length', 1).first().click();
@@ -90,23 +85,6 @@ const verifyThreadResume = () => {
   cy.get(SELECTORS.STEP).eq(8).should('contain.text', 'chat_profile');
 };
 
-const restartServer = (mode: ExecutionMode | undefined, env: ServerEnv) => {
-  const pathItems = Cypress.spec.absolute.split(sep);
-  const testName = pathItems[pathItems.length - 2];
-
-  cy.exec(
-    `pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode || ''}`,
-    {
-      env,
-      failOnNonZeroExit: false
-    }
-  ).then((result) => {
-    if (result.code !== 0) {
-      throw new Error(`Server restart failed: ${result.stderr}`);
-    }
-  });
-};
-
 const verifyContinueThread = () => {
   cy.get(SELECTORS.STEP).eq(7).should('contain.text', 'Welcome back to Hello');
   submitMessage('Hello after restart');
@@ -125,31 +103,22 @@ const startNewThread = () => {
 };
 
 describe('Data Layer', () => {
-  let threadHistoryFile: string;
-
-  beforeEach(() => {
-    // Set up the thread history file
-    const pathItems = Cypress.spec.absolute.split(sep);
-    pathItems[pathItems.length - 1] = 'thread_history.pickle';
-    threadHistoryFile = pathItems.join(sep);
-
-    runTestServer(undefined, {
-      THREAD_HISTORY_PICKLE_PATH: threadHistoryFile
-    });
-  });
-
-  afterEach(async () => {
-    const { platform } = await import('os');
-
-    // Clean up thread history file
-    const command =
-      platform() === 'win32'
-        ? `del /f "${threadHistoryFile}"`
-        : `rm -f "${threadHistoryFile}"`;
-    cy.exec(command, { failOnNonZeroExit: false });
-  });
+  const pathItems = Cypress.spec.absolute.split(sep);
+  pathItems[pathItems.length - 1] = 'thread_history.pickle';
+  const threadHistoryFile = pathItems.join(sep);
 
   describe('Data Features with Persistence', () => {
+    afterEach(async () => {
+      const { platform } = await import('os');
+
+      // Clean up thread history file
+      const command =
+        platform() === 'win32'
+          ? `del /f "${threadHistoryFile}"`
+          : `rm -f "${threadHistoryFile}"`;
+      cy.exec(command, { failOnNonZeroExit: false });
+    });
+
     it('Verifies login, feedback, thread queue, thread list, and thread resume functionality', () => {
       login();
       cy.wait(TIMEOUTS.MEDIUM);
@@ -160,21 +129,29 @@ describe('Data Layer', () => {
     });
 
     it('Verifies thread continuation after server restart and new thread creation', () => {
-      login();
-      cy.wait(TIMEOUTS.MEDIUM);
-      verifyFeedback();
-      verifyThreadQueue();
+      cy.task('restartChainlit', Cypress.spec).then(() => {
+        cy.wait(TIMEOUTS.LONG);
 
-      restartServer(undefined, {
-        THREAD_HISTORY_PICKLE_PATH: threadHistoryFile
+        cy.visit('/');
+
+        login();
+        cy.wait(TIMEOUTS.MEDIUM);
+        verifyFeedback();
+        verifyThreadQueue();
       });
-      cy.reload();
 
-      verifyContinueThread();
-      startNewThread();
-      cy.wait(TIMEOUTS.MEDIUM);
-      verifyFeedback();
-      verifyThreadQueue();
+      cy.task('restartChainlit', Cypress.spec).then(() => {
+        cy.wait(TIMEOUTS.LONG);
+
+        cy.reload();
+
+        verifyContinueThread();
+        startNewThread();
+        cy.wait(TIMEOUTS.MEDIUM);
+        verifyFeedback();
+        verifyThreadQueue();
+        console.error('end');
+      });
     });
   });
 });

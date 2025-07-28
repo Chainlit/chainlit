@@ -20,7 +20,6 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
   - [Run the tests](#run-the-tests)
     - [Backend unit tests](#backend-unit-tests)
     - [E2E tests](#e2e-tests)
-    - [Run one E2E test](#run-one-e2e-test)
     - [Headed/debugging](#headeddebugging)
 
 ## Local setup
@@ -126,7 +125,12 @@ This will run end to end tests, assessing both the frontend, the backend and the
 ```sh
 cd cypress
 cd e2e
-pnpm test
+pnpm test // will do cypress run
+pnpm test -- --spec cypress/e2e/copilot // will run single test with the name copilot
+pnpm test -- --spec "cypress/e2e/copilot,cypress/e2e/data_layer" // will run two tests with the names copilot and data_layer
+pnpm test -- --spec "cypress/e2e/**/async-*" // will run all async tests
+pnpm test -- --spec "cypress/e2e/**/sync-*" // will run all sync tests
+pnpm test -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
 ```
 
 (Go grab a cup of something, this will take a while.)
@@ -134,11 +138,6 @@ pnpm test
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
 Make sure to run `poetry install` again whenever you've updated the frontend!
-
-### Run one E2E test
-
-1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
-2. Run `SINGLE_TEST=FOLDER pnpm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements pnpm run test`).
 
 ### Headed/debugging
 

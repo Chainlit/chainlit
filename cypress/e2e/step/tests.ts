@@ -1,14 +1,6 @@
-import {
-  describeSyncAsync,
-  runTestServer,
-  submitMessage
-} from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
-describeSyncAsync('Step', () => {
-  before(() => {
-    runTestServer();
-  });
-
+export function tests() {
   it('should be able to nest steps', () => {
     submitMessage('Hello');
 
@@ -20,4 +12,4 @@ describeSyncAsync('Step', () => {
 
     cy.get('.step').should('have.length', 5);
   });
-});
+}

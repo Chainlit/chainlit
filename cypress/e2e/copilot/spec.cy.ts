@@ -1,8 +1,7 @@
-import { runTestServer, submitMessageCopilot } from '../../support/testUtils';
+import { submitMessageCopilot } from '../../support/testUtils';
 
 describe('Copilot', () => {
   before(() => {
-    runTestServer();
     cy.document().then((document) => {
       document.body.innerHTML = '<div id="root"><h1>Copilot test!</h1></div>';
       const script = document.createElement('script');
