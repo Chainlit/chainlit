@@ -6,7 +6,10 @@ import { runChainlit } from './cypress/support/run';
 export const CHAINLIT_APP_PORT = 8000;
 
 async function killChainlit() {
-  await fkill(`:${CHAINLIT_APP_PORT}`, { silent: true });
+  await fkill(`:${CHAINLIT_APP_PORT}`, {
+    forceAfterTimeout: 3000,
+    silent: true
+  });
 }
 
 ['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGBREAK'].forEach((signal) => {
@@ -38,7 +41,7 @@ export default defineConfig({
     defaultCommandTimeout: 30000,
     baseUrl: `http://127.0.0.1:${CHAINLIT_APP_PORT}`,
     async setupNodeEvents(on, config) {
-      await fkill(`:${CHAINLIT_APP_PORT}`, { silent: true }); // Fallback to ensure no previous instance is running
+      await killChainlit(); // Fallback to ensure no previous instance is running
 
       await runChainlit();
 
