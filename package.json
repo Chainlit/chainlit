@@ -5,7 +5,7 @@
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
-    "cypress": "12.9.0",
+    "cypress": "^14.5.3",
     "dotenv": "^16.3.1",
     "eslint": "^8.57.1",
     "husky": "^9.1.6",
@@ -30,7 +30,6 @@
   },
   "pnpm": {
     "overrides": {
-      "@cypress/request@<=2.88.12": ">=3.0.0",
       "braces@<3.0.3": ">=3.0.3",
       "micromatch@<4.0.8": ">=4.0.8"
     }
