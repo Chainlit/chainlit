@@ -1,33 +1,22 @@
-import { ChildProcessWithoutNullStreams } from 'child_process';
 import { defineConfig } from 'cypress';
 import fkill from 'fkill';
-import { platform } from 'os';
 
 import { runChainlit } from './cypress/support/run';
 
 export const CHAINLIT_APP_PORT = 8000;
 
-let chainlit: ChildProcessWithoutNullStreams;
-
-function killChainlit() {
-  if (chainlit) {
-    if (platform() === 'win32') {
-      chainlit.stdin.destroy();
-      chainlit.stdout.destroy();
-      chainlit.stderr.destroy();
-    }
-    chainlit.kill();
-  }
+async function killChainlit() {
+  await fkill(`:${CHAINLIT_APP_PORT}`, { silent: true });
 }
 
 ['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGBREAK'].forEach((signal) => {
   process.on(signal, () => {
-    if (chainlit) {
-      killChainlit(); // Ensure Chainlit is killed on exit
-    }
+    (async () => {
+      await killChainlit(); // Ensure Chainlit is killed on exit
 
-    const signalMap = { SIGTERM: 15, SIGINT: 2, SIGHUP: 1, SIGBREAK: 21 };
-    process.exit(128 + (signalMap[signal] || 0));
+      const signalMap = { SIGTERM: 15, SIGINT: 2, SIGHUP: 1, SIGBREAK: 21 };
+      process.exit(128 + (signalMap[signal] || 0));
+    })();
   });
 });
 
@@ -51,25 +40,19 @@ export default defineConfig({
     async setupNodeEvents(on, config) {
       await fkill(`:${CHAINLIT_APP_PORT}`, { silent: true }); // Fallback to ensure no previous instance is running
 
-      chainlit = await runChainlit();
+      await runChainlit();
 
       on('before:spec', async (spec) => {
-        if (chainlit) {
-          killChainlit();
-        }
-        chainlit = await runChainlit(spec);
+        await killChainlit();
+        await runChainlit(spec);
       });
 
-      on('after:spec', () => {
-        if (chainlit) {
-          killChainlit();
-        }
+      on('after:spec', async () => {
+        await killChainlit();
       });
 
-      on('after:run', () => {
-        if (chainlit) {
-          killChainlit();
-        }
+      on('after:run', async () => {
+        await killChainlit();
       });
 
       on('task', {
@@ -78,13 +61,11 @@ export default defineConfig({
           return null;
         },
         restartChainlit(spec: Cypress.Spec) {
-          if (chainlit) {
-            killChainlit();
-          }
           return new Promise((resolve) => {
-            runChainlit(spec).then((newChainlit) => {
-              chainlit = newChainlit;
-              resolve(null);
+            killChainlit().then(() => {
+              runChainlit(spec).then(() => {
+                resolve(null);
+              });
             });
           });
         }
