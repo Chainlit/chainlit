@@ -1,7 +1,7 @@
 import { submitMessageCopilot } from '../../support/testUtils';
 
 describe('Copilot', () => {
-  before(() => {
+  beforeEach(() => {
     cy.document().then((document) => {
       document.body.innerHTML = '<div id="root"><h1>Copilot test!</h1></div>';
       const script = document.createElement('script');
