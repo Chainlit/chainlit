@@ -33,24 +33,21 @@ const CopyButton = ({
   const copyToClipboard = async () => {
     try {
       let textToCopy: string;
-      let mime: string;
 
       if (typeof content === 'object') {
         textToCopy = JSON.stringify(content, null, 2);
-        mime = 'text/plain';
+        await navigator.clipboard.writeText(textToCopy);
       } else {
         textToCopy = await markdownToHtml(String(content), {
           allowHtml,
           latex
         });
-        mime = 'text/html';
-      }
-      if (navigator.clipboard && navigator.clipboard.write) {
-        const blob = new Blob([textToCopy], { type: mime });
-        const data = [new ClipboardItem({ [mime]: blob })];
-        await navigator.clipboard.write(data);
-      } else {
-        await navigator.clipboard.writeText(textToCopy);
+        const htmlBlob = new Blob([textToCopy], { type: 'text/html' });
+        const clipboardItem = new ClipboardItem({
+          'text/plain': String(content),
+          'text/html': htmlBlob
+        });
+        await navigator.clipboard.write([clipboardItem]);
       }
       setCopied(true);
 
