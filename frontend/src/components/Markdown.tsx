@@ -5,9 +5,13 @@ import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
+import rehypeStringify from 'rehype-stringify';
+import { remark } from 'remark';
 import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
 import { visit } from 'unist-util-visit';
 
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
@@ -88,6 +92,67 @@ const cursorPlugin = () => {
   };
 };
 
+const getRehypePlugins = (
+  allowHtml?: boolean,
+  latex?: boolean
+): PluggableList => {
+  let rehypePlugins: PluggableList = [];
+  if (allowHtml) {
+    rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
+  }
+  if (latex) {
+    rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
+  }
+  return rehypePlugins;
+};
+
+const getRemarkPlugins = (latex?: boolean): PluggableList => {
+  let remarkPlugins: PluggableList = [
+    cursorPlugin,
+    remarkGfm as any,
+    remarkDirective as any,
+    MarkdownAlert
+  ];
+  if (latex) {
+    remarkPlugins = [...remarkPlugins, remarkMath as any];
+  }
+  return remarkPlugins;
+};
+
+export async function markdownToHtml(
+  content: string,
+  options?: { allowHtml?: boolean; latex?: boolean }
+) {
+  const { allowHtml = false, latex = false } = options || {};
+  if (typeof content === 'object') {
+    content = JSON.stringify(content, null, 2);
+    return {
+      mime: 'text/plain',
+      content: String(content)
+    };
+  } else {
+    content = String(content);
+    const remarkPlugins = getRemarkPlugins(latex);
+    const rehypePlugins = getRehypePlugins(allowHtml, latex);
+
+    let processor = remark();
+    processor = processor.use(remarkParse);
+    remarkPlugins.forEach((plugin: any) => {
+      if (plugin) processor = processor.use(plugin);
+    });
+    processor = processor.use(remarkRehype);
+    rehypePlugins.forEach((plugin: any) => {
+      if (plugin) processor = processor.use(plugin);
+    });
+    processor = processor.use(rehypeStringify);
+    const file = await processor.process(content);
+    return {
+      mime: 'text/html',
+      content: String(file)
+    };
+  }
+}
+
 const Markdown = ({
   allowHtml,
   latex,
@@ -97,30 +162,11 @@ const Markdown = ({
 }: Props) => {
   const apiClient = useContext(ChainlitContext);
 
-  const rehypePlugins = useMemo(() => {
-    let rehypePlugins: PluggableList = [];
-    if (allowHtml) {
-      rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
-    }
-    if (latex) {
-      rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
-    }
-    return rehypePlugins;
-  }, [allowHtml, latex]);
-
-  const remarkPlugins = useMemo(() => {
-    let remarkPlugins: PluggableList = [
-      cursorPlugin,
-      remarkGfm as any,
-      remarkDirective as any,
-      MarkdownAlert
-    ];
-
-    if (latex) {
-      remarkPlugins = [...remarkPlugins, remarkMath as any];
-    }
-    return remarkPlugins;
-  }, [latex]);
+  const rehypePlugins = useMemo(
+    () => getRehypePlugins(allowHtml, latex),
+    [allowHtml, latex]
+  );
+  const remarkPlugins = useMemo(() => getRemarkPlugins(latex), [latex]);
 
   return (
     <ReactMarkdown

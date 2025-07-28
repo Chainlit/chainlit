@@ -14,9 +14,10 @@ import {
 interface Props {
   content: unknown;
   className?: string;
+  mime?: string;
 }
 
-const CopyButton = ({ content, className }: Props) => {
+const CopyButton = ({ content, mime = 'text/plain', className }: Props) => {
   const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
@@ -27,7 +28,13 @@ const CopyButton = ({ content, className }: Props) => {
           ? JSON.stringify(content, null, 2)
           : String(content);
 
-      await navigator.clipboard.writeText(textToCopy);
+      if (navigator.clipboard && navigator.clipboard.write) {
+        const blob = new Blob([textToCopy], { type: mime });
+        const data = [new ClipboardItem({ [mime]: blob })];
+        await navigator.clipboard.write(data);
+      } else {
+        await navigator.clipboard.writeText(textToCopy);
+      }
       setCopied(true);
 
       // Reset copied state after 2 seconds
