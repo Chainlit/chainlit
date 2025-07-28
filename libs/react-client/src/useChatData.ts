@@ -1,17 +1,7 @@
-import { useRecoilValue } from 'recoil';
-
-import {
-  actionState,
-  askUserState,
-  callFnState,
-  chatSettingsDefaultValueSelector,
-  chatSettingsInputsState,
-  chatSettingsValueState,
-  elementState,
-  loadingState,
-  sessionState,
-  tasklistState
-} from './state';
+import { useChatStore } from './store/chat';
+import { useMessagesStore } from './store/messages';
+import { useSessionState } from './store/session';
+import { useUserState } from './store/user';
 
 export interface IToken {
   id: number | string;
@@ -21,17 +11,17 @@ export interface IToken {
 }
 
 const useChatData = () => {
-  const loading = useRecoilValue(loadingState);
-  const elements = useRecoilValue(elementState);
-  const tasklists = useRecoilValue(tasklistState);
-  const actions = useRecoilValue(actionState);
-  const session = useRecoilValue(sessionState);
-  const askUser = useRecoilValue(askUserState);
-  const callFn = useRecoilValue(callFnState);
-  const chatSettingsInputs = useRecoilValue(chatSettingsInputsState);
-  const chatSettingsValue = useRecoilValue(chatSettingsValueState);
-  const chatSettingsDefaultValue = useRecoilValue(
-    chatSettingsDefaultValueSelector
+  const loading = useChatStore((s) => s.loading);
+  const elements = useMessagesStore((s) => s.elements);
+  const tasklists = useMessagesStore((s) => s.taskList);
+  const actions = useMessagesStore((s) => s.actions);
+  const session = useSessionState((s) => s.session);
+  const askUser = useUserState((s) => s.askUser);
+  const callFn = useChatStore((s) => s.callFn);
+  const chatSettingsInputs = useChatStore((s) => s.chatSettingsInputs);
+  const chatSettingsValue = useChatStore((s) => s.chatSettingsValue);
+  const chatSettingsDefaultValue = useChatStore(
+    (s) => s.chatSettingsDefaultValue
   );
 
   const connected = session?.socket.connected && !session?.error;
