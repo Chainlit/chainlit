@@ -124,33 +124,22 @@ export async function markdownToHtml(
   options?: { allowHtml?: boolean; latex?: boolean }
 ) {
   const { allowHtml = false, latex = false } = options || {};
-  if (typeof content === 'object') {
-    content = JSON.stringify(content, null, 2);
-    return {
-      mime: 'text/plain',
-      content: String(content)
-    };
-  } else {
-    content = String(content);
-    const remarkPlugins = getRemarkPlugins(latex);
-    const rehypePlugins = getRehypePlugins(allowHtml, latex);
+  content = String(content);
+  const remarkPlugins = getRemarkPlugins(latex);
+  const rehypePlugins = getRehypePlugins(allowHtml, latex);
 
-    let processor = remark();
-    processor = processor.use(remarkParse);
-    remarkPlugins.forEach((plugin: any) => {
-      if (plugin) processor = processor.use(plugin);
-    });
-    processor = processor.use(remarkRehype);
-    rehypePlugins.forEach((plugin: any) => {
-      if (plugin) processor = processor.use(plugin);
-    });
-    processor = processor.use(rehypeStringify);
-    const file = await processor.process(content);
-    return {
-      mime: 'text/html',
-      content: String(file)
-    };
-  }
+  let processor = remark();
+  processor = processor.use(remarkParse);
+  remarkPlugins.forEach((plugin: any) => {
+    if (plugin) processor = processor.use(plugin);
+  });
+  processor = processor.use(remarkRehype);
+  rehypePlugins.forEach((plugin: any) => {
+    if (plugin) processor = processor.use(plugin);
+  });
+  processor = processor.use(rehypeStringify);
+  const file = await processor.process(content);
+  return String(file);
 }
 
 const Markdown = ({

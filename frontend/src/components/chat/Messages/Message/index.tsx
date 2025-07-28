@@ -144,6 +144,8 @@ const Message = memo(
                         run={
                           scorableRun && isScorable ? scorableRun : undefined
                         }
+                        allowHtml={allowHtml}
+                        latex={latex}
                       />
                     </div>
                   )}
