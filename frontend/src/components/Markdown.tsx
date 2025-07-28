@@ -133,11 +133,13 @@ export async function markdownToHtml(
   remarkPlugins.forEach((plugin: any) => {
     if (plugin) processor = processor.use(plugin);
   });
-  processor = processor.use(remarkRehype);
+  processor = processor.use(remarkRehype as any, {
+    allowDangerousHtml: allowHtml
+  }) as any;
   rehypePlugins.forEach((plugin: any) => {
     if (plugin) processor = processor.use(plugin);
   });
-  processor = processor.use(rehypeStringify);
+  processor = processor.use(rehypeStringify) as any;
   const file = await processor.process(content);
   return String(file);
 }
