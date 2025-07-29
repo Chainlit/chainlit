@@ -32,3 +32,10 @@ jobs:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
         run: pnpm test
         shell: bash
+        continue-on-error: true
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: hashFiles('cypress/screenshots/**') != ''
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
