@@ -37,5 +37,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: hashFiles('cypress/screenshots/**') != ''
         with:
-          name: cypress-screenshots
+          name: cypress-screenshots-${{ matrix.os }}
           path: cypress/screenshots
