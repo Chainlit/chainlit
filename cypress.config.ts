@@ -66,7 +66,9 @@ export default defineConfig({
           return new Promise((resolve) => {
             killChainlit().then(() => {
               runChainlit(spec).then(() => {
-                resolve(null);
+                setTimeout(() => {
+                  resolve(null);
+                }, 1000);
               });
             });
           });
