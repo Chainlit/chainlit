@@ -7,7 +7,7 @@ export const CHAINLIT_APP_PORT = 8000;
 
 async function killChainlit() {
   await fkill(`:${CHAINLIT_APP_PORT}`, {
-    forceAfterTimeout: 3000,
+    force: true,
     silent: true
   });
 }
@@ -42,8 +42,7 @@ export default defineConfig({
     baseUrl: `http://127.0.0.1:${CHAINLIT_APP_PORT}`,
     async setupNodeEvents(on, config) {
       await killChainlit(); // Fallback to ensure no previous instance is running
-
-      await runChainlit();
+      await runChainlit(); // Start Chainlit before running tests as Cypress require
 
       on('before:spec', async (spec) => {
         await killChainlit();
