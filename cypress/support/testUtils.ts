@@ -1,7 +1,3 @@
-import { sep } from 'path';
-
-import { ExecutionMode } from './utils';
-
 const resizeObserverLoopErrRe = /^[^(ResizeObserver loop limit exceeded)]/;
 Cypress.on('uncaught:exception', (err) => {
   /* returning false here prevents Cypress from failing the test */
@@ -47,24 +43,4 @@ export function clearCopilotThreadId(newThreadId?: string) {
     // @ts-expect-error is not a valid prop
     win.clearChainlitCopilotThreadId(newThreadId);
   });
-}
-
-export function runTestServer(
-  mode: ExecutionMode = undefined,
-  env?: Record<string, string>
-) {
-  const pathItems = Cypress.spec.absolute.split(sep);
-  const testName = pathItems[pathItems.length - 2];
-  cy.exec(`pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode}`, {
-    env
-  });
-  cy.visit('/');
-}
-
-export function describeSyncAsync(
-  title: string,
-  callback: (mode: ExecutionMode) => void
-) {
-  describe(`[sync] ${title}`, () => callback(ExecutionMode.Sync));
-  describe(`[async] ${title}`, () => callback(ExecutionMode.Async));
 }

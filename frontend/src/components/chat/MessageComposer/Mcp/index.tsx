@@ -35,7 +35,6 @@ const McpButton = ({ disabled }: Props) => {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('add');
 
-
   const allowSse = !!config?.features.mcp?.sse?.enabled;
   const allowStdio = !!config?.features.mcp?.stdio?.enabled;
   const allowHttp = !!config?.features.mcp?.streamable_http?.enabled;
