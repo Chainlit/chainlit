@@ -123,6 +123,7 @@ You may need additional configuration or dependency installation to run Cypress.
 This will run end to end tests, assessing both the frontend, the backend and their interaction. First install cypress with `pnpm exec cypress install`, and then run:
 
 ```sh
+// from root
 pnpm test // will do cypress run
 pnpm test -- --spec cypress/e2e/copilot // will run single test with the name copilot
 pnpm test -- --spec "cypress/e2e/copilot,cypress/e2e/data_layer" // will run two tests with the names copilot and data_layer
