@@ -34,13 +34,19 @@ if TYPE_CHECKING:
 
     from chainlit.action import Action
     from chainlit.message import Message
-    from chainlit.types import ChatProfile, InputAudioChunk, Starter, ThreadDict
+    from chainlit.types import (
+        ChatProfile,
+        Feedback,
+        InputAudioChunk,
+        Starter,
+        ThreadDict,
+    )
     from chainlit.user import User
 else:
     # Pydantic needs to resolve forward annotations. Because all of these are used
     # within `typing.Callable`, alias to `Any` as Pydantic does not perform validation
     # of callable argument/return types anyway.
-    Request = Response = Action = Message = ChatProfile = InputAudioChunk = Starter = ThreadDict = User = Any  # fmt: off
+    Request = Response = Action = Message = ChatProfile = InputAudioChunk = Starter = ThreadDict = User = Feedback = Any  # fmt: off
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -61,10 +67,6 @@ config_translation_dir = os.path.join(config_dir, "translations")
 
 # Default config file created if none exists
 DEFAULT_CONFIG_STR = f"""[project]
-# Whether to enable telemetry (default: false). No personal data is collected.
-enable_telemetry = false
-
-
 # List of environment variables to be provided by each user to use the app.
 user_env = []
 
@@ -117,6 +119,9 @@ edit_message = true
     sample_rate = 24000
 
 [features.mcp.sse]
+    enabled = true
+
+[features.mcp.streamable-http]
     enabled = true
 
 [features.mcp.stdio]
@@ -255,6 +260,11 @@ class McpSseFeature(DataClassJsonMixin):
 
 
 @dataclass
+class McpStreamableHttpFeature(DataClassJsonMixin):
+    enabled: bool = True
+
+
+@dataclass
 class McpStdioFeature(DataClassJsonMixin):
     enabled: bool = True
     allowed_executables: Optional[list[str]] = None
@@ -264,6 +274,9 @@ class McpStdioFeature(DataClassJsonMixin):
 class McpFeature(DataClassJsonMixin):
     enabled: bool = False
     sse: McpSseFeature = Field(default_factory=McpSseFeature)
+    streamable_http: McpStreamableHttpFeature = Field(
+        default_factory=McpStreamableHttpFeature
+    )
     stdio: McpStdioFeature = Field(default_factory=McpStdioFeature)
 
 
@@ -341,6 +354,7 @@ class CodeSettings:
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[["Message"], Any]] = None
+    on_feedback: Optional[Callable[["Feedback"], Any]] = None
     on_audio_start: Optional[Callable[[], Any]] = None
     on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[], Any]] = None
@@ -375,7 +389,6 @@ class ProjectSettings(DataClassJsonMixin):
     allow_origins: List[str] = Field(default_factory=lambda: ["*"])
     # Socket.io client transports option
     transports: Optional[List[str]] = None
-    enable_telemetry: bool = False
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
     # Path to the local langchain cache database

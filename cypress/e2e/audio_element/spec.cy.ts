@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('audio', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to display an audio element', () => {
     cy.get('.step').should('have.length', 1);
     cy.get('.step').eq(0).find('.inline-audio').should('have.length', 1);
