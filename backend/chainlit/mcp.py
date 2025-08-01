@@ -1,4 +1,5 @@
-from typing import Literal, Union
+import shlex
+from typing import Dict, Literal, Optional, Union
 
 from pydantic import BaseModel
 
@@ -15,10 +16,18 @@ class StdioMcpConnection(BaseModel):
 class SseMcpConnection(BaseModel):
     name: str
     url: str
+    headers: Optional[Dict[str, str]] = None
     clientType: Literal["sse"] = "sse"
 
 
-McpConnection = Union[StdioMcpConnection, SseMcpConnection]
+class HttpMcpConnection(BaseModel):
+    name: str
+    url: str
+    headers: Optional[Dict[str, str]] = None
+    clientType: Literal["streamable-http"] = "streamable-http"
+
+
+McpConnection = Union[StdioMcpConnection, SseMcpConnection, HttpMcpConnection]
 
 
 def validate_mcp_command(command_string: str):
@@ -41,8 +50,18 @@ def validate_mcp_command(command_string: str):
     Raises:
         ValueError: If the command doesn't use an allowed executable
     """
-    # Split the command string into parts
-    parts = command_string.strip().split()
+    # Split the command string into parts while respecting quotes and escapes
+    # Using shlex.split provides POSIX-compatible parsing so that arguments
+    # wrapped in quotes (e.g. "--header \"Authorization: Bearer TOKEN\"")
+    # or environment variable assignments such as
+    # MY_VAR="value with spaces" are preserved as single list items.
+    # On Windows, shlex also works as long as posix=False is not required for
+    # our use-case (Chainlit targets POSIX-style shells for the MCP command).
+    try:
+        parts = shlex.split(command_string, posix=True)
+    except ValueError as exc:
+        # Provide a clearer error message when the command cannot be parsed
+        raise ValueError(f"Invalid command string: {exc}") from exc
 
     if not parts:
         raise ValueError("Empty command string")
