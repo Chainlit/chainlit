@@ -40,6 +40,7 @@ export default defineConfig({
   e2e: {
     defaultCommandTimeout: 30000,
     baseUrl: `http://127.0.0.1:${CHAINLIT_APP_PORT}`,
+    experimentalInteractiveRunEvents: true,
     async setupNodeEvents(on, config) {
       await killChainlit(); // Fallback to ensure no previous instance is running
       await runChainlit(); // Start Chainlit before running tests as Cypress require
