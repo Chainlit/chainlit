@@ -38,6 +38,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     def __init__(
         self,
         conninfo: str,
+        connect_args: Optional[dict[str, Any]] = None,
         ssl_require: bool = False,
         storage_provider: Optional[BaseStorageClient] = None,
         user_thread_limit: Optional[int] = 1000,
@@ -46,15 +47,16 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self._conninfo = conninfo
         self.user_thread_limit = user_thread_limit
         self.show_logger = show_logger
-        ssl_args = {}
+        if connect_args is None:
+            connect_args = {}
         if ssl_require:
             # Create an SSL context to require an SSL connection
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            ssl_args["ssl"] = ssl_context
+            connect_args["ssl"] = ssl_context
         self.engine: AsyncEngine = create_async_engine(
-            self._conninfo, connect_args=ssl_args
+            self._conninfo, connect_args=connect_args
         )
         self.async_session = sessionmaker(
             bind=self.engine, expire_on_commit=False, class_=AsyncSession

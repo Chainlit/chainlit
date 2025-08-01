@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('Header auth', () => {
-  before(() => {
-    runTestServer();
-  });
-
   beforeEach(() => {
     cy.visit('/');
   });
