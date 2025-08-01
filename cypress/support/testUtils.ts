@@ -1,7 +1,3 @@
-import { sep } from 'path';
-
-import { ExecutionMode } from './utils';
-
 const resizeObserverLoopErrRe = /^[^(ResizeObserver loop limit exceeded)]/;
 Cypress.on('uncaught:exception', (err) => {
   /* returning false here prevents Cypress from failing the test */
@@ -35,22 +31,16 @@ export function closeHistory() {
   cy.get(`body`).click();
 }
 
-export function runTestServer(
-  mode: ExecutionMode = undefined,
-  env?: Record<string, string>
-) {
-  const pathItems = Cypress.spec.absolute.split(sep);
-  const testName = pathItems[pathItems.length - 2];
-  cy.exec(`pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode}`, {
-    env
+export function getCopilotThreadId() {
+  return cy.window().then((win) => {
+    // @ts-expect-error is not a valid prop
+    return win.getChainlitCopilotThreadId();
   });
-  cy.visit('/');
 }
 
-export function describeSyncAsync(
-  title: string,
-  callback: (mode: ExecutionMode) => void
-) {
-  describe(`[sync] ${title}`, () => callback(ExecutionMode.Sync));
-  describe(`[async] ${title}`, () => callback(ExecutionMode.Async));
+export function clearCopilotThreadId(newThreadId?: string) {
+  return cy.window().then((win) => {
+    // @ts-expect-error is not a valid prop
+    win.clearChainlitCopilotThreadId(newThreadId);
+  });
 }

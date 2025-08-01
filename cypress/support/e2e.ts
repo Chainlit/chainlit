@@ -1,52 +1,20 @@
-import { ChildProcess, spawn } from 'child_process';
-import * as dotenv from 'dotenv';
-import * as kill from 'kill-port';
+import 'cypress-plugin-steps';
 
-import { runTests } from './utils';
-import { CHAINLIT_PORT } from './utils';
-
-dotenv.config();
-
-async function main() {
-  const matchName = process.env.SINGLE_TEST || '*';
-
-  // Start the Chainlit server
-  const pnpmCmd = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm';
-  let spawnOptions: any;
-  if (process.platform === 'win32') {
-    spawnOptions = { stdio: 'inherit', shell: true };
-  } else {
-    spawnOptions = { stdio: 'inherit' };
+/*
+ * This is a workaround for the ResizeObserver loop error that occurs in Cypress.
+ * See https://github.com/cypress-io/cypress/issues/20341
+ * See https://github.com/cypress-io/cypress/issues/29277
+ */
+Cypress.on('uncaught:exception', (err) => {
+  if (
+    err.message.includes(
+      'ResizeObserver loop completed with undelivered notifications'
+    )
+  ) {
+    return false;
   }
-  const server: ChildProcess = spawn(
-    pnpmCmd,
-    ['exec', 'ts-node', './cypress/support/run.ts', 'action'],
-    spawnOptions
-  );
+});
 
-  // Wait for the server to start
-  await new Promise((resolve) => setTimeout(resolve, 5000));
-
-  try {
-    await runTests(matchName);
-  } finally {
-    if (server && server.kill) {
-      server.kill('SIGKILL');
-    }
-    try {
-      await kill(CHAINLIT_PORT);
-    } catch (err) {
-      console.log(`Could not kill port ${CHAINLIT_PORT}: ${err}`);
-    }
-  }
-}
-
-main()
-  .then(() => {
-    console.log('Done!');
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+beforeEach(() => {
+  cy.visit('/');
+});

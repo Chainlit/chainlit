@@ -10,18 +10,17 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
 -->
 
 - [Contribute to Chainlit](#contribute-to-chainlit)
-  * [Table of Contents](#table-of-contents)
-  * [Local setup](#local-setup)
-    + [Requirements](#requirements)
-    + [Set up the repo](#set-up-the-repo)
-    + [Install dependencies](#install-dependencies)
-  * [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
-  * [Start the UI from source](#start-the-ui-from-source)
-  * [Run the tests](#run-the-tests)
-    + [Backend unit tests](#backend-unit-tests)
-    + [E2E tests](#e2e-tests)
-    + [Run one test](#run-one-test)
-    + [Headed/debugging](#headed-debugging)
+  - [Table of Contents](#table-of-contents)
+  - [Local setup](#local-setup)
+    - [Requirements](#requirements)
+    - [Set up the repo](#set-up-the-repo)
+    - [Install dependencies](#install-dependencies)
+  - [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
+  - [Start the UI from source](#start-the-ui-from-source)
+  - [Run the tests](#run-the-tests)
+    - [Backend unit tests](#backend-unit-tests)
+    - [E2E tests](#e2e-tests)
+    - [Headed/debugging](#headeddebugging)
 
 ## Local setup
 
@@ -119,24 +118,31 @@ poetry run pytest --cov=chainlit
 
 ### E2E tests
 
+You may need additional configuration or dependency installation to run Cypress. See the [Cypress system requirements](https://docs.cypress.io/app/get-started/install-cypress#System-requirements) for details.
+
 This will run end to end tests, assessing both the frontend, the backend and their interaction. First install cypress with `pnpm exec cypress install`, and then run:
 
 ```sh
-cd cypress
-cd e2e
-pnpm test
+// from root
+pnpm test // will do cypress run
+pnpm test -- --spec cypress/e2e/copilot // will run single test with the name copilot
+pnpm test -- --spec "cypress/e2e/copilot,cypress/e2e/data_layer" // will run two tests with the names copilot and data_layer
+pnpm test -- --spec "cypress/e2e/**/async-*" // will run all async tests
+pnpm test -- --spec "cypress/e2e/**/sync-*" // will run all sync tests
+pnpm test -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
 ```
 
 (Go grab a cup of something, this will take a while.)
 
+For debugging purposes, you can use the **interactive mode** (Cypress UI). Run:
+
+```
+pnpm test:interactive // runs `cypress open`
+```
+
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
 Make sure to run `poetry install` again whenever you've updated the frontend!
-
-### Run one E2E test
-
-1. Find the folder containing the e2e test that you're looking for in `cypress/e2e`.
-2. Run `SINGLE_TEST=FOLDER pnpm test` and change FOLDER with the folder from the previous step (example: `SINGLE_TEST=scoped_elements pnpm run test`).
 
 ### Headed/debugging
 
