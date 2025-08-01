@@ -30,3 +30,17 @@ export function openHistory() {
 export function closeHistory() {
   cy.get(`body`).click();
 }
+
+export function getCopilotThreadId() {
+  return cy.window().then((win) => {
+    // @ts-expect-error is not a valid prop
+    return win.getChainlitCopilotThreadId();
+  });
+}
+
+export function clearCopilotThreadId(newThreadId?: string) {
+  return cy.window().then((win) => {
+    // @ts-expect-error is not a valid prop
+    win.clearChainlitCopilotThreadId(newThreadId);
+  });
+}
