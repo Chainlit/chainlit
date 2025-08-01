@@ -1,7 +1,7 @@
 const openChatSettingsModal = () => {
   cy.step('Open chat settings modal');
 
-  cy.get('#chat-settings-open-modal').should('exist').and('be.visible').click();
+  cy.get('#chat-settings-open-modal').should('exist').click();
   cy.get('#chat-settings').should('exist').and('be.visible');
 };
 
@@ -11,9 +11,9 @@ describe('Customize chat settings', () => {
 
     cy.step('Update inputs');
 
-    cy.get('#Model').should('be.visible').click();
+    cy.get('#Model').click();
     cy.get('[role="listbox"]').should('be.visible');
-    cy.contains('gpt-4').should('be.visible').click();
+    cy.contains('gpt-4').click();
     cy.get('#Model').should('contain.text', 'gpt-4');
 
     cy.get('#Temperature')

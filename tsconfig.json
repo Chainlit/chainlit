@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["ESNext", "dom"],
+    "target": "esnext",
     "types": ["cypress", "cypress-plugin-steps", "node"],
     "baseUrl": ".",
   },
