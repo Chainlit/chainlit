@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('Llama Index Callback', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to send messages to the UI with prompts and elements', () => {
     cy.get('.step').should('have.length', 3);
 

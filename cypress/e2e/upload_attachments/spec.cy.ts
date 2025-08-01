@@ -1,10 +1,6 @@
-import { runTestServer, submitMessage } from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
 describe('Upload attachments', () => {
-  beforeEach(() => {
-    runTestServer();
-  });
-
   const shouldHaveInlineAttachments = () => {
     submitMessage('Message with attachments');
     cy.get('.step').should('have.length', 5);

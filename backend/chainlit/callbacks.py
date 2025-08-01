@@ -1,23 +1,67 @@
 import inspect
-from typing import Any, Awaitable, Callable, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
 
 from fastapi import Request, Response
+from mcp import ClientSession
 from starlette.datastructures import Headers
 
 from chainlit.action import Action
 from chainlit.config import config
 from chainlit.context import context
 from chainlit.data.base import BaseDataLayer
+from chainlit.mcp import McpConnection
 from chainlit.message import Message
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
-from chainlit.telemetry import trace
 from chainlit.types import ChatProfile, Starter, ThreadDict
 from chainlit.user import User
 from chainlit.utils import wrap_user_function
 
 
-@trace
+def on_app_startup(func: Callable[[], Union[None, Awaitable[None]]]) -> Callable:
+    """
+    Hook to run code when the Chainlit application starts.
+    Useful for initializing resources, loading models, setting up database connections, etc.
+    The function can be synchronous or asynchronous.
+
+    Args:
+        func (Callable[[], Union[None, Awaitable[None]]]): The startup hook to execute. Takes no arguments.
+
+    Example:
+        @cl.on_app_startup
+        async def startup():
+            print("Application is starting!")
+            # Initialize resources here
+
+    Returns:
+        Callable[[], Union[None, Awaitable[None]]]: The decorated startup hook.
+    """
+    config.code.on_app_startup = wrap_user_function(func, with_task=False)
+    return func
+
+
+def on_app_shutdown(func: Callable[[], Union[None, Awaitable[None]]]) -> Callable:
+    """
+    Hook to run code when the Chainlit application shuts down.
+    Useful for cleaning up resources, closing connections, saving state, etc.
+    The function can be synchronous or asynchronous.
+
+    Args:
+        func (Callable[[], Union[None, Awaitable[None]]]): The shutdown hook to execute. Takes no arguments.
+
+    Example:
+        @cl.on_app_shutdown
+        async def shutdown():
+            print("Application is shutting down!")
+            # Clean up resources here
+
+    Returns:
+        Callable[[], Union[None, Awaitable[None]]]: The decorated shutdown hook.
+    """
+    config.code.on_app_shutdown = wrap_user_function(func, with_task=False)
+    return func
+
+
 def password_auth_callback(
     func: Callable[[str, str], Awaitable[Optional[User]]],
 ) -> Callable:
@@ -39,7 +83,6 @@ def password_auth_callback(
     return func
 
 
-@trace
 def header_auth_callback(
     func: Callable[[Headers], Awaitable[Optional[User]]],
 ) -> Callable:
@@ -61,7 +104,6 @@ def header_auth_callback(
     return func
 
 
-@trace
 def oauth_callback(
     func: Callable[
         [str, str, Dict[str, str], User, Optional[str]], Awaitable[Optional[User]]
@@ -90,7 +132,6 @@ def oauth_callback(
     return func
 
 
-@trace
 def on_logout(func: Callable[[Request, Response], Any]) -> Callable:
     """
     Function called when the user logs out.
@@ -101,7 +142,6 @@ def on_logout(func: Callable[[Request, Response], Any]) -> Callable:
     return func
 
 
-@trace
 def on_message(func: Callable) -> Callable:
     """
     Framework agnostic decorator to react to messages coming from the UI.
@@ -126,7 +166,6 @@ def on_message(func: Callable) -> Callable:
     return func
 
 
-@trace
 async def send_window_message(data: Any):
     """
     Send custom data to the host window via a window.postMessage event.
@@ -137,7 +176,6 @@ async def send_window_message(data: Any):
     await context.emitter.send_window_message(data)
 
 
-@trace
 def on_window_message(func: Callable[[str], Any]) -> Callable:
     """
     Hook to react to javascript postMessage events coming from the UI.
@@ -153,7 +191,6 @@ def on_window_message(func: Callable[[str], Any]) -> Callable:
     return func
 
 
-@trace
 def on_chat_start(func: Callable) -> Callable:
     """
     Hook to react to the user websocket connection event.
@@ -171,7 +208,6 @@ def on_chat_start(func: Callable) -> Callable:
     return func
 
 
-@trace
 def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
     """
     Hook to react to resume websocket connection event.
@@ -187,7 +223,6 @@ def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
     return func
 
 
-@trace
 def set_chat_profiles(
     func: Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]],
 ) -> Callable:
@@ -205,7 +240,6 @@ def set_chat_profiles(
     return func
 
 
-@trace
 def set_starters(
     func: Callable[[Optional["User"]], Awaitable[List["Starter"]]],
 ) -> Callable:
@@ -223,7 +257,6 @@ def set_starters(
     return func
 
 
-@trace
 def on_chat_end(func: Callable) -> Callable:
     """
     Hook to react to the user websocket disconnect event.
@@ -239,7 +272,6 @@ def on_chat_end(func: Callable) -> Callable:
     return func
 
 
-@trace
 def on_audio_start(func: Callable) -> Callable:
     """
     Hook to react to the user initiating audio.
@@ -252,7 +284,6 @@ def on_audio_start(func: Callable) -> Callable:
     return func
 
 
-@trace
 def on_audio_chunk(func: Callable) -> Callable:
     """
     Hook to react to the audio chunks being sent.
@@ -268,7 +299,6 @@ def on_audio_chunk(func: Callable) -> Callable:
     return func
 
 
-@trace
 def on_audio_end(func: Callable) -> Callable:
     """
     Hook to react to the audio stream ending. This is called after the last audio chunk is sent.
@@ -283,7 +313,6 @@ def on_audio_end(func: Callable) -> Callable:
     return func
 
 
-@trace
 def author_rename(
     func: Callable[[str], Awaitable[str]],
 ) -> Callable[[str], Awaitable[str]]:
@@ -300,7 +329,24 @@ def author_rename(
     return func
 
 
-@trace
+def on_mcp_connect(func: Callable[[McpConnection, ClientSession], None]) -> Callable:
+    """
+    Called everytime an MCP is connected
+    """
+
+    config.code.on_mcp_connect = wrap_user_function(func)
+    return func
+
+
+def on_mcp_disconnect(func: Callable[[str, ClientSession], None]) -> Callable:
+    """
+    Called everytime an MCP is disconnected
+    """
+
+    config.code.on_mcp_disconnect = wrap_user_function(func)
+    return func
+
+
 def on_stop(func: Callable) -> Callable:
     """
     Hook to react to the user stopping a thread.
@@ -359,4 +405,25 @@ def data_layer(
     # 1. We don't need to support async here and;
     # 2. We don't want to change the API for get_data_layer() to be async, everywhere (at this point).
     config.code.data_layer = func
+    return func
+
+
+def on_feedback(func: Callable) -> Callable:
+    """
+    Hook to react to user feedback events from the UI.
+    The decorated function is called every time feedback is received.
+
+    Args:
+        func (Callable[[Feedback], Any]): The function to be called when feedback is received. Takes a cl.Feedback object.
+
+    Example:
+        @cl.on_feedback
+        async def on_feedback(feedback: Feedback):
+            print(f"Received feedback: {feedback.value} for step {feedback.forId}")
+            # Handle feedback here
+
+    Returns:
+        Callable[[Feedback], Any]: The decorated on_feedback function.
+    """
+    config.code.on_feedback = wrap_user_function(func)
     return func

@@ -6,15 +6,13 @@ const Popover = PopoverPrimitive.Root;
 
 const PopoverTrigger = PopoverPrimitive.Trigger;
 
+const PopoverPortal = PopoverPrimitive.Portal;
+
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 >(({ className, align = 'center', sideOffset = 4, ...props }, ref) => (
-  <PopoverPrimitive.Portal
-    container={
-      window.cl_shadowRootElement ? window.cl_shadowRootElement : undefined
-    }
-  >
+  <PopoverPortal container={window.cl_shadowRootElement}>
     <PopoverPrimitive.Content
       ref={ref}
       align={align}
@@ -25,8 +23,8 @@ const PopoverContent = React.forwardRef<
       )}
       {...props}
     />
-  </PopoverPrimitive.Portal>
+  </PopoverPortal>
 ));
 PopoverContent.displayName = PopoverPrimitive.Content.displayName;
 
-export { Popover, PopoverTrigger, PopoverContent };
+export { Popover, PopoverTrigger, PopoverPortal, PopoverContent };

@@ -47,6 +47,11 @@ def get_configuration():
             get_configured_oauth_providers() if is_oauth_enabled() else []
         ),
         "default_theme": config.ui.default_theme,
+        "ui": {
+            "login_page_image": config.ui.login_page_image,
+            "login_page_image_filter": config.ui.login_page_image_filter,
+            "login_page_image_dark_filter": config.ui.login_page_image_dark_filter,
+        },
     }
 
 

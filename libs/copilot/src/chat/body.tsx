@@ -15,7 +15,6 @@ import { useLayoutMaxWidth } from '@chainlit/app/src/hooks/useLayoutMaxWidth';
 import { useUpload } from '@chainlit/app/src/hooks/useUpload';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import {
-  threadHistoryState,
   useChatData,
   useChatInteract,
   useConfig
@@ -28,7 +27,6 @@ const Chat = () => {
   const { config } = useConfig();
   const layoutMaxWidth = useLayoutMaxWidth();
   const setAttachments = useSetRecoilState(attachmentsState);
-  const setThreads = useSetRecoilState(threadHistoryState);
   const autoScrollRef = useRef(true);
   const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
@@ -138,13 +136,6 @@ const Chat = () => {
     options: { noClick: true }
   });
 
-  useEffect(() => {
-    setThreads((prev) => ({
-      ...prev,
-      currentThreadId: undefined
-    }));
-  }, []);
-
   const enableAttachments =
     !disabled && config?.features?.spontaneous_file_upload?.enabled;
 
@@ -171,7 +162,10 @@ const Chat = () => {
         ) : null}
         <ChatSettingsModal />
         <ErrorBoundary>
-          <ScrollContainer autoScrollRef={autoScrollRef}>
+          <ScrollContainer
+            autoScrollUserMessage={config?.features?.user_message_autoscroll}
+            autoScrollRef={autoScrollRef}
+          >
             <div
               className="flex flex-col mx-auto w-full flex-grow px-4 pt-4"
               style={{

@@ -1,10 +1,6 @@
-import { runTestServer, submitMessage } from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
 describe('User Env', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to ask a user for required keys', () => {
     const key = 'TEST_KEY';
     const keyValue = 'TEST_VALUE';

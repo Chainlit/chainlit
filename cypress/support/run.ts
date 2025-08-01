@@ -1,85 +1,73 @@
-import { spawn } from 'child_process';
-import * as kill from 'kill-port';
-import { join } from 'path';
-import sh from 'shell-exec';
+import {
+  ChildProcessWithoutNullStreams,
+  SpawnOptionsWithoutStdio,
+  spawn
+} from 'child_process';
+import { access } from 'fs/promises';
+import { dirname, join } from 'path';
 
-import { BACKEND_DIR, CHAINLIT_PORT, E2E_DIR, ExecutionMode } from './utils';
+export const runChainlit = async (
+  spec: Cypress.Spec | null = null
+): Promise<ChildProcessWithoutNullStreams> => {
+  const CHAILIT_DIR = join(process.cwd(), 'backend', 'chainlit');
 
-interface CmdResult {
-  stdout: string;
-  stderr: string;
-}
-
-const killPort = async (port: number): Promise<CmdResult> => {
-  if (process.platform === 'win32') return kill(port);
-
-  return sh(`lsof -nPi :${port}`).then((res) => {
-    const { stdout } = res;
-    if (!stdout) return Promise.reject(`No process running on port ${port}`);
-    return sh(
-      `lsof -nPi :${port} | grep 'LISTEN' | awk '{print $2}' | xargs kill -9`
-    );
-  });
-};
-
-export const runChainlitForTest = async (
-  testName: string,
-  mode: ExecutionMode
-) => {
-  try {
-    await killPort(CHAINLIT_PORT);
-    console.log(`Process on port ${CHAINLIT_PORT} killed`);
-  } catch (error) {
-    console.log(`Could not kill process on port ${CHAINLIT_PORT}. ${error}.`);
-  }
   return new Promise((resolve, reject) => {
-    const dir = join(E2E_DIR, testName);
-    let file = 'main.py';
-    if (mode === ExecutionMode.Async) file = 'main_async.py';
-    if (mode === ExecutionMode.Sync) file = 'main_sync.py';
+    const testDir = spec ? dirname(spec.absolute) : CHAILIT_DIR;
+    const entryPointFileName = spec
+      ? spec.name.startsWith('async')
+        ? 'main_sync.py'
+        : spec.name.startsWith('sync')
+        ? 'main_sync.py'
+        : 'main.py'
+      : 'hello.py';
 
-    // Headless + CI mode
-    const options = [
+    const entryPointPath = join(testDir, entryPointFileName);
+
+    if (!access(entryPointPath)) {
+      return reject(
+        new Error(`Entry point file does not exist: ${entryPointPath}`)
+      );
+    }
+
+    const command = 'poetry';
+
+    const args = [
+      '--project',
+      CHAILIT_DIR,
       'run',
-      '-C',
-      BACKEND_DIR,
       'chainlit',
       'run',
-      file,
+      entryPointPath,
       '-h',
-      '-c'
+      '--ci'
     ];
 
-    const server = spawn('poetry', options, {
-      cwd: dir
-    });
+    const options: SpawnOptionsWithoutStdio = {
+      env: {
+        ...process.env,
+        CHAINLIT_APP_ROOT: testDir
+      }
+    };
 
-    server.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-      if (data.toString().includes('Your app is available at')) {
-        resolve(server);
+    const chainlit = spawn(command, args, options);
+
+    chainlit.stdout.on('data', (data) => {
+      const output = data.toString();
+      if (output.includes('Your app is available at')) {
+        resolve(chainlit);
       }
     });
 
-    server.stderr.on('data', (data) => {
-      console.error(`stderr: ${data}`);
+    chainlit.stderr.on('data', (data) => {
+      console.error(`[Chainlit stderr] ${data}`);
     });
 
-    server.on('error', (error) => {
+    chainlit.on('error', (error) => {
       reject(error.message);
     });
 
-    server.on('exit', function (code) {
-      reject('child process exited with code ' + code);
+    chainlit.on('exit', function (code) {
+      reject('Chainlit process exited with code ' + code);
     });
   });
 };
-
-runChainlitForTest(process.argv[2], process.argv[3] as ExecutionMode)
-  .then(() => {
-    process.exit(0);
-  })
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });

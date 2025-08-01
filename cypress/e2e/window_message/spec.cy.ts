@@ -1,5 +1,3 @@
-import { runTestServer } from '../../support/testUtils';
-
 const getIframeWindow = () => {
   return cy
     .get('iframe[data-cy="the-frame"]')
@@ -8,10 +6,6 @@ const getIframeWindow = () => {
 };
 
 describe('Window Message', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to send and receive window messages', () => {
     cy.visit('/public/iframe.html');
 

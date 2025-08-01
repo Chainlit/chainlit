@@ -68,12 +68,13 @@ const AskActionButtons = ({
 }) => {
   const { askUser } = useContext(MessageContext);
 
+  const belongsToMessage = askUser?.spec.step_id === messageId;
   const isAskingAction = askUser?.spec.type === 'action';
   const filteredActions = actions.filter((a) => {
     return a.forId === messageId && askUser?.spec.keys?.includes(a.id);
   });
 
-  if (!isAskingAction || !actions.length) return null;
+  if (!belongsToMessage || !isAskingAction || !actions.length) return null;
 
   return (
     <div className="flex items-center gap-1 flex-wrap">

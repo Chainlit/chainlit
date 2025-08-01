@@ -1,10 +1,6 @@
-import { runTestServer, submitMessage } from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
 describe('Remove Step', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to remove a step', () => {
     cy.get('.step').should('have.length', 1);
     cy.get('.step').eq(0).should('contain', 'Message 1');

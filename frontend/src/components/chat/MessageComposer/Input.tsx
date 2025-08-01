@@ -34,15 +34,6 @@ export interface InputMethods {
   reset: () => void;
 }
 
-const escapeHtml = (unsafe: string) => {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-};
-
 const Input = forwardRef<InputMethods, Props>(
   (
     {
@@ -81,28 +72,41 @@ const Input = forwardRef<InputMethods, Props>(
       if (commandSpan) {
         commandSpan.remove();
       }
+      const html = clone.innerHTML;
 
-      return (
-        clone.innerHTML
-          ?.replace(/<br\s*\/?>/g, '\n') // Convert <br> to newlines
-          .replace(/<div>/g, '\n') // Convert <div> to newlines
-          .replace(/<\/div>/g, '') // Remove closing div tags
-          .replace(/&nbsp;/g, ' ') // Convert &nbsp; to spaces
-          .replace(/<[^>]*>/g, '') // Remove any other HTML tags
-          .replace(/&lt;/g, '<') // Convert &lt; back to
-          .replace(/&gt;/g, '>') // Convert &gt; back to >
-          .replace(/&amp;/g, '&')
-          .replace('\u200B', '') || ''
-      );
+      let text = html
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<div>/gi, '\n')
+        .replace(/<\/div>/gi, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&');
+
+      text = text.replace(/<[^>]*>/g, '');
+      return text.replace('\u200B', '');
     };
 
     const reset = () => {
-      setSelectedCommand(undefined);
+      if (!selectedCommand?.persistent) {
+        setSelectedCommand(undefined);
+        if (contentEditableRef.current) {
+          contentEditableRef.current.innerHTML = '';
+        }
+      } else if (contentEditableRef.current) {
+        // if selectedCommand?.persistent is true , keep .command-span tag and clear content
+        const commandSpan =
+          contentEditableRef.current.querySelector('.command-span');
+        if (commandSpan) {
+          contentEditableRef.current.innerHTML = commandSpan.outerHTML;
+          // Zero-width space
+          contentEditableRef.current.appendChild(
+            document.createTextNode('\u200B')
+          );
+        }
+      }
       setSelectedIndex(0);
       setCommandInput('');
-      if (contentEditableRef.current) {
-        contentEditableRef.current.innerHTML = '';
-      }
       onChange('');
     };
 
@@ -159,7 +163,7 @@ const Input = forwardRef<InputMethods, Props>(
         // Find existing command span
         const existingCommandSpan = content.querySelector('.command-span');
 
-        if (selectedCommand) {
+        if (selectedCommand && !selectedCommand.button) {
           // Create new command block
           const newCommandBlock = document.createElement('div');
           newCommandBlock.className =
@@ -235,51 +239,26 @@ const Input = forwardRef<InputMethods, Props>(
       const textarea = contentEditableRef.current;
       if (!textarea || !onPaste) return;
 
-      const _onPaste = (event: ClipboardEvent) => {
+      const handlePaste = (event: ClipboardEvent) => {
         event.preventDefault();
 
         const textData = event.clipboardData?.getData('text/plain');
-
         if (textData) {
-          const escapedText = escapeHtml(textData);
-          const textWithNewLines = escapedText.replace(/\n/g, '<br>');
-
-          const selection = window.getSelection();
-          if (selection?.rangeCount) {
-            const range = selection.getRangeAt(0);
-            range.deleteContents();
-
-            // Insert the HTML content
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = textWithNewLines;
-            const fragment = document.createDocumentFragment();
-            while (tempDiv.firstChild) {
-              fragment.appendChild(tempDiv.firstChild);
-            }
-            range.insertNode(fragment);
-
-            // Move cursor to end of pasted content
-            range.collapse(false);
-            selection.removeAllRanges();
-            selection.addRange(range);
-
-            // Force focus back to the content editable
-            textarea.focus();
-            textarea.scrollTop = textarea.scrollHeight;
-          }
-
-          // Trigger input event to update state
-          const inputEvent = new Event('input', { bubbles: true });
+          document.execCommand('insertText', false, textData);
+          const inputEvent = new Event('input', {
+            bubbles: true,
+            composed: true
+          });
           textarea.dispatchEvent(inputEvent);
         }
-
         onPaste(event);
       };
 
-      textarea.addEventListener('paste', _onPaste);
+      // Use the capture phase to ensure we catch the event before it can bubble
+      textarea.addEventListener('paste', handlePaste, true);
 
       return () => {
-        textarea.removeEventListener('paste', _onPaste);
+        textarea.removeEventListener('paste', handlePaste, true);
       };
     }, [onPaste]);
 
@@ -358,10 +337,10 @@ const Input = forwardRef<InputMethods, Props>(
           id={id}
           autoFocus={autoFocus}
           ref={contentEditableRef}
-          contentEditable
+          contentEditable="plaintext-only"
           data-placeholder={placeholder}
           className={cn(
-            'min-h-10 max-h-[250px] overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
+            'min-h-10 max-h-[250px] whitespace-pre-wrap overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
             className
           )}
           onInput={handleInput}

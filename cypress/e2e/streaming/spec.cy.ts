@@ -1,5 +1,3 @@
-import { runTestServer } from '../../support/testUtils';
-
 const tokenList = ['the', 'quick', 'brown', 'fox'];
 
 function messageStream(index: number) {
@@ -19,10 +17,6 @@ function toolStream(tool: string) {
 }
 
 describe('Streaming', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to stream a message', () => {
     cy.get('.step').should('have.length', 1);
 

@@ -3,6 +3,7 @@ import importlib
 import inspect
 import os
 from asyncio import CancelledError
+from datetime import datetime, timezone
 from typing import Callable
 
 import click
@@ -14,7 +15,16 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from chainlit.auth import ensure_jwt_secret
 from chainlit.context import context
 from chainlit.logger import logger
-from chainlit.message import ErrorMessage
+
+
+def utc_now():
+    dt = datetime.now(timezone.utc).replace(tzinfo=None)
+    return dt.isoformat() + "Z"
+
+
+def timestamp_utc(timestamp: float):
+    dt = datetime.fromtimestamp(timestamp, timezone.utc).replace(tzinfo=None)
+    return dt.isoformat() + "Z"
 
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
@@ -52,6 +62,8 @@ def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
         except Exception as e:
             logger.exception(e)
             if with_task:
+                from chainlit.message import ErrorMessage
+
                 await ErrorMessage(
                     content=str(e) or e.__class__.__name__, author="Error"
                 ).send()
@@ -122,6 +134,14 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
     from chainlit.server import app as chainlit_app
 
     config.run.debug = os.environ.get("CHAINLIT_DEBUG", False)
+    os.environ["CHAINLIT_ROOT_PATH"] = path
+
+    api_full_path = path
+
+    if app.root_path:
+        parent_root_path = app.root_path.rstrip("/")
+        api_full_path = parent_root_path + path
+        os.environ["CHAINLIT_PARENT_ROOT_PATH"] = parent_root_path
 
     check_file(target)
     # Load the module provided by the user
@@ -143,7 +163,7 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
         """
 
         async def dispatch(self, request: Request, call_next):
-            if not request.url.path.startswith(path):
+            if not request.url.path.startswith(api_full_path):
                 return JSONResponse(status_code=404, content={"detail": "Not found"})
 
             return await call_next(request)

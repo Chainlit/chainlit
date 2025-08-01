@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('Password Auth', () => {
-  before(() => {
-    runTestServer();
-  });
-
   describe('when unauthenticated', () => {
     describe('visiting /', () => {
       beforeEach(() => {

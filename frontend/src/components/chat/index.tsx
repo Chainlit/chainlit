@@ -36,7 +36,7 @@ const Chat = () => {
   const setThreads = useSetRecoilState(threadHistoryState);
 
   const autoScrollRef = useRef(true);
-  const { error, disabled } = useChatData();
+  const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
   const navigate = useNavigate();
@@ -67,6 +67,15 @@ const Chat = () => {
 
   const { t } = useTranslation();
   const layoutMaxWidth = useLayoutMaxWidth();
+
+  useEffect(() => {
+    if (callFn) {
+      const event = new CustomEvent('chainlit-call-fn', {
+        detail: callFn
+      });
+      window.dispatchEvent(event);
+    }
+  }, [callFn]);
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -112,7 +121,9 @@ const Chat = () => {
           .catch((error) => {
             toast.error(
               `${t('chat.fileUpload.errors.failed')} ${file.name}: ${
-                error.message
+                typeof error === 'object' && error !== null
+                  ? error.message ?? error
+                  : error
               }`
             );
             setAttachments((prev) =>
@@ -200,7 +211,10 @@ const Chat = () => {
         </div>
       ) : null}
       <ErrorBoundary>
-        <ScrollContainer autoScrollRef={autoScrollRef}>
+        <ScrollContainer
+          autoScrollUserMessage={config?.features?.user_message_autoscroll}
+          autoScrollRef={autoScrollRef}
+        >
           <div
             className="flex flex-col mx-auto w-full flex-grow p-4"
             style={{

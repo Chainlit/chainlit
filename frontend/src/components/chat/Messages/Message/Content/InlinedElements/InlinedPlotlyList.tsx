@@ -14,7 +14,7 @@ const InlinedPlotlyList = ({ items }: Props) => (
           key={i}
           className="max-w-[600px] h-[400px]"
           style={{
-            maxWidth: '600px',
+            maxWidth: 'fit-content',
             height: '400px'
           }}
         >

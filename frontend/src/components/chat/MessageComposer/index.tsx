@@ -5,7 +5,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import {
   FileSpec,
-  ICommand,
   IStep,
   useAuth,
   useChatData,
@@ -16,11 +15,17 @@ import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
 
 import { chatSettingsOpenState } from '@/state/project';
-import { IAttachment, attachmentsState } from 'state/chat';
+import {
+  IAttachment,
+  attachmentsState,
+  persistentCommandState
+} from 'state/chat';
 
 import { Attachments } from './Attachments';
-import CommandButton from './CommandButton';
+import CommandButtons from './CommandButtons';
+import CommandButton from './CommandPopoverButton';
 import Input, { InputMethods } from './Input';
+import McpButton from './Mcp';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
@@ -40,7 +45,9 @@ export default function MessageComposer({
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
   const [value, setValue] = useState('');
-  const [selectedCommand, setSelectedCommand] = useState<ICommand>();
+  const [selectedCommand, setSelectedCommand] = useRecoilState(
+    persistentCommandState
+  );
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
@@ -117,7 +124,10 @@ export default function MessageComposer({
   );
 
   const submit = useCallback(() => {
-    if (disabled || (value === '' && attachments.length === 0)) {
+    if (
+      disabled ||
+      (value === '' && attachments.length === 0 && !selectedCommand)
+    ) {
       return;
     }
     if (askUser) {
@@ -139,7 +149,10 @@ export default function MessageComposer({
   ]);
 
   return (
-    <div className="bg-accent dark:bg-card rounded-3xl p-3 px-4 w-full min-h-24 flex flex-col">
+    <div
+      id="message-composer"
+      className="bg-accent dark:bg-card rounded-3xl p-3 px-4 w-full min-h-24 flex flex-col"
+    >
       {attachments.length > 0 ? (
         <div className="mb-1">
           <Attachments />
@@ -180,12 +193,18 @@ export default function MessageComposer({
               <Settings className="!size-6" />
             </Button>
           )}
+          <McpButton disabled={disabled} />
           <VoiceButton disabled={disabled} />
+          <CommandButtons
+            disabled={disabled}
+            selectedCommandId={selectedCommand?.id}
+            onCommandSelect={setSelectedCommand}
+          />
         </div>
         <div className="flex items-center gap-1">
           <SubmitButton
             onSubmit={submit}
-            disabled={disabled || !value.trim()}
+            disabled={disabled || (!value.trim() && !selectedCommand)}
           />
         </div>
       </div>

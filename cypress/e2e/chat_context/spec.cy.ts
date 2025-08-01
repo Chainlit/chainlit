@@ -1,10 +1,6 @@
-import { runTestServer, submitMessage } from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
 describe('Chat Context', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to current conversation chat history', () => {
     submitMessage('Hello 1');
 

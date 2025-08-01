@@ -1,7 +1,6 @@
+import chainlit as cl
 from chainlit.context import context
 from chainlit.sync import make_async, run_sync
-
-import chainlit as cl
 
 
 async def async_function_from_sync():

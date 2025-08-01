@@ -1,14 +1,8 @@
-import { runTestServer } from '../../support/testUtils';
-
 function openReadme() {
   cy.get('#readme-button').click();
 }
 
 describe('readme_language', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should show default markdown on open', () => {
     openReadme();
     cy.contains('Welcome to Chainlit!');

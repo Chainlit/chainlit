@@ -1,14 +1,6 @@
-import {
-  describeSyncAsync,
-  runTestServer,
-  submitMessage
-} from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
-describeSyncAsync('Stop task', (mode) => {
-  before(() => {
-    runTestServer(mode);
-  });
-
+export function tests() {
   it('should be able to stop a task', () => {
     submitMessage('Hello');
     cy.get('#stop-button').should('exist').click();
@@ -17,4 +9,4 @@ describeSyncAsync('Stop task', (mode) => {
     cy.get('.step').should('have.length', 3);
     cy.get('.step').last().should('contain.text', 'Task manually stopped.');
   });
-});
+}

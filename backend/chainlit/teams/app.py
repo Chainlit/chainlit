@@ -36,7 +36,6 @@ from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
 from chainlit.logger import logger
 from chainlit.message import Message, StepDict
-from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
@@ -134,7 +133,6 @@ adapter_settings = BotFrameworkAdapterSettings(
 adapter = BotFrameworkAdapter(adapter_settings)
 
 
-@trace
 def init_teams_context(
     session: HTTPSession,
     turn_context: TurnContext,
@@ -297,7 +295,7 @@ async def process_teams_message(
             except Exception as e:
                 logger.error(f"Error updating thread: {e}")
 
-    ctx.session.delete()
+    await ctx.session.delete()
 
 
 async def handle_message(turn_context: TurnContext):

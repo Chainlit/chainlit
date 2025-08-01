@@ -24,6 +24,7 @@ export default function ApiKeys() {
         <TooltipTrigger asChild>
           <Link to="/env">
             <Button
+              id="api-keys-button"
               size="icon"
               variant="ghost"
               className="text-muted-foreground hover:text-muted-foreground"

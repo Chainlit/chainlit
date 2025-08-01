@@ -1,4 +1,7 @@
+import asyncio
+import atexit
 import json
+import signal
 import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -14,6 +17,7 @@ from chainlit.logger import logger
 from chainlit.step import StepDict
 from chainlit.types import (
     Feedback,
+    FeedbackDict,
     PageInfo,
     PaginatedResponse,
     Pagination,
@@ -41,6 +45,11 @@ class ChainlitDataLayer(BaseDataLayer):
         self.storage_client = storage_client
         self.show_logger = show_logger
 
+        # Register cleanup handlers for application termination
+        atexit.register(self._sync_cleanup)
+        for sig in (signal.SIGINT, signal.SIGTERM):
+            signal.signal(sig, self._signal_handler)
+
     async def connect(self):
         if not self.pool:
             self.pool = await asyncpg.create_pool(self.database_url)
@@ -54,16 +63,26 @@ class ChainlitDataLayer(BaseDataLayer):
         if not self.pool:
             await self.connect()
 
-        async with self.pool.acquire() as connection:  # type: ignore
-            try:
-                if params:
-                    records = await connection.fetch(query, *params.values())
-                else:
-                    records = await connection.fetch(query)
-                return [dict(record) for record in records]
-            except Exception as e:
-                logger.error(f"Database error: {e!s}")
-                raise
+        try:
+            async with self.pool.acquire() as connection:  # type: ignore
+                try:
+                    if params:
+                        records = await connection.fetch(query, *params.values())
+                    else:
+                        records = await connection.fetch(query)
+                    return [dict(record) for record in records]
+                except Exception as e:
+                    logger.error(f"Database error: {e!s}")
+                    raise
+        except (
+            asyncpg.exceptions.ConnectionDoesNotExistError,
+            asyncpg.exceptions.InterfaceError,
+        ) as e:
+            # Handle connection issues by cleaning up and rethrowing
+            logger.error(f"Connection error: {e!s}, cleaning up pool")
+            await self.cleanup()
+            self.pool = None
+            raise
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
         query = """
@@ -137,7 +156,7 @@ class ChainlitDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
         if not self.storage_client:
-            logger.warn(
+            logger.warning(
                 "Data Layer: create_element error. No cloud storage configured!"
             )
             return
@@ -483,10 +502,14 @@ class ChainlitDataLayer(BaseDataLayer):
 
         thread = results[0]
 
-        # Get steps
+        # Get steps and related feedback
         steps_query = """
-        SELECT * FROM "Step" 
-        WHERE "threadId" = $1 
+        SELECT  s.*, 
+                f.id feedback_id, 
+                f.value feedback_value, 
+                f."comment" feedback_comment
+        FROM "Step" s left join "Feedback" f on s.id = f."stepId"
+        WHERE s."threadId" = $1
         ORDER BY "startTime"
         """
         steps_results = await self.execute_query(steps_query, {"thread_id": thread_id})
@@ -556,14 +579,31 @@ class ChainlitDataLayer(BaseDataLayer):
 
         update_sets = [f'"{k}" = EXCLUDED."{k}"' for k in data.keys() if k != "id"]
 
-        query = f"""
-            INSERT INTO "Thread" ({", ".join(columns)})
-            VALUES ({", ".join(placeholders)})
-            ON CONFLICT (id) DO UPDATE
-            SET {", ".join(update_sets)};
-        """
+        if update_sets:
+            query = f"""
+                INSERT INTO "Thread" ({", ".join(columns)})
+                VALUES ({", ".join(placeholders)})
+                ON CONFLICT (id) DO UPDATE
+                SET {", ".join(update_sets)};
+            """
+        else:
+            query = f"""
+                INSERT INTO "Thread" ({", ".join(columns)})
+                VALUES ({", ".join(placeholders)})
+                ON CONFLICT (id) DO NOTHING
+            """
 
         await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
+
+    def _extract_feedback_dict_from_step_row(self, row: Dict) -> Optional[FeedbackDict]:
+        if row["feedback_id"] is not None:
+            return FeedbackDict(
+                forId=row["id"],
+                id=row["feedback_id"],
+                value=row["feedback_value"],
+                comment=row["feedback_comment"],
+            )
+        return None
 
     def _convert_step_row_to_dict(self, row: Dict) -> StepDict:
         return StepDict(
@@ -580,6 +620,7 @@ class ChainlitDataLayer(BaseDataLayer):
             showInput=row.get("showInput"),
             isError=row.get("isError"),
             end=row["endTime"].isoformat() if row.get("endTime") else None,
+            feedback=self._extract_feedback_dict_from_step_row(row),
         )
 
     def _convert_element_row_to_dict(self, row: Dict) -> ElementDict:
@@ -610,6 +651,28 @@ class ChainlitDataLayer(BaseDataLayer):
         """Cleanup database connections"""
         if self.pool:
             await self.pool.close()
+
+    def _sync_cleanup(self):
+        """Cleanup database connections in a synchronous context."""
+        if self.pool and not self.pool.is_closing():
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(self.cleanup())
+            else:
+                try:
+                    cleanup_loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(cleanup_loop)
+                    cleanup_loop.run_until_complete(self.cleanup())
+                    cleanup_loop.close()
+                except Exception as e:
+                    logger.error(f"Error during sync cleanup: {e}")
+
+    def _signal_handler(self, sig, frame):
+        """Handle signals for graceful shutdown."""
+        logger.info(f"Received signal {sig}, cleaning up connection pool.")
+        self._sync_cleanup()
+        # Re-raise the signal after cleanup
+        signal.default_int_handler(sig, frame)
 
 
 def truncate(text: Optional[str], max_length: int = 255) -> Optional[str]:

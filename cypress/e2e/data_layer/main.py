@@ -16,7 +16,7 @@ from chainlit.types import (
     ThreadDict,
     ThreadFilter,
 )
-from literalai.helper import utc_now
+from chainlit.utils import utc_now
 
 now = utc_now()
 
@@ -70,21 +70,22 @@ thread_history = [
 ]  # type: List[ThreadDict]
 deleted_thread_ids = []  # type: List[str]
 
-THREAD_HISTORY_PICKLE_PATH = os.getenv("THREAD_HISTORY_PICKLE_PATH")
+THREAD_HISTORY_PICKLE_PATH = os.path.join(
+    os.path.dirname(__file__), "thread_history.pickle"
+)
 if THREAD_HISTORY_PICKLE_PATH and os.path.exists(THREAD_HISTORY_PICKLE_PATH):
     with open(THREAD_HISTORY_PICKLE_PATH, "rb") as f:
         thread_history = pickle.load(f)
 
 
 async def save_thread_history():
-    if THREAD_HISTORY_PICKLE_PATH:
-        # Force saving of thread history for reload when server restarts
-        await persist_user_session(
-            cl.context.session.thread_id, cl.context.session.to_persistable()
-        )
+    # Force saving of thread history for reload when server restarts
+    await persist_user_session(
+        cl.context.session.thread_id, cl.context.session.to_persistable()
+    )
 
-        with open(THREAD_HISTORY_PICKLE_PATH, "wb") as out_file:
-            pickle.dump(thread_history, out_file)
+    with open(THREAD_HISTORY_PICKLE_PATH, "wb") as out_file:
+        pickle.dump(thread_history, out_file)
 
 
 class TestDataLayer(cl_data.BaseDataLayer):

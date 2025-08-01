@@ -13,6 +13,10 @@ import {
 import Header from './components/Header';
 
 import ChatWrapper from './chat';
+import {
+  clearChainlitCopilotThreadId,
+  getChainlitCopilotThreadId
+} from './state';
 import { IWidgetConfig } from './types';
 
 interface Props {
@@ -21,14 +25,20 @@ interface Props {
 }
 
 const Widget = ({ config, error }: Props) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(config?.expanded || false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
+    window.getChainlitCopilotThreadId = getChainlitCopilotThreadId;
+    window.clearChainlitCopilotThreadId = clearChainlitCopilotThreadId;
 
     return () => {
       window.toggleChainlitCopilot = () => console.error('Widget not mounted.');
+      window.getChainlitCopilotThreadId = () => null;
+
+      window.clearChainlitCopilotThreadId = () =>
+        console.error('Widget not mounted.');
     };
   }, []);
 

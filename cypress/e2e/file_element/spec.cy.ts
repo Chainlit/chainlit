@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('file', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to display a file element', () => {
     cy.get('.step').should('have.length', 1);
     cy.get('.step').eq(0).find('.inline-file').should('have.length', 4);

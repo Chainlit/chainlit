@@ -14,7 +14,11 @@ interface Props {
 }
 
 export default function AppWrapper({ widgetConfig }: Props) {
-  const apiClient = makeApiClient(widgetConfig.chainlitServer);
+  const additionalQueryParams = widgetConfig?.additionalQueryParamsForAPI;
+  const apiClient = makeApiClient(
+    widgetConfig.chainlitServer,
+    additionalQueryParams || {}
+  );
   const [customThemeLoaded, setCustomThemeLoaded] = useState(false);
 
   function completeInitialization() {

@@ -7,6 +7,8 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+tsconfig.tsbuildinfo
+
 node_modules
 dist
 dist_embed

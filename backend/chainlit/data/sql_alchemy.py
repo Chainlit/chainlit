@@ -38,6 +38,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     def __init__(
         self,
         conninfo: str,
+        connect_args: Optional[dict[str, Any]] = None,
         ssl_require: bool = False,
         storage_provider: Optional[BaseStorageClient] = None,
         user_thread_limit: Optional[int] = 1000,
@@ -46,15 +47,16 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self._conninfo = conninfo
         self.user_thread_limit = user_thread_limit
         self.show_logger = show_logger
-        ssl_args = {}
+        if connect_args is None:
+            connect_args = {}
         if ssl_require:
             # Create an SSL context to require an SSL connection
             ssl_context = ssl.create_default_context()
             ssl_context.check_hostname = False
             ssl_context.verify_mode = ssl.CERT_NONE
-            ssl_args["ssl"] = ssl_context
+            connect_args["ssl"] = ssl_context
         self.engine: AsyncEngine = create_async_engine(
-            self._conninfo, connect_args=ssl_args
+            self._conninfo, connect_args=connect_args
         )
         self.async_session = sessionmaker(
             bind=self.engine, expire_on_commit=False, class_=AsyncSession
@@ -65,7 +67,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 logger.info("SQLAlchemyDataLayer storage client initialized")
         else:
             self.storage_provider = None
-            logger.warn(
+            logger.warning(
                 "SQLAlchemyDataLayer storage client is not initialized and elements will not be persisted!"
             )
 
@@ -93,11 +95,11 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     return result.rowcount
             except SQLAlchemyError as e:
                 await session.rollback()
-                logger.warn(f"An error occurred: {e}")
+                logger.warning(f"An error occurred: {e}")
                 return None
             except Exception as e:
                 await session.rollback()
-                logger.warn(f"An unexpected error occurred: {e}")
+                logger.warning(f"An unexpected error occurred: {e}")
                 return None
 
     async def get_current_timestamp(self) -> str:
@@ -345,6 +347,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     ###### Steps ######
     @queue_until_user_message()
     async def create_step(self, step_dict: "StepDict"):
+        await self.update_thread(step_dict["threadId"])
+
         if self.show_logger:
             logger.info(f"SQLAlchemy: create_step, step_id={step_dict.get('id')}")
 
@@ -466,7 +470,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             logger.info(f"SQLAlchemy: create_element, element_id = {element.id}")
 
         if not self.storage_provider:
-            logger.warn(
+            logger.warning(
                 "SQLAlchemy: create_element error. No blob_storage_client is configured!"
             )
             return
@@ -519,7 +523,12 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         columns = ", ".join(f'"{column}"' for column in element_dict_cleaned.keys())
         placeholders = ", ".join(f":{column}" for column in element_dict_cleaned.keys())
-        query = f"INSERT INTO elements ({columns}) VALUES ({placeholders})"
+        updates = ", ".join(
+            f'"{column}" = :{column}'
+            for column in element_dict_cleaned.keys()
+            if column != "id"
+        )
+        query = f"INSERT INTO elements ({columns}) VALUES ({placeholders}) ON CONFLICT (id) DO UPDATE SET {updates};"
         await self.execute_sql(query=query, parameters=element_dict_cleaned)
 
     @queue_until_user_message()
@@ -627,7 +636,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 e."language" AS element_language,
                 e."page" AS element_page,
                 e."forId" AS element_forid,
-                e."mime" AS element_mime
+                e."mime" AS element_mime,
+                e."props" AS props
             FROM elements e
             WHERE e."threadId" IN {thread_ids}
         """
@@ -712,7 +722,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         autoPlay=element.get("element_autoPlay"),
                         playerConfig=element.get("element_playerconfig"),
                         page=element.get("element_page"),
-                        props=json.loads(element.get("props", "{}")),
+                        props=element.get("props", "{}"),
                         forId=element.get("element_forid"),
                         mime=element.get("element_mime"),
                     )
