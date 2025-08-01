@@ -1,9 +1,10 @@
 import time
-from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 from uuid import UUID
 
 import pydantic
 from langchain.callbacks.tracers.schemas import Run
+from langchain.load.dump import dumps
 from langchain.schema import BaseMessage
 from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
 from langchain_core.tracers.base import AsyncBaseTracer
@@ -294,15 +295,13 @@ class GenerationHelper:
         return provider, model, tools, settings
 
 
-def process_content(content: Any) -> Tuple[Dict, Optional[str]]:
+def process_content(content: Any) -> Tuple[Dict | str, Optional[str]]:
     if content is None:
         return {}, None
-    if isinstance(content, dict):
-        return content, "json"
-    elif isinstance(content, str):
+    if isinstance(content, str):
         return {"content": content}, "text"
     else:
-        return {"content": str(content)}, "text"
+        return dumps(content), "json"
 
 
 DEFAULT_TO_IGNORE = [
@@ -560,12 +559,9 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
             parent_id=parent_id,
         )
         step.start = utc_now()
-        if step.metadata is None:
-            step.metadata = {}
         if step_type != "llm":
             step.input, language = process_content(run.inputs)
-            if language is not None:
-                step.metadata["language"] = language
+            step.show_input = language or False
 
         step.tags = run.tags
         self.steps[str(run.id)] = step
@@ -659,21 +655,10 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
 
             return
 
-        outputs = run.outputs or {}
-        output_keys = list(outputs.keys())
-        output = outputs
-
-        if output_keys:
-            output = outputs.get(output_keys[0], outputs)
-
         if current_step:
             if current_step.type != "llm":
-                current_step.output = (
-                    output[0]
-                    if isinstance(output, Sequence)
-                    and not isinstance(output, str)
-                    and len(output)
-                    else output
+                current_step.output, current_step.language = process_content(
+                    run.outputs
                 )
             current_step.end = utc_now()
             await current_step.update()
