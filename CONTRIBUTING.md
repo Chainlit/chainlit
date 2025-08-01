@@ -135,6 +135,12 @@ pnpm test -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
 
 (Go grab a cup of something, this will take a while.)
 
+For debugging purposes, you can use the **interactive mode** (Cypress UI). Run:
+
+```
+pnpm test:interactive // runs `cypress open`
+```
+
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
 Make sure to run `poetry install` again whenever you've updated the frontend!
