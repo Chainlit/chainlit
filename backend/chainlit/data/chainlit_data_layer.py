@@ -1,8 +1,8 @@
-import json
-import uuid
-import signal
-import atexit
 import asyncio
+import atexit
+import json
+import signal
+import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -74,8 +74,10 @@ class ChainlitDataLayer(BaseDataLayer):
                 except Exception as e:
                     logger.error(f"Database error: {e!s}")
                     raise
-        except (asyncpg.exceptions.ConnectionDoesNotExistError, 
-                asyncpg.exceptions.InterfaceError) as e:
+        except (
+            asyncpg.exceptions.ConnectionDoesNotExistError,
+            asyncpg.exceptions.InterfaceError,
+        ) as e:
             # Handle connection issues by cleaning up and rethrowing
             logger.error(f"Connection error: {e!s}, cleaning up pool")
             await self.cleanup()

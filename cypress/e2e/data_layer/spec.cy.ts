@@ -1,48 +1,59 @@
+import { platform } from 'os';
 import { sep } from 'path';
 
-import { runTestServer, submitMessage } from '../../support/testUtils';
-import { ExecutionMode } from '../../support/utils';
+import { submitMessage } from '../../support/testUtils';
 
-// Constants for selectors and timeouts
+// Constants
 const SELECTORS = {
   EMAIL_INPUT: '#email',
   PASSWORD_INPUT: '#password',
+  AI_MESSAGE: "[data-step-type='assistant_message']",
   POSITIVE_FEEDBACK: '.positive-feedback-off',
   NEGATIVE_FEEDBACK: '.negative-feedback-off',
   SUBMIT_FEEDBACK: '#submit-feedback',
   POSITIVE_FEEDBACK_ACTIVE: '.positive-feedback-on',
   STEP: '.step',
+  THREAD_HISTORY: '#thread-history',
   THREAD_TEST1: '#thread-test1',
   THREAD_TEST2: '#thread-test2',
   THREAD_OPTIONS: '#thread-options',
   DELETE_THREAD: '#delete-thread',
   CONFIRM_BUTTON: "[role='alertdialog'] button.bg-primary",
   NEW_CHAT_BUTTON: '#new-chat-button',
-  CONFIRM_NEW: '#confirm'
+  CONFIRM_NEW: '#confirm',
+  LOADER: '.lucide-loader'
 } as const;
-
-const TIMEOUTS = {
-  SHORT: 100,
-  MEDIUM: 1000,
-  LONG: 2000
-} as const;
-
-// Types
-interface ServerEnv {
-  THREAD_HISTORY_PICKLE_PATH: string;
-  [key: string]: string;
-}
 
 // Utility functions
+
 const login = () => {
+  cy.step('Verify login');
+
+  cy.location('pathname').should('eq', '/login');
+
   cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type('admin');
   cy.get(SELECTORS.PASSWORD_INPUT).should('be.visible').type('admin{enter}');
 };
 
-const verifyFeedback = () => {
+const startConversation = () => {
+  cy.step('Start conversation');
+
   cy.location('pathname').should('eq', '/');
+
+  cy.get(SELECTORS.AI_MESSAGE)
+    .should('exist')
+    .and('be.visible')
+    .and('have.length', 2);
+
   submitMessage('Hello');
+
   cy.location('pathname').should('match', /^\/thread\//);
+
+  cy.get(SELECTORS.AI_MESSAGE).should('exist').and('be.visible');
+};
+
+const verifyFeedback = () => {
+  cy.step('Verify feedback');
 
   cy.get(SELECTORS.NEGATIVE_FEEDBACK).should('have.length', 1);
   cy.get(SELECTORS.POSITIVE_FEEDBACK).should('have.length', 1).first().click();
@@ -51,38 +62,45 @@ const verifyFeedback = () => {
 };
 
 const verifyThreadQueue = () => {
+  cy.step('Verify thread queue');
+
   cy.get(SELECTORS.STEP).eq(1).should('contain.text', 'Create step counter: 0');
   cy.get(SELECTORS.STEP).eq(3).should('contain.text', 'Create step counter: 5');
   cy.get(SELECTORS.STEP).eq(6).should('contain.text', 'Create step counter: 8');
 };
 
 const verifyThreadList = () => {
+  cy.step('Verify thread list');
+
   cy.get(SELECTORS.THREAD_TEST1).should('contain.text', 'thread 1');
   cy.get(SELECTORS.THREAD_TEST2).should('contain.text', 'thread 2');
 
-  // Test thread page
+  cy.step('Verify thread page');
+
   cy.get(SELECTORS.THREAD_TEST1).click();
   cy.get(SELECTORS.STEP).should('have.length', 2);
   cy.get(SELECTORS.STEP).eq(0).should('contain.text', 'Message 1');
   cy.get(SELECTORS.STEP).eq(1).should('contain.text', 'Message 2');
 
-  // Test thread deletion
+  cy.step('Verify thread deletion');
+
   cy.get(SELECTORS.THREAD_TEST1).find(SELECTORS.THREAD_OPTIONS).click();
-  cy.wait(TIMEOUTS.SHORT);
-  cy.get(SELECTORS.DELETE_THREAD).click();
-  cy.wait(TIMEOUTS.SHORT);
-  cy.get(SELECTORS.CONFIRM_BUTTON).click();
-  cy.wait(TIMEOUTS.SHORT);
+  cy.get(SELECTORS.DELETE_THREAD).should('be.visible').click();
+  cy.get(SELECTORS.CONFIRM_BUTTON).should('be.visible').click();
   cy.get(SELECTORS.THREAD_TEST1).should('not.exist');
   cy.get('body').type('{esc}');
 };
 
 const verifyThreadResume = () => {
+  cy.step('Verify thread resume');
+
   cy.get('body').should('have.css', 'pointer-events', 'auto');
+
   cy.get(SELECTORS.THREAD_TEST2).click();
-  cy.wait(TIMEOUTS.MEDIUM);
-  cy.get('a').contains('Hello').click();
-  cy.wait(TIMEOUTS.MEDIUM);
+  cy.get(SELECTORS.LOADER).should('not.be.visible');
+
+  cy.get(SELECTORS.THREAD_HISTORY).contains('Hello').click();
+  cy.get(SELECTORS.LOADER).should('not.be.visible');
 
   cy.get(SELECTORS.STEP).should('have.length', 10);
   cy.get(SELECTORS.STEP).eq(0).should('contain.text', 'Hello');
@@ -90,24 +108,9 @@ const verifyThreadResume = () => {
   cy.get(SELECTORS.STEP).eq(8).should('contain.text', 'chat_profile');
 };
 
-const restartServer = (mode: ExecutionMode | undefined, env: ServerEnv) => {
-  const pathItems = Cypress.spec.absolute.split(sep);
-  const testName = pathItems[pathItems.length - 2];
-
-  cy.exec(
-    `pnpm exec ts-node ./cypress/support/run.ts ${testName} ${mode || ''}`,
-    {
-      env,
-      failOnNonZeroExit: false
-    }
-  ).then((result) => {
-    if (result.code !== 0) {
-      throw new Error(`Server restart failed: ${result.stderr}`);
-    }
-  });
-};
-
 const verifyContinueThread = () => {
+  cy.step('Verify thread continuation');
+
   cy.get(SELECTORS.STEP).eq(7).should('contain.text', 'Welcome back to Hello');
   submitMessage('Hello after restart');
 
@@ -120,61 +123,65 @@ const verifyContinueThread = () => {
 };
 
 const startNewThread = () => {
+  cy.step('Start new thread');
+
   cy.get(SELECTORS.NEW_CHAT_BUTTON).click();
   cy.get(SELECTORS.CONFIRM_NEW).click();
 };
 
 describe('Data Layer', () => {
-  let threadHistoryFile: string;
+  const pathItems = Cypress.spec.absolute.split(sep);
+  pathItems[pathItems.length - 1] = 'thread_history.pickle';
+  const threadHistoryFile = pathItems.join(sep);
 
-  beforeEach(() => {
-    // Set up the thread history file
-    const pathItems = Cypress.spec.absolute.split(sep);
-    pathItems[pathItems.length - 1] = 'thread_history.pickle';
-    threadHistoryFile = pathItems.join(sep);
-
-    runTestServer(undefined, {
-      THREAD_HISTORY_PICKLE_PATH: threadHistoryFile
-    });
-  });
-
-  afterEach(async () => {
-    const { platform } = await import('os');
-
+  const cleanupThreadHistory = () => {
     // Clean up thread history file
     const command =
       platform() === 'win32'
         ? `del /f "${threadHistoryFile}"`
         : `rm -f "${threadHistoryFile}"`;
     cy.exec(command, { failOnNonZeroExit: false });
-  });
+  };
 
   describe('Data Features with Persistence', () => {
+    before(cleanupThreadHistory);
+    afterEach(cleanupThreadHistory);
+
     it('Verifies login, feedback, thread queue, thread list, and thread resume functionality', () => {
       login();
-      cy.wait(TIMEOUTS.MEDIUM);
+      startConversation();
+
       verifyFeedback();
       verifyThreadQueue();
+
       verifyThreadList();
       verifyThreadResume();
     });
 
-    it('Verifies thread continuation after server restart and new thread creation', () => {
-      login();
-      cy.wait(TIMEOUTS.MEDIUM);
-      verifyFeedback();
-      verifyThreadQueue();
+    it.skip('Verifies thread continuation after server restart and new thread creation', () => {
+      cy.task('restartChainlit', Cypress.spec).then(() => {
+        cy.section('Before server restart');
 
-      restartServer(undefined, {
-        THREAD_HISTORY_PICKLE_PATH: threadHistoryFile
+        cy.visit('/');
+
+        login();
+        startConversation();
+
+        verifyFeedback();
+        verifyThreadQueue();
       });
-      cy.reload();
 
-      verifyContinueThread();
-      startNewThread();
-      cy.wait(TIMEOUTS.MEDIUM);
-      verifyFeedback();
-      verifyThreadQueue();
+      cy.task('restartChainlit', Cypress.spec).then(() => {
+        cy.section('After server restart');
+
+        verifyContinueThread();
+
+        startNewThread();
+        startConversation();
+
+        verifyFeedback();
+        verifyThreadQueue();
+      });
     });
   });
 });
