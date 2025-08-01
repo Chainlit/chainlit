@@ -1,10 +1,6 @@
-import { runTestServer, submitMessage } from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
 describe('Chat profiles', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to select a chat profile', () => {
     cy.visit('/');
     cy.get("input[name='email']").type('admin');
@@ -37,7 +33,7 @@ describe('Chat profiles', () => {
     cy.get('[data-test="select-item:GPT-4"]').click();
     cy.get('#confirm').click();
 
-    cy.wait(1000)
+    cy.wait(1000);
 
     cy.get('#starter-ask-for-help').should('not.be.disabled').click();
 
@@ -79,7 +75,7 @@ describe('Chat profiles', () => {
     cy.get('#chat-profiles').click();
 
     // Force hover over GPT-4 profile to show description
-    cy.get('[data-test="select-item:GPT-4"]').focus()
+    cy.get('[data-test="select-item:GPT-4"]').focus();
 
     // Wait for the popover to appear and check its content
     cy.get('#chat-profile-description').within(() => {
@@ -113,7 +109,7 @@ describe('Chat profiles', () => {
     // Select GPT-4 profile
     cy.get('[data-test="select-item:GPT-4"]').click();
 
-    cy.wait(1000)
+    cy.wait(1000);
 
     // Verify the profile has been changed
     submitMessage('hello');

@@ -4,6 +4,51 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.3] - 2025-07-25
+
+### Added
+- Ability to send empty commands
+- Wider element view in copilot and improved styling
+- Support signed urls for elements using dynamoDB persistence
+- Support additional connection arguments in SQLAlchemy data layer
+- Added `CHAINLIT_COOKIE_PATH` environment variable to set the cookie path
+
+### Fixed
+- Message inputs formatting
+- Language pattern to allow `tzm-Latn-DZ`
+- Properly encode parentheses in markdown links
+- Fix chainlit data layer metadata upserts
+- Improve database connection handling
+- Fixed cookie path 
+- Improve lanchain callbacks
+
+### Other
+- Improve robustness of E2E tests
+- Removed watermark "Built with Chainlit"
+
+## [2.6.2] - 2025-07-16
+
+Technical release due to missed `frontend` and `copilot` folders in previous one.
+
+## [2.6.1] - 2025-07-15
+
+### Added
+- New `on_feedback` callback
+- Relaxed restriction on number of starters (now more than 4 can be displayed)
+
+### Fixed
+- Command persistence when `"button": True` is missing from command definition
+- `openai` and `mistralai` sub-modules fail due to incorrect `timestamp_utc` import
+- Temporarily reverted fix caused the following issues with Chainlit data layer:
+  - `null value in column "metadata" of relation "Thread"`
+  - `syntax error at or near ";"`
+- Google Cloud Storage private bucket support in Chainlit data layer
+- Portals (popups, dialogs, etc.) now render correctly inside Copilot’s shadow DOM
+
+### Other
+- Removed telemetry
+- Updated versions for Node.js, Poetry, and pnpm; added Corepack support
+
 ## [2.6.0] - 2025-07-01
 
 ### Added
@@ -28,7 +73,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Only update thread metadata when not empty
 
 ### Breaking
-- **LiteralAI** is being sunset and will be removed in the next release. Please migrate to the official data layer instead.
+- **LiteralAI** is being sunset and will be removed in one of the next releases. Please migrate to the official data layer instead.
 - Telemetry is now opt-in by default and will be removed in the next release.
 
 ## [2.5.5] - 2025-04-14
