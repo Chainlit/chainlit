@@ -1,12 +1,15 @@
 describe('Customize chat settings', () => {
   it('should update inputs', () => {
-    // Open chat settings modal
-    cy.get('#chat-settings-open-modal').should('exist');
-    cy.get('#chat-settings-open-modal').click();
-    cy.get('#chat-settings').should('exist');
+    cy.step('Open chat settings modal');
 
-    // Update inputs
+    cy.get('#chat-settings-open-modal').should('exist').and('be.visible');
+    cy.get('#chat-settings-open-modal').click();
+    cy.get('#chat-settings').should('exist').and('be.visible');
+
+    cy.step('Update inputs');
+
     cy.get('#Model').click();
+    cy.get('[role="listbox"]').should('be.visible');
     cy.contains('gpt-4').click();
     cy.get('#Model').should('contain.text', 'gpt-4');
 
@@ -33,7 +36,8 @@ describe('Customize chat settings', () => {
     cy.get('.step').should('have.length', 1);
     cy.get('.step').eq(0).should('contain', 'Settings updated!');
 
-    // Check if inputs are updated
+    cy.step('Check inputs are updated');
+
     cy.get('#chat-settings-open-modal').click();
     cy.get('#Temperature')
       .find('[role="slider"]')
@@ -55,7 +59,8 @@ describe('Customize chat settings', () => {
       .find('[role="slider"]')
       .should('have.attr', 'aria-valuenow', '512');
 
-    // Check if modal is correctly closed
+    cy.step('Check if model is correctly closed');
+
     cy.contains('Cancel').click();
     cy.get('#chat-settings').should('not.exist');
   });
