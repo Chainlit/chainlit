@@ -25,7 +25,7 @@ interface Props {
 }
 
 const Widget = ({ config, error }: Props) => {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(config?.expanded || false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
