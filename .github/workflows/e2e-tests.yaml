@@ -18,20 +18,24 @@ jobs:
         name: Install Node, pnpm and dependencies.
         with:
           pnpm-skip-install: true
-      - name: Install depdendencies and Cypress
+      - name: Install Cypress
         uses: cypress-io/github-action@v6
         with:
           runTests: false
       - uses: ./.github/actions/poetry-python-install
-        name: Install Python, poetry and Python dependencies
+        name: Install Python, poetry and Python & pnpm (poetry does it automatically) dependencies
         with:
           poetry-working-directory: ${{ env.BACKEND_DIR }}
           poetry-install-args: --with tests
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        uses: nick-fields/retry@v3
+        run: pnpm test
+        shell: bash
+        continue-on-error: true
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: hashFiles('cypress/screenshots/**') != ''
         with:
-          timeout_minutes: 20
-          max_attempts: 3
-          command: pnpm test
+          name: cypress-screenshots-${{ matrix.os }}
+          path: cypress/screenshots

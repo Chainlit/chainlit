@@ -1,4 +1,4 @@
-<h1 align="center">Welcome to Chainlit by Literal AI 👋</h1>
+<h1 align="center">Welcome to Chainlit 👋</h1>
 
 <p align="center">
 <b>Build python production-ready conversational AI applications in minutes, not weeks ⚡️</b>
@@ -11,6 +11,15 @@
         <a href="https://github.com/chainlit/chainlit/graphs/contributors" rel="nofollow"><img alt="Contributors" src="https://img.shields.io/github/contributors/chainlit/chainlit" style="max-width:100%;"></a>
     <a href="https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml" rel="nofollow"><img alt="CI" src="https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg" style="max-width:100%;"></a>
 </p>
+
+> ⚠️ **Notice:** Chainlit is now community-maintained.
+>
+> As of May 1st 2025, the original Chainlit team has stepped back from active development. The project is maintained by @Chainlit/chainlit-maintainers under a formal Maintainer Agreement.
+>
+> Maintainers are responsible for code review, releases, and security.  
+> Chainlit SAS provides no warranties on future updates.
+>
+> Want to help maintain? [Apply here →](https://docs.google.com/forms/d/e/1FAIpQLSf6CllNWnKBnDIoj0m-DnHU6b0dj8HYFGixKy-_qNi_rD4iNA/viewform)
 
 <p align="center">
     <a href="https://chainlit.io"><b>Website</b></a>  •  
@@ -25,8 +34,6 @@
 
 https://github.com/user-attachments/assets/b3738aba-55c0-42fa-ac00-6efd1ee0d148
 
-> [!NOTE]
-> Chainlit is maintained by [Literal AI](https://literalai.com), an LLMOps platform to monitor and evaluate LLM applications! It works with any Python or TypeScript applications and [seamlessly](https://docs.chainlit.io/llmops/literalai) with Chainlit. For enterprise support, please fill this [form](https://docs.google.com/forms/d/e/1FAIpQLSdPVGqfuaWSC2DfunR6cY4C7kUHl0c2W7DnhzsF9bmMxrVpkg/viewform?usp=header).
 
 ## Installation
 

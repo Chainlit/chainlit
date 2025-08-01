@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('Context should be reachable', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should find the Emitter from async, make_async and async_from_sync contexts', () => {
     cy.get('.step').should('have.length', 3);
 

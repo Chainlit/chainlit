@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('remove_elements', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to remove elements', () => {
     cy.get('#step-tool1').should('exist');
     cy.get('#step-tool1').click();

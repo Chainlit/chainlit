@@ -125,7 +125,7 @@ class AskSpec(DataClassJsonMixin):
     """Specification for asking the user."""
 
     timeout: int
-    type: Literal["text", "file", "action"]
+    type: Literal["text", "file", "action", "element"]
     step_id: str
 
 
@@ -137,6 +137,13 @@ class AskFileSpec(FileSpec, AskSpec, DataClassJsonMixin):
 @dataclass
 class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
     """Specification for asking the user an action"""
+
+
+@dataclass
+class AskElementSpec(AskSpec, DataClassJsonMixin):
+    """Specification for asking the user a custom element"""
+
+    element_id: str
 
 
 class FileReference(TypedDict):
@@ -195,6 +202,10 @@ class AskActionResponse(TypedDict):
     id: str
 
 
+class AskElementResponse(TypedDict, total=False):
+    submitted: bool
+
+
 class UpdateThreadRequest(BaseModel):
     threadId: str
     name: str
@@ -230,9 +241,22 @@ class ConnectSseMCPRequest(BaseModel):
     clientType: Literal["sse"]
     name: str
     url: str
+    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    headers: Optional[Dict[str, str]] = None
 
 
-ConnectMCPRequest = Union[ConnectStdioMCPRequest, ConnectSseMCPRequest]
+class ConnectStreamableHttpMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["streamable-http"]
+    name: str
+    url: str
+    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    headers: Optional[Dict[str, str]] = None
+
+
+ConnectMCPRequest = Union[
+    ConnectStdioMCPRequest, ConnectSseMCPRequest, ConnectStreamableHttpMCPRequest
+]
 
 
 class DisconnectMCPRequest(BaseModel):
@@ -256,6 +280,7 @@ class Starter(DataClassJsonMixin):
 
     label: str
     message: str
+    command: Optional[str] = None
     icon: Optional[str] = None
 
 
