@@ -30,6 +30,9 @@ importers:
       cypress:
         specifier: ^14.5.3
         version: 14.5.3
+      cypress-plugin-steps:
+        specifier: 1.2.1
+        version: 1.2.1(cypress@14.5.3)
       dotenv:
         specifier: ^16.3.1
         version: 16.3.1
@@ -569,6 +572,11 @@ packages:
 
   csstype@3.1.2:
     resolution: {integrity: sha512-I7K1Uu0MBPzaFKg4nI5Q7Vs2t+3gWWW648spaF+Rg7pI9ds18Ugn+lvg4SHczUdKlHI5LWBXyqfS8+DufyBsgQ==}
+
+  cypress-plugin-steps@1.2.1:
+    resolution: {integrity: sha512-L2khZMhTMgbAMBQhh4x2SQweVlb8ugadVsQlunnwGVBN313YfhoxsvWaQjJjm/N+0z/oUSZoKD3yAYkcFKEw9A==}
+    peerDependencies:
+      cypress: '>=10'
 
   cypress@14.5.3:
     resolution: {integrity: sha512-syLwKjDeMg77FRRx68bytLdlqHXDT4yBVh0/PPkcgesChYDjUZbwxLqMXuryYKzAyJsPsQHUDW1YU74/IYEUIA==}
@@ -2134,6 +2142,10 @@ snapshots:
       which: 2.0.2
 
   csstype@3.1.2: {}
+
+  cypress-plugin-steps@1.2.1(cypress@14.5.3):
+    dependencies:
+      cypress: 14.5.3
 
   cypress@14.5.3:
     dependencies:
