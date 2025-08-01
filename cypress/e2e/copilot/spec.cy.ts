@@ -8,6 +8,8 @@ describe('Copilot', () => {
   const opts = { includeShadowDom: true };
 
   beforeEach(() => {
+    cy.step('Load the copilot script');
+
     cy.document().then((document) => {
       document.body.innerHTML = '<div id="root"><h1>Copilot test!</h1></div>';
 
@@ -22,6 +24,8 @@ describe('Copilot', () => {
     });
 
     cy.window().should('have.property', 'mountChainlitWidget');
+
+    cy.step('Mount the widget');
 
     // Wait for the script to load and execute the initialization
     cy.window().then((win) => {
@@ -48,11 +52,15 @@ describe('Copilot', () => {
       });
     });
 
+    cy.step('Open copilot');
+
     cy.get('#chainlit-copilot-button', opts).click();
     cy.get('#chainlit-copilot', opts).should('exist');
 
     cy.get('.step', opts).should('have.length', 1);
     cy.contains('.step', 'Hi from copilot!', opts).should('be.visible');
+
+    cy.step('Start conversation');
 
     submitMessageCopilot('Call func!');
     cy.get('.step', opts).should('have.length', 5);
@@ -65,12 +73,16 @@ describe('Copilot', () => {
   });
 
   it('should persist thread', () => {
+    cy.step('Check persistance availability');
+
     cy.window().should('have.property', 'getChainlitCopilotThreadId');
     cy.window().should('have.property', 'clearChainlitCopilotThreadId');
 
     getCopilotThreadId().then((threadId) => {
       expect(threadId).to.equal(null);
     });
+
+    cy.step('Open copilot');
 
     cy.get('#chainlit-copilot-button', opts).click();
     cy.get('#chainlit-copilot', opts).should('exist');
@@ -81,11 +93,15 @@ describe('Copilot', () => {
       expect(firstThreadId).to.not.equal(null);
     });
 
+    cy.step('Start conversation');
+
     submitMessageCopilot('Hello Copilot!');
 
     cy.get('.step', opts).should('have.length', 2);
     cy.contains('.step', 'Hi from copilot!', opts).should('be.visible');
     cy.contains('.step', 'Hello Copilot!', opts).should('be.visible');
+
+    cy.step('Start new thread programmatically');
 
     clearCopilotThreadId();
 
@@ -98,12 +114,16 @@ describe('Copilot', () => {
 
     cy.get('.step', opts).should('have.length', 1);
 
+    cy.step('Start conversation');
+
     submitMessageCopilot('Hello Copilot from a new thread!');
     cy.get('.step', opts).should('have.length', 2);
     cy.contains('.step', 'Hi from copilot!', opts).should('be.visible');
     cy.contains('.step', 'Hello Copilot from a new thread!', opts).should(
       'be.visible'
     );
+
+    cy.step('Start new thread programmatially with predefined ID');
 
     const newThreadId = crypto.randomUUID();
     clearCopilotThreadId(newThreadId);
@@ -116,6 +136,8 @@ describe('Copilot', () => {
 
     cy.get('.step', opts).should('have.length', 1);
     cy.contains('.step', 'Hi from copilot!', opts).should('be.visible');
+
+    cy.step('Start new thread from UI');
 
     cy.get('#new-chat-button', opts).click();
     cy.get('#new-chat-dialog', opts).should('exist');
