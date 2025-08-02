@@ -36,8 +36,8 @@ const MessagesContainer = ({ navigate }: Props) => {
   const { t } = useTranslation();
 
   const uploadFile = useCallback(
-    (file: File, onProgress: (progress: number) => void) => {
-      return _uploadFile(file, onProgress);
+    (file: File, onProgress: (progress: number) => void, parentId?: string) => {
+      return _uploadFile(file, onProgress, parentId);
     },
     [_uploadFile]
   );

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Literal, Optional,
 import aiofiles
 
 from chainlit.logger import logger
-from chainlit.types import FileReference
+from chainlit.types import AskFileSpec, FileReference
 
 if TYPE_CHECKING:
     from mcp import ClientSession
@@ -80,6 +80,7 @@ class BaseSession:
         self.chat_profile = chat_profile
 
         self.files: Dict[str, FileDict] = {}
+        self.files_spec: Dict[str, AskFileSpec] = {}
 
         self.id = id
 
