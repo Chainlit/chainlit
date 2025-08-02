@@ -11,23 +11,44 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip';
 
+import { markdownToHtml } from './Markdown';
+
 interface Props {
   content: unknown;
   className?: string;
+  mime?: string;
+  allowHtml?: boolean;
+  latex?: boolean;
 }
 
-const CopyButton = ({ content, className }: Props) => {
+const CopyButton = ({
+  content,
+  className,
+  allowHtml = false,
+  latex = false
+}: Props) => {
   const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
   const copyToClipboard = async () => {
     try {
-      const textToCopy =
-        typeof content === 'object'
-          ? JSON.stringify(content, null, 2)
-          : String(content);
+      let textToCopy: string;
 
-      await navigator.clipboard.writeText(textToCopy);
+      if (typeof content === 'object') {
+        textToCopy = JSON.stringify(content, null, 2);
+        await navigator.clipboard.writeText(textToCopy);
+      } else {
+        textToCopy = await markdownToHtml(String(content), {
+          allowHtml,
+          latex
+        });
+        const htmlBlob = new Blob([textToCopy], { type: 'text/html' });
+        const clipboardItem = new ClipboardItem({
+          'text/plain': String(content),
+          'text/html': htmlBlob
+        });
+        await navigator.clipboard.write([clipboardItem]);
+      }
       setCopied(true);
 
       // Reset copied state after 2 seconds

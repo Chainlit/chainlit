@@ -15,9 +15,17 @@ interface Props {
   message: IStep;
   actions: IAction[];
   run?: IStep;
+  allowHtml?: boolean;
+  latex?: boolean;
 }
 
-const MessageButtons = ({ message, actions, run }: Props) => {
+const MessageButtons = ({
+  message,
+  actions,
+  run,
+  allowHtml = false,
+  latex = false
+}: Props) => {
   const { config } = useConfig();
   const { firstInteraction } = useChatMessages();
 
@@ -39,7 +47,13 @@ const MessageButtons = ({ message, actions, run }: Props) => {
 
   return (
     <div className="-ml-1.5 flex items-center flex-wrap">
-      {showCopyButton ? <CopyButton content={message.output} /> : null}
+      {showCopyButton ? (
+        <CopyButton
+          content={message.output}
+          allowHtml={allowHtml}
+          latex={latex}
+        />
+      ) : null}
       {run ? <FeedbackButtons message={run} /> : null}
       {messageActions.length ? (
         <MessageActions actions={messageActions} />
