@@ -254,9 +254,7 @@ async def add_reaction_if_enabled(event, emoji: str = "eyes"):
     if config.features.slack.reaction_on_message_received:
         try:
             await slack_app.client.reactions_add(
-                channel=event["channel"],
-                timestamp=event["ts"],
-                name=emoji
+                channel=event["channel"], timestamp=event["ts"], name=emoji
             )
         except Exception as e:
             logger.warning(f"Failed to add reaction: {e}")
