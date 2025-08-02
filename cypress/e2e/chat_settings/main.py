@@ -63,5 +63,4 @@ async def start():
 
 @cl.on_settings_update
 async def setup_agent(settings):
-    raise ExceptionType("Error message")
     await cl.Message(content="Settings updated!").send()
