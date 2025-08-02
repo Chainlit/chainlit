@@ -85,7 +85,7 @@ Start by running `backend/hello.py` as an example.
 ```sh
 cd backend
 poetry env activate
-poetry chainlit run chainlit/hello.py
+poetry run chainlit run chainlit/hello.py
 ```
 
 You should now be able to access the Chainlit app you just launched on `http://127.0.0.1:8000`.
