@@ -244,7 +244,10 @@ const Input = forwardRef<InputMethods, Props>(
 
         const textData = event.clipboardData?.getData('text/plain');
         if (textData) {
-          document.execCommand('insertText', false, textData);
+          const escapedText = document.createTextNode(textData).textContent;
+          if (escapedText) {
+            document.execCommand('insertText', false, escapedText);
+          }
           const inputEvent = new Event('input', {
             bubbles: true,
             composed: true
