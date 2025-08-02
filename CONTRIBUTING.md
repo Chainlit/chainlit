@@ -85,7 +85,7 @@ Start by running `backend/hello.py` as an example.
 ```sh
 cd backend
 poetry env activate
-chainlit run chainlit/hello.py
+poetry chainlit run chainlit/hello.py
 ```
 
 You should now be able to access the Chainlit app you just launched on `http://127.0.0.1:8000`.
@@ -100,10 +100,10 @@ Then, start the UI.
 
 ```sh
 cd frontend
-pnpm run dev --port 5174 --host
+pnpm run dev
 ```
 
-If you visit `http://localhost:5174/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
+If you visit `http://localhost:5173/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
 
 ## Run the tests
 
