@@ -31,38 +31,48 @@ import type { IToken } from './useChatData';
 
 const useChatSession = () => {
   const client = useContext(ChainlitContext);
-  const sessionId = useSessionState((s) => s.sessionId);
+  const sessionId = useSessionState((state) => state.sessionId);
 
-  const session = useSessionState((s) => s.session);
-  const setSession = useSessionState((s) => s.setSession);
-  const setIsAiSpeaking = useChatStore((s) => s.setIsAiSpeaking);
-  const setAudioConnection = useChatStore((s) => s.setAudioConnection);
-  const setChatSettingsInputs = useChatStore((s) => s.setChatSettingsInputs);
-  const resetChatSettingsValue = useChatStore((s) => s.resetChatSettingsValue);
-  const setChatSettingsValue = useChatStore((s) => s.setChatSettingsValue);
-  const setFirstUserInteraction = useUserState(
-    (s) => s.setFirstUserInteraction
+  const session = useSessionState((state) => state.session);
+  const setSession = useSessionState((state) => state.setSession);
+  const setIsAiSpeaking = useChatStore((state) => state.setIsAiSpeaking);
+  const setAudioConnection = useChatStore((state) => state.setAudioConnection);
+  const setChatSettingsInputs = useChatStore(
+    (state) => state.setChatSettingsInputs
   );
-  const setLoading = useChatStore((s) => s.setLoading);
-  const setMcps = useMcpStore((s) => s.setMcps);
-  const wavStreamPlayer = useChatStore((s) => s.wavStreamPlayer);
-  const wavRecorder = useChatStore((s) => s.wavRecorder);
-  const setMessages = useMessagesStore((s) => s.setMessages);
-  const setAskUser = useUserState((s) => s.setAskUser);
-  const setCallFn = useChatStore((s) => s.setCallFn);
-  const setCommands = useChatStore((s) => s.setCommands);
-  const setSideView = useChatStore((s) => s.setSideView);
-  const setElements = useMessagesStore((s) => s.setElements);
-  const setTasklists = useMessagesStore((s) => s.setTaskList);
-  const setActions = useMessagesStore((s) => s.setActions);
-  const setTokenCount = useMessagesStore((s) => s.setTokenCount);
-  const chatProfile = useChatStore((s) => s.chatProfile);
-  const setChatProfile = useChatStore((s) => s.setChatProfile);
-  const idToResume = useThreadStore((s) => s.idToResume);
-  const setThreadResumeError = useThreadStore((s) => s.setResumeThreadError);
+  const resetChatSettingsValue = useChatStore(
+    (state) => state.resetChatSettingsValue
+  );
+  const setChatSettingsValue = useChatStore(
+    (state) => state.setChatSettingsValue
+  );
+  const setFirstUserInteraction = useUserState(
+    (state) => state.setFirstUserInteraction
+  );
+  const setLoading = useChatStore((state) => state.setLoading);
+  const setMcps = useMcpStore((state) => state.setMcps);
+  const wavStreamPlayer = useChatStore((state) => state.wavStreamPlayer);
+  const wavRecorder = useChatStore((state) => state.wavRecorder);
+  const setMessages = useMessagesStore((state) => state.setMessages);
+  const setAskUser = useUserState((state) => state.setAskUser);
+  const setCallFn = useChatStore((state) => state.setCallFn);
+  const setCommands = useChatStore((state) => state.setCommands);
+  const setSideView = useChatStore((state) => state.setSideView);
+  const setElements = useMessagesStore((state) => state.setElements);
+  const setTasklists = useMessagesStore((state) => state.setTaskList);
+  const setActions = useMessagesStore((state) => state.setActions);
+  const setTokenCount = useMessagesStore((state) => state.setTokenCount);
+  const chatProfile = useChatStore((state) => state.chatProfile);
+  const setChatProfile = useChatStore((state) => state.setChatProfile);
+  const idToResume = useThreadStore((state) => state.idToResume);
+  const setThreadResumeError = useThreadStore(
+    (state) => state.setResumeThreadError
+  );
 
-  const currentThreadId = useThreadStore((s) => s.currentThreadId);
-  const setCurrentThreadId = useThreadStore((s) => s.setCurrentThreadId);
+  const currentThreadId = useThreadStore((state) => state.currentThreadId);
+  const setCurrentThreadId = useThreadStore(
+    (state) => state.setCurrentThreadId
+  );
 
   // Use currentThreadId as thread id in websocket header
   useEffect(() => {

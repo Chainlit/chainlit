@@ -22,8 +22,8 @@ export const CommandButtons = ({
   selectedCommandId,
   onCommandSelect
 }: Props) => {
-  const commands = useChatStore((s) => s.commands);
-  const commandButtons = commands.filter((c) => !!c.button);
+  const commands = useChatStore((state) => state.commands);
+  const commandButtons = commands.filter((command) => !!command.button);
 
   if (!commandButtons.length) return null;
 

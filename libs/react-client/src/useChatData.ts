@@ -11,17 +11,17 @@ export interface IToken {
 }
 
 const useChatData = () => {
-  const loading = useChatStore((s) => s.loading);
-  const elements = useMessagesStore((s) => s.elements);
-  const tasklists = useMessagesStore((s) => s.taskList);
-  const actions = useMessagesStore((s) => s.actions);
-  const session = useSessionState((s) => s.session);
-  const askUser = useUserState((s) => s.askUser);
-  const callFn = useChatStore((s) => s.callFn);
-  const chatSettingsInputs = useChatStore((s) => s.chatSettingsInputs);
-  const chatSettingsValue = useChatStore((s) => s.chatSettingsValue);
+  const loading = useChatStore((state) => state.loading);
+  const elements = useMessagesStore((state) => state.elements);
+  const tasklists = useMessagesStore((state) => state.taskList);
+  const actions = useMessagesStore((state) => state.actions);
+  const session = useSessionState((state) => state.session);
+  const askUser = useUserState((state) => state.askUser);
+  const callFn = useChatStore((state) => state.callFn);
+  const chatSettingsInputs = useChatStore((state) => state.chatSettingsInputs);
+  const chatSettingsValue = useChatStore((state) => state.chatSettingsValue);
   const chatSettingsDefaultValue = useChatStore(
-    (s) => s.chatSettingsDefaultValue
+    (state) => state.chatSettingsDefaultValue
   );
 
   const connected = session?.socket.connected && !session?.error;

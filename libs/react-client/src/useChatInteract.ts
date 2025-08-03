@@ -15,25 +15,31 @@ type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 const useChatInteract = () => {
   const client = useContext(ChainlitContext);
   const session = useSessionState((state) => state.session);
-  const askUser = useUserState((s) => s.askUser);
-  const sessionId = useSessionState((s) => s.sessionId);
+  const askUser = useUserState((state) => state.askUser);
+  const sessionId = useSessionState((state) => state.sessionId);
 
-  const resetChatSettings = useChatStore((s) => s.resetChatSettingsInputs);
-  const resetSessionId = useSessionState((s) => s.resetSessionId);
-  const resetChatSettingsValue = useChatStore((s) => s.resetChatSettingsValue);
+  const resetChatSettings = useChatStore(
+    (state) => state.resetChatSettingsInputs
+  );
+  const resetSessionId = useSessionState((state) => state.resetSessionId);
+  const resetChatSettingsValue = useChatStore(
+    (state) => state.resetChatSettingsValue
+  );
 
   const setFirstUserInteraction = useUserState(
     (state) => state.setFirstUserInteraction
   );
-  const setLoading = useChatStore((s) => s.setLoading);
-  const setMessages = useMessagesStore((s) => s.setMessages);
-  const setElements = useMessagesStore((s) => s.setElements);
-  const setTasklists = useMessagesStore((s) => s.setTaskList);
-  const setActions = useMessagesStore((s) => s.setActions);
-  const setTokenCount = useMessagesStore((s) => s.setTokenCount);
-  const setIdToResume = useThreadStore((s) => s.setIdToResume);
-  const setSideView = useChatStore((s) => s.setSideView);
-  const setCurrentThreadId = useThreadStore((s) => s.setCurrentThreadId);
+  const setLoading = useChatStore((state) => state.setLoading);
+  const setMessages = useMessagesStore((state) => state.setMessages);
+  const setElements = useMessagesStore((state) => state.setElements);
+  const setTasklists = useMessagesStore((state) => state.setTaskList);
+  const setActions = useMessagesStore((state) => state.setActions);
+  const setTokenCount = useMessagesStore((state) => state.setTokenCount);
+  const setIdToResume = useThreadStore((state) => state.setIdToResume);
+  const setSideView = useChatStore((state) => state.setSideView);
+  const setCurrentThreadId = useThreadStore(
+    (state) => state.setCurrentThreadId
+  );
 
   const clear = useCallback(() => {
     session?.socket.emit('clear_session');

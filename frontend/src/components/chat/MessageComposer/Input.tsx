@@ -48,7 +48,7 @@ const Input = forwardRef<InputMethods, Props>(
     },
     ref
   ) => {
-    const commands = useChatStore((s) => s.commands);
+    const commands = useChatStore((state) => state.commands);
     const [isComposing, setIsComposing] = useState(false);
     const [showCommands, setShowCommands] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(0);
