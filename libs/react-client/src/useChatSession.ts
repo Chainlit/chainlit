@@ -129,10 +129,22 @@ const useChatSession = () => {
         setSession((s) => ({ ...s!, error: false }));
         setMcps((prev) =>
           prev.map((mcp) => {
-            const promise =
-              mcp.clientType === 'sse'
-                ? client.connectSseMCP(sessionId, mcp.name, mcp.url!)
-                : client.connectStdioMCP(sessionId, mcp.name, mcp.command!);
+            let promise;
+            if (mcp.clientType === 'sse') {
+              promise = client.connectSseMCP(sessionId, mcp.name, mcp.url!);
+            } else if (mcp.clientType === 'streamable-http') {
+              promise = client.connectStreamableHttpMCP(
+                sessionId,
+                mcp.name,
+                mcp.url!
+              );
+            } else {
+              promise = client.connectStdioMCP(
+                sessionId,
+                mcp.name,
+                mcp.command!
+              );
+            }
             promise
               .then(async ({ success, mcp }) => {
                 setMcps((prev) =>

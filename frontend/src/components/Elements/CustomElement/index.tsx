@@ -1,3 +1,4 @@
+import { MessageContext } from 'contexts/MessageContext';
 import {
   memo,
   useCallback,
@@ -18,8 +19,6 @@ import {
   useChatInteract,
   useSessionState
 } from '@chainlit/react-client';
-
-import { MessageContext } from 'contexts/MessageContext';
 
 import Alert from '@/components/Alert';
 

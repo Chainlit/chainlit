@@ -58,9 +58,10 @@ export const NewChatDialog = ({
 
 interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   navigate?: (to: string) => void;
+  onConfirm?: () => void;
 }
 
-const NewChatButton = ({ navigate, ...buttonProps }: Props) => {
+const NewChatButton = ({ navigate, onConfirm, ...buttonProps }: Props) => {
   const [open, setOpen] = useState(false);
   const { clear } = useChatInteract();
 
@@ -73,8 +74,12 @@ const NewChatButton = ({ navigate, ...buttonProps }: Props) => {
   };
 
   const handleConfirm = () => {
-    clear();
-    navigate?.('/');
+    if (onConfirm) {
+      onConfirm();
+    } else {
+      clear();
+      navigate?.('/');
+    }
     handleClose();
   };
 

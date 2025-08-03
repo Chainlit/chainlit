@@ -5,16 +5,31 @@ import { Logo } from '@chainlit/app/src/components/Logo';
 import ChatProfiles from '@chainlit/app/src/components/header/ChatProfiles';
 import NewChatButton from '@chainlit/app/src/components/header/NewChat';
 import { Button } from '@chainlit/app/src/components/ui/button';
-import { useAudio, useConfig } from '@chainlit/react-client';
+import { IChainlitConfig, useAudio } from '@chainlit/react-client';
+
+import { useCopilotInteract } from '../hooks';
+
+interface IProjectConfig {
+  config?: IChainlitConfig;
+  error?: Error;
+  isLoading: boolean;
+  language: string;
+}
 
 interface Props {
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
+  projectConfig: IProjectConfig;
 }
 
-const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
-  const { config } = useConfig();
+const Header = ({
+  expanded,
+  setExpanded,
+  projectConfig
+}: Props): JSX.Element => {
+  const { config } = projectConfig;
   const { audioConnection } = useAudio();
+  const { startNewChat } = useCopilotInteract();
 
   const hasChatProfiles = !!config?.chatProfiles.length;
 
@@ -33,7 +48,10 @@ const Header = ({ expanded, setExpanded }: Props): JSX.Element => {
             barSpacing={2}
           />
         ) : null}
-        <NewChatButton className="text-muted-foreground mt-[1.5px]" />
+        <NewChatButton
+          className="text-muted-foreground mt-[1.5px]"
+          onConfirm={startNewChat}
+        />
         <Button
           size="icon"
           variant="ghost"

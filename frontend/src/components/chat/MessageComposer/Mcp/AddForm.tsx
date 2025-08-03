@@ -24,24 +24,37 @@ interface McpAddFormProps {
   onCancel: () => void;
   allowStdio?: boolean;
   allowSse?: boolean;
+  allowHttp?: boolean;
 }
 
 export const McpAddForm = ({
   onSuccess,
   onCancel,
   allowStdio,
-  allowSse
+  allowSse,
+  allowHttp
 }: McpAddFormProps) => {
   const apiClient = useContext(ChainlitContext);
   const sessionId = useSessionState((state) => state.sessionId);
   const setMcps = useMcpStore((state) => state.setMcps);
 
   const [serverName, setServerName] = useState('');
-  const [serverType, setServerType] = useState<'stdio' | 'sse'>(
-    allowStdio ? 'stdio' : 'sse'
-  );
+  // Pick the first protocol enabled by the parent component.
+  const defaultType: 'stdio' | 'sse' | 'streamable-http' = allowStdio
+    ? 'stdio'
+    : allowSse
+    ? 'sse'
+    : allowHttp
+    ? 'streamable-http'
+    : 'stdio';
+
+  const [serverType, setServerType] = useState<
+    'stdio' | 'sse' | 'streamable-http'
+  >(defaultType);
   const [serverUrl, setServerUrl] = useState('');
+  const [httpUrl, setHttpUrl] = useState('');
   const [serverCommand, setServerCommand] = useState('');
+  const [headersInput, setHeadersInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   // Form validation function
@@ -50,26 +63,44 @@ export const McpAddForm = ({
 
     if (serverType === 'stdio') {
       return !!serverCommand.trim();
-    } else {
+    } else if (serverType === 'sse') {
       return !!serverUrl.trim();
+    } else if (serverType === 'streamable-http') {
+      return !!httpUrl.trim();
     }
+    return false;
   };
 
   const resetForm = () => {
     setServerName('');
-    setServerType('stdio');
+    setServerType(defaultType);
     setServerUrl('');
     setServerCommand('');
+    setHttpUrl('');
+    setHeadersInput('');
   };
 
   const addMcp = () => {
     setIsLoading(true);
 
+    // Helper to parse the optional headers JSON
+    let headersObj: Record<string, string> | undefined;
+    if (headersInput.trim()) {
+      try {
+        headersObj = JSON.parse(headersInput.trim());
+      } catch (_err) {
+        toast.error('Headers must be valid JSON');
+        setIsLoading(false);
+        return;
+      }
+    }
+
     if (serverType === 'stdio') {
       toast.promise(
         apiClient
           .connectStdioMCP(sessionId, serverName, serverCommand)
-          .then(async ({ success, mcp }) => {
+          .then(async (resp: any) => {
+            const { success, mcp } = resp;
             if (success && mcp) {
               setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
             }
@@ -83,11 +114,31 @@ export const McpAddForm = ({
           error: (err) => <span>{err.message}</span>
         }
       );
-    } else {
+    } else if (serverType === 'sse') {
       toast.promise(
-        apiClient
-          .connectSseMCP(sessionId, serverName, serverUrl)
-          .then(async ({ success, mcp }) => {
+        (apiClient as any)
+          .connectSseMCP(sessionId, serverName, serverUrl, headersObj)
+          .then(async (resp: any) => {
+            const { success, mcp } = resp;
+            if (success && mcp) {
+              setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
+            }
+            resetForm();
+            onSuccess();
+          })
+          .finally(() => setIsLoading(false)),
+        {
+          loading: 'Adding MCP...',
+          success: () => 'MCP added!',
+          error: (err) => <span>{err.message}</span>
+        }
+      );
+    } else if (serverType === 'streamable-http') {
+      toast.promise(
+        (apiClient as any)
+          .connectStreamableHttpMCP(sessionId, serverName, httpUrl, headersObj)
+          .then(async (resp: any) => {
+            const { success, mcp } = resp;
             if (success && mcp) {
               setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
             }
@@ -143,37 +194,86 @@ export const McpAddForm = ({
                 {allowStdio ? (
                   <SelectItem value="stdio">stdio</SelectItem>
                 ) : null}
+                {allowHttp ? (
+                  <SelectItem value="streamable-http">
+                    streamable-http
+                  </SelectItem>
+                ) : null}
               </SelectContent>
             </Select>
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label
-            htmlFor="server-endpoint"
-            className="text-foreground/70 text-sm"
-          >
-            {serverType === 'sse' ? 'Server URL *' : 'Command *'}
-          </Label>
-          <Input
-            id="server-endpoint"
-            placeholder={
-              serverType === 'sse'
-                ? 'Example: http://localhost:5000'
-                : 'Example: npx -y @stripe/mcp --tools=all --api-key=YOUR_STRIPE_SECRET_KEY'
-            }
-            className="w-full bg-background text-foreground border-input"
-            value={serverType === 'sse' ? serverUrl : serverCommand}
-            onChange={(e) => {
-              if (serverType === 'sse') {
-                setServerUrl(e.target.value);
-              } else {
-                setServerCommand(e.target.value);
-              }
-            }}
-            required
-            disabled={isLoading}
-          />
+          {serverType === 'stdio' && (
+            <>
+              <Label
+                htmlFor="server-command"
+                className="text-foreground/70 text-sm"
+              >
+                Command *
+              </Label>
+              <Input
+                id="server-command"
+                placeholder="Example: npx -y @stripe/mcp --tools=all --api-key=YOUR_STRIPE_SECRET_KEY"
+                className="w-full bg-background text-foreground border-input"
+                value={serverCommand}
+                onChange={(e) => setServerCommand(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </>
+          )}
+          {serverType === 'sse' && (
+            <>
+              <Label
+                htmlFor="server-url"
+                className="text-foreground/70 text-sm"
+              >
+                Server URL *
+              </Label>
+              <Input
+                id="server-url"
+                placeholder="Example: http://localhost:5000"
+                className="w-full bg-background text-foreground border-input"
+                value={serverUrl}
+                onChange={(e) => setServerUrl(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </>
+          )}
+          {serverType === 'streamable-http' && (
+            <>
+              <Label htmlFor="http-url" className="text-foreground/70 text-sm">
+                HTTP URL *
+              </Label>
+              <Input
+                id="http-url"
+                placeholder="Example: http://localhost:8000/mcp"
+                className="w-full bg-background text-foreground border-input"
+                value={httpUrl}
+                onChange={(e) => setHttpUrl(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </>
+          )}
+          {(serverType === 'sse' || serverType === 'streamable-http') && (
+            <>
+              <Label htmlFor="headers" className="text-foreground/70 text-sm">
+                Headers (JSON, optional)
+              </Label>
+              <Input
+                id="headers"
+                placeholder='Example: {"Authorization": "Bearer TOKEN"}'
+                className="w-full bg-background text-foreground border-input font-mono"
+                value={headersInput}
+                onChange={(e) => setHeadersInput(e.target.value)}
+                disabled={isLoading}
+              />
+            </>
+          )}
         </div>
       </div>
 
