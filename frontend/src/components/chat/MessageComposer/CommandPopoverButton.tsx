@@ -3,6 +3,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@radix-ui/react-popover';
+import { every } from 'lodash';
 
 import { ICommand, useChatStore } from '@chainlit/react-client';
 
@@ -32,6 +33,7 @@ export const CommandPopoverButton = ({
   onCommandSelect
 }: Props) => {
   const commands = useChatStore((state) => state.commands);
+  const allButtons = every(commands.map((command) => !!command.button));
 
   if (!commands.length || allButtons) return null;
 

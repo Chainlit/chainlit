@@ -6,7 +6,7 @@ import { useRecoilState } from 'recoil';
 import {
   useChatData,
   useChatInteract,
-  useChatSession
+  useChatStore
 } from '@chainlit/react-client';
 
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,9 @@ export default function ChatSettingsModal() {
   const { handleSubmit, setValue, reset, watch } = useForm({
     defaultValues: chatSettingsValue
   });
-  const { setChatSettingsValue } = useChatSession();
+  const setChatSettingsValue = useChatStore(
+    (state) => state.setChatSettingsValue
+  );
 
   // Reset form when default values change
   useEffect(() => {
