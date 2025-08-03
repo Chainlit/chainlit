@@ -1,20 +1,15 @@
 import { useEffect, useRef } from 'react';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilValue } from 'recoil';
 
-import {
-  threadIdToResumeState,
-  useChatInteract,
-  useChatSession
-} from '@chainlit/react-client';
+import { useChatInteract, useChatSession } from '@chainlit/react-client';
 
 import { copilotThreadIdState } from '../state';
 import ChatBody from './body';
 
 export default function ChatWrapper() {
   const { connect, session, idToResume } = useChatSession();
-  const { sendMessage } = useChatInteract();
+  const { sendMessage, setIdToResume } = useChatInteract();
   const copilotThreadId = useRecoilValue(copilotThreadIdState);
-  const setThreadIdToResume = useSetRecoilState(threadIdToResumeState);
   const hasConnected = useRef<boolean>(false);
   const lastConnectedThreadId = useRef<string | null>(null);
 
@@ -23,8 +18,8 @@ export default function ChatWrapper() {
       return;
     }
 
-    setThreadIdToResume(copilotThreadId);
-  }, [copilotThreadId, setThreadIdToResume]);
+    setIdToResume(copilotThreadId);
+  }, [copilotThreadId, idToResume]);
 
   useEffect(() => {
     if (
