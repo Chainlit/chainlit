@@ -72,19 +72,8 @@ const Input = forwardRef<InputMethods, Props>(
       if (commandSpan) {
         commandSpan.remove();
       }
-      const html = clone.innerHTML;
 
-      let text = html
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<div>/gi, '\n')
-        .replace(/<\/div>/gi, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&');
-
-      text = text.replace(/<[^>]*>/g, '');
-      return text.replace('\u200B', '');
+      return clone.textContent ?? '';
     };
 
     const reset = () => {
@@ -99,10 +88,6 @@ const Input = forwardRef<InputMethods, Props>(
           contentEditableRef.current.querySelector('.command-span');
         if (commandSpan) {
           contentEditableRef.current.innerHTML = commandSpan.outerHTML;
-          // Zero-width space
-          contentEditableRef.current.appendChild(
-            document.createTextNode('\u200B')
-          );
         }
       }
       setSelectedIndex(0);
@@ -167,7 +152,7 @@ const Input = forwardRef<InputMethods, Props>(
           // Create new command block
           const newCommandBlock = document.createElement('div');
           newCommandBlock.className =
-            'command-span font-bold inline-flex text-[#08f] items-center mr-1';
+            'command-span font-bold inline-flex text-[#08f] items-center pr-1';
           newCommandBlock.contentEditable = 'false';
           newCommandBlock.innerHTML = `<span>${selectedCommand.id}</span>`;
 
@@ -185,20 +170,12 @@ const Input = forwardRef<InputMethods, Props>(
             }
           }
 
-          let textNode;
-
-          // Create a text node after the command span if none exists
-          if (!newCommandBlock.nextSibling) {
-            textNode = document.createTextNode('\u200B');
-            content.appendChild(textNode); // Zero-width space
-          }
-
           // Ensure cursor is placed after the command span
           const selection = window.getSelection();
           const range = document.createRange();
 
           // Set cursor after the command span
-          range.setStartAfter(textNode || newCommandBlock);
+          range.setStartAfter(newCommandBlock);
           range.collapse(true);
 
           // Apply the selection
@@ -284,7 +261,7 @@ const Input = forwardRef<InputMethods, Props>(
       }
 
       // If there's no real content, remove the <br>
-      if (!fullContent.trim() || fullContent.trim() === '\u200B') {
+      if (!fullContent.trim()) {
         e.currentTarget.innerHTML = '';
       }
     };
