@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
+import chainlit as cl
 from chainlit import config
 from chainlit.callbacks import password_auth_callback
 from chainlit.data.base import BaseDataLayer
@@ -463,6 +464,94 @@ async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitCo
 
         # Check that the emit method was called
         context.session.emit.assert_called()
+
+
+async def test_on_socket_connect(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import on_socket_connect
+
+    async with mock_chainlit_context as context:
+        # Setup test data
+        test_message = "New WebSocket connection established"
+        socket_connected = False
+        message_sent = False
+
+        @on_socket_connect
+        async def handle_socket_connect():
+            nonlocal socket_connected, message_sent
+            socket_connected = True
+            print(test_message)
+            # Simulate sending a message on connect, like in connectiontester.py
+            await cl.Message(content="New WebSocket message").send()
+            message_sent = True
+
+        # Test that the callback is properly registered
+        assert test_config.code.on_socket_connect is not None
+
+        # Setup mock for cl.Message().send()
+        mock_message = AsyncMock()
+        with patch("chainlit.Message", return_value=mock_message) as mock_message_class:
+            # Call the registered callback
+            await test_config.code.on_socket_connect()
+
+        # Check that the socket_connected flag was set
+        assert socket_connected
+        # Check that the message was sent
+        assert message_sent
+        # Verify the message was created with correct content
+        mock_message_class.assert_called_once_with(content="New WebSocket message")
+        # Verify send was called on the message
+        mock_message.send.assert_awaited_once()
+        # Check that the emit method was called on the session
+        context.session.emit.assert_called()
+
+
+async def test_on_socket_disconnect(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import on_socket_disconnect
+
+    async with mock_chainlit_context as context:
+        # Setup test data
+        test_message = "WebSocket connection closed"
+        socket_disconnected = False
+        session_id = "test_session_123"
+
+        # Mock the context and session
+        context.session.id = session_id
+
+        @on_socket_disconnect
+        async def handle_socket_disconnect():
+            nonlocal socket_disconnected, test_message
+            socket_disconnected = True
+            print(test_message)
+            # Simulate the context and session checks from connectiontester.py
+            print(f"Context available: {hasattr(cl, 'context')}")
+            if hasattr(cl, "context"):
+                print(
+                    f"Session ID: {getattr(cl.context, 'session', None) and cl.context.session.id}"
+                )
+                print(
+                    f"Session type: {type(getattr(cl.context, 'session', None)).__name__ if hasattr(cl.context, 'session') else 'No session'}"
+                )
+            else:
+                print("No context available in on_socket_disconnect")
+
+        # Test that the callback is properly registered
+        assert test_config.code.on_socket_disconnect is not None
+
+        # Setup mock for cl.context
+        with patch("chainlit.context", context):
+            # Call the registered callback
+            await test_config.code.on_socket_disconnect()
+
+        # Check that the socket_disconnected flag was set
+        assert socket_disconnected
+        # Check that the emit method was called on the session
+        context.session.emit.assert_called()
+        # Verify the session ID is accessible as expected
+        assert context.session.id == session_id
 
 
 async def test_data_layer_config(
