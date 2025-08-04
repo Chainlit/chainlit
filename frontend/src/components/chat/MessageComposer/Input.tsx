@@ -73,16 +73,25 @@ const Input = forwardRef<InputMethods, Props>(
         commandSpan.remove();
       }
 
-      return clone.textContent?.replace('\u200B', '') || '';
+      return clone.textContent ?? '';
     };
 
     const reset = () => {
-      setSelectedCommand(undefined);
+      if (!selectedCommand?.persistent) {
+        setSelectedCommand(undefined);
+        if (contentEditableRef.current) {
+          contentEditableRef.current.innerHTML = '';
+        }
+      } else if (contentEditableRef.current) {
+        // if selectedCommand?.persistent is true , keep .command-span tag and clear content
+        const commandSpan =
+          contentEditableRef.current.querySelector('.command-span');
+        if (commandSpan) {
+          contentEditableRef.current.innerHTML = commandSpan.outerHTML;
+        }
+      }
       setSelectedIndex(0);
       setCommandInput('');
-      if (contentEditableRef.current) {
-        contentEditableRef.current.innerHTML = '';
-      }
       onChange('');
     };
 
@@ -139,11 +148,11 @@ const Input = forwardRef<InputMethods, Props>(
         // Find existing command span
         const existingCommandSpan = content.querySelector('.command-span');
 
-        if (selectedCommand) {
+        if (selectedCommand && !selectedCommand.button) {
           // Create new command block
           const newCommandBlock = document.createElement('div');
           newCommandBlock.className =
-            'command-span font-bold inline-flex text-[#08f] items-center mr-1';
+            'command-span font-bold inline-flex text-[#08f] items-center pr-1';
           newCommandBlock.contentEditable = 'false';
           newCommandBlock.innerHTML = `<span>${selectedCommand.id}</span>`;
 
@@ -161,20 +170,12 @@ const Input = forwardRef<InputMethods, Props>(
             }
           }
 
-          let textNode;
-
-          // Create a text node after the command span if none exists
-          if (!newCommandBlock.nextSibling) {
-            textNode = document.createTextNode('\u200B');
-            content.appendChild(textNode); // Zero-width space
-          }
-
           // Ensure cursor is placed after the command span
           const selection = window.getSelection();
           const range = document.createRange();
 
           // Set cursor after the command span
-          range.setStartAfter(textNode || newCommandBlock);
+          range.setStartAfter(newCommandBlock);
           range.collapse(true);
 
           // Apply the selection
@@ -201,18 +202,43 @@ const Input = forwardRef<InputMethods, Props>(
       }
     }, [selectedCommand, onChange]);
 
-    const filteredCommands = commands.filter((command) =>
-      command.id.toLowerCase().startsWith(commandInput.toLowerCase().slice(1))
-    );
+    const normalizedInput = commandInput.toLowerCase().slice(1);
+
+    const filteredCommands = commands
+      .filter((command) => command.id.toLowerCase().includes(normalizedInput))
+      .sort((a, b) => {
+        const indexA = a.id.toLowerCase().indexOf(normalizedInput);
+        const indexB = b.id.toLowerCase().indexOf(normalizedInput);
+        return indexA - indexB;
+      });
 
     useEffect(() => {
       const textarea = contentEditableRef.current;
       if (!textarea || !onPaste) return;
 
-      textarea.addEventListener('paste', onPaste);
+      const handlePaste = (event: ClipboardEvent) => {
+        event.preventDefault();
+
+        const textData = event.clipboardData?.getData('text/plain');
+        if (textData) {
+          const escapedText = document.createTextNode(textData).textContent;
+          if (escapedText) {
+            document.execCommand('insertText', false, escapedText);
+          }
+          const inputEvent = new Event('input', {
+            bubbles: true,
+            composed: true
+          });
+          textarea.dispatchEvent(inputEvent);
+        }
+        onPaste(event);
+      };
+
+      // Use the capture phase to ensure we catch the event before it can bubble
+      textarea.addEventListener('paste', handlePaste, true);
 
       return () => {
-        textarea.removeEventListener('paste', onPaste);
+        textarea.removeEventListener('paste', handlePaste, true);
       };
     }, [onPaste]);
 
@@ -224,18 +250,18 @@ const Input = forwardRef<InputMethods, Props>(
 
       // For command detection, use the full content including command input
       const fullContent = e.currentTarget.textContent || '';
-      const lastWord = fullContent.split(' ').pop() || '';
+      const words = fullContent.split(' ');
 
-      if (lastWord.startsWith('/')) {
+      if (words.length === 1 && words[0].startsWith('/')) {
         setShowCommands(true);
-        setCommandInput(lastWord);
+        setCommandInput(words[0]);
       } else {
         setShowCommands(false);
         setCommandInput('');
       }
 
       // If there's no real content, remove the <br>
-      if (!fullContent.trim() || fullContent.trim() === '\u200B') {
+      if (!fullContent.trim()) {
         e.currentTarget.innerHTML = '';
       }
     };
@@ -291,10 +317,10 @@ const Input = forwardRef<InputMethods, Props>(
           id={id}
           autoFocus={autoFocus}
           ref={contentEditableRef}
-          contentEditable
+          contentEditable="plaintext-only"
           data-placeholder={placeholder}
           className={cn(
-            'min-h-10 max-h-[250px] overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
+            'min-h-10 max-h-[250px] whitespace-pre-wrap overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
             className
           )}
           onInput={handleInput}

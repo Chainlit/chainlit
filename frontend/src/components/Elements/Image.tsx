@@ -22,7 +22,7 @@ const ImageElement = ({ element }: { element: IImageElement }) => {
 
   return (
     <>
-      <div className="rounded-sm bg-muted overflow-hidden">
+      <div className="rounded-sm bg-accent overflow-hidden">
         <img
           className={cn(
             'mx-auto block max-w-full h-auto',

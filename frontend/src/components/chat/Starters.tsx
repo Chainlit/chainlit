@@ -19,7 +19,7 @@ export default function Starters({ className }: Props) {
         (profile) => profile.name === chatProfile
       );
       if (selectedChatProfile?.starters) {
-        return selectedChatProfile.starters.slice(0, 4);
+        return selectedChatProfile.starters;
       }
     }
     return config?.starters;
@@ -28,7 +28,10 @@ export default function Starters({ className }: Props) {
   if (!starters?.length) return null;
 
   return (
-    <div className={cn('flex gap-2 justify-center flex-wrap', className)}>
+    <div
+      id="starters"
+      className={cn('flex gap-2 justify-center flex-wrap', className)}
+    >
       {starters?.map((starter, i) => (
         <Starter key={i} starter={starter} />
       ))}

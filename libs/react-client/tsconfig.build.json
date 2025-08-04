@@ -1,0 +1,7 @@
+{
+  // This is for tsup build since it's not supporting composite
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false
+  }
+}

@@ -1,10 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Union
 
 from azure.storage.blob import BlobSasPermissions, ContentSettings, generate_blob_sas
 from azure.storage.blob.aio import BlobServiceClient as AsyncBlobServiceClient
 
-from chainlit.data.storage_clients.base import EXPIRY_TIME, BaseStorageClient
+from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time
 from chainlit.logger import logger
 
 
@@ -32,8 +32,8 @@ class AzureBlobStorageClient(BaseStorageClient):
             raise Exception("Not using Azure Storage")
 
         sas_permissions = BlobSasPermissions(read=True)
-        start_time = datetime.now()
-        expiry_time = start_time + timedelta(seconds=EXPIRY_TIME)
+        start_time = datetime.now(tz=timezone.utc)
+        expiry_time = start_time + timedelta(seconds=storage_expiry_time)
 
         sas_token = generate_blob_sas(
             account_name=self.storage_account,
@@ -70,6 +70,8 @@ class AzureBlobStorageClient(BaseStorageClient):
 
             return {
                 "path": object_key,
+                "object_key": object_key,
+                "url": await self.get_read_url(object_key),
                 "size": properties.size,
                 "last_modified": properties.last_modified,
                 "etag": properties.etag,
@@ -85,5 +87,5 @@ class AzureBlobStorageClient(BaseStorageClient):
             await blob_client.delete_blob()
             return True
         except Exception as e:
-            logger.warn(f"AzureBlobStorageClient, delete_file error: {e}")
+            logger.warning(f"AzureBlobStorageClient, delete_file error: {e}")
             return False

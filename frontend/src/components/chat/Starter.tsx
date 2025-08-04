@@ -1,4 +1,5 @@
 import { useCallback, useContext } from 'react';
+import { useRecoilValue } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -12,35 +13,42 @@ import {
 
 import { Button } from '@/components/ui/button';
 
+import { persistentCommandState } from '@/state/chat';
+
 interface StarterProps {
   starter: IStarter;
 }
 
 export default function Starter({ starter }: StarterProps) {
   const apiClient = useContext(ChainlitContext);
+  const selectedCommand = useRecoilValue(persistentCommandState);
   const { sendMessage } = useChatInteract();
-  const { loading } = useChatData();
+  const { loading, connected } = useChatData();
   const { user } = useAuth();
+
+  const disabled = loading || !connected;
 
   const onSubmit = useCallback(async () => {
     const message: IStep = {
       threadId: '',
       id: uuidv4(),
+      command: starter.command ?? selectedCommand?.id,
       name: user?.identifier || 'User',
       type: 'user_message',
       output: starter.message,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      metadata: { location: window.location.href }
     };
 
     sendMessage(message, []);
-  }, [user, sendMessage, starter]);
+  }, [user, selectedCommand, sendMessage, starter]);
 
   return (
     <Button
       id={`starter-${starter.label.trim().toLowerCase().replaceAll(' ', '-')}`}
       variant="outline"
       className="w-fit justify-start rounded-3xl"
-      disabled={loading}
+      disabled={disabled}
       onClick={onSubmit}
     >
       <div className="flex gap-2">

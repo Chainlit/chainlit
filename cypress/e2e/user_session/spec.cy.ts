@@ -1,4 +1,4 @@
-import { runTestServer, submitMessage } from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
 function newSession() {
   cy.get('#header')
@@ -12,10 +12,6 @@ function newSession() {
 }
 
 describe('User Session', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to store data related per user session', () => {
     submitMessage('Hello 1');
 

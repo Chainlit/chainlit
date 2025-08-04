@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { useContext, useEffect, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
@@ -16,6 +17,7 @@ import {
   CommandItem,
   CommandList
 } from '@/components/ui/command';
+import { DialogTitle } from '@/components/ui/dialog';
 import {
   Tooltip,
   TooltipContent,
@@ -27,6 +29,7 @@ import { Translator } from 'components/i18n';
 import { Kbd } from '../Kbd';
 
 export default function SearchChats() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,6 +93,7 @@ export default function SearchChats() {
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
+              id="search-chats-button"
               onClick={() => setOpen(!open)}
               size="icon"
               variant="ghost"
@@ -107,8 +111,11 @@ export default function SearchChats() {
         </Tooltip>
       </TooltipProvider>
       <CommandDialog open={open} onOpenChange={setOpen}>
+        <DialogTitle className="sr-only">
+          {t('threadHistory.sidebar.filters.search')}
+        </DialogTitle>
         <CommandInput
-          placeholder="Search conversations..."
+          placeholder={t('threadHistory.sidebar.filters.placeholder')}
           value={searchQuery}
           onValueChange={setSearchQuery}
         />
@@ -118,7 +125,9 @@ export default function SearchChats() {
               <Loader />
             </CommandEmpty>
           ) : Object.keys(groupedThreads).length === 0 ? (
-            <CommandEmpty>No conversations found.</CommandEmpty>
+            <CommandEmpty>
+              <Translator path="threadHistory.sidebar.empty" />
+            </CommandEmpty>
           ) : (
             Object.entries(groupedThreads).map(([monthYear, monthThreads]) => (
               <CommandGroup
@@ -135,7 +144,9 @@ export default function SearchChats() {
                       navigate(`/thread/${thread.id}`);
                     }}
                   >
-                    {thread.name || 'Untitled Conversation'}
+                    <div className="line-clamp-2">
+                      {thread.name || 'Untitled Conversation'}
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>

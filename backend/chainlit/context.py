@@ -56,8 +56,9 @@ class ChainlitContext:
 
 
 context_var: ContextVar[ChainlitContext] = ContextVar("chainlit")
-local_steps: ContextVar[Optional[List["Step"]]] = ContextVar("local_steps")
-local_steps.set(None)
+local_steps: ContextVar[Optional[List["Step"]]] = ContextVar(
+    "local_steps", default=None
+)
 
 
 def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitContext:

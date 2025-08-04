@@ -1,9 +1,9 @@
 {
   "name": "@chainlit/react-client",
   "description": "Websocket client to connect to your chainlit app.",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "scripts": {
-    "build": "tsup src/index.ts --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
+    "build": "tsup src/index.ts --tsconfig tsconfig.build.json --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
     "dev": "tsup src/index.ts --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
     "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 && tsc --noemit",
     "format": "prettier '**/*.{ts,tsx}' --write",
@@ -55,6 +55,7 @@
     "jwt-decode": "^3.1.2",
     "lodash": "^4.17.21",
     "socket.io-client": "^4.7.2",
+    "sonner": "^1.7.1",
     "swr": "^2.2.2",
     "uuid": "^9.0.0"
   },
@@ -70,8 +71,7 @@
       "vite@>=4.0.0 <4.5.4": ">=4.5.4",
       "vite@>=4.0.0 <=4.5.3": ">=4.5.4",
       "rollup@>=3.0.0 <3.29.5": ">=3.29.5",
-      "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5",
-      "nanoid@<3.3.8": ">=3.3.8"
+      "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5"
     }
   }
 }

@@ -1,5 +1,5 @@
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext } from 'react';
+import React, { memo, useContext } from 'react';
 
 import {
   type IAction,
@@ -22,10 +22,13 @@ interface Props {
 
 const CL_RUN_NAMES = ['on_chat_start', 'on_message', 'on_audio_end'];
 
-const hasToolStep = (step: IStep): boolean => {
+const hasActiveToolStep = (step: IStep): boolean => {
   return (
     step.steps?.some(
-      (s) => s.type === 'tool' || s.type.includes('message') || hasToolStep(s)
+      (s) =>
+        (s.type === 'tool' && s.start && !s.end && !s.isError) ||
+        s.type.includes('message') ||
+        hasActiveToolStep(s)
     ) || false
   );
 };
@@ -51,7 +54,7 @@ const Messages = memo(
             const isHiddenCoT = messageContext.cot === 'hidden';
 
             const showToolCoTLoader = isToolCallCoT
-              ? isRunning && !hasToolStep(m)
+              ? isRunning && !hasActiveToolStep(m)
               : false;
 
             const showHiddenCoTLoader = isHiddenCoT
@@ -61,10 +64,9 @@ const Messages = memo(
             const scorableRun =
               !isRunning && m.name !== 'on_chat_start' ? m : undefined;
             return (
-              <>
+              <React.Fragment key={m.id}>
                 {m.steps?.length ? (
                   <Messages
-                    key={m.id}
                     messages={m.steps}
                     elements={elements}
                     actions={actions}
@@ -73,10 +75,11 @@ const Messages = memo(
                     scorableRun={scorableRun}
                   />
                 ) : null}
-                {showToolCoTLoader || showHiddenCoTLoader ? (
+                {(showToolCoTLoader || showHiddenCoTLoader) &&
+                m.name !== 'on_chat_start' ? (
                   <BlinkingCursor />
                 ) : null}
-              </>
+              </React.Fragment>
             );
           } else {
             // Score the current run

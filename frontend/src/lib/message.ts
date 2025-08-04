@@ -1,5 +1,10 @@
 import type { IMessageElement } from 'client-types/';
 
+const toSafeLinkTarget = (name: string) =>
+  encodeURIComponent(name.replace(/\s+/g, '_'))
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29'); // Encode parentheses to avoid issues in URLs
+
 const isForIdMatch = (id: string | number | undefined, forId: string) => {
   if (!forId || !id) {
     return false;
@@ -61,8 +66,9 @@ export const prepareContent = ({
       } else {
         // Element is a reference, add it to the list and return link
         refElements.push(element);
-        // spaces break markdown links. The address in the link is not used anyway
-        return `[${match}](${match.replaceAll(' ', '_')})`;
+        // Build a Markdown-safe link: escape text, and encode () in the slug
+        // The address in the link is not used anyway
+        return `[${match}](${toSafeLinkTarget(match)})`;
       }
     });
   }

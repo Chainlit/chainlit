@@ -1,11 +1,10 @@
-import { useCallback, useRef, useState } from 'react';
+import { MutableRefObject, useCallback, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   FileSpec,
-  ICommand,
   IStep,
   useAuth,
   useChatData,
@@ -16,11 +15,17 @@ import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
 
 import { chatSettingsOpenState } from '@/state/project';
-import { IAttachment, attachmentsState } from 'state/chat';
+import {
+  IAttachment,
+  attachmentsState,
+  persistentCommandState
+} from 'state/chat';
 
 import { Attachments } from './Attachments';
-import CommandButton from './CommandButton';
+import CommandButtons from './CommandButtons';
+import CommandButton from './CommandPopoverButton';
 import Input, { InputMethods } from './Input';
+import McpButton from './Mcp';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
@@ -29,18 +34,20 @@ interface Props {
   fileSpec: FileSpec;
   onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
-  setAutoScroll: (autoScroll: boolean) => void;
+  autoScrollRef: MutableRefObject<boolean>;
 }
 
 export default function MessageComposer({
   fileSpec,
   onFileUpload,
   onFileUploadError,
-  setAutoScroll
+  autoScrollRef
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
   const [value, setValue] = useState('');
-  const [selectedCommand, setSelectedCommand] = useState<ICommand>();
+  const [selectedCommand, setSelectedCommand] = useRecoilState(
+    persistentCommandState
+  );
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
@@ -54,15 +61,6 @@ export default function MessageComposer({
   const onPaste = useCallback((event: ClipboardEvent) => {
     if (event.clipboardData && event.clipboardData.items) {
       const items = Array.from(event.clipboardData.items);
-
-      // Attempt to handle text data first
-      const textData = event.clipboardData.getData('text/plain');
-      if (textData) {
-        // Skip file handling if text data is present
-        return;
-      }
-
-      event.preventDefault();
 
       // If no text data, check for files (e.g., images)
       items.forEach((item) => {
@@ -89,14 +87,17 @@ export default function MessageComposer({
         name: user?.identifier || 'User',
         type: 'user_message',
         output: msg,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        metadata: { location: window.location.href }
       };
 
       const fileReferences = attachments
         ?.filter((a) => !!a.serverId)
         .map((a) => ({ id: a.serverId! }));
 
-      setAutoScroll(true);
+      if (autoScrollRef) {
+        autoScrollRef.current = true;
+      }
       sendMessage(message, fileReferences);
     },
     [user, sendMessage]
@@ -110,17 +111,23 @@ export default function MessageComposer({
         name: user?.identifier || 'User',
         type: 'user_message',
         output: msg,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        metadata: { location: window.location.href }
       };
 
       replyMessage(message);
-      setAutoScroll(true);
+      if (autoScrollRef) {
+        autoScrollRef.current = true;
+      }
     },
     [user, replyMessage]
   );
 
   const submit = useCallback(() => {
-    if (disabled || (value === '' && attachments.length === 0)) {
+    if (
+      disabled ||
+      (value === '' && attachments.length === 0 && !selectedCommand)
+    ) {
       return;
     }
     if (askUser) {
@@ -142,7 +149,10 @@ export default function MessageComposer({
   ]);
 
   return (
-    <div className="bg-accent dark:bg-card rounded-3xl p-3 px-4 w-full min-h-24 flex flex-col">
+    <div
+      id="message-composer"
+      className="bg-accent dark:bg-card rounded-3xl p-3 px-4 w-full min-h-24 flex flex-col"
+    >
       {attachments.length > 0 ? (
         <div className="mb-1">
           <Attachments />
@@ -183,10 +193,19 @@ export default function MessageComposer({
               <Settings className="!size-6" />
             </Button>
           )}
+          <McpButton disabled={disabled} />
           <VoiceButton disabled={disabled} />
+          <CommandButtons
+            disabled={disabled}
+            selectedCommandId={selectedCommand?.id}
+            onCommandSelect={setSelectedCommand}
+          />
         </div>
         <div className="flex items-center gap-1">
-          <SubmitButton onSubmit={submit} disabled={disabled || !value} />
+          <SubmitButton
+            onSubmit={submit}
+            disabled={disabled || (!value.trim() && !selectedCommand)}
+          />
         </div>
       </div>
     </div>

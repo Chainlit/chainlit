@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import hljs from 'highlight.js';
 import { useEffect, useRef } from 'react';
 
@@ -64,13 +65,15 @@ export default function CodeSnippet({ ...props }: CodeProps) {
   ) : null;
 
   const nonHighlightedCode = showSyntaxHighlighter ? null : (
-    <div className="p-2 rounded-b-md min-h-20 overflow-x-auto bg-accent">
+    <div
+      className={cn('rounded-b-md overflow-x-auto bg-accent', code && 'p-2')}
+    >
       <code className="whitespace-pre-wrap">{code}</code>
     </div>
   );
 
   return (
-    <Card className="relative">
+    <Card className="relative my-2">
       <CardHeader className="flex flex-row items-center justify-between py-1 px-4">
         <span className="text-sm text-muted-foreground">
           {match?.[1] || 'Raw code'}

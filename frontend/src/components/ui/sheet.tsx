@@ -1,5 +1,3 @@
-'use client';
-
 import { cn } from '@/lib/utils';
 import * as SheetPrimitive from '@radix-ui/react-dialog';
 import { type VariantProps, cva } from 'class-variance-authority';
@@ -56,11 +54,7 @@ const SheetContent = React.forwardRef<
   React.ElementRef<typeof SheetPrimitive.Content>,
   SheetContentProps
 >(({ side = 'right', className, children, ...props }, ref) => (
-  <SheetPortal
-    container={
-      window.cl_shadowRootElement ? window.cl_shadowRootElement : undefined
-    }
-  >
+  <SheetPortal container={window.cl_shadowRootElement}>
     <SheetOverlay />
     <SheetPrimitive.Content
       ref={ref}

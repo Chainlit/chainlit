@@ -111,13 +111,14 @@
     "settings": {
       "title": "Settings panel"
     },
-    "watermark": "Built with"
+    "watermark": "LLMs can make mistakes. Check important info."
   },
   "threadHistory": {
     "sidebar": {
       "title": "Past Chats",
       "filters": {
-        "search": "Search"
+        "search": "Search",
+        "placeholder": "Search conversations..."
       },
       "timeframes": {
         "today": "Today",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "Chat",
-      "readme": "Readme"
+      "readme": "Readme",
+      "theme": {
+        "light": "Light Theme",
+        "dark": "Dark Theme",
+        "system": "Follow System"
+      }
     },
     "newChat": {
       "button": "New Chat",
@@ -187,5 +193,22 @@
     "success": {
       "saved": "Saved successfully"
     }
+  },
+  "alerts": {
+    "info": "Info",
+    "note": "Note",
+    "tip": "Tip",
+    "important": "Important",
+    "warning": "Warning",
+    "caution": "Caution",
+    "debug": "Debug",
+    "example": "Example",
+    "success": "Success",
+    "help": "Help",
+    "idea": "Idea",
+    "pending": "Pending",
+    "security": "Security",
+    "beta": "Beta",
+    "best-practice": "Best Practice"
   }
 }

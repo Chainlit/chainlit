@@ -146,6 +146,7 @@ const ReadOnlyThread = ({ id }: Props) => {
     return {
       allowHtml: config?.features?.unsafe_allow_html,
       latex: config?.features?.latex,
+      editable: false,
       loading: false,
       showFeedbackButtons: !!config?.dataPersistence,
       uiName: config?.ui?.name || '',

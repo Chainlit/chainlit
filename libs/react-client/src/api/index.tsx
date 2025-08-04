@@ -46,17 +46,28 @@ export class APIBase {
   constructor(
     public httpEndpoint: string,
     public type: 'webapp' | 'copilot' | 'teams' | 'slack' | 'discord',
+    public additionalQueryParams?: Record<string, string>,
     public on401?: () => void,
     public onError?: (error: ClientError) => void
   ) {}
 
   buildEndpoint(path: string) {
+    let fullUrl = `${this.httpEndpoint}${path}`;
     if (this.httpEndpoint.endsWith('/')) {
       // remove trailing slash on httpEndpoint
-      return `${this.httpEndpoint.slice(0, -1)}${path}`;
-    } else {
-      return `${this.httpEndpoint}${path}`;
+      fullUrl = `${this.httpEndpoint.slice(0, -1)}${path}`;
     }
+
+    const url = new URL(fullUrl);
+
+    // Add additionalQueryParams for all API calls
+    if (this.additionalQueryParams) {
+      const params = new URLSearchParams(this.additionalQueryParams);
+      const separator = url.search ? '&' : '?';
+      url.search = url.search + `${separator}${params.toString()}`;
+    }
+
+    return url.toString();
   }
 
   private async getDetailFromErrorResponse(
@@ -173,6 +184,13 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async stickyCookie(sessionId: string) {
+    const res = await this.fetch('POST', '/set-session-cookie', {
+      session_id: sessionId
+    });
+    return res.json();
+  }
+
   async passwordAuth(data: FormData) {
     const res = await this.post(`/login`, data);
     return res.json();
@@ -254,6 +272,12 @@ export class ChainlitAPI extends APIBase {
         if (xhr.status === 200) {
           const response = JSON.parse(xhr.responseText);
           resolve(response);
+          return;
+        }
+        const contentType = xhr.getResponseHeader('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+          const response = JSON.parse(xhr.responseText);
+          reject(response.detail);
         } else {
           reject('Upload failed');
         }
@@ -287,12 +311,60 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async connectStdioMCP(sessionId: string, name: string, fullCommand: string) {
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      fullCommand,
+      clientType: 'stdio'
+    });
+    return res.json();
+  }
+
+  async connectSseMCP(
+    sessionId: string,
+    name: string,
+    url: string,
+    headers?: Record<string, string>
+  ) {
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      url,
+      ...(headers ? { headers } : {}),
+      clientType: 'sse'
+    });
+    return res.json();
+  }
+
+  async connectStreamableHttpMCP(
+    sessionId: string,
+    name: string,
+    url: string,
+    headers?: Record<string, string>
+  ) {
+    const res = await this.post(`/mcp`, {
+      sessionId,
+      name,
+      url,
+      ...(headers ? { headers } : {}),
+      clientType: 'streamable-http'
+    });
+    return res.json();
+  }
+
+  async disconnectMcp(sessionId: string, name: string) {
+    const res = await this.delete(`/mcp`, { sessionId, name });
+    return res.json();
+  }
+
   getElementUrl(id: string, sessionId: string) {
     const queryParams = `?session_id=${sessionId}`;
     return this.buildEndpoint(`/project/file/${id}${queryParams}`);
   }
 
-  getLogoEndpoint(theme: string) {
+  getLogoEndpoint(theme: string, configuredLogoUrl?: string) {
+    if (configuredLogoUrl) return configuredLogoUrl;
     return this.buildEndpoint(`/logo?theme=${theme}`);
   }
 

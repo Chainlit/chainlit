@@ -26,11 +26,34 @@ const QuiltedGrid = <T extends IImageElement | IVideoElement>({
   renderElement: Renderer,
   className
 }: QuiltedGridProps<T>) => {
+  // If there's only one element, use a simpler layout
+  if (elements.length === 1) {
+    const element = elements[0];
+    const size = sizeToUnit(element);
+
+    return (
+      <div
+        className={cn(
+          'w-full',
+          // Adjust max-width based on size
+          size === 1
+            ? 'max-w-[150px]'
+            : size === 2
+            ? 'max-w-[300px]'
+            : 'max-w-[600px]',
+          className
+        )}
+      >
+        <Renderer element={element} />
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
         'grid grid-cols-4 gap-2 w-full max-w-[600px]',
-        'transform-gpu', // equivalent to transform: translateZ(0)
+        'transform-gpu',
         className
       )}
     >

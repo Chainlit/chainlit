@@ -111,13 +111,14 @@
     "settings": {
       "title": "设置面板"
     },
-    "watermark": "技术支持"
+    "watermark": "大语言模型可能会犯错。请核实重要信息。"
   },
   "threadHistory": {
     "sidebar": {
       "title": "历史对话",
       "filters": {
-        "search": "搜索"
+        "search": "搜索",
+        "placeholder": "搜索会话..."
       },
       "timeframes": {
         "today": "今天",
@@ -162,7 +163,12 @@
   "navigation": {
     "header": {
       "chat": "聊天",
-      "readme": "说明"
+      "readme": "说明",
+      "theme": {
+        "light": "浅色主题",
+        "dark": "深色主题",
+        "system": "跟随系统"
+      }
     },
     "newChat": {
       "button": "新建对话",
@@ -187,5 +193,22 @@
     "success": {
       "saved": "保存成功"
     }
+  },
+  "alerts": {
+    "info": "信息",
+    "note": "注释",
+    "tip": "提示",
+    "important": "重要",
+    "warning": "警告",
+    "caution": "注意",
+    "debug": "调试",
+    "example": "示例",
+    "success": "成功",
+    "help": "帮助",
+    "idea": "想法",
+    "pending": "待处理",
+    "security": "安全",
+    "beta": "测试",
+    "best-practice": "最佳实践"
   }
 }

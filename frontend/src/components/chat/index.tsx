@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
@@ -35,8 +35,8 @@ const Chat = () => {
   const setAttachments = useSetRecoilState(attachmentsState);
   const setThreads = useSetRecoilState(threadHistoryState);
 
-  const [autoScroll, setAutoScroll] = useState(true);
-  const { error, disabled } = useChatData();
+  const autoScrollRef = useRef(true);
+  const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
   const navigate = useNavigate();
@@ -67,6 +67,15 @@ const Chat = () => {
 
   const { t } = useTranslation();
   const layoutMaxWidth = useLayoutMaxWidth();
+
+  useEffect(() => {
+    if (callFn) {
+      const event = new CustomEvent('chainlit-call-fn', {
+        detail: callFn
+      });
+      window.dispatchEvent(event);
+    }
+  }, [callFn]);
 
   useEffect(() => {
     uploadFileRef.current = uploadFile;
@@ -112,7 +121,9 @@ const Chat = () => {
           .catch((error) => {
             toast.error(
               `${t('chat.fileUpload.errors.failed')} ${file.name}: ${
-                error.message
+                typeof error === 'object' && error !== null
+                  ? error.message ?? error
+                  : error
               }`
             );
             setAttachments((prev) =>
@@ -200,7 +211,10 @@ const Chat = () => {
         </div>
       ) : null}
       <ErrorBoundary>
-        <ScrollContainer autoScroll={autoScroll} setAutoScroll={setAutoScroll}>
+        <ScrollContainer
+          autoScrollUserMessage={config?.features?.user_message_autoscroll}
+          autoScrollRef={autoScrollRef}
+        >
           <div
             className="flex flex-col mx-auto w-full flex-grow p-4"
             style={{
@@ -212,7 +226,7 @@ const Chat = () => {
               fileSpec={fileSpec}
               onFileUpload={onFileUpload}
               onFileUploadError={onFileUploadError}
-              setAutoScroll={setAutoScroll}
+              autoScrollRef={autoScrollRef}
             />
             <MessagesContainer navigate={navigate} />
           </div>
@@ -227,8 +241,7 @@ const Chat = () => {
             fileSpec={fileSpec}
             onFileUpload={onFileUpload}
             onFileUploadError={onFileUploadError}
-            setAutoScroll={setAutoScroll}
-            autoScroll={autoScroll}
+            autoScrollRef={autoScrollRef}
           />
         </div>
       </ErrorBoundary>

@@ -1,20 +1,20 @@
-import json
 import time
-from typing import Any, Dict, List, Optional, Sequence, Tuple, TypedDict, Union
+from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 from uuid import UUID
 
 import pydantic
 from langchain.callbacks.tracers.schemas import Run
+from langchain.load.dump import dumps
 from langchain.schema import BaseMessage
 from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
 from langchain_core.tracers.base import AsyncBaseTracer
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
-from literalai.helper import utc_now
 from literalai.observability.step import TrueStepType
 
 from chainlit.context import context_var
 from chainlit.message import Message
 from chainlit.step import Step
+from chainlit.utils import utc_now
 
 DEFAULT_ANSWER_PREFIX_TOKENS = ["Final", "Answer", ":"]
 
@@ -170,7 +170,31 @@ class GenerationHelper:
         if function_call:
             msg["function_call"] = function_call
         else:
-            msg["content"] = kwargs.get("content", "")
+            content = kwargs.get("content")
+            if isinstance(content, list):
+                tool_calls = []
+                content_parts = []
+                for item in content:
+                    if item.get("type") == "tool_use":
+                        tool_calls.append(
+                            {
+                                "id": item.get("id"),
+                                "type": "function",
+                                "function": {
+                                    "name": item.get("name"),
+                                    "arguments": item.get("input"),
+                                },
+                            }
+                        )
+                    elif item.get("type") == "text":
+                        content_parts.append({"type": "text", "text": item.get("text")})
+
+                if tool_calls:
+                    msg["tool_calls"] = tool_calls
+                if content_parts:
+                    msg["content"] = content_parts  # type: ignore
+            else:
+                msg["content"] = content  # type: ignore
 
         return msg
 
@@ -182,6 +206,7 @@ class GenerationHelper:
             return self._convert_message_dict(
                 message,
             )
+
         function_call = message.additional_kwargs.get("function_call")
 
         msg = GenerationMessage(
@@ -199,7 +224,32 @@ class GenerationHelper:
         if function_call:
             msg["function_call"] = function_call
         else:
-            msg["content"] = message.content  # type: ignore
+            if isinstance(message.content, list):
+                tool_calls = []
+                content_parts = []
+                for item in message.content:
+                    if isinstance(item, str):
+                        continue
+                    if item.get("type") == "tool_use":
+                        tool_calls.append(
+                            {
+                                "id": item.get("id"),
+                                "type": "function",
+                                "function": {
+                                    "name": item.get("name"),
+                                    "arguments": item.get("input"),
+                                },
+                            }
+                        )
+                    elif item.get("type") == "text":
+                        content_parts.append({"type": "text", "text": item.get("text")})
+
+                if tool_calls:
+                    msg["tool_calls"] = tool_calls
+                if content_parts:
+                    msg["content"] = content_parts  # type: ignore
+            else:
+                msg["content"] = message.content  # type: ignore
 
         return msg
 
@@ -230,23 +280,28 @@ class GenerationHelper:
 
         model_keys = ["azure_deployment", "deployment_name", "model", "model_name"]
         model = next((settings[k] for k in model_keys if k in settings), None)
+        if isinstance(model, str):
+            model = model.replace("models/", "")
         tools = None
         if "functions" in settings:
             tools = [{"type": "function", "function": f} for f in settings["functions"]]
         if "tools" in settings:
-            tools = settings["tools"]
+            tools = [
+                {"type": "function", "function": t}
+                if t.get("type") != "function"
+                else t
+                for t in settings["tools"]
+            ]
         return provider, model, tools, settings
 
 
-def process_content(content: Any) -> Tuple[Dict, Optional[str]]:
+def process_content(content: Any) -> Tuple[Dict | str, Optional[str]]:
     if content is None:
         return {}, None
-    if isinstance(content, dict):
-        return content, "json"
-    elif isinstance(content, str):
+    if isinstance(content, str):
         return {"content": content}, "text"
     else:
-        return {"content": str(content)}, "text"
+        return dumps(content), "json"
 
 
 DEFAULT_TO_IGNORE = [
@@ -391,14 +446,28 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
         if start["tt_first_token"] is None:
             start["tt_first_token"] = (time.time() - start["start"]) * 1000
 
+        # Process token to ensure it's a string, as strip() will be called on it.
+        processed_token: str
+        # Handle case where token is a list (can occur with some model outputs).
+        # Join all elements into a single string to maintain compatibility with downstream processing.
+        if isinstance(token, list):
+            # If token is a list, join its elements (converted to strings) into a single string.
+            processed_token = "".join(map(str, token))
+        elif not isinstance(token, str):
+            # If token is neither a list nor a string, convert it to a string.
+            processed_token = str(token)
+        else:
+            # If token is already a string, use it as is.
+            processed_token = token
+
         if self.stream_final_answer:
-            self._append_to_last_tokens(token)
+            self._append_to_last_tokens(processed_token)
 
             if self.answer_reached:
                 if not self.final_stream:
                     self.final_stream = Message(content="")
                     await self.final_stream.send()
-                await self.final_stream.stream_token(token)
+                await self.final_stream.stream_token(processed_token)
                 self.has_streamed_final_answer = True
             else:
                 self.answer_reached = self._check_if_answer_reached()
@@ -490,12 +559,11 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
             parent_id=parent_id,
         )
         step.start = utc_now()
-        step.input, language = process_content(run.inputs)
-        if language is not None:
-            if step.metadata is None:
-                step.metadata = {}
-            step.metadata["language"] = language
+        if step_type != "llm":
+            step.input, language = process_content(run.inputs)
+            step.show_input = language or False
 
+        step.tags = run.tags
         self.steps[str(run.id)] = step
 
         await step.send()
@@ -518,9 +586,7 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
             generations = (run.outputs or {}).get("generations", [])
             generation = generations[0][0]
             variables = self.generation_inputs.get(str(run.parent_run_id), {})
-            variables = {
-                k: process_content(v) for k, v in variables.items() if v is not None
-            }
+            variables = {k: str(v) for k, v in variables.items() if v is not None}
             if message := generation.get("message"):
                 chat_start = self.chat_generations[str(run.id)]
                 duration = time.time() - chat_start["start"]
@@ -552,16 +618,13 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
                         ]
                         if custom_variables := m.additional_kwargs.get("variables"):
                             current_step.generation.variables = {
-                                k: process_content(v)
+                                k: str(v)
                                 for k, v in custom_variables.items()
                                 if v is not None
                             }
                     break
 
                 current_step.language = "json"
-                current_step.output = json.dumps(
-                    message_completion, indent=4, ensure_ascii=False
-                )
             else:
                 completion_start = self.completion_generations[str(run.id)]
                 completion = generation.get("text", "")
@@ -592,21 +655,11 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
 
             return
 
-        outputs = run.outputs or {}
-        output_keys = list(outputs.keys())
-        output = outputs
-
-        if output_keys:
-            output = outputs.get(output_keys[0], outputs)
-
         if current_step:
-            current_step.output = (
-                output[0]
-                if isinstance(output, Sequence)
-                and not isinstance(output, str)
-                and len(output)
-                else output
-            )
+            if current_step.type != "llm":
+                current_step.output, current_step.language = process_content(
+                    run.outputs
+                )
             current_step.end = utc_now()
             await current_step.update()
 

@@ -292,6 +292,7 @@ class LiteralDataLayer(BaseDataLayer):
             "display": element.display,
             "type": element.type,
             "page": getattr(element, "page", None),
+            "props": getattr(element, "props", None),
         }
 
         if not element.for_id:

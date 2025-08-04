@@ -1,4 +1,4 @@
-import chainlit as cl  # noqa: F401
+import chainlit as cl
 
 
 @cl.on_message

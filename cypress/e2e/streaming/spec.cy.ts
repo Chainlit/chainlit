@@ -1,5 +1,3 @@
-import { runTestServer } from '../../support/testUtils';
-
 const tokenList = ['the', 'quick', 'brown', 'fox'];
 
 function messageStream(index: number) {
@@ -13,16 +11,12 @@ function toolStream(tool: string) {
   const toolCall = cy.get(`#step-${tool}`);
   toolCall.click();
   for (const token of tokenList) {
-    toolCall.parent().should('contain', token);
+    toolCall.parent().parent().should('contain', token);
   }
-  toolCall.parent().should('contain', tokenList.join(' '));
+  toolCall.parent().parent().should('contain', tokenList.join(' '));
 }
 
 describe('Streaming', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to stream a message', () => {
     cy.get('.step').should('have.length', 1);
 

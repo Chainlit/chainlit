@@ -9,6 +9,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Translator } from 'components/i18n';
 
 interface Props {
   className?: string;
@@ -36,13 +37,13 @@ export function ThemeToggle({ className }: Props) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => setTheme('light')}>
-          Light
+          <Translator path="navigation.header.theme.light" />
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('dark')}>
-          Dark
+          <Translator path="navigation.header.theme.dark" />
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => setTheme('system')}>
-          System
+          <Translator path="navigation.header.theme.system" />
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

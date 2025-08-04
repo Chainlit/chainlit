@@ -37,8 +37,8 @@ const Page = ({ children }: Props) => {
       >
         <ResizablePanel
           className="flex flex-col h-full w-full"
-          minSize={60}
-          defaultSize={50}
+          minSize={40}
+          defaultSize={60}
         >
           <div className="flex flex-row flex-grow overflow-auto">
             {children}
@@ -52,7 +52,9 @@ const Page = ({ children }: Props) => {
   const historyEnabled = config?.dataPersistence && data?.requireLogin;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider
+      defaultOpen={config?.ui.default_sidebar_state !== 'closed'}
+    >
       {historyEnabled ? (
         <>
           <LeftSidebar />

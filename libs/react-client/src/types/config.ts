@@ -2,6 +2,7 @@ export interface IStarter {
   label: string;
   message: string;
   icon?: string;
+  command?: string;
 }
 
 export interface ChatProfile {
@@ -23,6 +24,7 @@ export interface IAuthConfig {
   headerAuth: boolean;
   oauthProviders: string[];
   default_theme?: 'light' | 'dark';
+  ui?: IChainlitConfig['ui'];
 }
 
 export interface IChainlitConfig {
@@ -33,12 +35,25 @@ export interface IChainlitConfig {
     font_family?: string;
     default_theme?: 'light' | 'dark';
     layout?: 'default' | 'wide';
+    default_sidebar_state?: 'open' | 'closed';
     cot: 'hidden' | 'tool_call' | 'full';
     github?: string;
     custom_css?: string;
     custom_js?: string;
     custom_font?: string;
+    alert_style?: 'classic' | 'modern';
+    login_page_image?: string;
+    login_page_image_filter?: string;
+    login_page_image_dark_filter?: string;
     custom_meta_image_url?: string;
+    logo_file_url?: string;
+    default_avatar_file_url?: string;
+    header_links?: {
+      name: string;
+      display_name: string;
+      icon_url: string;
+      url: string;
+    }[];
   };
   features: {
     spontaneous_file_upload?: {
@@ -49,8 +64,21 @@ export interface IChainlitConfig {
     };
     audio: IAudioConfig;
     unsafe_allow_html?: boolean;
+    user_message_autoscroll?: boolean;
     latex?: boolean;
     edit_message?: boolean;
+    mcp?: {
+      enabled?: boolean;
+      sse?: {
+        enabled?: boolean;
+      };
+      streamable_http?: {
+        enabled?: boolean;
+      };
+      stdio?: {
+        enabled?: boolean;
+      };
+    };
   };
   debugUrl?: string;
   userEnv: string[];

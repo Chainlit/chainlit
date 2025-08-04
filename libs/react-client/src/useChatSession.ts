@@ -7,6 +7,7 @@ import {
   useSetRecoilState
 } from 'recoil';
 import io from 'socket.io-client';
+import { toast } from 'sonner';
 import {
   actionState,
   askUserState,
@@ -21,6 +22,7 @@ import {
   firstUserInteraction,
   isAiSpeakingState,
   loadingState,
+  mcpState,
   messagesState,
   resumeThreadErrorState,
   sessionIdState,
@@ -61,8 +63,10 @@ const useChatSession = () => {
   const setIsAiSpeaking = useSetRecoilState(isAiSpeakingState);
   const setAudioConnection = useSetRecoilState(audioConnectionState);
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
+  const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
   const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
+  const setMcps = useSetRecoilState(mcpState);
   const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
   const wavRecorder = useRecoilValue(wavRecorderState);
   const setMessages = useSetRecoilState(messagesState);
@@ -90,7 +94,7 @@ const useChatSession = () => {
   }, [currentThreadId]);
 
   const _connect = useCallback(
-    ({
+    async ({
       transports,
       userEnv
     }: {
@@ -103,6 +107,12 @@ const useChatSession = () => {
         pathname && pathname !== '/'
           ? `${pathname}/ws/socket.io`
           : '/ws/socket.io';
+
+      try {
+        await client.stickyCookie(sessionId);
+      } catch (err) {
+        console.error(`Failed to set sticky session cookie: ${err}`);
+      }
 
       const socket = io(uri, {
         path,
@@ -127,6 +137,55 @@ const useChatSession = () => {
       socket.on('connect', () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
+        setMcps((prev) =>
+          prev.map((mcp) => {
+            let promise;
+            if (mcp.clientType === 'sse') {
+              promise = client.connectSseMCP(sessionId, mcp.name, mcp.url!);
+            } else if (mcp.clientType === 'streamable-http') {
+              promise = client.connectStreamableHttpMCP(
+                sessionId,
+                mcp.name,
+                mcp.url!
+              );
+            } else {
+              promise = client.connectStdioMCP(
+                sessionId,
+                mcp.name,
+                mcp.command!
+              );
+            }
+            promise
+              .then(async ({ success, mcp }) => {
+                setMcps((prev) =>
+                  prev.map((existingMcp) => {
+                    if (existingMcp.name === mcp.name) {
+                      return {
+                        ...existingMcp,
+                        status: success ? 'connected' : 'failed',
+                        tools: mcp ? mcp.tools : existingMcp.tools
+                      };
+                    }
+                    return existingMcp;
+                  })
+                );
+              })
+              .catch(() => {
+                setMcps((prev) =>
+                  prev.map((existingMcp) => {
+                    if (existingMcp.name === mcp.name) {
+                      return {
+                        ...existingMcp,
+                        status: 'failed'
+                      };
+                    }
+                    return existingMcp;
+                  })
+                );
+              });
+            return { ...mcp, status: 'connecting' };
+          })
+        );
       });
 
       socket.on('connect_error', (_) => {
@@ -188,6 +247,9 @@ const useChatSession = () => {
         }
         if (thread.metadata?.chat_profile) {
           setChatProfile(thread.metadata?.chat_profile);
+        }
+        if (thread.metadata?.chat_settings) {
+          setChatSettingsValue(thread.metadata?.chat_settings);
         }
         setMessages(messages);
         const elements = thread.elements || [];
@@ -287,27 +349,32 @@ const useChatSession = () => {
 
       socket.on('set_sidebar_title', (title: string) => {
         setSideView((prev) => {
+          if (prev?.title === title) return prev;
           return { title, elements: prev?.elements || [] };
         });
       });
 
-      socket.on('set_sidebar_elements', (elements: IMessageElement[]) => {
-        if (!elements.length) {
-          setSideView(undefined);
-        } else {
-          elements.forEach((element) => {
-            if (!element.url && element.chainlitKey) {
-              element.url = client.getElementUrl(
-                element.chainlitKey,
-                sessionId
-              );
-            }
-          });
-          setSideView((prev) => {
-            return { title: prev?.title || '', elements: elements };
-          });
+      socket.on(
+        'set_sidebar_elements',
+        ({ elements, key }: { elements: IMessageElement[]; key?: string }) => {
+          if (!elements.length) {
+            setSideView(undefined);
+          } else {
+            elements.forEach((element) => {
+              if (!element.url && element.chainlitKey) {
+                element.url = client.getElementUrl(
+                  element.chainlitKey,
+                  sessionId
+                );
+              }
+            });
+            setSideView((prev) => {
+              if (prev?.key === key) return prev;
+              return { title: prev?.title || '', elements: elements, key };
+            });
+          }
         }
-      });
+      );
 
       socket.on('element', (element: IElement) => {
         if (!element.url && element.chainlitKey) {
@@ -363,6 +430,31 @@ const useChatSession = () => {
       socket.on('window_message', (data: any) => {
         if (window.parent) {
           window.parent.postMessage(data, '*');
+        }
+      });
+
+      socket.on('toast', (data: { message: string; type: string }) => {
+        if (!data.message) {
+          console.warn('No message received for toast.');
+          return;
+        }
+
+        switch (data.type) {
+          case 'info':
+            toast.info(data.message);
+            break;
+          case 'error':
+            toast.error(data.message);
+            break;
+          case 'success':
+            toast.success(data.message);
+            break;
+          case 'warning':
+            toast.warning(data.message);
+            break;
+          default:
+            toast(data.message);
+            break;
         }
       });
     },

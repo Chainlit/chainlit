@@ -2,30 +2,33 @@ import { useRecoilState } from 'recoil';
 
 import { Element } from '@chainlit/app/src/components/Elements';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle
-} from '@chainlit/app/src/components/ui/sheet';
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@chainlit/app/src/components/ui/dialog';
 import { sideViewState } from '@chainlit/react-client';
 
 export default function ElementSideView() {
   const [sideView, setSideView] = useRecoilState(sideViewState);
 
-  if (!sideView) return null;
+  if (!sideView || sideView.title === 'canvas') return null;
 
   return (
-    <Sheet open onOpenChange={(open) => !open && setSideView(undefined)}>
-      <SheetContent side="left" className="flex flex-col">
-        <SheetHeader>
-          <SheetTitle>{sideView.title}</SheetTitle>
-        </SheetHeader>
-        <div className="mt-4 overflow-y-auto flex-grow flex flex-col gap-4">
+    <Dialog open onOpenChange={(open) => !open && setSideView(undefined)}>
+      <DialogContent className="max-w-[80%]">
+        <DialogHeader>
+          <DialogTitle>{sideView.title}</DialogTitle>
+        </DialogHeader>
+        <div
+          className="mt-4 overflow-y-auto overscroll-contain min-h-[50vh] max-h-[80vh] flex flex-col gap-4"
+          onWheel={(e) => e.stopPropagation()}
+        >
           {sideView.elements.map((e) => (
             <Element key={e.id} element={e} />
           ))}
         </div>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 }

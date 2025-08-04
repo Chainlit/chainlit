@@ -5,6 +5,7 @@ import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
+import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { visit } from 'unist-util-visit';
@@ -26,6 +27,12 @@ import {
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
 import { ElementRef } from './Elements/ElementRef';
+import {
+  type AlertProps,
+  MarkdownAlert,
+  alertComponents,
+  normalizeAlertType
+} from './MarkdownAlert';
 
 interface Props {
   allowHtml?: boolean;
@@ -102,7 +109,12 @@ const Markdown = ({
   }, [allowHtml, latex]);
 
   const remarkPlugins = useMemo(() => {
-    let remarkPlugins: PluggableList = [cursorPlugin, remarkGfm as any];
+    let remarkPlugins: PluggableList = [
+      cursorPlugin,
+      remarkGfm as any,
+      remarkDirective as any,
+      MarkdownAlert
+    ];
 
     if (latex) {
       remarkPlugins = [...remarkPlugins, remarkMath as any];
@@ -116,6 +128,7 @@ const Markdown = ({
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
       components={{
+        ...alertComponents, // add alert components
         code(props) {
           return (
             <code
@@ -231,9 +244,10 @@ const Markdown = ({
         },
         p(props) {
           return (
-            <p
+            <div
               {...omit(props, ['node'])}
               className="leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words"
+              role="article"
             />
           );
         },
@@ -260,7 +274,15 @@ const Markdown = ({
           return <TableBody {...(props as any)}>{children}</TableBody>;
         },
         // @ts-expect-error custom plugin
-        blinkingCursor: () => <BlinkingCursor whitespace />
+        blinkingCursor: () => <BlinkingCursor whitespace />,
+        alert: ({
+          type,
+          children,
+          ...props
+        }: AlertProps & { type?: string }) => {
+          const alertType = normalizeAlertType(type || props.variant || 'info');
+          return alertComponents.Alert({ variant: alertType, children });
+        }
       }}
     >
       {children}
@@ -268,4 +290,4 @@ const Markdown = ({
   );
 };
 
-export default Markdown;
+export { Markdown };

@@ -122,6 +122,7 @@ const MessagesContainer = ({ navigate }: Props) => {
       askUser,
       allowHtml: config?.features?.unsafe_allow_html,
       latex: config?.features?.latex,
+      editable: !!config?.features.edit_message,
       loading,
       showFeedbackButtons: enableFeedback,
       uiName: config?.ui?.name || '',
@@ -147,6 +148,7 @@ const MessagesContainer = ({ navigate }: Props) => {
     <MessageContext.Provider value={memoizedContext}>
       <Messages
         indent={0}
+        isRunning={loading}
         messages={messages}
         elements={elements}
         actions={actions}

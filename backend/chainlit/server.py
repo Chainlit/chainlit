@@ -8,7 +8,7 @@ import re
 import shutil
 import urllib.parse
 import webbrowser
-from contextlib import asynccontextmanager
+from contextlib import AsyncExitStack, asynccontextmanager
 from pathlib import Path
 from typing import List, Optional, Union, cast
 
@@ -25,6 +25,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.datastructures import URL
@@ -59,8 +60,10 @@ from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 from chainlit.types import (
     CallActionRequest,
+    ConnectMCPRequest,
     DeleteFeedbackRequest,
     DeleteThreadRequest,
+    DisconnectMCPRequest,
     ElementRequest,
     GetThreadsRequest,
     Theme,
@@ -78,9 +81,12 @@ mimetypes.add_type("text/css", ".css")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Context manager to handle app start and shutdown."""
+    if config.code.on_app_startup:
+        await config.code.on_app_startup()
+
     host = config.run.host
     port = config.run.port
-    root_path = config.run.root_path
+    root_path = os.getenv("CHAINLIT_ROOT_PATH", "")
 
     if host == DEFAULT_HOST:
         url = f"http://localhost:{port}{root_path}"
@@ -143,6 +149,9 @@ async def lifespan(app: FastAPI):
         yield
     finally:
         try:
+            if config.code.on_app_shutdown:
+                await config.code.on_app_shutdown()
+
             if watch_task:
                 stop_event.set()
                 watch_task.cancel()
@@ -195,12 +204,10 @@ app = FastAPI(lifespan=lifespan)
 
 sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 
-asgi_app = socketio.ASGIApp(
-    socketio_server=sio,
-    socketio_path="",
-)
+asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
 
-app.mount("/ws/socket.io", asgi_app)
+# config.run.root_path is only set when started with --root-path. Not on submounts.
+app.mount(f"{config.run.root_path}/ws/socket.io", asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -210,7 +217,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-router = APIRouter()
+app.add_middleware(GZipMiddleware)
+
+# config.run.root_path is only set when started with --root-path. Not on submounts.
+router = APIRouter(prefix=config.run.root_path)
 
 
 @router.get("/public/{filename:path}")
@@ -333,7 +343,6 @@ def get_html_template(root_path):
     default_meta_image_url = (
         "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
     )
-    url = config.ui.github or default_url
     meta_image_url = config.ui.custom_meta_image_url or default_meta_image_url
     favicon_path = "/favicon"
 
@@ -344,7 +353,7 @@ def get_html_template(root_path):
     <meta property="og:title" content="{config.ui.name}">
     <meta property="og:description" content="{config.ui.description}">
     <meta property="og:image" content="{meta_image_url}">
-    <meta property="og:url" content="{url}">
+    <meta property="og:url" content="{default_url}">
     <meta property="og:root_path" content="{root_path}">"""
 
     js = f"""<script>
@@ -354,12 +363,10 @@ def get_html_template(root_path):
 
     css = None
     if config.ui.custom_css:
-        css = (
-            f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}">"""
-        )
+        css = f"""<link rel="stylesheet" type="text/css" href="{config.ui.custom_css}" {config.ui.custom_css_attributes}>"""
 
     if config.ui.custom_js:
-        js += f"""<script src="{config.ui.custom_js}" defer></script>"""
+        js += f"""<script src="{config.ui.custom_js}" {config.ui.custom_js_attributes}></script>"""
 
     font = None
     if custom_theme and custom_theme.get("custom_fonts"):
@@ -427,6 +434,7 @@ def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Respons
 
     if redirect_to_callback:
         root_path = os.environ.get("CHAINLIT_ROOT_PATH", "")
+        root_path = "" if root_path == "/" else root_path
         redirect_url = (
             f"{root_path}/login/callback?{urllib.parse.urlencode(response_dict)}"
         )
@@ -440,17 +448,14 @@ def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Respons
     return JSONResponse(response_dict)
 
 
-def _get_oauth_redirect_error(error: str) -> Response:
+def _get_oauth_redirect_error(request: Request, error: str) -> Response:
     """Get the redirect response for an OAuth error."""
     params = urllib.parse.urlencode(
         {
             "error": error,
         }
     )
-    response = RedirectResponse(
-        # FIXME: redirect to the right frontend base url to improve the dev environment
-        url=f"/login?{params}",  # Shouldn't there be {root_path} here?
-    )
+    response = RedirectResponse(url=str(request.url_for("login")) + "?" + params)
     return response
 
 
@@ -617,7 +622,7 @@ async def oauth_callback(
         )
 
     if error:
-        return _get_oauth_redirect_error(error)
+        return _get_oauth_redirect_error(request, error)
 
     if not code or not state:
         raise HTTPException(
@@ -676,7 +681,7 @@ async def oauth_azure_hf_callback(
         )
 
     if error:
-        return _get_oauth_redirect_error(error)
+        return _get_oauth_redirect_error(request, error)
 
     if not code:
         raise HTTPException(
@@ -710,8 +715,27 @@ async def get_user(current_user: UserParam) -> GenericUser:
 
 
 _language_pattern = (
-    "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,3})?(-[a-zA-Z0-9]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
+    "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,4})?(-[a-zA-Z0-9]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
 )
+
+
+@router.post("/set-session-cookie")
+async def set_session_cookie(request: Request, response: Response):
+    body = await request.json()
+    session_id = body.get("session_id")
+
+    is_local = request.client and request.client.host in ["127.0.0.1", "localhost"]
+
+    response.set_cookie(
+        key="X-Chainlit-Session-id",
+        value=session_id,
+        path="/",
+        httponly=True,
+        secure=not is_local,
+        samesite="lax" if is_local else "none",
+    )
+
+    return {"message": "Session cookie set"}
 
 
 @router.get("/project/translations")
@@ -760,6 +784,9 @@ async def project_settings(
     if config.code.on_audio_chunk:
         config.features.audio.enabled = True
 
+    if config.code.on_mcp_connect:
+        config.features.mcp.enabled = True
+
     debug_url = None
     data_layer = get_data_layer()
 
@@ -794,6 +821,15 @@ async def update_feedback(
 
     try:
         feedback_id = await data_layer.upsert_feedback(feedback=update.feedback)
+
+        if config.code.on_feedback:
+            try:
+                await config.code.on_feedback(update.feedback)
+            except Exception as callback_error:
+                logger.error(
+                    f"Error in user-provided on_feedback callback: {callback_error}"
+                )
+                # Optionally, you could continue without raising an exception to avoid disrupting the endpoint.
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=500) from e
 
@@ -1061,6 +1097,214 @@ async def call_action(
     return JSONResponse(content={"success": True, "response": response})
 
 
+@router.post("/mcp")
+async def connect_mcp(
+    payload: ConnectMCPRequest,
+    current_user: UserParam,
+):
+    from mcp import ClientSession
+    from mcp.client.sse import sse_client
+    from mcp.client.stdio import (
+        StdioServerParameters,
+        get_default_environment,
+        stdio_client,
+    )
+    from mcp.client.streamable_http import streamablehttp_client
+
+    from chainlit.context import init_ws_context
+    from chainlit.mcp import (
+        HttpMcpConnection,
+        McpConnection,
+        SseMcpConnection,
+        StdioMcpConnection,
+        validate_mcp_command,
+    )
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+            )
+
+    mcp_enabled = config.code.on_mcp_connect is not None
+    if mcp_enabled:
+        if payload.name in session.mcp_sessions:
+            old_client_session, old_exit_stack = session.mcp_sessions[payload.name]
+            if on_mcp_disconnect := config.code.on_mcp_disconnect:
+                await on_mcp_disconnect(payload.name, old_client_session)
+            try:
+                await old_exit_stack.aclose()
+            except Exception:
+                pass
+
+        try:
+            exit_stack = AsyncExitStack()
+            mcp_connection: McpConnection
+
+            if payload.clientType == "sse":
+                if not config.features.mcp.sse.enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="SSE MCP is not enabled",
+                    )
+
+                mcp_connection = SseMcpConnection(
+                    url=payload.url,
+                    name=payload.name,
+                    headers=getattr(payload, "headers", None),
+                )
+
+                transport = await exit_stack.enter_async_context(
+                    sse_client(
+                        url=mcp_connection.url,
+                        headers=mcp_connection.headers,
+                    )
+                )
+            elif payload.clientType == "stdio":
+                if not config.features.mcp.stdio.enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Stdio MCP is not enabled",
+                    )
+
+                env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
+                mcp_connection = StdioMcpConnection(
+                    command=command, args=args, name=payload.name
+                )
+
+                env = get_default_environment()
+                env.update(env_from_cmd)
+                # Create the server parameters
+                server_params = StdioServerParameters(
+                    command=command, args=args, env=env
+                )
+
+                transport = await exit_stack.enter_async_context(
+                    stdio_client(server_params)
+                )
+
+            elif payload.clientType == "streamable-http":
+                if not config.features.mcp.streamable_http.enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="HTTP MCP is not enabled",
+                    )
+                mcp_connection = HttpMcpConnection(
+                    url=payload.url,
+                    name=payload.name,
+                    headers=getattr(payload, "headers", None),
+                )
+                transport = await exit_stack.enter_async_context(
+                    streamablehttp_client(
+                        url=mcp_connection.url,
+                        headers=mcp_connection.headers,
+                    )
+                )
+
+            # The transport can return (read, write) for stdio, sse
+            # Or (read, write, get_session_id) for streamable-http
+            # We are only interested in the read and write streams here.
+            read, write = transport[:2]
+
+            mcp_session: ClientSession = await exit_stack.enter_async_context(
+                ClientSession(
+                    read_stream=read, write_stream=write, sampling_callback=None
+                )
+            )
+
+            # Initialize the session
+            await mcp_session.initialize()
+
+            # Store the session
+            session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
+
+            # Call the callback
+            await config.code.on_mcp_connect(mcp_connection, mcp_session)
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not connect to the MCP: {e!s}",
+            )
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="This app does not support MCP.",
+        )
+
+    tool_list = await mcp_session.list_tools()
+
+    return JSONResponse(
+        content={
+            "success": True,
+            "mcp": {
+                "name": payload.name,
+                "tools": [{"name": t.name} for t in tool_list.tools],
+                "clientType": payload.clientType,
+                "command": payload.fullCommand
+                if payload.clientType == "stdio"
+                else None,
+                "url": getattr(payload, "url", None)
+                if payload.clientType in ["sse", "streamable-http"]
+                else None,
+                # Include optional headers for SSE and streamable-http connections
+                "headers": getattr(payload, "headers", None)
+                if payload.clientType in ["sse", "streamable-http"]
+                else None,
+            },
+        }
+    )
+
+
+@router.delete("/mcp")
+async def disconnect_mcp(
+    payload: DisconnectMCPRequest,
+    current_user: UserParam,
+):
+    from chainlit.context import init_ws_context
+    from chainlit.session import WebsocketSession
+
+    session = WebsocketSession.get_by_id(payload.sessionId)
+    context = init_ws_context(session)
+
+    if current_user:
+        if (
+            not context.session.user
+            or context.session.user.identifier != current_user.identifier
+        ):
+            raise HTTPException(
+                status_code=401,
+            )
+
+    callback = config.code.on_mcp_disconnect
+    if payload.name in session.mcp_sessions:
+        try:
+            client_session, exit_stack = session.mcp_sessions[payload.name]
+            if callback:
+                await callback(payload.name, client_session)
+
+            try:
+                await exit_stack.aclose()
+            except Exception:
+                pass
+            del session.mcp_sessions[payload.name]
+
+        except Exception as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Could not disconnect to the MCP: {e!s}",
+            )
+
+    return JSONResponse(content={"success": True})
+
+
 @router.post("/project/file")
 async def upload_file(
     current_user: UserParam,
@@ -1088,21 +1332,24 @@ async def upload_file(
 
     session.files_dir.mkdir(exist_ok=True)
 
-    content = await file.read()
-
-    assert file.filename, "No filename for uploaded file"
-    assert file.content_type, "No content type for uploaded file"
-
     try:
-        validate_file_upload(file)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        content = await file.read()
 
-    file_response = await session.persist_file(
-        name=file.filename, content=content, mime=file.content_type
-    )
+        assert file.filename, "No filename for uploaded file"
+        assert file.content_type, "No content type for uploaded file"
 
-    return JSONResponse(content=file_response)
+        try:
+            validate_file_upload(file)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+        file_response = await session.persist_file(
+            name=file.filename, content=content, mime=file.content_type
+        )
+
+        return JSONResponse(content=file_response)
+    finally:
+        await file.close()
 
 
 def validate_file_upload(file: UploadFile):
@@ -1156,7 +1403,9 @@ def validate_file_mime_type(file: UploadFile):
                 if len(extensions) == 0:
                     return
                 for extension in extensions:
-                    if file.filename is not None and file.filename.endswith(extension):
+                    if file.filename is not None and file.filename.lower().endswith(
+                        extension.lower()
+                    ):
                         return
     raise ValueError("File type not allowed")
 
@@ -1256,13 +1505,13 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
 @router.get("/avatars/{avatar_id:str}")
 async def get_avatar(avatar_id: str):
     """Get the avatar for the user based on the avatar_id."""
-    if not re.match(r"^[a-zA-Z0-9_ -]+$", avatar_id):
+    if not re.match(r"^[a-zA-Z0-9_ .-]+$", avatar_id):
         raise HTTPException(status_code=400, detail="Invalid avatar_id")
 
     if avatar_id == "default":
         avatar_id = config.ui.name
 
-    avatar_id = avatar_id.strip().lower().replace(" ", "_")
+    avatar_id = avatar_id.strip().lower().replace(" ", "_").replace(".", "_")
 
     base_path = Path(APP_ROOT) / "public" / "avatars"
     avatar_pattern = f"{avatar_id}.*"
@@ -1272,7 +1521,6 @@ async def get_avatar(avatar_id: str):
     if avatar_path := next(matching_files, None):
         if not is_path_inside(avatar_path, base_path):
             raise HTTPException(status_code=400, detail="Invalid filename")
-
         media_type, _ = mimetypes.guess_type(str(avatar_path))
 
         return FileResponse(avatar_path, media_type=media_type)
@@ -1289,7 +1537,10 @@ def status_check():
 @router.get("/{full_path:path}")
 async def serve(request: Request):
     """Serve the UI files."""
-    html_template = get_html_template(request.scope["root_path"])
+    root_path = os.getenv("CHAINLIT_PARENT_ROOT_PATH", "") + os.getenv(
+        "CHAINLIT_ROOT_PATH", ""
+    )
+    html_template = get_html_template(root_path)
     response = HTMLResponse(content=html_template, status_code=200)
 
     return response

@@ -30,13 +30,13 @@ def get_data_layer():
                 # When @data_layer is configured, call it to get data layer.
                 _data_layer = config.code.data_layer()
             elif database_url := os.environ.get("DATABASE_URL"):
-                # Default to Chainlit data layer if DATABASE_URL specified.
                 from .chainlit_data_layer import ChainlitDataLayer
 
                 if os.environ.get("LITERAL_API_KEY"):
                     warnings.warn(
                         "Both LITERAL_API_KEY and DATABASE_URL specified. Ignoring Literal AI data layer and relying on data layer pointing to DATABASE_URL."
                     )
+
                 bucket_name = os.environ.get("BUCKET_NAME")
 
                 # AWS S3
@@ -50,9 +50,7 @@ def get_data_layer():
                 gcs_project_id = os.getenv("APP_GCS_PROJECT_ID")
                 gcs_client_email = os.getenv("APP_GCS_CLIENT_EMAIL")
                 gcs_private_key = os.getenv("APP_GCS_PRIVATE_KEY")
-                is_using_gcs = bool(
-                    gcs_project_id and gcs_client_email and gcs_private_key
-                )
+                is_using_gcs = bool(gcs_project_id)
 
                 # Azure Storage
                 azure_storage_account = os.getenv("APP_AZURE_STORAGE_ACCOUNT")

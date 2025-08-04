@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,7 +15,6 @@ import { useLayoutMaxWidth } from '@chainlit/app/src/hooks/useLayoutMaxWidth';
 import { useUpload } from '@chainlit/app/src/hooks/useUpload';
 import { IAttachment, attachmentsState } from '@chainlit/app/src/state/chat';
 import {
-  threadHistoryState,
   useChatData,
   useChatInteract,
   useConfig
@@ -28,8 +27,7 @@ const Chat = () => {
   const { config } = useConfig();
   const layoutMaxWidth = useLayoutMaxWidth();
   const setAttachments = useSetRecoilState(attachmentsState);
-  const setThreads = useSetRecoilState(threadHistoryState);
-  const [autoScroll, setAutoScroll] = useState(true);
+  const autoScrollRef = useRef(true);
   const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
@@ -138,13 +136,6 @@ const Chat = () => {
     options: { noClick: true }
   });
 
-  useEffect(() => {
-    setThreads((prev) => ({
-      ...prev,
-      currentThreadId: undefined
-    }));
-  }, []);
-
   const enableAttachments =
     !disabled && config?.features?.spontaneous_file_upload?.enabled;
 
@@ -172,8 +163,8 @@ const Chat = () => {
         <ChatSettingsModal />
         <ErrorBoundary>
           <ScrollContainer
-            autoScroll={autoScroll}
-            setAutoScroll={setAutoScroll}
+            autoScrollUserMessage={config?.features?.user_message_autoscroll}
+            autoScrollRef={autoScrollRef}
           >
             <div
               className="flex flex-col mx-auto w-full flex-grow px-4 pt-4"
@@ -197,8 +188,7 @@ const Chat = () => {
               fileSpec={fileSpec}
               onFileUpload={onFileUpload}
               onFileUploadError={onFileUploadError}
-              setAutoScroll={setAutoScroll}
-              autoScroll={autoScroll}
+              autoScrollRef={autoScrollRef}
             />
           </div>
         </ErrorBoundary>

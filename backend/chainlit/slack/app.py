@@ -2,7 +2,6 @@ import asyncio
 import os
 import re
 import uuid
-from datetime import datetime
 from functools import partial
 from typing import Dict, List, Optional, Union
 
@@ -17,7 +16,6 @@ from chainlit.element import Element, ElementDict
 from chainlit.emitter import BaseChainlitEmitter
 from chainlit.logger import logger
 from chainlit.message import Message, StepDict
-from chainlit.telemetry import trace
 from chainlit.types import Feedback
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
@@ -127,7 +125,6 @@ slack_app = AsyncApp(
 )
 
 
-@trace
 def init_slack_context(
     session: HTTPSession,
     slack_channel_id: str,
@@ -253,6 +250,16 @@ async def download_slack_files(session: HTTPSession, files, token):
     return elements
 
 
+async def add_reaction_if_enabled(event, emoji: str = "eyes"):
+    if config.features.slack.reaction_on_message_received:
+        try:
+            await slack_app.client.reactions_add(
+                channel=event["channel"], timestamp=event["ts"], name=emoji
+            )
+        except Exception as e:
+            logger.warning(f"Failed to add reaction: {e}")
+
+
 async def process_slack_message(
     event,
     say,
@@ -261,6 +268,8 @@ async def process_slack_message(
     bind_thread_to_user=False,
     thread_ts: Optional[str] = None,
 ):
+    await add_reaction_if_enabled(event)
+
     user = await get_user(event["user"])
 
     channel_id = event["channel"]
@@ -321,7 +330,7 @@ async def process_slack_message(
         except Exception as e:
             logger.error(f"Error updating thread: {e}")
 
-    ctx.session.delete()
+    await ctx.session.delete()
 
 
 @slack_app.event("app_home_opened")
@@ -339,12 +348,6 @@ async def handle_app_mentions(event, say):
 
 @slack_app.event("message")
 async def handle_message(message, say):
-    thread_id = str(
-        uuid.uuid5(
-            uuid.NAMESPACE_DNS,
-            message["channel"] + datetime.today().strftime("%Y-%m-%d"),
-        )
-    )
     thread_ts = message.get("thread_ts", message["ts"])
     thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 

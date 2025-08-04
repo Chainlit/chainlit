@@ -23,9 +23,9 @@ assert _cookie_samesite in [
     "Invalid value for CHAINLIT_COOKIE_SAMESITE. Must be one of 'lax', 'strict' or 'none'."
 )
 _cookie_secure = _cookie_samesite == "none"
-
+_cookie_path = os.environ.get("CHAINLIT_COOKIE_PATH", "/")
 _state_cookie_lifetime = 3 * 60  # 3m
-_auth_cookie_name = "access_token"
+_auth_cookie_name = os.environ.get("CHAINLIT_AUTH_COOKIE_NAME", "access_token")
 _state_cookie_name = "oauth_state"
 
 
@@ -149,7 +149,9 @@ def set_auth_cookie(request: Request, response: Response, token: str):
 
     # Delete remaining prior cookies/cookie chunks
     for k in existing_cookies:
-        response.delete_cookie(key=k, path="/")
+        response.delete_cookie(
+            key=k, path=_cookie_path, secure=_cookie_secure, samesite=_cookie_samesite
+        )
 
 
 def clear_auth_cookie(request: Request, response: Response):
@@ -162,7 +164,9 @@ def clear_auth_cookie(request: Request, response: Response):
     }
 
     for k in existing_cookies:
-        response.delete_cookie(key=k, path="/")
+        response.delete_cookie(
+            key=k, path=_cookie_path, secure=_cookie_secure, samesite=_cookie_samesite
+        )
 
 
 def set_oauth_state_cookie(response: Response, token: str):

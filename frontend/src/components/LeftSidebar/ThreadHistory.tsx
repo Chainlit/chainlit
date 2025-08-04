@@ -129,7 +129,7 @@ export function ThreadHistory() {
       <SidebarGroup>
         <SidebarMenu>
           {threadHistory ? (
-            <div className="flex-grow">
+            <div id="thread-history" className="flex-grow">
               <ThreadList
                 threadHistory={threadHistory}
                 error={error}

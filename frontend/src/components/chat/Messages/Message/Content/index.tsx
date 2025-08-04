@@ -4,7 +4,7 @@ import { memo } from 'react';
 import type { IMessageElement, IStep } from '@chainlit/react-client';
 
 import { CURSOR_PLACEHOLDER } from '@/components/BlinkingCursor';
-import Markdown from '@/components/Markdown';
+import { Markdown } from '@/components/Markdown';
 
 import { InlinedElements } from './InlinedElements';
 
@@ -38,11 +38,9 @@ const MessageContent = memo(
     const isMessage = message.type.includes('message');
 
     const outputMarkdown = (
-      <p className="flex flex-col gap-2">
-        {!isMessage && displayInput ? (
-          <div className="text-lg font-semibold leading-none tracking-tight">
-            Output
-          </div>
+      <>
+        {!isMessage && displayInput && message.output ? (
+          <div className="font-medium">Output</div>
         ) : null}
         <Markdown
           allowHtml={allowHtml}
@@ -51,7 +49,7 @@ const MessageContent = memo(
         >
           {output}
         </Markdown>
-      </p>
+      </>
     );
 
     let inputMarkdown;
@@ -73,10 +71,9 @@ const MessageContent = memo(
         });
 
       inputMarkdown = (
-        <p className="flex flex-col gap-2">
-          <div className="text-lg font-semibold leading-none tracking-tight">
-            Input
-          </div>
+        <>
+          <div className="font-medium">Input</div>
+
           <Markdown
             allowHtml={allowHtml}
             latex={latex}
@@ -84,7 +81,7 @@ const MessageContent = memo(
           >
             {input}
           </Markdown>
-        </p>
+        </>
       );
     }
 

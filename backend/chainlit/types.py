@@ -25,6 +25,7 @@ from pydantic.dataclasses import dataclass
 InputWidgetType = Literal[
     "switch", "slider", "select", "textinput", "tags", "numberinput"
 ]
+ToastType = Literal["info", "success", "warning", "error"]
 
 
 class ThreadDict(TypedDict):
@@ -124,7 +125,8 @@ class AskSpec(DataClassJsonMixin):
     """Specification for asking the user."""
 
     timeout: int
-    type: Literal["text", "file", "action"]
+    type: Literal["text", "file", "action", "element"]
+    step_id: str
 
 
 @dataclass
@@ -135,6 +137,13 @@ class AskFileSpec(FileSpec, AskSpec, DataClassJsonMixin):
 @dataclass
 class AskActionSpec(ActionSpec, AskSpec, DataClassJsonMixin):
     """Specification for asking the user an action"""
+
+
+@dataclass
+class AskElementSpec(AskSpec, DataClassJsonMixin):
+    """Specification for asking the user a custom element"""
+
+    element_id: str
 
 
 class FileReference(TypedDict):
@@ -193,6 +202,10 @@ class AskActionResponse(TypedDict):
     id: str
 
 
+class AskElementResponse(TypedDict, total=False):
+    submitted: bool
+
+
 class UpdateThreadRequest(BaseModel):
     threadId: str
     name: str
@@ -216,6 +229,41 @@ class CallActionRequest(BaseModel):
     sessionId: str
 
 
+class ConnectStdioMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["stdio"]
+    name: str
+    fullCommand: str
+
+
+class ConnectSseMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["sse"]
+    name: str
+    url: str
+    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    headers: Optional[Dict[str, str]] = None
+
+
+class ConnectStreamableHttpMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["streamable-http"]
+    name: str
+    url: str
+    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    headers: Optional[Dict[str, str]] = None
+
+
+ConnectMCPRequest = Union[
+    ConnectStdioMCPRequest, ConnectSseMCPRequest, ConnectStreamableHttpMCPRequest
+]
+
+
+class DisconnectMCPRequest(BaseModel):
+    sessionId: str
+    name: str
+
+
 class ElementRequest(BaseModel):
     element: Dict
     sessionId: str
@@ -232,6 +280,7 @@ class Starter(DataClassJsonMixin):
 
     label: str
     message: str
+    command: Optional[str] = None
     icon: Optional[str] = None
 
 
@@ -256,6 +305,10 @@ class CommandDict(TypedDict):
     description: str
     # The lucide icon name
     icon: str
+    # Display the command as a button in the composer
+    button: Optional[bool]
+    # Whether the command will be persistent unless the user toggles it
+    persistent: Optional[bool]
 
 
 class FeedbackDict(TypedDict):

@@ -7,6 +7,7 @@ import * as Zod from 'zod';
 
 import * as ChainlitReactClient from '@chainlit/react-client';
 
+import * as Markdown from '@/components/Markdown';
 import * as AccordionComponents from '@/components/ui/accordion';
 import * as AspectRatioComponents from '@/components/ui/aspect-ratio';
 import * as AvatarComponents from '@/components/ui/avatar';
@@ -32,6 +33,7 @@ import * as SheetComponents from '@/components/ui/sheet';
 import * as SkeletonComponents from '@/components/ui/skeleton';
 import * as SwitchComponents from '@/components/ui/switch';
 import * as TableComponents from '@/components/ui/table';
+import * as TabsComponents from '@/components/ui/tabs';
 import * as TextareaComponents from '@/components/ui/textarea';
 import * as TooltipComponents from '@/components/ui/tooltip';
 
@@ -41,8 +43,10 @@ const Imports = {
   zod: Zod,
   recoil: Recoil,
   '@chainlit/react-client': ChainlitReactClient,
+  '@/components/markdown': Markdown,
   'react-hook-form': ReactHookForm,
   'lucide-react': LucideIcons,
+  '@/components/ui/tabs': TabsComponents,
   '@/components/ui/accordion': AccordionComponents,
   '@/components/ui/aspect-ratio': AspectRatioComponents,
   '@/components/ui/avatar': AvatarComponents,

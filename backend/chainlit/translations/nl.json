@@ -111,13 +111,14 @@
       "settings": {
         "title": "Instellingenpaneel"
       },
-      "watermark": "Gebouwd met"
+      "watermark": "LLM's kunnen fouten maken. Overweeg het controleren van belangrijke informatie."
     },
     "threadHistory": {
       "sidebar": {
         "title": "Eerdere chats",
         "filters": {
-          "search": "Zoeken"
+          "search": "Zoeken",
+          "placeholder": "Search conversations..."
         },
         "timeframes": {
           "today": "Vandaag",
@@ -162,7 +163,12 @@
     "navigation": {
       "header": {
         "chat": "Chat",
-        "readme": "Leesmij"
+        "readme": "Leesmij",
+        "theme": {
+          "light": "Light Theme",
+          "dark": "Dark Theme",
+          "system": "Follow System"
+        }
       },
       "newChat": {
         "button": "Nieuwe chat",
@@ -187,5 +193,22 @@
       "success": {
         "saved": "Succesvol opgeslagen"
       }
-    }
+    },
+  "alerts": {
+    "info": "Info",
+    "note": "Note",
+    "tip": "Tip",
+    "important": "Important",
+    "warning": "Warning",
+    "caution": "Caution",
+    "debug": "Debug",
+    "example": "Example",
+    "success": "Success",
+    "help": "Help",
+    "idea": "Idea",
+    "pending": "Pending",
+    "security": "Security",
+    "beta": "Beta",
+    "best-practice": "Best Practice"
+  }
   }

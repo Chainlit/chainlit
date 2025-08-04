@@ -19,7 +19,7 @@ const ElementRef = ({ element }: ElementRefProps) => {
   return (
     <a
       href="#"
-      className="cursor-pointer uppercase -translate-y-px inline-flex items-center rounded-xl bg-muted px-1.5 text-[0.7rem] font-medium text-muted-foreground element-link hover:bg-primary hover:text-primary-foreground h-[22px]"
+      className="cursor-pointer uppercase -translate-y-px inline-flex items-center rounded-xl bg-muted px-1.5 text-[0.7rem] font-medium text-muted-foreground element-link hover:bg-primary hover:text-primary-foreground"
       onClick={() => onElementRefClick?.(element)}
     >
       {element.name}

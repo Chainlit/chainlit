@@ -1,5 +1,7 @@
 import { atom } from 'recoil';
 
+import { ICommand } from 'client-types/*';
+
 export interface IAttachment {
   id: string;
   serverId?: string;
@@ -15,4 +17,9 @@ export interface IAttachment {
 export const attachmentsState = atom<IAttachment[]>({
   key: 'Attachments',
   default: []
+});
+
+export const persistentCommandState = atom<ICommand | undefined>({
+  key: 'PersistentCommand',
+  default: undefined
 });

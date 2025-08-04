@@ -24,7 +24,6 @@ from chainlit.config import (
 from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret
-from chainlit.telemetry import trace_event
 from chainlit.utils import check_file
 
 
@@ -48,8 +47,6 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str):
-    from chainlit.server import app
-
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
     root_path = os.environ.get("CHAINLIT_ROOT_PATH", DEFAULT_ROOT_PATH)
@@ -71,6 +68,8 @@ def run_chainlit(target: str):
     config.run.host = host
     config.run.port = port
     config.run.root_path = root_path
+
+    from chainlit.server import app
 
     check_file(target)
     # Load the module provided by the user
@@ -99,7 +98,6 @@ def run_chainlit(target: str):
             ws_per_message_deflate=ws_per_message_deflate,
             ssl_keyfile=ssl_keyfile,
             ssl_certfile=ssl_certfile,
-            root_path=root_path,
         )
         server = uvicorn.Server(config)
         await server.serve()
@@ -195,14 +193,11 @@ def chainlit_run(
     if ci:
         logger.info("Running in CI mode")
 
-        config.project.enable_telemetry = False
         no_cache = True
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
         # This is required for authentication tests
         os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
-    else:
-        trace_event("chainlit run")
 
     config.run.headless = headless
     config.run.debug = debug
@@ -218,7 +213,6 @@ def chainlit_run(
 @cli.command("hello")
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
-    trace_event("chainlit hello")
     hello_path = os.path.join(BACKEND_ROOT, "hello.py")
     run_chainlit(hello_path)
 
@@ -226,15 +220,12 @@ def chainlit_hello(args=None, **kwargs):
 @cli.command("init")
 @click.argument("args", nargs=-1)
 def chainlit_init(args=None, **kwargs):
-    trace_event("chainlit init")
     init_config(log=True)
 
 
 @cli.command("create-secret")
 @click.argument("args", nargs=-1)
 def chainlit_create_secret(args=None, **kwargs):
-    trace_event("chainlit secret")
-
     print(
         f'Copy the following secret into your .env file. Once it is set, changing it will logout all users with active sessions.\nCHAINLIT_AUTH_SECRET="{random_secret()}"'
     )
@@ -243,6 +234,4 @@ def chainlit_create_secret(args=None, **kwargs):
 @cli.command("lint-translations")
 @click.argument("args", nargs=-1)
 def chainlit_lint_translations(args=None, **kwargs):
-    trace_event("chainlit lint-translation")
-
     lint_translations()

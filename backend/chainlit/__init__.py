@@ -4,12 +4,13 @@ from dotenv import load_dotenv
 
 # ruff: noqa: E402
 # Keep this here to ensure imports have environment available.
-env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
+env_file = os.getenv("CHAINLIT_ENV_FILE", ".env")
+env_found = load_dotenv(dotenv_path=os.path.join(os.getcwd(), env_file))
 
 from chainlit.logger import logger
 
 if env_found:
-    logger.info("Loaded .env file")
+    logger.info(f"Loaded {env_file} file")
 
 import asyncio
 from typing import TYPE_CHECKING, Any, Dict
@@ -40,6 +41,7 @@ from chainlit.element import (
 )
 from chainlit.message import (
     AskActionMessage,
+    AskElementMessage,
     AskFileMessage,
     AskUserMessage,
     ErrorMessage,
@@ -60,13 +62,18 @@ from .callbacks import (
     data_layer,
     header_auth_callback,
     oauth_callback,
+    on_app_shutdown,
+    on_app_startup,
     on_audio_chunk,
     on_audio_end,
     on_audio_start,
     on_chat_end,
     on_chat_resume,
     on_chat_start,
+    on_feedback,
     on_logout,
+    on_mcp_connect,
+    on_mcp_disconnect,
     on_message,
     on_settings_update,
     on_stop,
@@ -78,7 +85,6 @@ from .callbacks import (
 )
 
 if TYPE_CHECKING:
-    from chainlit.haystack.callbacks import HaystackAgentCallbackHandler
     from chainlit.langchain.callbacks import (
         AsyncLangchainCallbackHandler,
         LangchainCallbackHandler,
@@ -86,6 +92,7 @@ if TYPE_CHECKING:
     from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
     from chainlit.mistralai import instrument_mistralai
     from chainlit.openai import instrument_openai
+    from chainlit.semantic_kernel import SemanticKernelFilter
 
 
 def sleep(duration: int):
@@ -111,15 +118,16 @@ __getattr__ = make_module_getattr(
         "LangchainCallbackHandler": "chainlit.langchain.callbacks",
         "AsyncLangchainCallbackHandler": "chainlit.langchain.callbacks",
         "LlamaIndexCallbackHandler": "chainlit.llama_index.callbacks",
-        "HaystackAgentCallbackHandler": "chainlit.haystack.callbacks",
         "instrument_openai": "chainlit.openai",
         "instrument_mistralai": "chainlit.mistralai",
+        "SemanticKernelFilter": "chainlit.semantic_kernel",
     }
 )
 
 __all__ = [
     "Action",
     "AskActionMessage",
+    "AskElementMessage",
     "AskFileMessage",
     "AskUserMessage",
     "AsyncLangchainCallbackHandler",
@@ -135,7 +143,6 @@ __all__ = [
     "ErrorMessage",
     "File",
     "GenerationMessage",
-    "HaystackAgentCallbackHandler",
     "Image",
     "InputAudioChunk",
     "LangchainCallbackHandler",
@@ -146,6 +153,7 @@ __all__ = [
     "PersistedUser",
     "Plotly",
     "Pyplot",
+    "SemanticKernelFilter",
     "Starter",
     "Step",
     "Task",
@@ -167,13 +175,18 @@ __all__ = [
     "instrument_openai",
     "make_async",
     "oauth_callback",
+    "on_app_shutdown",
+    "on_app_startup",
     "on_audio_chunk",
     "on_audio_end",
     "on_audio_start",
     "on_chat_end",
     "on_chat_resume",
     "on_chat_start",
+    "on_feedback",
     "on_logout",
+    "on_mcp_connect",
+    "on_mcp_disconnect",
     "on_message",
     "on_settings_update",
     "on_stop",
