@@ -4,6 +4,7 @@ about: Create a report to help us improve
 title: ''
 labels: needs-triage
 assignees: ''
+type: 'Bug'
 ---
 
 **Describe the bug**
