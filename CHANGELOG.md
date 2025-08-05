@@ -4,6 +4,14 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.5] - 2025-08-02
+
+### Fixed
+- Properly escape HTML on paste
+- Enable gzip compression for frontend
+- Address security vulnerabilities in dependencies by upgrading them to the closest safe versions
+- CI e2e tests and pnpm cache issues
+
 ## [2.6.4] - 2025-08-01
 
 ### Added
