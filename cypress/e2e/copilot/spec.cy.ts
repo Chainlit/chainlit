@@ -158,38 +158,33 @@ describe('Copilot', () => {
   });
 
   describe('Language from config', () => {
-    it('should support en-US', () => {
-      mountWidget({
-        language: 'en-US'
+    const testData = [
+      {
+        language: 'en-US',
+        placeholder: 'Type your message here...'
+      },
+      {
+        language: 'fr-FR',
+        placeholder: 'Tapez votre message ici...'
+      }
+    ];
+
+    testData.forEach(({ language, placeholder }) => {
+      it(`should support ${language}`, () => {
+        mountWidget({
+          language
+        });
+        cy.step('Open copilot');
+        cy.get('#chainlit-copilot-button', opts).click();
+        cy.get('#chainlit-copilot', opts).should('exist');
+
+        cy.step('Check input placeholder');
+        cy.get('#chat-input', opts).should(
+          'have.attr',
+          'data-placeholder',
+          placeholder
+        );
       });
-
-      cy.step('Open copilot');
-      cy.get('#chainlit-copilot-button', opts).click();
-      cy.get('#chainlit-copilot', opts).should('exist');
-
-      cy.step('Check input placeholder');
-      cy.get('#chat-input', opts).should(
-        'have.attr',
-        'placeholder',
-        'Type your message here...'
-      );
-    });
-
-    it('should support es-ES', () => {
-      mountWidget({
-        language: 'es-ES'
-      });
-
-      cy.step('Open copilot');
-      cy.get('#chainlit-copilot-button', opts).click();
-      cy.get('#chainlit-copilot', opts).should('exist');
-
-      cy.step('Check input placeholder');
-      cy.get('#chat-input', opts).should(
-        'have.attr',
-        'placeholder',
-        'Escribe tu mensaje aquí...'
-      );
     });
   });
 });
