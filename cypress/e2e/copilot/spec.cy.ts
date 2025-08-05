@@ -163,6 +163,11 @@ describe('Copilot', () => {
         language: 'en-US'
       });
 
+      cy.step('Open copilot');
+      cy.get('#chainlit-copilot-button', opts).click();
+      cy.get('#chainlit-copilot', opts).should('exist');
+
+      cy.step('Check input placeholder');
       cy.get('#chat-input', opts).should(
         'have.attr',
         'placeholder',
@@ -175,6 +180,11 @@ describe('Copilot', () => {
         language: 'es-ES'
       });
 
+      cy.step('Open copilot');
+      cy.get('#chainlit-copilot-button', opts).click();
+      cy.get('#chainlit-copilot', opts).should('exist');
+
+      cy.step('Check input placeholder');
       cy.get('#chat-input', opts).should(
         'have.attr',
         'placeholder',
