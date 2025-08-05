@@ -36,7 +36,7 @@ export default function App({ widgetConfig }: Props) {
   const apiClient = useContext(ChainlitContext);
   const { i18n } = useTranslation();
   const { startNewChat } = useCopilotInteract();
-  const languageInUse = navigator.language || 'en-US';
+  const languageInUse = widgetConfig.language || navigator.language || 'en-US';
   const [authError, setAuthError] = useState<string>();
   const [fetchError, setFetchError] = useState<string>();
 
