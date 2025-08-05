@@ -2,7 +2,8 @@ import type { IMessageElement } from 'client-types/';
 
 const toSafeLinkTarget = (name: string) =>
   encodeURIComponent(name.replace(/\s+/g, '_'))
-    .replace(/\(/g, '%28').replace(/\)/g, '%29'); // Encode parentheses to avoid issues in URLs
+    .replace(/\(/g, '%28')
+    .replace(/\)/g, '%29'); // Encode parentheses to avoid issues in URLs
 
 const isForIdMatch = (id: string | number | undefined, forId: string) => {
   if (!forId || !id) {

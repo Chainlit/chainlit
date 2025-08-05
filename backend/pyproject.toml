@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.6.3"
+version = "2.6.5"
 keywords = [
     'LLM',
     'Agents',
@@ -47,9 +47,9 @@ python = ">=3.10,<4.0.0"
 httpx = ">=0.23.0"
 literalai = "0.1.201"
 dataclasses_json = "^0.6.7"
-fastapi = ">=0.115.3,<0.116"
-starlette = ">=0.41.2"
-uvicorn = ">=0.25.0"
+fastapi = ">=0.116.1,<0.117"
+starlette = ">=0.47.2"
+uvicorn = ">=0.35.0"
 python-socketio = "^5.11.0"
 aiofiles = ">=23.1.0,<25.0.0"
 syncer = "^2.0.3"
@@ -66,6 +66,7 @@ lazify = "^0.4.0"
 packaging = ">=23.1"
 python-multipart = "^0.0.18"
 pyjwt = "^2.8.0"
+audioop-lts = { version = "0.2.1", python = "^3.13" }
 
 [tool.poetry.group.tests]
 optional = true
@@ -76,7 +77,7 @@ pytest-asyncio = "^0.23.8"
 pytest-cov = "^5.0.0"
 openai = "^1.11.1"
 langchain = "^0.2.4"
-llama-index = "^0.10.45"
+llama-index = "^0.13.0"
 semantic-kernel = "^1.24.0"
 tenacity = "^8.4.1"
 transformers = "^4.38"

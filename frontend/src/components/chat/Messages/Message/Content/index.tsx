@@ -1,5 +1,5 @@
 import { prepareContent } from '@/lib/message';
-import { memo } from 'react';
+import { forwardRef, memo } from 'react';
 
 import type { IMessageElement, IStep } from '@chainlit/react-client';
 
@@ -16,89 +16,91 @@ export interface Props {
 }
 
 const MessageContent = memo(
-  ({ message, elements, allowHtml, latex }: Props) => {
-    const outputContent =
-      message.streaming && message.output
-        ? message.output + CURSOR_PLACEHOLDER
-        : message.output;
+  forwardRef<HTMLDivElement, Props>(
+    ({ message, elements, allowHtml, latex }, ref) => {
+      const outputContent =
+        message.streaming && message.output
+          ? message.output + CURSOR_PLACEHOLDER
+          : message.output;
 
-    const {
-      preparedContent: output,
-      inlinedElements: outputInlinedElements,
-      refElements: outputRefElements
-    } = prepareContent({
-      elements,
-      id: message.id,
-      content: outputContent,
-      language: message.language
-    });
+      const {
+        preparedContent: output,
+        inlinedElements: outputInlinedElements,
+        refElements: outputRefElements
+      } = prepareContent({
+        elements,
+        id: message.id,
+        content: outputContent,
+        language: message.language
+      });
 
-    const displayInput = message.input && message.showInput;
+      const displayInput = message.input && message.showInput;
 
-    const isMessage = message.type.includes('message');
+      const isMessage = message.type.includes('message');
 
-    const outputMarkdown = (
-      <>
-        {!isMessage && displayInput && message.output ? (
-          <div className="font-medium">Output</div>
-        ) : null}
-        <Markdown
-          allowHtml={allowHtml}
-          latex={latex}
-          refElements={outputRefElements}
-        >
-          {output}
-        </Markdown>
-      </>
-    );
-
-    let inputMarkdown;
-
-    if (displayInput) {
-      const inputContent =
-        message.streaming && message.input
-          ? message.input + CURSOR_PLACEHOLDER
-          : message.input;
-      const { preparedContent: input, refElements: inputRefElements } =
-        prepareContent({
-          elements,
-          id: message.id,
-          content: inputContent,
-          language:
-            typeof message.showInput === 'string'
-              ? message.showInput
-              : undefined
-        });
-
-      inputMarkdown = (
+      const outputMarkdown = (
         <>
-          <div className="font-medium">Input</div>
-
+          {!isMessage && displayInput && message.output ? (
+            <div className="font-medium">Output</div>
+          ) : null}
           <Markdown
             allowHtml={allowHtml}
             latex={latex}
-            refElements={inputRefElements}
+            refElements={outputRefElements}
           >
-            {input}
+            {output}
           </Markdown>
         </>
       );
+
+      let inputMarkdown;
+
+      if (displayInput) {
+        const inputContent =
+          message.streaming && message.input
+            ? message.input + CURSOR_PLACEHOLDER
+            : message.input;
+        const { preparedContent: input, refElements: inputRefElements } =
+          prepareContent({
+            elements,
+            id: message.id,
+            content: inputContent,
+            language:
+              typeof message.showInput === 'string'
+                ? message.showInput
+                : undefined
+          });
+
+        inputMarkdown = (
+          <>
+            <div className="font-medium">Input</div>
+
+            <Markdown
+              allowHtml={allowHtml}
+              latex={latex}
+              refElements={inputRefElements}
+            >
+              {input}
+            </Markdown>
+          </>
+        );
+      }
+
+      const markdownContent = (
+        <div className="flex flex-col gap-4">
+          {inputMarkdown}
+          {outputMarkdown}
+        </div>
+      );
+
+      return (
+        <div ref={ref} className="message-content w-full flex flex-col gap-2">
+          {!!inputMarkdown || output ? markdownContent : null}
+          <InlinedElements elements={outputInlinedElements} />
+        </div>
+      );
     }
-
-    const markdownContent = (
-      <div className="flex flex-col gap-4">
-        {inputMarkdown}
-        {outputMarkdown}
-      </div>
-    );
-
-    return (
-      <div className="message-content w-full flex flex-col gap-2">
-        {!!inputMarkdown || output ? markdownContent : null}
-        <InlinedElements elements={outputInlinedElements} />
-      </div>
-    );
-  }
+  )
 );
 
 export { MessageContent };

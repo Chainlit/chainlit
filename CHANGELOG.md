@@ -4,6 +4,30 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.5] - 2025-08-02
+
+### Fixed
+- Properly escape HTML on paste
+- Enable gzip compression for frontend
+- Address security vulnerabilities in dependencies by upgrading them to the closest safe versions
+- CI e2e tests and pnpm cache issues
+
+## [2.6.4] - 2025-08-01
+
+### Added
+- Add streamable HTTP MCP support
+- Improve e2e test stability and performance
+- Add configuration for expanded copilot mode
+- Add French translation
+
+### Fixed
+- Fix inputs/outputs for langchain callbacks
+- Fix blinking indicator for in-progress steps
+- Avoid unnecessary logo fetching when supplied in config.toml
+
+### Other
+- Bump dependencies
+
 ## [2.6.3] - 2025-07-25
 
 ### Added

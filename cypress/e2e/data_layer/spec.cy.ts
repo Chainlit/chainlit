@@ -158,7 +158,7 @@ describe('Data Layer', () => {
       verifyThreadResume();
     });
 
-    it.skip('Verifies thread continuation after server restart and new thread creation', () => {
+    it('Verifies thread continuation after server restart and new thread creation', () => {
       cy.task('restartChainlit', Cypress.spec).then(() => {
         cy.section('Before server restart');
 
