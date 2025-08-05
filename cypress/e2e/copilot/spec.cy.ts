@@ -1,8 +1,20 @@
+import { IWidgetConfig } from '../../../libs/copilot/src/types';
 import {
   clearCopilotThreadId,
   getCopilotThreadId,
   submitMessageCopilot
 } from '../../support/testUtils';
+
+function mountWidget(widgetConfig?: Partial<IWidgetConfig>) {
+  cy.step('Mount the widget');
+  cy.window().then((win) => {
+    // @ts-expect-error is not a valid prop
+    win.mountChainlitWidget({
+      ...widgetConfig,
+      chainlitServer: window.location.origin
+    });
+  });
+}
 
 describe('Copilot', () => {
   const opts = { includeShadowDom: true };
@@ -24,19 +36,10 @@ describe('Copilot', () => {
     });
 
     cy.window().should('have.property', 'mountChainlitWidget');
-
-    cy.step('Mount the widget');
-
-    // Wait for the script to load and execute the initialization
-    cy.window().then((win) => {
-      // @ts-expect-error is not a valid prop
-      win.mountChainlitWidget({
-        chainlitServer: window.location.origin
-      });
-    });
   });
 
   it('should be able to embed the copilot', () => {
+    mountWidget();
     cy.window().then((win) => {
       win.addEventListener('chainlit-call-fn', (e) => {
         // @ts-expect-error is not a valid prop
@@ -73,6 +76,7 @@ describe('Copilot', () => {
   });
 
   it('should persist thread', () => {
+    mountWidget();
     cy.step('Check persistance availability');
 
     cy.window().should('have.property', 'getChainlitCopilotThreadId');
@@ -150,6 +154,32 @@ describe('Copilot', () => {
     getCopilotThreadId().then((threadId) => {
       expect(threadId).to.not.equal(null);
       expect(threadId).to.not.equal(newThreadId);
+    });
+  });
+
+  describe('Language from config', () => {
+    it('should support en-US', () => {
+      mountWidget({
+        language: 'en-US'
+      });
+
+      cy.get('#chat-input', opts).should(
+        'have.attr',
+        'placeholder',
+        'Type your message here...'
+      );
+    });
+
+    it('should support es-ES', () => {
+      mountWidget({
+        language: 'es-ES'
+      });
+
+      cy.get('#chat-input', opts).should(
+        'have.attr',
+        'placeholder',
+        'Escribe tu mensaje aquí...'
+      );
     });
   });
 });
