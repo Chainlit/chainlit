@@ -22,7 +22,29 @@ const onError = (error: ClientError) => {
   toast.error(error.toString());
 };
 
-export const apiClient = new ChainlitAPI(
+class ExtendedChainlitAPI extends ChainlitAPI {
+  connectStreamableHttpMCP(sessionId: string, name: string, url: string) {
+    // Assumes the backend expects { clientType, name, url }
+    return fetch(`${this.httpEndpoint}mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(sessionId ? { 'x-session-id': sessionId } : {})
+      },
+      body: JSON.stringify({
+        clientType: 'streamable-http',
+        name,
+        url,
+        sessionId
+      })
+    }).then(async (res) => {
+      const data = await res.json();
+      return { success: res.ok, mcp: data.mcp, error: data.detail };
+    });
+  }
+}
+
+export const apiClient = new ExtendedChainlitAPI(
   httpEndpoint,
   'webapp',
   {}, // Optional - additionalQueryParams property.

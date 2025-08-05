@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('Upload file', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to receive and decode files', () => {
     cy.get('#ask-upload-button').should('exist');
 
