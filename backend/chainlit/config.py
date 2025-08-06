@@ -419,11 +419,6 @@ class ChainlitConfig:
         )
         default_translation_lib_file_path = translation_dir / f"{default_language}.json"
 
-        # Try built-in translations as fallback
-        builtin_translation_file_path = builtin_translation_dir / f"{language}.json"
-        builtin_parent_language_file_path = builtin_translation_dir / f"{parent_language}.json"
-        builtin_default_translation_file_path = builtin_translation_dir / f"{default_language}.json"
-
         if (
             is_path_inside(translation_lib_file_path, translation_dir)
             and translation_lib_file_path.is_file()
@@ -454,6 +449,7 @@ class ChainlitConfig:
         # Fallback to built-in Chainlit translations
         else:
             # Get list of available builtin translation files
+            builtin_default_translation_file_path = builtin_translation_dir / f"{default_language}.json"
             available_builtin_files = []
             if builtin_translation_dir.exists():
                 available_builtin_files = [
