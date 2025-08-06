@@ -315,7 +315,6 @@ class UISettings(DataClassJsonMixin):
     name: str
     description: str = ""
     cot: Literal["hidden", "tool_call", "full"] = "full"
-    font_family: Optional[str] = None
     default_theme: Optional[Literal["light", "dark"]] = "dark"
     layout: Optional[Literal["default", "wide"]] = "default"
     default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
