@@ -20,9 +20,9 @@
       "login": {
         "title": "アプリにログイン",
         "form": {
-          "email": {
-            "label": "メールアドレス",
-            "required": "メールアドレスは必須項目です"
+          "username": {
+            "label": "ユーザー名",
+            "required": "ユーザー名は必須フィールドです"
           },
           "password": {
             "label": "パスワード",

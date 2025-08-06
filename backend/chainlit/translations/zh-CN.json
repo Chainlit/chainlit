@@ -20,9 +20,9 @@
     "login": {
       "title": "登录以访问应用",
       "form": {
-        "email": {
-          "label": "电子邮箱",
-          "required": "邮箱是必填项"
+        "username": {
+          "label": "用户名",
+          "required": "用户名是必填字段"
         },
         "password": {
           "label": "密码",

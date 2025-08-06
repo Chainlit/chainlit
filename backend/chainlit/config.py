@@ -410,12 +410,19 @@ class ChainlitConfig:
         parent_language = language.split("-")[0]
 
         translation_dir = Path(config_translation_dir)
+        builtin_translation_dir = Path(TRANSLATIONS_DIR)
 
+        # Try local config directory first
         translation_lib_file_path = translation_dir / f"{language}.json"
         translation_lib_parent_language_file_path = (
             translation_dir / f"{parent_language}.json"
         )
         default_translation_lib_file_path = translation_dir / f"{default_language}.json"
+
+        # Try built-in translations as fallback
+        builtin_translation_file_path = builtin_translation_dir / f"{language}.json"
+        builtin_parent_language_file_path = builtin_translation_dir / f"{parent_language}.json"
+        builtin_default_translation_file_path = builtin_translation_dir / f"{default_language}.json"
 
         if (
             is_path_inside(translation_lib_file_path, translation_dir)
@@ -444,6 +451,50 @@ class ChainlitConfig:
             translation = json.loads(
                 default_translation_lib_file_path.read_text(encoding="utf-8")
             )
+        # Fallback to built-in Chainlit translations
+        else:
+            # Get list of available builtin translation files
+            available_builtin_files = []
+            if builtin_translation_dir.exists():
+                available_builtin_files = [
+                    f.stem for f in builtin_translation_dir.glob("*.json")
+                ]
+
+            def find_best_builtin_match(lang: str) -> str:
+                """Find the best matching builtin translation file for a given language."""
+                # Exact match
+                if lang in available_builtin_files:
+                    return lang
+                
+                # Parent language match (e.g., 'fr' for 'fr-FR')
+                parent = lang.split("-")[0]
+                if parent in available_builtin_files:
+                    return parent
+                
+                # Find any variant of the parent language (e.g., 'zh-CN' for 'zh')
+                for available_lang in available_builtin_files:
+                    if available_lang.startswith(f"{parent}-"):
+                        return available_lang
+                
+                # No match found
+                return None
+
+            best_match = find_best_builtin_match(language)
+            if best_match:
+                builtin_file_path = builtin_translation_dir / f"{best_match}.json"
+                logger.info(
+                    f"Using built-in Chainlit translation '{best_match}' for requested language '{language}'."
+                )
+                translation = json.loads(
+                    builtin_file_path.read_text(encoding="utf-8")
+                )
+            elif builtin_default_translation_file_path.is_file():
+                logger.warning(
+                    f"No suitable translation found for {language}. Using built-in default translation {default_language}."
+                )
+                translation = json.loads(
+                    builtin_default_translation_file_path.read_text(encoding="utf-8")
+                )
 
         return translation
 

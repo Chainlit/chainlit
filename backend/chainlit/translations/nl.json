@@ -20,9 +20,9 @@
       "login": {
         "title": "Inloggen om toegang te krijgen tot de app",
         "form": {
-          "email": {
-            "label": "E-mailadres",
-            "required": "e-mail is een verplicht veld"
+          "username": {
+            "label": "Gebruikersnaam",
+            "required": "Gebruikersnaam is verplicht"
           },
           "password": {
             "label": "Wachtwoord",

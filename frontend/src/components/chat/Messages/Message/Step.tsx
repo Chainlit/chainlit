@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { PropsWithChildren, useMemo } from 'react';
+import { PropsWithChildren, useMemo, useRef, useEffect } from 'react';
 
 import type { IStep } from '@chainlit/react-client';
 
@@ -21,9 +21,18 @@ export default function Step({
   children,
   isRunning
 }: PropsWithChildren<Props>) {
+  const contentRef = useRef<HTMLDivElement>(null);
+  
   const using = useMemo(() => {
     return isRunning && step.start && !step.end && !step.isError;
   }, [step, isRunning]);
+
+  // Auto-scroll to bottom when content changes or when streaming
+  useEffect(() => {
+    if (contentRef.current && (using || isRunning)) {
+      contentRef.current.scrollTop = contentRef.current.scrollHeight;
+    }
+  }, [children, using, isRunning, step.output, step.input]);
 
   const hasContent = step.input || step.output || step.steps?.length;
   const isError = step.isError;
@@ -42,15 +51,7 @@ export default function Step({
           )}
           id={`step-${stepName}`}
         >
-          {using ? (
-            <>
-              <Translator path="chat.messages.status.using" /> {stepName}
-            </>
-          ) : (
-            <>
-              <Translator path="chat.messages.status.used" /> {stepName}
-            </>
-          )}
+          {stepName}
         </p>
       </div>
     );
@@ -74,18 +75,13 @@ export default function Step({
             )}
             id={`step-${stepName}`}
           >
-            {using ? (
-              <>
-                <Translator path="chat.messages.status.using" /> {stepName}
-              </>
-            ) : (
-              <>
-                <Translator path="chat.messages.status.used" /> {stepName}
-              </>
-            )}
+            {stepName}
           </AccordionTrigger>
           <AccordionContent>
-            <div className="flex-grow mt-4 ml-1 pl-4 border-l-2 border-primary">
+            <div 
+              ref={contentRef}
+              className="flex-grow mt-4 ml-1 pl-4 border-l-2 border-primary max-h-36 overflow-y-auto scroll-smooth"
+            >
               {children}
             </div>
           </AccordionContent>

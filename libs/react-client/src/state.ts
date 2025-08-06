@@ -251,3 +251,9 @@ export const mcpState = atom<IMcp[]>({
   default: [],
   effects: [localStorageEffect<IMcp[]>('mcp_storage_key')]
 });
+
+export const languageState = atom<string>({
+  key: 'Language',
+  default: navigator.language || 'en-US',
+  effects: [localStorageEffect<string>('chainlit_language')]
+});

@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { LoginForm } from '@/components/LoginForm';
 import { Logo } from '@/components/Logo';
 import { useTheme } from '@/components/ThemeProvider';
+import { LanguageSwitcher } from '@/components/header/LanguageSwitcher';
 
 import { useQuery } from 'hooks/query';
 
@@ -53,9 +54,9 @@ export default function Login() {
     handleAuth(jsonPromise, '/');
   };
 
-  const handlePasswordLogin = async (email: string, password: string) => {
+  const handlePasswordLogin = async (username: string, password: string) => {
     const formData = new FormData();
-    formData.append('username', email);
+    formData.append('username', username);
     formData.append('password', password);
 
     const jsonPromise = apiClient.passwordAuth(formData);
@@ -82,44 +83,26 @@ export default function Login() {
   }, [config, user]);
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
+    <div className="flex min-h-svh items-center justify-center p-6">
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+      <div className="flex flex-col gap-8 w-full max-w-sm">
+        <div className="flex justify-center">
           <Logo className="w-[150px]" />
         </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
-            <LoginForm
-              error={error}
-              callbackUrl="/"
-              providers={config?.oauthProviders || []}
-              onPasswordSignIn={
-                config?.passwordAuth ? handlePasswordLogin : undefined
-              }
-              onOAuthSignIn={async (provider: string) => {
-                window.location.href = apiClient.getOAuthEndpoint(provider);
-              }}
-            />
-          </div>
-        </div>
+        <LoginForm
+          error={error}
+          callbackUrl="/"
+          providers={config?.oauthProviders || []}
+          onPasswordSignIn={
+            config?.passwordAuth ? handlePasswordLogin : undefined
+          }
+          onOAuthSignIn={async (provider: string) => {
+            window.location.href = apiClient.getOAuthEndpoint(provider);
+          }}
+        />
       </div>
-      {!config?.headerAuth ? (
-        <div className="relative hidden bg-muted lg:block overflow-hidden">
-          <img
-            src={
-              config?.ui?.login_page_image ||
-              apiClient.buildEndpoint('/favicon')
-            }
-            alt="Image"
-            className={`absolute inset-0 h-full w-full object-cover ${
-              isDarkMode
-                ? config?.ui?.login_page_image_dark_filter ||
-                  'brightness-[0.2] grayscale'
-                : config?.ui?.login_page_image_filter || ''
-            }`}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }

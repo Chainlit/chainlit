@@ -2,13 +2,13 @@ import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 
 import { useApi, useAuth } from './api';
-import { configState } from './state';
+import { configState, languageState } from './state';
 import { IChainlitConfig } from './types';
 
 const useConfig = () => {
   const [config, setConfig] = useRecoilState(configState);
+  const [language, setLanguage] = useRecoilState(languageState);
   const { isAuthenticated } = useAuth();
-  const language = navigator.language || 'en-US';
 
   const { data, error, isLoading } = useApi<IChainlitConfig>(
     !config && isAuthenticated ? `/project/settings?language=${language}` : null
@@ -16,10 +16,17 @@ const useConfig = () => {
 
   useEffect(() => {
     if (!data) return;
+    console.log('Config loaded for language:', language);
     setConfig(data);
   }, [data, setConfig]);
 
-  return { config, error, isLoading, language };
+  useEffect(() => {
+    if (error) {
+      console.error('Error loading config for language:', language, error);
+    }
+  }, [error, language]);
+
+  return { config, error, isLoading, language, setLanguage };
 };
 
 export { useConfig };
