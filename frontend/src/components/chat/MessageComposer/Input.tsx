@@ -66,6 +66,9 @@ const Input = forwardRef<InputMethods, Props>(
       const clone = contentEditableRef.current.cloneNode(
         true
       ) as HTMLDivElement;
+      clone.className += 'hidden';
+
+      contentEditableRef.current.parentNode?.appendChild(clone);
 
       // Remove command span from clone
       const commandSpan = clone.querySelector('.command-span');
@@ -73,7 +76,11 @@ const Input = forwardRef<InputMethods, Props>(
         commandSpan.remove();
       }
 
-      return clone.textContent ?? '';
+      const text = clone.innerText ?? '';
+
+      contentEditableRef.current.parentNode?.removeChild(clone);
+
+      return text;
     };
 
     const reset = () => {
