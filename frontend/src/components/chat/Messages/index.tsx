@@ -36,7 +36,9 @@ const hasActiveToolStep = (step: IStep): boolean => {
 const hasAssistantMessage = (step: IStep): boolean => {
   return (
     step.steps?.some(
-      (s) => s.type === 'assistant_message' || hasAssistantMessage(s)
+      (s) => 
+        (s.type === 'assistant_message' && s.output.trim() !== '') || 
+        hasAssistantMessage(s)
     ) || false
   );
 };
