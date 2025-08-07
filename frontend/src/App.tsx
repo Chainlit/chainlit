@@ -23,7 +23,7 @@ declare global {
     };
   }
 }
-
+t
 function App() {
   const { config } = useConfig();
 
