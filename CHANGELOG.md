@@ -4,6 +4,11 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.7] - 2025-08-07
+
+### Fixed
+- Formatting when pasting HTML code and newlines in received messages
+
 ## [2.6.6] - 2025-08-05
 
 ### Added
