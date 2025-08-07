@@ -66,19 +66,19 @@ async def resume_thread(session: WebsocketSession):
 
 
 def load_user_env(user_env):
+    if user_env:
+        user_env_dict = json.loads(user_env)
     # Check user env
     if config.project.user_env:
-        # Check if requested user environment variables are provided
-        if user_env:
-            user_env = json.loads(user_env)
-            for key in config.project.user_env:
-                if key not in user_env:
-                    raise ConnectionRefusedError(
-                        "Missing user environment variable: " + key
-                    )
-        else:
+        if not user_env_dict:
             raise ConnectionRefusedError("Missing user environment variables")
-    return user_env
+        # Check if requested user environment variables are provided
+        for key in config.project.user_env:
+            if key not in user_env_dict:
+                raise ConnectionRefusedError(
+                    "Missing user environment variable: " + key
+                )
+    return user_env_dict
 
 
 def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:

@@ -14,9 +14,10 @@ import {
 interface Props {
   content: unknown;
   className?: string;
+  contentRef?: React.RefObject<HTMLDivElement>;
 }
 
-const CopyButton = ({ content, className }: Props) => {
+const CopyButton = ({ content, className, contentRef }: Props) => {
   const [copied, setCopied] = useState(false);
   const { t } = useTranslation();
 
@@ -27,7 +28,44 @@ const CopyButton = ({ content, className }: Props) => {
           ? JSON.stringify(content, null, 2)
           : String(content);
 
-      await navigator.clipboard.writeText(textToCopy);
+      // Create clipboard items array
+      const clipboardItems: ClipboardItem[] = [];
+
+      // Always add text version
+      clipboardItems.push(
+        new ClipboardItem({
+          'text/plain': new Blob([textToCopy], { type: 'text/plain' })
+        })
+      );
+
+      // If contentRef is provided, also add HTML version
+      if (contentRef?.current) {
+        const htmlContent = contentRef.current.innerHTML;
+        clipboardItems.push(
+          new ClipboardItem({
+            'text/html': new Blob([htmlContent], { type: 'text/html' })
+          })
+        );
+      }
+
+      // Try to write multiple formats to clipboard
+      if (navigator.clipboard.write && clipboardItems.length > 1) {
+        // Use the newer clipboard API that supports multiple formats
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            'text/plain': new Blob([textToCopy], { type: 'text/plain' }),
+            ...(contentRef?.current && {
+              'text/html': new Blob([contentRef.current.innerHTML], {
+                type: 'text/html'
+              })
+            })
+          })
+        ]);
+      } else {
+        // Fallback to text-only for older browsers
+        await navigator.clipboard.writeText(textToCopy);
+      }
+
       setCopied(true);
 
       // Reset copied state after 2 seconds

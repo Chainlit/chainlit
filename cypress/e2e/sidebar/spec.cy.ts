@@ -1,10 +1,6 @@
-import { runTestServer, submitMessage } from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
 describe('Element Sidebar', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should be able to interact with the element sidebar', () => {
     // Check initial state
     cy.get('#side-view-title').should('have.text', 'Test title');

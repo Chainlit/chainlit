@@ -124,7 +124,7 @@ const Markdown = ({
 
   return (
     <ReactMarkdown
-      className={cn('prose lg:prose-xl', className)}
+      className={cn('prose lg:prose-xl whitespace-pre-wrap', className)}
       remarkPlugins={remarkPlugins}
       rehypePlugins={rehypePlugins}
       components={{

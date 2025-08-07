@@ -10,4 +10,6 @@ export interface IWidgetConfig {
   };
   customCssUrl?: string;
   additionalQueryParamsForAPI?: Record<string, string>;
+  expanded?: boolean;
+  language?: string;
 }
