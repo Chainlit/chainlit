@@ -39,6 +39,7 @@ const Widget = ({ config, error }: Props) => {
       window.toggleChainlitCopilot = () => console.error('Widget not mounted.');
       window.getChainlitCopilotThreadId = () => null;
 
+      window.clearChainlitCopilotThreadId?.();
       window.clearChainlitCopilotThreadId = () =>
         console.error('Widget not mounted.');
     };
