@@ -1,14 +1,13 @@
 import { cn } from '@/lib/utils';
 import { Link, RefreshCw, SquareTerminal, Trash2, Wrench } from 'lucide-react';
 import { useContext, useState } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
   ChainlitContext,
   IMcp,
-  mcpState,
-  sessionIdState
+  useMcpStore,
+  useSessionState
 } from '@chainlit/react-client';
 
 import CopyButton from '@/components/CopyButton';
@@ -33,8 +32,10 @@ interface McpListProps {
 
 export const McpList = ({ onAddNewClick }: McpListProps) => {
   const apiClient = useContext(ChainlitContext);
-  const sessionId = useRecoilValue(sessionIdState);
-  const [mcps, setMcps] = useRecoilState(mcpState);
+  const sessionId = useSessionState((state) => state.sessionId);
+  const mcps = useMcpStore((state) => state.mcps);
+  const setMcps = useMcpStore((state) => state.setMcps);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const deleteMcp = (mcp: IMcp) => {
@@ -194,8 +195,9 @@ const DeleteMcpButton = ({ mcp, onDelete, disabled }: DeleteMcpButtonProps) => {
 
 const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
   const apiClient = useContext(ChainlitContext);
-  const setMcps = useSetRecoilState(mcpState);
-  const sessionId = useRecoilValue(sessionIdState);
+  const setMcps = useMcpStore((state) => state.setMcps);
+  const sessionId = useSessionState((state) => state.sessionId);
+
   const [isLoading, setIsLoading] = useState(false);
 
   const reconnectMcp = () => {
