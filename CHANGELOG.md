@@ -4,6 +4,12 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.8] - 2025-08-08
+
+### Other
+
+- Reverted PR with newline preservation in messages due to incorrect rendering in child components like lists
+
 ## [2.6.7] - 2025-08-07
 
 ### Fixed
