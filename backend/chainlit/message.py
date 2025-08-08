@@ -36,6 +36,7 @@ class MessageBase(ABC):
     type: MessageStepType = "assistant_message"
     streaming = False
     created_at: Union[str, None] = None
+    end_time: Union[str, None] = None
     fail_on_persist_error: bool = False
     persisted = False
     is_error = False
@@ -80,7 +81,6 @@ class MessageBase(ABC):
             "createdAt": self.created_at,
             "command": self.command,
             "start": self.created_at,
-            "end": self.created_at,
             "output": self.content,
             "name": self.author,
             "type": self.type,
@@ -91,6 +91,23 @@ class MessageBase(ABC):
             "metadata": self.metadata or {},
             "tags": self.tags,
         }
+
+        # Set 'end' based on the following logic:
+        # 1. If message has explicit end_time, use it
+        # 2. If message is streaming, don't set end
+        # 3. If message has empty content (placeholder for streaming), don't set end
+        # 4. Otherwise, set end to created_at
+        if self.end_time:
+            _dict["end"] = self.end_time
+        elif self.streaming:
+            # Streaming messages don't have an end time
+            pass
+        elif self.content.strip() == "":
+            # Empty messages are placeholders for streaming, don't set end
+            pass
+        else:
+            # Normal completed messages have end time
+            _dict["end"] = self.created_at
 
         return _dict
 
@@ -103,6 +120,9 @@ class MessageBase(ABC):
 
         if self.streaming:
             self.streaming = False
+            
+        # Set end time when updating to mark message as complete
+        self.end_time = utc_now()
 
         step_dict = self.to_dict()
         chat_context.add(self)
