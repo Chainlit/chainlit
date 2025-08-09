@@ -379,3 +379,48 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
+
+
+@sio.on("chat_profile_change")
+async def change_chat_profile(sid, profile_name: str):
+    """Handle chat profile change from the UI."""
+    context = init_ws_context(sid)
+    
+    # Get the available profiles
+    current_user = context.session.user
+    if config.code.set_chat_profiles:
+        try:
+            chat_profiles = await config.code.set_chat_profiles(current_user)
+            # Find the selected profile
+            selected_profile = None
+            for profile in chat_profiles:
+                if profile.name == profile_name:
+                    selected_profile = profile
+                    break
+            
+            if selected_profile:
+                # Update session chat profile
+                old_profile = context.session.chat_profile
+                context.session.chat_profile = profile_name
+                
+                # Clear any existing config overrides when switching profiles
+                context.session.config_overrides = {}
+                
+                # Trigger the profile switch callback if defined
+                if config.code.on_profile_switch:
+                    await config.code.on_profile_switch(selected_profile)
+                
+                # Emit confirmation back to client
+                await context.emitter.emit("chat_profile_changed", {
+                    "old_profile": old_profile,
+                    "new_profile": profile_name
+                })
+                
+                logger.info(f"Chat profile changed from {old_profile} to {profile_name}")
+            else:
+                logger.warning(f"Unknown chat profile requested: {profile_name}")
+                
+        except Exception as e:
+            logger.exception(f"Error changing chat profile: {e}")
+    else:
+        logger.warning("No chat profiles configured, ignoring profile change request")

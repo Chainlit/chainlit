@@ -240,6 +240,36 @@ def set_chat_profiles(
     return func
 
 
+def on_profile_switch(func: Callable[["ChatProfile"], Any]) -> Callable:
+    """
+    Hook to react to chat profile switching events.
+    Called when a user switches between different chat profiles.
+
+    Args:
+        func (Callable[["ChatProfile"], Any]): The function to be called when a profile is switched. Takes a ChatProfile object.
+
+    Example:
+        @cl.on_profile_switch
+        async def handle_profile_switch(profile: ChatProfile):
+            # Update configuration for the specific profile
+            await cl.update_config({
+                "features": {
+                    "spontaneous_file_upload": {
+                        "enabled": profile.name == "vision-model"
+                    }
+                },
+                "ui": {
+                    "name": f"Assistant ({profile.name})"
+                }
+            })
+
+    Returns:
+        Callable[["ChatProfile"], Any]: The decorated profile switch handler.
+    """
+    config.code.on_profile_switch = wrap_user_function(func, with_task=True)
+    return func
+
+
 def set_starters(
     func: Callable[[Optional["User"]], Awaitable[List["Starter"]]],
 ) -> Callable:

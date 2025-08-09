@@ -1,7 +1,9 @@
+import asyncio
 import json
 import os
 import site
 import sys
+from copy import deepcopy
 from importlib import util
 from pathlib import Path
 from typing import (
@@ -370,6 +372,7 @@ class CodeSettings:
     on_mcp_connect: Optional[Callable] = None
     on_mcp_disconnect: Optional[Callable] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
+    on_profile_switch: Optional[Callable[["ChatProfile"], Any]] = None
     set_chat_profiles: Optional[
         Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
     ] = None
@@ -617,6 +620,119 @@ def lint_translations():
 
                     # Lint the translation file
                     lint_translation_json(file, truth, translation)
+
+
+def deep_merge_dict(base: Dict[str, Any], overrides: Dict[str, Any]) -> Dict[str, Any]:
+    """Recursively merge dictionaries, with overrides taking precedence."""
+    result = deepcopy(base)
+    for key, value in overrides.items():
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+            result[key] = deep_merge_dict(result[key], value)
+        else:
+            result[key] = deepcopy(value)
+    return result
+
+
+async def update_config(config_updates: Dict[str, Any]) -> None:
+    """
+    Update the configuration for the current session.
+    
+    Args:
+        config_updates: Dictionary containing configuration updates to apply.
+                       Should follow the same structure as config.toml sections.
+                       
+    Example:
+        await cl.update_config({
+            "features": {
+                "spontaneous_file_upload": {
+                    "enabled": True,
+                    "max_files": 5
+                }
+            },
+            "ui": {
+                "name": "Custom Assistant Name"
+            }
+        })
+    """
+    from chainlit.context import get_context
+    
+    try:
+        context = get_context()
+        session = context.session
+        
+        # Merge new config updates with existing overrides
+        session.config_overrides = deep_merge_dict(session.config_overrides, config_updates)
+        
+        # Emit config update to the frontend if it's a websocket session
+        if hasattr(session, 'emit') and callable(session.emit):
+            # Extract UI settings that need to be sent to frontend
+            ui_updates = config_updates.get('ui', {})
+            if ui_updates:
+                await context.emitter.emit("config_update", ui_updates)
+                
+    except Exception as e:
+        from chainlit.logger import logger
+        logger.error(f"Failed to update config: {e}")
+        raise
+
+
+def get_session_config():
+    """Get the current configuration with session-specific overrides applied."""
+    from chainlit.context import get_context
+    
+    try:
+        context = get_context()
+        session = context.session
+        
+        if session.config_overrides:
+            # Create a copy of the global config with session overrides applied
+            session_config = deepcopy(config)
+            
+            # Apply overrides to features
+            if 'features' in session.config_overrides:
+                features_overrides = session.config_overrides['features']
+                session_config.features = _merge_dataclass_with_dict(session_config.features, features_overrides)
+            
+            # Apply overrides to UI settings
+            if 'ui' in session.config_overrides:
+                ui_overrides = session.config_overrides['ui']
+                session_config.ui = _merge_dataclass_with_dict(session_config.ui, ui_overrides)
+            
+            # Apply overrides to project settings
+            if 'project' in session.config_overrides:
+                project_overrides = session.config_overrides['project']
+                session_config.project = _merge_dataclass_with_dict(session_config.project, project_overrides)
+                
+            return session_config
+        else:
+            return config
+    except:
+        # If no context available, return global config
+        return config
+
+
+def _merge_dataclass_with_dict(dataclass_instance, overrides: Dict[str, Any]):
+    """Merge dictionary overrides into a dataclass instance."""
+    from dataclasses import fields, is_dataclass
+    
+    if not is_dataclass(dataclass_instance):
+        return dataclass_instance
+    
+    # Get current values as dict
+    current_values = {}
+    for field in fields(dataclass_instance):
+        current_value = getattr(dataclass_instance, field.name)
+        if field.name in overrides:
+            if is_dataclass(current_value) and isinstance(overrides[field.name], dict):
+                # Recursively merge nested dataclasses
+                current_values[field.name] = _merge_dataclass_with_dict(current_value, overrides[field.name])
+            else:
+                current_values[field.name] = overrides[field.name]
+        else:
+            current_values[field.name] = current_value
+    
+    # Create new instance with merged values
+    return type(dataclass_instance)(**current_values)
 
 
 config = load_config()
