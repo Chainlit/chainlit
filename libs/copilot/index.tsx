@@ -17,7 +17,7 @@ import {
 } from './src/state';
 import { IWidgetConfig } from './src/types';
 
-const id = 'chainlit-copilot';
+const id = 'chainlit-copilot-wrapper';
 let root: ReactDOM.Root | null = null;
 
 declare global {

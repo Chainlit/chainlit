@@ -39,7 +39,9 @@ describe('Copilot', () => {
   });
 
   it('should be able to embed the copilot', () => {
+    cy.get('#chainlit-copilot-wrapper').should('not.exist');
     mountWidget();
+    cy.get('#chainlit-copilot-wrapper').should('exist');
     cy.window().then((win) => {
       win.addEventListener('chainlit-call-fn', (e) => {
         // @ts-expect-error is not a valid prop
@@ -57,7 +59,20 @@ describe('Copilot', () => {
 
     cy.step('Open copilot');
 
+    cy.get('#chainlit-copilot-button', opts).should(
+      'have.attr',
+      'aria-expanded',
+      'false'
+    );
+    cy.get('#chainlit-copilot', opts).should('not.exist');
+
     cy.get('#chainlit-copilot-button', opts).click();
+
+    cy.get('#chainlit-copilot-button', opts).should(
+      'have.attr',
+      'aria-expanded',
+      'true'
+    );
     cy.get('#chainlit-copilot', opts).should('exist');
 
     cy.get('.step', opts).should('have.length', 1);
@@ -186,5 +201,18 @@ describe('Copilot', () => {
         );
       });
     });
+  });
+
+  it('should be opened if config.opened is true', () => {
+    mountWidget({
+      opened: true
+    });
+
+    cy.get('#chainlit-copilot-button', opts).should(
+      'have.attr',
+      'aria-expanded',
+      'true'
+    );
+    cy.get('#chainlit-copilot', opts).should('exist');
   });
 });

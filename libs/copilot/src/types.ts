@@ -12,4 +12,5 @@ export interface IWidgetConfig {
   additionalQueryParamsForAPI?: Record<string, string>;
   expanded?: boolean;
   language?: string;
+  opened?: boolean;
 }
