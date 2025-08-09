@@ -108,7 +108,6 @@ def test_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
     test_config = config.load_config()
 
     monkeypatch.setattr("chainlit.callbacks.config", test_config)
-    monkeypatch.setattr("chainlit.server.config", test_config)
     monkeypatch.setattr("chainlit.config.config", test_config)
 
     return test_config
