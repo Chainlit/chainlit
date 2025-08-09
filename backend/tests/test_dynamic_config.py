@@ -163,7 +163,7 @@ async def test_profile_switch_with_config_update(mock_chainlit_context, test_con
             markdown_description="AI model with vision capabilities"
         )
         
-        await test_config.code.on_profile_switch(vision_profile)
+        await handle_profile_switch(vision_profile)
         
         # Check configuration changes for vision model
         overrides = context.session.config_overrides
@@ -179,7 +179,7 @@ async def test_profile_switch_with_config_update(mock_chainlit_context, test_con
             markdown_description="Text-only AI model"
         )
         
-        await test_config.code.on_profile_switch(text_profile)
+        await handle_profile_switch(text_profile)
         
         # Check configuration changes for text model
         overrides = context.session.config_overrides

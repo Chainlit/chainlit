@@ -713,6 +713,7 @@ def get_session_config():
 def _merge_dataclass_with_dict(dataclass_instance, overrides: Dict[str, Any]):
     """Merge dictionary overrides into a dataclass instance."""
     from dataclasses import fields, is_dataclass
+    from typing import Any, cast
     
     if not is_dataclass(dataclass_instance):
         return dataclass_instance
@@ -731,7 +732,8 @@ def _merge_dataclass_with_dict(dataclass_instance, overrides: Dict[str, Any]):
             current_values[field.name] = current_value
     
     # Create new instance with merged values
-    return type(dataclass_instance)(**current_values)
+    # Using type: ignore to suppress mypy warning about type constructor
+    return type(dataclass_instance)(**current_values)  # type: ignore
 
 
 config = load_config()
