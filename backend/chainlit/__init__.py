@@ -23,6 +23,7 @@ from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_context import chat_context
 from chainlit.chat_settings import ChatSettings
+from chainlit.config import get_session_config, update_config
 from chainlit.context import context
 from chainlit.element import (
     Audio,
@@ -75,6 +76,7 @@ from .callbacks import (
     on_mcp_connect,
     on_mcp_disconnect,
     on_message,
+    on_profile_switch,
     on_settings_update,
     on_stop,
     on_window_message,
@@ -169,6 +171,7 @@ __all__ = [
     "chat_context",
     "context",
     "data_layer",
+    "get_session_config",
     "header_auth_callback",
     "input_widget",
     "instrument_mistralai",
@@ -188,6 +191,7 @@ __all__ = [
     "on_mcp_connect",
     "on_mcp_disconnect",
     "on_message",
+    "on_profile_switch",
     "on_settings_update",
     "on_stop",
     "on_window_message",
@@ -198,6 +202,7 @@ __all__ = [
     "set_starters",
     "sleep",
     "step",
+    "update_config",
     "user_session",
 ]
 

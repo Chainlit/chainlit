@@ -84,6 +84,9 @@ class BaseSession:
         self.id = id
 
         self.chat_settings: Dict[str, Any] = {}
+        
+        # Session-specific configuration overrides
+        self.config_overrides: Dict[str, Any] = {}
 
     @property
     def files_dir(self):
