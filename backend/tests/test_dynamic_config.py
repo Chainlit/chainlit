@@ -1,13 +1,10 @@
 """Tests for dynamic configuration management."""
 
-import asyncio
-from unittest.mock import AsyncMock, Mock
-
-import pytest
+from unittest.mock import Mock
 
 from chainlit import config
 from chainlit.callbacks import on_profile_switch
-from chainlit.config import update_config, deep_merge_dict
+from chainlit.config import deep_merge_dict, update_config
 from chainlit.types import ChatProfile
 
 

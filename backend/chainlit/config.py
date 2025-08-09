@@ -1,4 +1,3 @@
-import asyncio
 import json
 import os
 import site
@@ -664,9 +663,9 @@ async def update_config(config_updates: Dict[str, Any]) -> None:
         session.config_overrides = deep_merge_dict(session.config_overrides, config_updates)
         
         # Emit config update to the frontend if it's a websocket session
-        if hasattr(session, 'emit') and callable(session.emit):
+        if hasattr(session, "emit") and callable(session.emit):
             # Extract UI settings that need to be sent to frontend
-            ui_updates = config_updates.get('ui', {})
+            ui_updates = config_updates.get("ui", {})
             if ui_updates:
                 await context.emitter.emit("config_update", ui_updates)
                 
@@ -689,24 +688,24 @@ def get_session_config():
             session_config = deepcopy(config)
             
             # Apply overrides to features
-            if 'features' in session.config_overrides:
-                features_overrides = session.config_overrides['features']
+            if "features" in session.config_overrides:
+                features_overrides = session.config_overrides["features"]
                 session_config.features = _merge_dataclass_with_dict(session_config.features, features_overrides)
             
             # Apply overrides to UI settings
-            if 'ui' in session.config_overrides:
-                ui_overrides = session.config_overrides['ui']
+            if "ui" in session.config_overrides:
+                ui_overrides = session.config_overrides["ui"]
                 session_config.ui = _merge_dataclass_with_dict(session_config.ui, ui_overrides)
             
             # Apply overrides to project settings
-            if 'project' in session.config_overrides:
-                project_overrides = session.config_overrides['project']
+            if "project" in session.config_overrides:
+                project_overrides = session.config_overrides["project"]
                 session_config.project = _merge_dataclass_with_dict(session_config.project, project_overrides)
                 
             return session_config
         else:
             return config
-    except:
+    except Exception:
         # If no context available, return global config
         return config
 

@@ -1,8 +1,5 @@
 """Integration test demonstrating the complete dynamic configuration workflow."""
 
-import asyncio
-from unittest.mock import Mock, AsyncMock
-
 import pytest
 
 from chainlit import config
@@ -238,7 +235,7 @@ async def test_error_handling_in_profile_switch():
     # Should raise an exception when called without context
     try:
         await update_config({"ui": {"name": "Test"}})
-        assert False, "Expected exception when calling update_config without context"
+        pytest.fail("Expected exception when calling update_config without context")
     except Exception:
         pass  # This is expected
 
@@ -247,9 +244,14 @@ def test_backward_compatibility(test_config: config.ChainlitConfig):
     """Test that existing functionality remains unchanged."""
     
     # Verify that existing callback registration still works
-    from chainlit.callbacks import set_chat_profiles, on_message, on_chat_start, on_profile_switch
-    from chainlit.types import ChatProfile
+    from chainlit.callbacks import (
+        on_chat_start,
+        on_message,
+        on_profile_switch,
+        set_chat_profiles,
+    )
     from chainlit.message import Message
+    from chainlit.types import ChatProfile
     
     profiles_registered = False
     message_handler_registered = False

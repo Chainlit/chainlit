@@ -1,9 +1,7 @@
 """Tests for socket-level profile switching functionality."""
 
 import asyncio
-from unittest.mock import AsyncMock, Mock, patch
-
-import pytest
+from unittest.mock import Mock
 
 
 def test_socket_profile_change_functionality():
@@ -90,7 +88,6 @@ def test_socket_profile_change_functionality():
         assert callback_profile.name == "vision-model"
     
     # Run the test
-    import asyncio
     asyncio.run(run_test())
 
 
@@ -184,7 +181,6 @@ def test_profile_switching_edge_cases():
         assert result["error"] == "Test error"
     
     # Run all tests
-    import asyncio
     asyncio.run(test_unknown_profile())
     asyncio.run(test_no_profiles())
     asyncio.run(test_exception())

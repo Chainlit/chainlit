@@ -23,7 +23,7 @@ from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_context import chat_context
 from chainlit.chat_settings import ChatSettings
-from chainlit.config import update_config, get_session_config
+from chainlit.config import get_session_config, update_config
 from chainlit.context import context
 from chainlit.element import (
     Audio,
@@ -171,6 +171,7 @@ __all__ = [
     "chat_context",
     "context",
     "data_layer",
+    "get_session_config",
     "header_auth_callback",
     "input_widget",
     "instrument_mistralai",
@@ -202,7 +203,6 @@ __all__ = [
     "sleep",
     "step",
     "update_config",
-    "get_session_config",
     "user_session",
 ]
 
