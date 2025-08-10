@@ -25,7 +25,6 @@ from fastapi import (
     UploadFile,
     status,
 )
-from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.datastructures import URL
@@ -216,8 +215,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-app.add_middleware(GZipMiddleware)
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
 router = APIRouter(prefix=config.run.root_path)
