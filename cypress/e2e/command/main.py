@@ -21,12 +21,6 @@ commands = [
         "button": True,
         "persistent": True,
     },
-    {
-        "id": "ResetCommands",
-        "icon": "rotate-ccw",
-        "description": "Restore default commands",
-        "button": True,
-    },
 ]
 
 
@@ -38,11 +32,8 @@ async def start():
 @cl.on_message
 async def message(msg: cl.Message):
     # Clear all commands after choosing Picture to test UI behavior with zero commands
+    # This simulates a scenario where certain commands might change the available tool set
     if msg.command == "Picture":
         await cl.context.emitter.set_commands([])
-
-    # Restore full command set on demand
-    if msg.command == "ResetCommands":
-        await cl.context.emitter.set_commands(commands)
 
     await cl.Message(content=f"Command: {msg.command}").send()

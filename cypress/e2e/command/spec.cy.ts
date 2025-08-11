@@ -41,7 +41,7 @@ describe('Command', () => {
     cy.get('#chat-input').should('exist');
     cy.wait(500);
 
-    // Test 1: Check initial command buttons (now includes Search and StickyButton)
+    // Test 1: Check initial command buttons (Search and StickyButton are button commands)
     cy.get('#command-Search').should('exist').and('be.visible');
     cy.get('#command-StickyButton').should('exist').and('be.visible');
     cy.get('#command-Picture').should('not.exist');
@@ -98,8 +98,8 @@ describe('Command', () => {
 
     cy.get('#command-button').should('exist').click();
     cy.get('[data-popover-content]').should('be.visible');
-    // Non-button commands are listed: Picture, Canvas, Sticky (at least those)
-    cy.get('[data-popover-content] [data-index]').should('have.length.at.least', 2);
+    // Non-button commands are listed: Picture, Canvas, Sticky
+    cy.get('[data-popover-content] [data-index]').should('have.length.at.least', 3);
 
     cy.get('[data-popover-content]').should('contain', 'Picture');
     cy.get('[data-popover-content]').should('contain', 'Canvas');
@@ -326,7 +326,7 @@ describe('Command', () => {
 
     // Inline "/" menu contains all commands
     cy.get('#chat-input').type('/');
-    cy.get('.command-menu-animate [data-index]').should('have.length.at.least', 3);
+    cy.get('.command-menu-animate [data-index]').should('have.length', 5); // Total: Picture, Search, Canvas, Sticky, StickyButton
 
     cy.get('.command-menu-animate').within(() => {
       cy.contains('Picture').should('exist');
@@ -335,5 +335,34 @@ describe('Command', () => {
       cy.contains('Sticky').should('exist');
       cy.contains('StickyButton').should('exist');
     });
+  });
+
+  it('should test command clearing behavior with Picture command', () => {
+    cy.visit('/');
+    cy.get('#chat-input').should('exist');
+    cy.wait(500);
+
+    // Verify initial state - commands are available
+    cy.get('#command-Search').should('exist');
+    cy.get('#command-StickyButton').should('exist');
+    cy.get('#command-button').should('exist');
+
+    // Select and use Picture command
+    cy.get('#chat-input').type('/pic');
+    cy.get('[data-index="0"]').click();
+    cy.get('#chat-input').type('Generate a sunset{enter}');
+
+    // After Picture command, all commands should be cleared
+    cy.get('#command-Search').should('not.exist');
+    cy.get('#command-StickyButton').should('not.exist');
+    cy.get('#command-button').should('not.exist');
+    
+    // Verify "/" doesn't show any commands
+    cy.get('#chat-input').type('/');
+    cy.get('[data-index]').should('not.exist');
+    
+    // Future messages should work without any commands
+    cy.get('#chat-input').clear().type('Regular message{enter}');
+    cy.get('.step').last().should('contain', 'Command:');
   });
 });
