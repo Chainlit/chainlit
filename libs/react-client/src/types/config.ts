@@ -32,7 +32,6 @@ export interface IChainlitConfig {
   ui: {
     name: string;
     description?: string;
-    font_family?: string;
     default_theme?: 'light' | 'dark';
     layout?: 'default' | 'wide';
     default_sidebar_state?: 'open' | 'closed';
