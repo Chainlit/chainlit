@@ -107,7 +107,7 @@ const Widget = ({ config, error }: Props) => {
             : 'copilot-container-collapsed'
         )}
       >
-        <div id="chainlit-copilot" className="flex flex-col h-full w-full">
+        <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
           {error ? (
             <Alert variant="error">{error}</Alert>
           ) : (
