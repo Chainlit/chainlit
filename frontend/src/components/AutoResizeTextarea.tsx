@@ -16,6 +16,7 @@ const AutoResizeTextarea = ({
   onEnter,
   placeholder,
   className,
+  onKeyDown,
   ...props
 }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -25,10 +26,10 @@ const AutoResizeTextarea = ({
     const textarea = textareaRef.current;
     if (!textarea || !onPaste) return;
 
-    textarea.addEventListener('paste', onPaste);
+    textarea.addEventListener('paste', onPaste as any);
 
     return () => {
-      textarea.removeEventListener('paste', onPaste);
+      textarea.removeEventListener('paste', onPaste as any);
     };
   }, [onPaste]);
 
@@ -38,10 +39,22 @@ const AutoResizeTextarea = ({
     textarea.style.height = '40px';
     const newHeight = Math.min(textarea.scrollHeight, maxHeight);
     textarea.style.height = `${newHeight}px`;
-  }, [props.value]);
+  }, [props.value, maxHeight]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Enter' && !event.shiftKey && onEnter && !isComposing) {
+    // Call the parent's onKeyDown first (this is Input's handler)
+    if (onKeyDown) {
+      onKeyDown(event);
+    }
+
+    // Only handle our Enter logic if the event wasn't already handled
+    if (
+      !event.defaultPrevented &&
+      event.key === 'Enter' &&
+      !event.shiftKey &&
+      onEnter &&
+      !isComposing
+    ) {
       event.preventDefault();
       onEnter(event);
     }
