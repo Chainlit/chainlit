@@ -8,7 +8,6 @@ async def main():
 
 @cl.step(type="tool")
 async def tool():
-    # Fake tool
     await cl.sleep(5)
     return "Response from the tool!"
 
