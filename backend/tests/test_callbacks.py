@@ -486,34 +486,36 @@ async def test_data_layer_config(
 
 def test_chat_profile_with_config_overrides():
     """Test that ChatProfile can be created with config_overrides."""
-    from chainlit.config import ChainlitConfigOverrides, FeaturesSettings, McpFeature, UISettings
+    from chainlit.config import (
+        ChainlitConfigOverrides,
+        FeaturesSettings,
+        McpFeature,
+        UISettings,
+    )
     from chainlit.types import ChatProfile
 
     # Test creating a profile without config_overrides
     basic_profile = ChatProfile(
-        name="Basic Profile",
-        markdown_description="A basic profile without overrides"
+        name="Basic Profile", markdown_description="A basic profile without overrides"
     )
     assert basic_profile.config_overrides is None
 
     # Test creating a profile with config_overrides
     config_overrides = ChainlitConfigOverrides(
-        features=FeaturesSettings(
-            mcp=McpFeature(enabled=True)
-        ),
+        features=FeaturesSettings(mcp=McpFeature(enabled=True)),
         ui=UISettings(
             name="Custom App Name",
             description="Custom description",
-            default_theme="light"
-        )
+            default_theme="light",
+        ),
     )
-    
+
     profile_with_overrides = ChatProfile(
-        name="MCP Profile", 
+        name="MCP Profile",
         markdown_description="A profile with MCP enabled",
-        config_overrides=config_overrides
+        config_overrides=config_overrides,
     )
-    
+
     # Verify the profile was created successfully
     assert profile_with_overrides.name == "MCP Profile"
     assert profile_with_overrides.config_overrides is not None
@@ -527,7 +529,12 @@ async def test_set_chat_profiles_with_config_overrides(
 ):
     """Test that set_chat_profiles callback works with profiles that have config_overrides."""
     from chainlit.callbacks import set_chat_profiles
-    from chainlit.config import ChainlitConfigOverrides, FeaturesSettings, McpFeature, UISettings
+    from chainlit.config import (
+        ChainlitConfigOverrides,
+        FeaturesSettings,
+        McpFeature,
+        UISettings,
+    )
     from chainlit.types import ChatProfile
 
     async with mock_chainlit_context:
@@ -537,23 +544,23 @@ async def test_set_chat_profiles_with_config_overrides(
             return [
                 ChatProfile(
                     name="Basic Profile",
-                    markdown_description="A basic profile without overrides"
+                    markdown_description="A basic profile without overrides",
                 ),
                 ChatProfile(
                     name="MCP Profile",
                     markdown_description="A profile with MCP enabled",
                     config_overrides=ChainlitConfigOverrides(
                         features=FeaturesSettings(mcp=McpFeature(enabled=True)),
-                        ui=UISettings(name="MCP Assistant", default_theme="dark")
-                    )
+                        ui=UISettings(name="MCP Assistant", default_theme="dark"),
+                    ),
                 ),
                 ChatProfile(
                     name="Light Theme Profile",
                     markdown_description="A profile with light theme",
                     config_overrides=ChainlitConfigOverrides(
                         ui=UISettings(name="Light Theme App", default_theme="light")
-                    )
-                )
+                    ),
+                ),
             ]
 
         # Test that the callback is properly registered

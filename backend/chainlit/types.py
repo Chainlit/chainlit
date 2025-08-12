@@ -9,7 +9,6 @@ from typing import (
     Generic,
     List,
     Literal,
-    Optional,
     Protocol,
     TypedDict,
     TypeVar,
@@ -17,7 +16,6 @@ from typing import (
 )
 
 if TYPE_CHECKING:
-    from chainlit.config import ChainlitConfigOverrides
     from chainlit.element import ElementDict
     from chainlit.step import StepDict
 
@@ -68,7 +66,7 @@ class PageInfo:
         }
 
     @classmethod
-    def from_dict(cls, page_info_dict: Dict) -> "PageInfo":
+    def from_dict(cls, page_info_dict: Dict) -> PageInfo:
         hasNextPage = page_info_dict.get("hasNextPage", False)
         startCursor = page_info_dict.get("startCursor", None)
         endCursor = page_info_dict.get("endCursor", None)
@@ -103,7 +101,7 @@ class PaginatedResponse(Generic[T]):
     @classmethod
     def from_dict(
         cls, paginated_response_dict: Dict, the_class: HasFromDict[T]
-    ) -> "PaginatedResponse[T]":
+    ) -> PaginatedResponse[T]:
         pageInfo = PageInfo.from_dict(paginated_response_dict.get("pageInfo", {}))
 
         data = [the_class.from_dict(d) for d in paginated_response_dict.get("data", [])]
@@ -113,7 +111,7 @@ class PaginatedResponse(Generic[T]):
 
 @dataclass
 class FileSpec(DataClassJsonMixin):
-    accept: Union[List[str], Dict[str, List[str]]]
+    accept: List[str] | Dict[str, List[str]]
     max_files: int
     max_size_mb: int
 
@@ -162,8 +160,8 @@ class FileDict(TypedDict):
 
 
 class MessagePayload(TypedDict):
-    message: "StepDict"
-    fileReferences: Optional[List[FileReference]]
+    message: StepDict
+    fileReferences: List[FileReference] | None
 
 
 class InputAudioChunkPayload(TypedDict):
@@ -245,7 +243,7 @@ class ConnectSseMCPRequest(BaseModel):
     name: str
     url: str
     # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
-    headers: Optional[Dict[str, str]] = None
+    headers: Dict[str, str] | None = None
 
 
 class ConnectStreamableHttpMCPRequest(BaseModel):
@@ -254,7 +252,7 @@ class ConnectStreamableHttpMCPRequest(BaseModel):
     name: str
     url: str
     # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
-    headers: Optional[Dict[str, str]] = None
+    headers: Dict[str, str] | None = None
 
 
 ConnectMCPRequest = Union[
@@ -310,25 +308,25 @@ class CommandDict(TypedDict):
     # The lucide icon name
     icon: str
     # Display the command as a button in the composer
-    button: Optional[bool]
+    button: bool | None
     # Whether the command will be persistent unless the user toggles it
-    persistent: Optional[bool]
+    persistent: bool | None
 
 
 class FeedbackDict(TypedDict):
     forId: str
-    id: Optional[str]
+    id: str | None
     value: Literal[0, 1]
-    comment: Optional[str]
+    comment: str | None
 
 
 @dataclass
 class Feedback:
     forId: str
     value: Literal[0, 1]
-    threadId: Optional[str] = None
-    id: Optional[str] = None
-    comment: Optional[str] = None
+    threadId: str | None = None
+    id: str | None = None
+    comment: str | None = None
 
 
 class UpdateFeedbackRequest(BaseModel):
