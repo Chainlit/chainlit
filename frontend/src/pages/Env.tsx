@@ -86,6 +86,7 @@ const Env = () => {
                   <Label htmlFor={key}>{key}</Label>
                   <Input
                     id={key}
+                    type="password"
                     {...register(key)}
                     className={
                       touchedFields[key] && errors[key] ? 'border-red-500' : ''
