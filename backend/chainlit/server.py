@@ -1360,7 +1360,7 @@ def validate_file_upload(file: UploadFile):
         ValueError: If the file is not allowed.
     """
     from chainlit.config import get_session_config
-    
+
     # Use session-specific configuration if available, otherwise fall back to global config
     try:
         session_config = get_session_config()
@@ -1371,7 +1371,7 @@ def validate_file_upload(file: UploadFile):
     if upload_config is None:
         """Default for a missing config is to allow the fileupload without any restrictions"""
         return
-    
+
     # Only check enabled if it's explicitly set to False
     if upload_config.enabled is False:
         raise ValueError("File upload is not enabled")
@@ -1388,7 +1388,7 @@ def validate_file_mime_type(file: UploadFile):
         ValueError: If the file type is not allowed.
     """
     from chainlit.config import get_session_config
-    
+
     # Use session-specific configuration if available, otherwise fall back to global config
     try:
         session_config = get_session_config()
@@ -1396,10 +1396,7 @@ def validate_file_mime_type(file: UploadFile):
     except Exception:
         upload_config = config.features.spontaneous_file_upload
 
-    if (
-        upload_config is None
-        or upload_config.accept is None
-    ):
+    if upload_config is None or upload_config.accept is None:
         "Accept is not configured, allowing all file types"
         return
 
@@ -1434,25 +1431,18 @@ def validate_file_size(file: UploadFile):
         ValueError: If the file size is too large.
     """
     from chainlit.config import get_session_config
-    
+
     # Use session-specific configuration if available, otherwise fall back to global config
     try:
         session_config = get_session_config()
         upload_config = session_config.features.spontaneous_file_upload
     except Exception:
         upload_config = config.features.spontaneous_file_upload
-        
-    if (
-        upload_config is None
-        or upload_config.max_size_mb is None
-    ):
+
+    if upload_config is None or upload_config.max_size_mb is None:
         return
 
-    if (
-        file.size is not None
-        and file.size
-        > upload_config.max_size_mb * 1024 * 1024
-    ):
+    if file.size is not None and file.size > upload_config.max_size_mb * 1024 * 1024:
         raise ValueError("File size too large")
 
 

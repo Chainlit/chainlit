@@ -110,9 +110,10 @@ def test_config(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
 
     monkeypatch.setattr("chainlit.callbacks.config", test_config)
     monkeypatch.setattr("chainlit.config.config", test_config)
-    
+
     # Only patch server config if server module is imported
     import sys
+
     if "chainlit.server" in sys.modules:
         monkeypatch.setattr("chainlit.server.config", test_config)
 

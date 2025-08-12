@@ -17,7 +17,7 @@ async def test_deep_merge_dict():
         },
         "ui": {"name": "Base Assistant"},
     }
-    
+
     overrides = {
         "features": {
             "audio": {"enabled": True, "sample_rate": 44100},
@@ -25,9 +25,9 @@ async def test_deep_merge_dict():
         },
         "project": {"cache": True},
     }
-    
+
     result = deep_merge_dict(base, overrides)
-    
+
     assert result["features"]["audio"]["enabled"] is True
     assert result["features"]["audio"]["sample_rate"] == 44100
     assert result["features"]["latex"] is True
@@ -41,86 +41,95 @@ async def test_update_config(mock_chainlit_context, test_config: config.Chainlit
     async with mock_chainlit_context as context:
         # Initial state - no overrides
         assert context.session.config_overrides == {}
-        
+
         # Update configuration
         config_updates = {
-            "features": {
-                "spontaneous_file_upload": {
-                    "enabled": False,
-                    "max_files": 5
-                }
-            },
-            "ui": {
-                "name": "Updated Assistant"
-            }
+            "features": {"spontaneous_file_upload": {"enabled": False, "max_files": 5}},
+            "ui": {"name": "Updated Assistant"},
         }
-        
+
         await update_config(config_updates)
-        
+
         # Check that overrides were stored in session
         assert "features" in context.session.config_overrides
         assert "ui" in context.session.config_overrides
-        assert context.session.config_overrides["features"]["spontaneous_file_upload"]["enabled"] is False
-        assert context.session.config_overrides["features"]["spontaneous_file_upload"]["max_files"] == 5
+        assert (
+            context.session.config_overrides["features"]["spontaneous_file_upload"][
+                "enabled"
+            ]
+            is False
+        )
+        assert (
+            context.session.config_overrides["features"]["spontaneous_file_upload"][
+                "max_files"
+            ]
+            == 5
+        )
         assert context.session.config_overrides["ui"]["name"] == "Updated Assistant"
 
 
-async def test_update_config_merging(mock_chainlit_context, test_config: config.ChainlitConfig):
+async def test_update_config_merging(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
     """Test that multiple config updates are properly merged."""
     async with mock_chainlit_context as context:
         # First update
-        await update_config({
-            "features": {
-                "audio": {"enabled": True}
-            },
-            "ui": {"name": "First Update"}
-        })
-        
+        await update_config(
+            {"features": {"audio": {"enabled": True}}, "ui": {"name": "First Update"}}
+        )
+
         # Second update - should merge with first
-        await update_config({
-            "features": {
-                "latex": True,
-                "audio": {"sample_rate": 44100}  # Should merge with existing audio config
-            },
-            "ui": {"description": "Updated description"}  # Should merge with existing UI config
-        })
-        
+        await update_config(
+            {
+                "features": {
+                    "latex": True,
+                    "audio": {
+                        "sample_rate": 44100
+                    },  # Should merge with existing audio config
+                },
+                "ui": {
+                    "description": "Updated description"
+                },  # Should merge with existing UI config
+            }
+        )
+
         overrides = context.session.config_overrides
-        
+
         # Check that both audio settings are present
         assert overrides["features"]["audio"]["enabled"] is True
         assert overrides["features"]["audio"]["sample_rate"] == 44100
         assert overrides["features"]["latex"] is True
-        
+
         # Check that both UI settings are present
         assert overrides["ui"]["name"] == "First Update"
         assert overrides["ui"]["description"] == "Updated description"
 
 
-async def test_on_profile_switch_callback(mock_chainlit_context, test_config: config.ChainlitConfig):
+async def test_on_profile_switch_callback(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
     """Test the on_profile_switch callback registration and execution."""
     async with mock_chainlit_context:
         profile_switched = False
         received_profile = None
-        
+
         @on_profile_switch
         async def handle_profile_switch(profile: ChatProfile):
             nonlocal profile_switched, received_profile
             profile_switched = True
             received_profile = profile
-        
+
         # Test that the callback is properly registered
         assert test_config.code.on_profile_switch is not None
-        
+
         # Create a test profile
         test_profile = ChatProfile(
-            name="test-profile",
-            markdown_description="A test profile"
+            name="test-profile", markdown_description="A test profile"
         )
-        
+
         # Call the registered callback
         await test_config.code.on_profile_switch(test_profile)
-        
+
         # Check that the callback was executed
         assert profile_switched is True
         assert received_profile is not None
@@ -128,59 +137,57 @@ async def test_on_profile_switch_callback(mock_chainlit_context, test_config: co
         assert received_profile.markdown_description == "A test profile"
 
 
-async def test_profile_switch_with_config_update(mock_chainlit_context, test_config: config.ChainlitConfig):
+async def test_profile_switch_with_config_update(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
     """Test a realistic profile switch scenario with configuration updates."""
     async with mock_chainlit_context as context:
+
         @on_profile_switch
         async def handle_profile_switch(profile: ChatProfile):
             if profile.name == "vision-model":
-                await update_config({
-                    "features": {
-                        "spontaneous_file_upload": {
-                            "enabled": True,
-                            "accept": ["image/*"]
-                        }
-                    },
-                    "ui": {
-                        "name": f"Vision Assistant ({profile.name})"
+                await update_config(
+                    {
+                        "features": {
+                            "spontaneous_file_upload": {
+                                "enabled": True,
+                                "accept": ["image/*"],
+                            }
+                        },
+                        "ui": {"name": f"Vision Assistant ({profile.name})"},
                     }
-                })
+                )
             elif profile.name == "text-model":
-                await update_config({
-                    "features": {
-                        "spontaneous_file_upload": {
-                            "enabled": False
-                        }
-                    },
-                    "ui": {
-                        "name": f"Text Assistant ({profile.name})"
+                await update_config(
+                    {
+                        "features": {"spontaneous_file_upload": {"enabled": False}},
+                        "ui": {"name": f"Text Assistant ({profile.name})"},
                     }
-                })
-        
+                )
+
         # Test vision model profile
         vision_profile = ChatProfile(
             name="vision-model",
-            markdown_description="AI model with vision capabilities"
+            markdown_description="AI model with vision capabilities",
         )
-        
+
         await handle_profile_switch(vision_profile)
-        
+
         # Check configuration changes for vision model
         overrides = context.session.config_overrides
         assert overrides["features"]["spontaneous_file_upload"]["enabled"] is True
         assert overrides["features"]["spontaneous_file_upload"]["accept"] == ["image/*"]
         assert overrides["ui"]["name"] == "Vision Assistant (vision-model)"
-        
+
         # Clear overrides and test text model
         context.session.config_overrides = {}
-        
+
         text_profile = ChatProfile(
-            name="text-model",
-            markdown_description="Text-only AI model"
+            name="text-model", markdown_description="Text-only AI model"
         )
-        
+
         await handle_profile_switch(text_profile)
-        
+
         # Check configuration changes for text model
         overrides = context.session.config_overrides
         assert overrides["features"]["spontaneous_file_upload"]["enabled"] is False
@@ -192,16 +199,10 @@ async def test_apply_session_config_overrides(test_config: config.ChainlitConfig
     # Create a mock session with overrides
     mock_session = Mock()
     mock_session.config_overrides = {
-        "features": {
-            "latex": True,
-            "audio": {"enabled": True, "sample_rate": 44100}
-        },
-        "ui": {
-            "name": "Custom Assistant",
-            "description": "Custom description"
-        }
+        "features": {"latex": True, "audio": {"enabled": True, "sample_rate": 44100}},
+        "ui": {"name": "Custom Assistant", "description": "Custom description"},
     }
-    
+
     # Test that the session has the expected overrides
     assert "features" in mock_session.config_overrides
     assert "ui" in mock_session.config_overrides
@@ -214,11 +215,11 @@ async def test_config_override_isolation(mock_session_factory):
     # Create two mock sessions
     session1 = mock_session_factory(id="session1")
     session2 = mock_session_factory(id="session2")
-    
+
     # Each session should have its own config overrides
     session1.config_overrides = {"ui": {"name": "Assistant 1"}}
     session2.config_overrides = {"ui": {"name": "Assistant 2"}}
-    
+
     assert session1.config_overrides != session2.config_overrides
     assert session1.config_overrides["ui"]["name"] == "Assistant 1"
     assert session2.config_overrides["ui"]["name"] == "Assistant 2"
