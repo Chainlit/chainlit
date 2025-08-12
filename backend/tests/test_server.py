@@ -25,11 +25,12 @@ def test_client():
 
 @pytest.fixture
 def mock_load_translation(test_config: ChainlitConfig, monkeypatch: pytest.MonkeyPatch):
+    mock_method = Mock(return_value={"key": "value"})
     monkeypatch.setattr(
-        test_config, "load_translation", Mock(return_value={"key": "value"})
+        "chainlit.config.ChainlitConfig.load_translation", mock_method
     )
 
-    return test_config.load_translation
+    return mock_method
 
 
 def test_project_translations_default_language(
