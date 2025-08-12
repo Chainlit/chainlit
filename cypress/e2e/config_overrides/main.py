@@ -1,7 +1,12 @@
 from typing import Optional
 
 import chainlit as cl
-from chainlit.config import ChainlitConfigOverrides, UISettings, FeaturesSettings, McpFeature
+from chainlit.config import (
+    ChainlitConfigOverrides,
+    UISettings,
+    FeaturesSettings,
+    McpFeature,
+)
 
 
 @cl.set_chat_profiles
@@ -24,18 +29,16 @@ async def chat_profile(current_user: cl.User):
                         enabled=True,
                         stdio={"enabled": True},
                         sse={"enabled": True},
-                        streamable_http={"enabled": True}
+                        streamable_http={"enabled": True},
                     )
-                )
+                ),
             ),
         ),
         cl.ChatProfile(
             name="MCP Disabled",
             markdown_description="Profile with MCP explicitly disabled",
             config_overrides=ChainlitConfigOverrides(
-                features=FeaturesSettings(
-                    mcp=McpFeature(enabled=False)
-                )
+                features=FeaturesSettings(mcp=McpFeature(enabled=False))
             ),
         ),
     ]
