@@ -687,3 +687,131 @@ def test_project_translations_file_path_traversal(
 
     # Should give error status
     assert response.status_code == 422
+
+
+def test_project_settings_with_chat_profile_config_overrides(
+    test_client: TestClient, test_config: ChainlitConfig, monkeypatch: pytest.MonkeyPatch
+):
+    """Test that /project/settings endpoint returns merged configuration when chat_profile is specified."""
+    from chainlit.config import ChainlitConfigOverrides, FeaturesSettings, McpFeature, UISettings
+    from chainlit.types import ChatProfile
+
+    # Mock chat profiles with different config overrides
+    mock_profiles = [
+        ChatProfile(
+            name="basic",
+            markdown_description="Basic profile without overrides",
+            default=True
+        ),
+        ChatProfile(
+            name="mcp-enabled",
+            markdown_description="Profile with MCP enabled",
+            config_overrides=ChainlitConfigOverrides(
+                features=FeaturesSettings(mcp=McpFeature(enabled=True)),
+                ui=UISettings(name="MCP Assistant", default_theme="dark")
+            )
+        ),
+        ChatProfile(
+            name="light-theme",
+            markdown_description="Profile with light theme",
+            config_overrides=ChainlitConfigOverrides(
+                ui=UISettings(name="Light Theme App", default_theme="light", description="Light theme app")
+            )
+        )
+    ]
+
+    # Mock the chat profiles callback
+    async def mock_get_chat_profiles(user):
+        # Use asyncio.sleep to make this truly async
+        import asyncio
+        await asyncio.sleep(0)
+        return mock_profiles
+
+    test_config.code.set_chat_profiles = mock_get_chat_profiles
+
+    # Test 1: Default profile (no overrides)
+    response = test_client.get("/project/settings", params={"chat_profile": "basic"})
+    assert response.status_code == 200
+    config_data = response.json()
+    
+    # Should return base configuration without overrides
+    assert config_data["ui"]["name"] == test_config.ui.name  # Original name
+    assert config_data["features"]["mcp"]["enabled"] == test_config.features.mcp.enabled  # Original MCP setting
+
+    # Test 2: MCP-enabled profile
+    response = test_client.get("/project/settings", params={"chat_profile": "mcp-enabled"})
+    assert response.status_code == 200
+    config_data = response.json()
+    
+    # Should return merged configuration with MCP enabled and custom UI
+    assert config_data["features"]["mcp"]["enabled"] is True  # Overridden
+    assert config_data["ui"]["name"] == "MCP Assistant"  # Overridden
+    assert config_data["ui"]["default_theme"] == "dark"  # Overridden
+    
+    # Test 3: Light theme profile
+    response = test_client.get("/project/settings", params={"chat_profile": "light-theme"})
+    assert response.status_code == 200
+    config_data = response.json()
+    
+    # Should return merged configuration with light theme
+    assert config_data["ui"]["default_theme"] == "light"  # Overridden
+    assert config_data["ui"]["description"] == "Light theme app"  # Overridden
+    assert config_data["features"]["mcp"]["enabled"] == test_config.features.mcp.enabled  # Not overridden
+
+    # Test 4: Non-existent profile (should return base config)
+    response = test_client.get("/project/settings", params={"chat_profile": "non-existent"})
+    assert response.status_code == 200
+    config_data = response.json()
+    
+    # Should return base configuration
+    assert config_data["ui"]["name"] == test_config.ui.name
+    assert config_data["features"]["mcp"]["enabled"] == test_config.features.mcp.enabled
+
+    # Test 5: No profile specified (should return base config)
+    response = test_client.get("/project/settings")
+    assert response.status_code == 200
+    config_data = response.json()
+    
+    # Should return base configuration
+    assert config_data["ui"]["name"] == test_config.ui.name
+    assert config_data["features"]["mcp"]["enabled"] == test_config.features.mcp.enabled
+
+
+def test_project_settings_config_overrides_serialization(
+    test_client: TestClient, test_config: ChainlitConfig, monkeypatch: pytest.MonkeyPatch
+):
+    """Test that config_overrides field is not included in serialized chat profiles."""
+    from chainlit.config import ChainlitConfigOverrides, FeaturesSettings, McpFeature
+    from chainlit.types import ChatProfile
+
+    # Mock chat profile with config overrides
+    mock_profile = ChatProfile(
+        name="test-profile",
+        markdown_description="Test profile",
+        config_overrides=ChainlitConfigOverrides(
+            features=FeaturesSettings(mcp=McpFeature(enabled=True))
+        )
+    )
+
+    async def mock_get_chat_profiles(user):
+        # Use asyncio.sleep to make this truly async
+        import asyncio
+        await asyncio.sleep(0)
+        return [mock_profile]
+
+    test_config.code.set_chat_profiles = mock_get_chat_profiles
+
+    # Get the project settings
+    response = test_client.get("/project/settings", params={"chat_profile": "test-profile"})
+    assert response.status_code == 200
+    config_data = response.json()
+    
+    # Check that chatProfiles are included in the response
+    assert "chatProfiles" in config_data
+    assert len(config_data["chatProfiles"]) == 1
+    
+    # Check that config_overrides is NOT included in the serialized profile
+    profile_data = config_data["chatProfiles"][0]
+    assert "config_overrides" not in profile_data
+    assert profile_data["name"] == "test-profile"
+    assert profile_data["markdown_description"] == "Test profile"

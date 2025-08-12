@@ -482,3 +482,107 @@ async def test_data_layer_config(
     assert isinstance(result, BaseDataLayer)
 
     mock_get_data_layer.assert_called_once()
+
+
+def test_chat_profile_with_config_overrides():
+    """Test that ChatProfile can be created with config_overrides."""
+    from chainlit.config import ChainlitConfigOverrides, FeaturesSettings, McpFeature, UISettings
+    from chainlit.types import ChatProfile
+
+    # Test creating a profile without config_overrides
+    basic_profile = ChatProfile(
+        name="Basic Profile",
+        markdown_description="A basic profile without overrides"
+    )
+    assert basic_profile.config_overrides is None
+
+    # Test creating a profile with config_overrides
+    config_overrides = ChainlitConfigOverrides(
+        features=FeaturesSettings(
+            mcp=McpFeature(enabled=True)
+        ),
+        ui=UISettings(
+            name="Custom App Name",
+            description="Custom description",
+            default_theme="light"
+        )
+    )
+    
+    profile_with_overrides = ChatProfile(
+        name="MCP Profile", 
+        markdown_description="A profile with MCP enabled",
+        config_overrides=config_overrides
+    )
+    
+    # Verify the profile was created successfully
+    assert profile_with_overrides.name == "MCP Profile"
+    assert profile_with_overrides.config_overrides is not None
+    assert profile_with_overrides.config_overrides.features.mcp.enabled is True
+    assert profile_with_overrides.config_overrides.ui.name == "Custom App Name"
+    assert profile_with_overrides.config_overrides.ui.default_theme == "light"
+
+
+async def test_set_chat_profiles_with_config_overrides(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    """Test that set_chat_profiles callback works with profiles that have config_overrides."""
+    from chainlit.callbacks import set_chat_profiles
+    from chainlit.config import ChainlitConfigOverrides, FeaturesSettings, McpFeature, UISettings
+    from chainlit.types import ChatProfile
+
+    async with mock_chainlit_context:
+
+        @set_chat_profiles
+        async def get_chat_profiles(user):
+            return [
+                ChatProfile(
+                    name="Basic Profile",
+                    markdown_description="A basic profile without overrides"
+                ),
+                ChatProfile(
+                    name="MCP Profile",
+                    markdown_description="A profile with MCP enabled",
+                    config_overrides=ChainlitConfigOverrides(
+                        features=FeaturesSettings(mcp=McpFeature(enabled=True)),
+                        ui=UISettings(name="MCP Assistant", default_theme="dark")
+                    )
+                ),
+                ChatProfile(
+                    name="Light Theme Profile",
+                    markdown_description="A profile with light theme",
+                    config_overrides=ChainlitConfigOverrides(
+                        ui=UISettings(name="Light Theme App", default_theme="light")
+                    )
+                )
+            ]
+
+        # Test that the callback is properly registered
+        assert test_config.code.set_chat_profiles is not None
+
+        # Call the registered callback
+        result = await test_config.code.set_chat_profiles(None)
+
+        # Check the result
+        assert result is not None
+        assert isinstance(result, list)
+        assert len(result) == 3
+
+        # Test basic profile
+        basic_profile = result[0]
+        assert basic_profile.name == "Basic Profile"
+        assert basic_profile.config_overrides is None
+
+        # Test MCP profile
+        mcp_profile = result[1]
+        assert mcp_profile.name == "MCP Profile"
+        assert mcp_profile.config_overrides is not None
+        assert mcp_profile.config_overrides.features.mcp.enabled is True
+        assert mcp_profile.config_overrides.ui.name == "MCP Assistant"
+        assert mcp_profile.config_overrides.ui.default_theme == "dark"
+
+        # Test light theme profile
+        light_profile = result[2]
+        assert light_profile.name == "Light Theme Profile"
+        assert light_profile.config_overrides is not None
+        assert light_profile.config_overrides.ui.name == "Light Theme App"
+        assert light_profile.config_overrides.ui.default_theme == "light"
