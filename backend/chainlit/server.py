@@ -799,7 +799,7 @@ async def project_settings(
     ui_config = config.ui.model_dump()
     features_config = config.features.model_dump()
     project_config = {"userEnv": config.project.user_env}
-    
+
     if chat_profile and config.code.set_chat_profiles:
         # Find the current chat profile and apply overrides
         chat_profiles = await config.code.set_chat_profiles(current_user)
@@ -809,24 +809,32 @@ async def project_settings(
             )
             if current_profile and current_profile.config_overrides:
                 overrides = current_profile.config_overrides
-                
+
                 # Apply UI overrides
                 if overrides.ui:
                     ui_overrides = overrides.ui.model_dump(exclude_none=True)
                     ui_config.update(ui_overrides)
-                
+
                 # Apply feature overrides
                 if overrides.features:
-                    features_overrides = overrides.features.model_dump(exclude_none=True)
+                    features_overrides = overrides.features.model_dump(
+                        exclude_none=True
+                    )
+
                     # Deep merge features configuration
                     def deep_merge(base, overrides):
                         for key, value in overrides.items():
-                            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+                            if (
+                                key in base
+                                and isinstance(base[key], dict)
+                                and isinstance(value, dict)
+                            ):
                                 deep_merge(base[key], value)
                             else:
                                 base[key] = value
+
                     deep_merge(features_config, features_overrides)
-                
+
                 # Apply project overrides
                 if overrides.project:
                     project_overrides = overrides.project.model_dump(exclude_none=True)

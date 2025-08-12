@@ -401,7 +401,7 @@ class ProjectSettings(BaseModel):
 
 class ChainlitConfigOverrides(BaseModel):
     """Configuration overrides that can be applied to specific chat profiles."""
-    
+
     ui: Optional[UISettings] = None
     features: Optional[FeaturesSettings] = None
     project: Optional[ProjectSettings] = None
@@ -409,7 +409,7 @@ class ChainlitConfigOverrides(BaseModel):
 
 class ChainlitConfig(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
-    
+
     # Directory where the Chainlit project is located
     root: str = APP_ROOT
     # Chainlit server URL. Used only for cloud features
