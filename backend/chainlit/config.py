@@ -394,6 +394,14 @@ class ProjectSettings(BaseModel):
     cache: bool = False
 
 
+class ChainlitConfigOverrides(BaseModel):
+    """Configuration overrides that can be applied to specific chat profiles."""
+    
+    ui: Optional[UISettings] = None
+    features: Optional[FeaturesSettings] = None
+    project: Optional[ProjectSettings] = None
+
+
 class ChainlitConfig(BaseModel):
     # Directory where the Chainlit project is located
     root: ClassVar = APP_ROOT
@@ -602,3 +610,9 @@ def lint_translations():
 
 
 config = load_config()
+
+
+# Rebuild ChatProfile dataclass after ChainlitConfigOverrides is defined
+from pydantic.dataclasses import rebuild_dataclass
+from chainlit.types import ChatProfile
+rebuild_dataclass(ChatProfile)

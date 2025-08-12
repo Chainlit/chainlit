@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -20,7 +22,7 @@ if TYPE_CHECKING:
 
 from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass
+from pydantic.dataclasses import dataclass, rebuild_dataclass
 
 InputWidgetType = Literal[
     "switch", "slider", "select", "textinput", "tags", "numberinput"
@@ -293,6 +295,7 @@ class ChatProfile(DataClassJsonMixin):
     icon: Optional[str] = None
     default: bool = False
     starters: Optional[List[Starter]] = None
+    config_overrides: Optional["ChainlitConfigOverrides"] = None
 
 
 FeedbackStrategy = Literal["BINARY"]

@@ -762,18 +762,26 @@ async def project_settings(
     language: str = Query(
         default="en-US", description="Language code", pattern=_language_pattern
     ),
+    chat_profile: Optional[str] = Query(
+        default=None, description="Current chat profile name"
+    ),
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
 
     # Load the markdown file based on the provided language
-
     markdown = get_markdown_str(config.root, language)
 
     profiles = []
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
-            profiles = [p.to_dict() for p in chat_profiles]
+            # Custom serialization to handle ChainlitConfigOverrides
+            for p in chat_profiles:
+                profile_dict = p.to_dict()
+                # Remove config_overrides from the serialized profile since it's used server-side only
+                if 'config_overrides' in profile_dict:
+                    del profile_dict['config_overrides']
+                profiles.append(profile_dict)
 
     starters = []
     if config.code.set_starters:
@@ -793,11 +801,49 @@ async def project_settings(
     if data_layer and config.run.debug:
         debug_url = await data_layer.build_debug_url()
 
+    # Apply profile-specific configuration overrides
+    ui_config = config.ui.model_dump()
+    features_config = config.features.model_dump()
+    project_config = {"userEnv": config.project.user_env}
+    
+    if chat_profile and config.code.set_chat_profiles:
+        # Find the current chat profile and apply overrides
+        chat_profiles = await config.code.set_chat_profiles(current_user)
+        if chat_profiles:
+            current_profile = next(
+                (p for p in chat_profiles if p.name == chat_profile), None
+            )
+            if current_profile and current_profile.config_overrides:
+                overrides = current_profile.config_overrides
+                
+                # Apply UI overrides
+                if overrides.ui:
+                    ui_overrides = overrides.ui.model_dump(exclude_none=True)
+                    ui_config.update(ui_overrides)
+                
+                # Apply feature overrides
+                if overrides.features:
+                    features_overrides = overrides.features.model_dump(exclude_none=True)
+                    # Deep merge features configuration
+                    def deep_merge(base, overrides):
+                        for key, value in overrides.items():
+                            if key in base and isinstance(base[key], dict) and isinstance(value, dict):
+                                deep_merge(base[key], value)
+                            else:
+                                base[key] = value
+                    deep_merge(features_config, features_overrides)
+                
+                # Apply project overrides
+                if overrides.project:
+                    project_overrides = overrides.project.model_dump(exclude_none=True)
+                    if "user_env" in project_overrides:
+                        project_config["userEnv"] = project_overrides["user_env"]
+
     return JSONResponse(
         content={
-            "ui": config.ui.model_dump(),
-            "features": config.features.model_dump(),
-            "userEnv": config.project.user_env,
+            "ui": ui_config,
+            "features": features_config,
+            "userEnv": project_config["userEnv"],
             "dataPersistence": get_data_layer() is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
