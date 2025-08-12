@@ -713,7 +713,6 @@ def get_session_config():
 def _merge_dataclass_with_dict(dataclass_instance, overrides: Dict[str, Any]):
     """Merge dictionary overrides into a dataclass instance."""
     from dataclasses import fields, is_dataclass
-    from typing import Any, cast
     
     if not is_dataclass(dataclass_instance):
         return dataclass_instance

@@ -1365,7 +1365,7 @@ def validate_file_upload(file: UploadFile):
     try:
         session_config = get_session_config()
         upload_config = session_config.features.spontaneous_file_upload
-    except:
+    except Exception:
         upload_config = config.features.spontaneous_file_upload
 
     if upload_config is None:
@@ -1393,7 +1393,7 @@ def validate_file_mime_type(file: UploadFile):
     try:
         session_config = get_session_config()
         upload_config = session_config.features.spontaneous_file_upload
-    except:
+    except Exception:
         upload_config = config.features.spontaneous_file_upload
 
     if (
@@ -1439,7 +1439,7 @@ def validate_file_size(file: UploadFile):
     try:
         session_config = get_session_config()
         upload_config = session_config.features.spontaneous_file_upload
-    except:
+    except Exception:
         upload_config = config.features.spontaneous_file_upload
         
     if (
