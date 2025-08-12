@@ -779,8 +779,8 @@ async def project_settings(
             for p in chat_profiles:
                 profile_dict = p.to_dict()
                 # Remove config_overrides from the serialized profile since it's used server-side only
-                if 'config_overrides' in profile_dict:
-                    del profile_dict['config_overrides']
+                if "config_overrides" in profile_dict:
+                    del profile_dict["config_overrides"]
                 profiles.append(profile_dict)
 
     starters = []
@@ -788,12 +788,6 @@ async def project_settings(
         starters = await config.code.set_starters(current_user)
         if starters:
             starters = [s.to_dict() for s in starters]
-
-    if config.code.on_audio_chunk:
-        config.features.audio.enabled = True
-
-    if config.code.on_mcp_connect:
-        config.features.mcp.enabled = True
 
     debug_url = None
     data_layer = get_data_layer()
@@ -1179,7 +1173,7 @@ async def connect_mcp(
                 status_code=401,
             )
 
-    mcp_enabled = config.code.on_mcp_connect is not None
+    mcp_enabled = config.features.mcp.enabled
     if mcp_enabled:
         if payload.name in session.mcp_sessions:
             old_client_session, old_exit_stack = session.mcp_sessions[payload.name]

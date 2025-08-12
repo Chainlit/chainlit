@@ -17,12 +17,13 @@ from typing import (
 )
 
 if TYPE_CHECKING:
+    from chainlit.config import ChainlitConfigOverrides
     from chainlit.element import ElementDict
     from chainlit.step import StepDict
 
 from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
-from pydantic.dataclasses import dataclass, rebuild_dataclass
+from pydantic.dataclasses import dataclass
 
 InputWidgetType = Literal[
     "switch", "slider", "select", "textinput", "tags", "numberinput"
@@ -33,31 +34,31 @@ ToastType = Literal["info", "success", "warning", "error"]
 class ThreadDict(TypedDict):
     id: str
     createdAt: str
-    name: Optional[str]
-    userId: Optional[str]
-    userIdentifier: Optional[str]
-    tags: Optional[List[str]]
-    metadata: Optional[Dict]
-    steps: List["StepDict"]
-    elements: Optional[List["ElementDict"]]
+    name: str | None
+    userId: str | None
+    userIdentifier: str | None
+    tags: List[str] | None
+    metadata: Dict | None
+    steps: List[StepDict]
+    elements: List[ElementDict] | None
 
 
 class Pagination(BaseModel):
     first: int
-    cursor: Optional[str] = None
+    cursor: str | None = None
 
 
 class ThreadFilter(BaseModel):
-    feedback: Optional[Literal[0, 1]] = None
-    userId: Optional[str] = None
-    search: Optional[str] = None
+    feedback: Literal[0, 1] | None = None
+    userId: str | None = None
+    search: str | None = None
 
 
 @dataclass
 class PageInfo:
     hasNextPage: bool
-    startCursor: Optional[str]
-    endCursor: Optional[str]
+    startCursor: str | None
+    endCursor: str | None
 
     def to_dict(self):
         return {
@@ -282,8 +283,8 @@ class Starter(DataClassJsonMixin):
 
     label: str
     message: str
-    command: Optional[str] = None
-    icon: Optional[str] = None
+    command: str | None = None
+    icon: str | None = None
 
 
 @dataclass
@@ -292,10 +293,10 @@ class ChatProfile(DataClassJsonMixin):
 
     name: str
     markdown_description: str
-    icon: Optional[str] = None
+    icon: str | None = None
     default: bool = False
-    starters: Optional[List[Starter]] = None
-    config_overrides: Optional["ChainlitConfigOverrides"] = None
+    starters: List[Starter] | None = None
+    config_overrides: "ChainlitConfigOverrides | None" = None
 
 
 FeedbackStrategy = Literal["BINARY"]

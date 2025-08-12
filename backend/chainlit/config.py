@@ -9,7 +9,6 @@ from typing import (
     Any,
     Awaitable,
     Callable,
-    ClassVar,
     Dict,
     List,
     Literal,
@@ -18,7 +17,7 @@ from typing import (
 )
 
 import tomli
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import Headers
 
 from chainlit.data.base import BaseDataLayer
@@ -118,8 +117,14 @@ reaction_on_message_received = false
     max_size_mb = 500
 
 [features.audio]
+    # Enable audio features
+    enabled = false
     # Sample rate of the audio
     sample_rate = 24000
+
+[features.mcp]
+    # Enable Model Context Protocol (MCP) features
+    enabled = false
 
 [features.mcp.sse]
     enabled = true
@@ -403,8 +408,10 @@ class ChainlitConfigOverrides(BaseModel):
 
 
 class ChainlitConfig(BaseModel):
+    model_config = ConfigDict(extra="allow")
+    
     # Directory where the Chainlit project is located
-    root: ClassVar = APP_ROOT
+    root: str = APP_ROOT
     # Chainlit server URL. Used only for cloud features
     chainlit_server: str
     run: RunSettings
@@ -610,9 +617,3 @@ def lint_translations():
 
 
 config = load_config()
-
-
-# Rebuild ChatProfile dataclass after ChainlitConfigOverrides is defined
-from pydantic.dataclasses import rebuild_dataclass
-from chainlit.types import ChatProfile
-rebuild_dataclass(ChatProfile)
