@@ -296,7 +296,8 @@ class ChatProfile(DataClassJsonMixin):
     icon: str | None = None
     default: bool = False
     starters: List[Starter] | None = None
-    config_overrides: "ChainlitConfigOverrides | None" = None
+    # Configuration overrides for this profile - type: ChainlitConfigOverrides | None
+    config_overrides: Any = None
 
 
 FeedbackStrategy = Literal["BINARY"]
