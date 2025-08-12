@@ -795,8 +795,8 @@ async def project_settings(
 
     return JSONResponse(
         content={
-            "ui": config.ui.to_dict(),
-            "features": config.features.to_dict(),
+            "ui": config.ui.model_dump(),
+            "features": config.features.model_dump(),
             "userEnv": config.project.user_env,
             "dataPersistence": get_data_layer() is not None,
             "threadResumable": bool(config.code.on_chat_resume),
