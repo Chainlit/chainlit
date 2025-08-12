@@ -1,9 +1,8 @@
 import { cn } from '@/lib/utils';
-import { useEffect } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 import { router } from 'router';
-
+import { useEffect, useState } from 'react';
 import { useAuth, useChatSession, useConfig } from '@chainlit/react-client';
 
 import ChatSettingsModal from './components/ChatSettings';
@@ -32,6 +31,11 @@ function App() {
   const { connect, chatProfile, setChatProfile } = useChatSession();
 
   const configLoaded = !!config;
+
+  const [bootstrapped, setBootstrapped] = useState(false);
+  useEffect(() => {
+    if (isReady) setBootstrapped(true); // once ready, never show overlay again
+  }, [isReady]);
 
   const chatProfileOk = configLoaded
     ? config.chatProfiles.length
@@ -73,6 +77,8 @@ function App() {
 
   if (!configLoaded && isAuthenticated) return null;
 
+  const showBootOverlay = !bootstrapped && !isReady;
+
   return (
     <ThemeProvider
       storageKey="vite-ui-theme"
@@ -86,7 +92,7 @@ function App() {
       <div
         className={cn(
           'bg-[hsl(var(--background))] flex items-center justify-center fixed size-full p-2 top-0',
-          isReady && 'hidden'
+          !showBootOverlay && 'hidden'
         )}
       >
         <Loader className="!size-6" />
