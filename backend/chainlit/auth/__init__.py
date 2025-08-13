@@ -30,12 +30,7 @@ def is_oauth_enabled():
 
 
 def require_login():
-    return (
-        bool(os.environ.get("CHAINLIT_AUTH_SECRET"))
-        or config.code.password_auth_callback is not None
-        or config.code.header_auth_callback is not None
-        or is_oauth_enabled()
-    )
+    return bool(os.environ.get("CHAINLIT_AUTH_SECRET"))
 
 
 def get_configuration():
