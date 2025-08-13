@@ -226,7 +226,7 @@ class SafariWebSocketsCompatibleGZipMiddleware(GZipMiddleware):
             return await self.app(scope, receive, send)
 
         # Prevent gzip compression for HTTP requests to socket.io path due to a bug in Safari
-        if SOCKET_IO_PATH in scope["path"]:
+        if URL(scope=scope).path.startswith(SOCKET_IO_PATH):
             await self.app(scope, receive, send)
         else:
             await super().__call__(scope, receive, send)
