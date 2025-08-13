@@ -222,6 +222,9 @@ app.add_middleware(
 
 class SafariWebSocketsCompatibleGZipMiddleware(GZipMiddleware):
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
         # Prevent gzip compression for HTTP requests to socket.io path due to a bug in Safari
         if SOCKET_IO_PATH in scope["path"]:
             await self.app(scope, receive, send)
