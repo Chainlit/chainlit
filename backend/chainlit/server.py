@@ -30,6 +30,7 @@ from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Redirect
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
+from starlette.types import Receive, Scope, Send
 from typing_extensions import Annotated
 from watchfiles import awatch
 
@@ -207,7 +208,8 @@ sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
-app.mount(f"{config.run.root_path}/ws/socket.io", asgi_app)
+SOCKET_IO_PATH = f"{config.run.root_path}/ws/socket.io"
+app.mount(SOCKET_IO_PATH, asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -217,7 +219,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.add_middleware(GZipMiddleware)
+
+class SafariWebSocketsCompatibleGZipMiddleware(GZipMiddleware):
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        # Prevent gzip compression for HTTP requests to socket.io path due to a bug in Safari
+        if URL(scope=scope).path.startswith(SOCKET_IO_PATH):
+            await self.app(scope, receive, send)
+        else:
+            await super().__call__(scope, receive, send)
+
+
+app.add_middleware(SafariWebSocketsCompatibleGZipMiddleware)
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
 router = APIRouter(prefix=config.run.root_path)
