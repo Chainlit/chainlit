@@ -4,6 +4,30 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.8] - 2025-08-08
+
+### Other
+
+- Reverted PR with newline preservation in messages due to incorrect rendering in child components like lists
+
+## [2.6.7] - 2025-08-07
+
+### Fixed
+- Formatting when pasting HTML code and newlines in received messages
+
+## [2.6.6] - 2025-08-05
+
+### Added
+- Add support for emoji reaction on message received in Slack
+- Add Greek translation
+- Copy both plain text and rich text to clipboard, if available (rich text pasting to editors like Word)
+- Rename `CHAINLIT_COOKIE_PATH` to `CHAINLIT_AUTH_COOKIE_PATH` and now espect CHAINLIT_ROOT_PATH
+- Add language parameter to Copilot widget configuration
+
+### Fixed
+- Prevent HTML code in user message to be rendered as HTML instead of displaying as code
+- Properly parse `user_env` when `config.project.user_env` is empty
+
 ## [2.6.5] - 2025-08-02
 
 ### Fixed

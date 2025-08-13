@@ -32,7 +32,7 @@ jobs:
     steps:
       # Propagate failure
       - name: Check dependent jobs
-        if: contains(needs.*.result, 'success') != true || contains(needs.*.result, 'skipped')
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'action_required') || contains(needs.*.result, 'timed_out')
         run: |
           echo "Not all required jobs succeeded"
           exit 1

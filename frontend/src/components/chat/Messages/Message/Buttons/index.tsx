@@ -15,9 +15,10 @@ interface Props {
   message: IStep;
   actions: IAction[];
   run?: IStep;
+  contentRef?: React.RefObject<HTMLDivElement>;
 }
 
-const MessageButtons = ({ message, actions, run }: Props) => {
+const MessageButtons = ({ message, actions, run, contentRef }: Props) => {
   const { config } = useConfig();
   const { firstInteraction } = useChatMessages();
 
@@ -39,7 +40,9 @@ const MessageButtons = ({ message, actions, run }: Props) => {
 
   return (
     <div className="-ml-1.5 flex items-center flex-wrap">
-      {showCopyButton ? <CopyButton content={message.output} /> : null}
+      {showCopyButton ? (
+        <CopyButton content={message.output} contentRef={contentRef} />
+      ) : null}
       {run ? <FeedbackButtons message={run} /> : null}
       {messageActions.length ? (
         <MessageActions actions={messageActions} />
