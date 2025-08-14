@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 import aiofiles
 import asyncpg  # type: ignore
 
-from chainlit.data.storage_clients.azure_blob import AzureBlobStorageClient
+from chainlit.data.storage_clients.gcs import GCSStorageClient
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.data.utils import queue_until_user_message
@@ -200,7 +200,7 @@ class ChainlitDataLayer(BaseDataLayer):
             path = f"files/{element.id}"
 
         if content is not None:
-            if isinstance(self.storage_client, AzureBlobStorageClient):
+            if not isinstance(self.storage_client, GCSStorageClient):
                 await self.storage_client.upload_file(
                     object_key=path,
                     data=content,
