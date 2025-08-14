@@ -9,6 +9,7 @@ from typing import (
     Generic,
     List,
     Literal,
+    Optional,
     Protocol,
     TypedDict,
     TypeVar,
@@ -32,18 +33,18 @@ ToastType = Literal["info", "success", "warning", "error"]
 class ThreadDict(TypedDict):
     id: str
     createdAt: str
-    name: str | None
-    userId: str | None
-    userIdentifier: str | None
-    tags: List[str] | None
-    metadata: Dict | None
+    name: Optional[str]
+    userId: Optional[str]
+    userIdentifier: Optional[str]
+    tags: Optional[List[str]]
+    metadata: Optional[Dict]
     steps: List[StepDict]
-    elements: List[ElementDict] | None
+    elements: Optional[List[ElementDict]]
 
 
 class Pagination(BaseModel):
     first: int
-    cursor: str | None = None
+    cursor: Optional[str] = None
 
 
 class ThreadFilter(BaseModel):
@@ -55,8 +56,8 @@ class ThreadFilter(BaseModel):
 @dataclass
 class PageInfo:
     hasNextPage: bool
-    startCursor: str | None
-    endCursor: str | None
+    startCursor: Optional[str]
+    endCursor: Optional[str]
 
     def to_dict(self):
         return {
@@ -111,7 +112,7 @@ class PaginatedResponse(Generic[T]):
 
 @dataclass
 class FileSpec(DataClassJsonMixin):
-    accept: List[str] | Dict[str, List[str]]
+    accept: Union[List[str], Dict[str, List[str]]]
     max_files: int
     max_size_mb: int
 
@@ -161,7 +162,7 @@ class FileDict(TypedDict):
 
 class MessagePayload(TypedDict):
     message: StepDict
-    fileReferences: List[FileReference] | None
+    fileReferences: Optional[List[FileReference]]
 
 
 class InputAudioChunkPayload(TypedDict):
@@ -243,7 +244,7 @@ class ConnectSseMCPRequest(BaseModel):
     name: str
     url: str
     # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
-    headers: Dict[str, str] | None = None
+    headers: Optional[Dict[str, str]] = None
 
 
 class ConnectStreamableHttpMCPRequest(BaseModel):
@@ -281,8 +282,8 @@ class Starter(DataClassJsonMixin):
 
     label: str
     message: str
-    command: str | None = None
-    icon: str | None = None
+    command: Optional[str] = None
+    icon: Optional[str] = None
 
 
 @dataclass
@@ -291,9 +292,9 @@ class ChatProfile(DataClassJsonMixin):
 
     name: str
     markdown_description: str
-    icon: str | None = None
+    icon: Optional[str] = None
     default: bool = False
-    starters: List[Starter] | None = None
+    starters: Optional[List[Starter]] = None
     config_overrides: Any = None
 
 
@@ -308,25 +309,25 @@ class CommandDict(TypedDict):
     # The lucide icon name
     icon: str
     # Display the command as a button in the composer
-    button: bool | None
+    button: Optional[bool]
     # Whether the command will be persistent unless the user toggles it
-    persistent: bool | None
+    persistent: Optional[bool]
 
 
 class FeedbackDict(TypedDict):
     forId: str
-    id: str | None
+    id: Optional[str]
     value: Literal[0, 1]
-    comment: str | None
+    comment: Optional[str]
 
 
 @dataclass
 class Feedback:
     forId: str
     value: Literal[0, 1]
-    threadId: str | None = None
-    id: str | None = None
-    comment: str | None = None
+    threadId: Optional[str] = None
+    id: Optional[str] = None
+    comment: Optional[str] = None
 
 
 class UpdateFeedbackRequest(BaseModel):

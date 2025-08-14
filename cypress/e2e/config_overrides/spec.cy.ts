@@ -8,7 +8,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
     cy.get('#chat-input').should('exist');
-    cy.wait(1000);
   });
 
   it('should show MCP button only for profiles with MCP enabled', () => {
@@ -16,7 +15,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:Default Profile"]').click();
     cy.get('#confirm').click();
-    cy.wait(1000);
 
     // MCP button should not be visible
     cy.get('[data-testid="mcp-button"]').should('not.exist');
@@ -28,7 +26,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Enabled"]').click();
     cy.get('#confirm').click();
-    cy.wait(1000);
 
     // MCP button should now be visible
     cy.get('.lucide-plug').should('exist');
@@ -40,13 +37,11 @@ describe('Config Overrides with Chat Profiles', () => {
     
     // Close the MCP dialog
     cy.get('body').type('{esc}');
-    cy.wait(500);
 
     // Switch to MCP disabled profile
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Disabled"]').click();
     cy.get('#confirm').click();
-    cy.wait(1000);
 
     // MCP button should not be visible again
     cy.get('[data-testid="mcp-button"]').should('not.exist');
@@ -58,7 +53,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Enabled"]').click();
     cy.get('#confirm').click();
-    cy.wait(1000);
 
     submitMessage('Hello with MCP');
     
@@ -78,7 +72,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:Default Profile"]').click();
     cy.get('#confirm').click();
-    cy.wait(1000);
 
     submitMessage('Hello without MCP');
     
@@ -100,7 +93,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Enabled"]').click();
     cy.get('#confirm').click();
-    cy.wait(1000);
 
     // The UI should reflect the overridden name
     // This tests that config merging is working properly
@@ -124,25 +116,21 @@ describe('Config Overrides with Chat Profiles', () => {
     // Test rapid switching between profiles
     cy.get('[data-test="select-item:MCP Enabled"]').click();
     cy.get('#confirm').click();
-    cy.wait(500);
     cy.get('.lucide-plug').should('exist');
 
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Disabled"]').click();
     cy.get('#confirm').click();
-    cy.wait(500);
     cy.get('.lucide-plug').should('not.exist');
 
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:Default Profile"]').click();
     cy.get('#confirm').click();
-    cy.wait(500);
     cy.get('.lucide-plug').should('not.exist');
 
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Enabled"]').click();
     cy.get('#confirm').click();
-    cy.wait(500);
     cy.get('.lucide-plug').should('exist');
   });
 });
