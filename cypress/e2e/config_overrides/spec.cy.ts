@@ -4,23 +4,8 @@ describe('Config Overrides with Chat Profiles', () => {
   beforeEach(() => {
     cy.visit('/');
     
-    // Add some debugging and more robust waiting
-    cy.url().should('include', '/');
-    
-    // Wait for the login form to be visible
-    cy.get("input[name='email']", { timeout: 10000 }).should('be.visible');
-    cy.get("input[name='password']", { timeout: 10000 }).should('be.visible');
-    
-    // Login as admin
-    cy.get("input[name='email']").type('admin');
-    cy.get("input[name='password']").type('admin');
-    cy.get("button[type='submit']").click();
-    
-    // Wait for successful login and chat interface to load
+    // Wait for the chat interface to load
     cy.get('#chat-input', { timeout: 15000 }).should('exist').should('be.visible');
-    
-    // Additional wait to ensure the page is fully loaded
-    cy.wait(1000);
   });
 
   it('should show MCP button only for profiles with MCP enabled', () => {
@@ -30,9 +15,6 @@ describe('Config Overrides with Chat Profiles', () => {
     // Wait for profile options to appear
     cy.get('[data-test="select-item:Default Profile"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
-
-    // Wait for profile change to take effect
-    cy.wait(1000);
 
     // MCP button should not be visible
     cy.get('[data-testid="mcp-button"]').should('not.exist');
@@ -44,9 +26,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Enabled"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
-
-    // Wait for profile change and MCP to load
-    cy.wait(2000);
 
     // MCP button should now be visible
     cy.get('.lucide-plug', { timeout: 10000 }).should('exist').should('be.visible');
@@ -64,9 +43,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('[data-test="select-item:MCP Disabled"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
 
-    // Wait for profile change
-    cy.wait(1000);
-
     // MCP button should not be visible again
     cy.get('[data-testid="mcp-button"]').should('not.exist');
     cy.get('.lucide-plug').should('not.exist');
@@ -77,9 +53,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles', { timeout: 10000 }).should('be.visible').click();
     cy.get('[data-test="select-item:MCP Enabled"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
-
-    // Wait for profile change
-    cy.wait(2000);
 
     submitMessage('Hello with MCP');
     
@@ -99,9 +72,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:Default Profile"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
-
-    // Wait for profile change
-    cy.wait(1000);
 
     submitMessage('Hello without MCP');
     
@@ -123,9 +93,6 @@ describe('Config Overrides with Chat Profiles', () => {
     cy.get('#chat-profiles', { timeout: 10000 }).should('be.visible').click();
     cy.get('[data-test="select-item:MCP Enabled"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
-
-    // Wait for profile change
-    cy.wait(2000);
 
     // The UI should reflect the overridden name
     // This tests that config merging is working properly
@@ -149,25 +116,21 @@ describe('Config Overrides with Chat Profiles', () => {
     // Test rapid switching between profiles
     cy.get('[data-test="select-item:MCP Enabled"]').click();
     cy.get('#confirm').click();
-    cy.wait(2000);
     cy.get('.lucide-plug', { timeout: 10000 }).should('exist');
 
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Disabled"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
-    cy.wait(1000);
     cy.get('.lucide-plug').should('not.exist');
 
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:Default Profile"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
-    cy.wait(1000);
     cy.get('.lucide-plug').should('not.exist');
 
     cy.get('#chat-profiles').click();
     cy.get('[data-test="select-item:MCP Enabled"]', { timeout: 5000 }).should('be.visible').click();
     cy.get('#confirm').click();
-    cy.wait(2000);
     cy.get('.lucide-plug', { timeout: 10000 }).should('exist');
   });
 });
