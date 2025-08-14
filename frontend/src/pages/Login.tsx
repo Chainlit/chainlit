@@ -50,7 +50,7 @@ export default function Login() {
     const jsonPromise = apiClient.headerAuth();
 
     // Why does apiClient redirect to '/' but handlePasswordLogin to callbackUrl?
-    handleAuth(jsonPromise, '/');
+    await handleAuth(jsonPromise, '/');
   };
 
   const handlePasswordLogin = async (email: string, password: string) => {
@@ -59,7 +59,7 @@ export default function Login() {
     formData.append('password', password);
 
     const jsonPromise = apiClient.passwordAuth(formData);
-    handleAuth(jsonPromise);
+    await handleAuth(jsonPromise);
   };
 
   useEffect(() => {
