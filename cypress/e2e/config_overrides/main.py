@@ -42,6 +42,4 @@ async def chat_profile(current_user: cl.User):
 @cl.on_message
 async def on_message():
     chat_profile = cl.user_session.get("chat_profile")
-    await cl.Message(
-        content=f"Chat using {chat_profile} profile"
-    ).send()
+    await cl.Message(content=f"Chat using {chat_profile} profile").send()
