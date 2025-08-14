@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 import aiofiles
 import asyncpg  # type: ignore
 
+from backend.chainlit.data.storage_clients.azure_blob import AzureBlobStorageClient
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.data.utils import queue_until_user_message
@@ -199,12 +200,21 @@ class ChainlitDataLayer(BaseDataLayer):
             path = f"files/{element.id}"
 
         if content is not None:
-            await self.storage_client.upload_file(
-                object_key=path,
-                data=content,
-                mime=element.mime or "application/octet-stream",
-                overwrite=True,
-            )
+            if isinstance(self.storage_client, AzureBlobStorageClient):
+                await self.storage_client.upload_file(
+                    object_key=path,
+                    data=content,
+                    mime=element.mime or "application/octet-stream",
+                    overwrite=True,
+                    content_disposition=f"attachment; filename=\"{element.name}\"",
+                )
+            else:
+                await self.storage_client.upload_file(
+                    object_key=path,
+                    data=content,
+                    mime=element.mime or "application/octet-stream",
+                    overwrite=True,
+                )
 
         query = """
         INSERT INTO "Element" (
