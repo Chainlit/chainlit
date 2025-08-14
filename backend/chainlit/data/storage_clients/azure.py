@@ -61,12 +61,13 @@ class AzureStorageClient(BaseStorageClient):
         data: Union[bytes, str],
         mime: str = "application/octet-stream",
         overwrite: bool = True,
+        content_disposition: str = "",
     ) -> Dict[str, Any]:
         try:
             file_client: DataLakeFileClient = self.container_client.get_file_client(
                 object_key
             )
-            content_settings = ContentSettings(content_type=mime)
+            content_settings = ContentSettings(content_type=mime, content_disposition=content_disposition)
             file_client.upload_data(
                 data, overwrite=overwrite, content_settings=content_settings
             )
