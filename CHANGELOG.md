@@ -4,6 +4,20 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.6.9] - 2025-08-14
+
+### Added
+- Add GitHub Copilot instructions for automated PRs
+- (Slack) Add threadId for user feedback
+- (Copilot) Add new optional opened property has been added to the widget config
+
+### Fixed
+- Fix blinking cursor indicator
+- (Copilot) Rename copilot inner div id `chainlit-copilot` to `chainlit-copilot-chat` due to naming conflict with the outer div
+- Disable gzip for websocket-relaed http endpoint (Safari compatibility)
+- Prevent constant refresh on the login screen when using custom authenication
+- Fix MCP type hints
+
 ## [2.6.8] - 2025-08-08
 
 ### Other
