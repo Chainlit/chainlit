@@ -1561,6 +1561,32 @@ async def serve(request: Request):
     return response
 
 
+@router.post("/project/thread/{thread_id}/share")
+async def share_thread(
+    request: Request,
+    thread_id: str,
+    current_user: UserParam,
+):
+    """Share a thread by making it public."""
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    # Get the original thread
+    thread = await data_layer.get_thread(thread_id)
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    await data_layer.update_thread(
+        thread_id=thread_id, metadata={**thread.get("metadata", {}), "is_shared": True}
+    )
+    return JSONResponse(content={"success": True, "threadId": thread_id})
+
+
 app.include_router(router)
 
 import chainlit.socket  # noqa
