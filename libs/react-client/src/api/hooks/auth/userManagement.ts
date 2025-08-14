@@ -10,17 +10,14 @@ export const useUserManagement = () => {
   const {
     data: userData,
     error,
-    isLoading,
     mutate: setUserFromAPI
   } = useApi<IUser>('/user');
 
   useEffect(() => {
     if (userData) {
       setUser(userData);
-    } else if (isLoading) {
-      setUser(undefined);
     }
-  }, [userData, isLoading, setUser]);
+  }, [userData, setUser]);
 
   useEffect(() => {
     if (error) {
