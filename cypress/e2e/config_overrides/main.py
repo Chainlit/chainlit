@@ -1,5 +1,3 @@
-from typing import Optional
-
 import chainlit as cl
 from chainlit.config import (
     ChainlitConfigOverrides,
