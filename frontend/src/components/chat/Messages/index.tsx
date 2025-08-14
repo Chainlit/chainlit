@@ -50,7 +50,9 @@ const Messages = memo(
           // Handle chainlit runs
           if (CL_RUN_NAMES.includes(m.name)) {
             const isRunning = !m.end && !m.isError && messageContext.loading;
-            const isToolCallCoT = messageContext.cot === 'tool_call';
+            const isToolCallCoT =
+              messageContext.cot === 'tool_call' ||
+              messageContext.cot === 'full';
             const isHiddenCoT = messageContext.cot === 'hidden';
 
             const showToolCoTLoader = isToolCallCoT
