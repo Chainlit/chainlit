@@ -39,7 +39,7 @@ describe('Config overrides with chat profiles', () => {
     cy.get('#confirm').click();
 
     // Verify we're on a thread page after profile switch
-    cy.location('pathname').should('match', /^\/thread\//);
+    cy.location('pathname').should('eq', '/');
     cy.get('#starter-mcp-test').should('not.be.disabled').click();
 
     cy.get('.step')
@@ -132,7 +132,7 @@ describe('Config overrides with chat profiles', () => {
     cy.get('[data-test="select-item:MCP Enabled"]').click();
 
     // Verify we're on a thread page after profile selection
-    cy.location('pathname').should('match', /^\/thread\//);
+    cy.location('pathname').should('eq', '/');
     cy.get('.lucide-plug').should('exist');
 
     // Verify the profile has been changed
