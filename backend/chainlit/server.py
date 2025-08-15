@@ -823,7 +823,7 @@ async def project_settings(
                     (p for p in chat_profiles if p.name == chat_profile), None
                 )
                 
-                if current_profile and (overrides := getattr(current_profile, 'config_overrides', None)):
+                if current_profile and (overrides := getattr(current_profile, "config_overrides", None)):
                     def apply_model_override(base_config, override_attr):
                         if override := getattr(overrides, override_attr, None):
                             return base_config.model_copy(
@@ -831,10 +831,10 @@ async def project_settings(
                             )
                         return base_config
 
-                    ui_config = apply_model_override(ui_config, 'ui')
-                    features_config = apply_model_override(features_config, 'features')
+                    ui_config = apply_model_override(ui_config, "ui")
+                    features_config = apply_model_override(features_config, "features")
 
-                    if project_override := getattr(overrides, 'project', None):
+                    if project_override := getattr(overrides, "project", None):
                         project_overrides = project_override.model_dump(exclude_none=True)
                         if "user_env" in project_overrides:
                             project_config["userEnv"] = project_overrides["user_env"]
