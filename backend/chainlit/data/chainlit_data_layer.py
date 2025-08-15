@@ -200,20 +200,13 @@ class ChainlitDataLayer(BaseDataLayer):
             path = f"files/{element.id}"
 
         if content is not None:
-            if not isinstance(self.storage_client, GCSStorageClient):
-                await self.storage_client.upload_file(
-                    object_key=path,
-                    data=content,
-                    mime=element.mime or "application/octet-stream",
-                    overwrite=True,
-                    content_disposition=f"attachment; filename=\"{element.name}\"",
-                )
-            else:
-                await self.storage_client.upload_file(
-                    object_key=path,
-                    data=content,
-                    mime=element.mime or "application/octet-stream",
-                    overwrite=True,
+            content_disposition = f"attachment; filename=\"{element.name}\"" if not isinstance(self.storage_client, GCSStorageClient) else None
+            await self.storage_client.upload_file(
+                object_key=path,
+                data=content,
+                mime=element.mime or "application/octet-stream",
+                overwrite=True,
+                content_disposition=content_disposition,
                 )
 
         query = """
