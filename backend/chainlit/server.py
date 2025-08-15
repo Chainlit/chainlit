@@ -811,50 +811,39 @@ async def project_settings(
         debug_url = await data_layer.build_debug_url()
 
     # Apply profile-specific configuration overrides
-    ui_config = config.ui.model_dump()
-    features_config = config.features.model_dump()
+    ui_config = config.ui
+    features_config = config.features
     project_config = {"userEnv": config.project.user_env}
 
     if chat_profile and config.code.set_chat_profiles:
-        # Find the current chat profile and apply overrides
-        chat_profiles = await config.code.set_chat_profiles(current_user)
-        if chat_profiles:
-            current_profile = next(
-                (p for p in chat_profiles if p.name == chat_profile), None
-            )
-            if current_profile and current_profile.config_overrides:
-                overrides = current_profile.config_overrides
+        try:
+            chat_profiles = await config.code.set_chat_profiles(current_user)
+            if chat_profiles:
+                current_profile = next(
+                    (p for p in chat_profiles if p.name == chat_profile), None
+                )
+                
+                if current_profile and (overrides := getattr(current_profile, 'config_overrides', None)):
+                    def apply_model_override(base_config, override_attr):
+                        if override := getattr(overrides, override_attr, None):
+                            return base_config.model_copy(
+                                update=override.model_dump(exclude_none=True), deep=True
+                            )
+                        return base_config
 
-                # Apply UI overrides
-                if overrides.ui:
-                    ui_overrides = overrides.ui.model_dump(exclude_none=True)
-                    ui_config.update(ui_overrides)
+                    ui_config = apply_model_override(ui_config, 'ui')
+                    features_config = apply_model_override(features_config, 'features')
 
-                # Apply feature overrides
-                if overrides.features:
-                    features_overrides = overrides.features.model_dump(
-                        exclude_none=True
-                    )
+                    if project_override := getattr(overrides, 'project', None):
+                        project_overrides = project_override.model_dump(exclude_none=True)
+                        if "user_env" in project_overrides:
+                            project_config["userEnv"] = project_overrides["user_env"]
+                            
+        except Exception as e:
+            logger.warning(f"Error applying chat profile config overrides: {e}")
 
-                    # Deep merge features configuration
-                    def deep_merge(base, overrides):
-                        for key, value in overrides.items():
-                            if (
-                                key in base
-                                and isinstance(base[key], dict)
-                                and isinstance(value, dict)
-                            ):
-                                deep_merge(base[key], value)
-                            else:
-                                base[key] = value
-
-                    deep_merge(features_config, features_overrides)
-
-                # Apply project overrides
-                if overrides.project:
-                    project_overrides = overrides.project.model_dump(exclude_none=True)
-                    if "user_env" in project_overrides:
-                        project_config["userEnv"] = project_overrides["user_env"]
+    ui_config = ui_config.model_dump()
+    features_config = features_config.model_dump()
 
     return JSONResponse(
         content={
