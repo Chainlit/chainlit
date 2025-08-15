@@ -6,10 +6,13 @@ describe('Config overrides with chat profiles', () => {
     cy.get("input[name='email']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
+    
+    // Verify we're on the main page after login
+    cy.location('pathname').should('eq', '/');
     cy.get('#chat-input').should('exist');
 
     // Wait for the interface to be ready
-    cy.get('#starter-default-chat', { timeout: 10000 }).should('exist').click();
+    cy.get('#starter-default-chat').should('exist').click();
 
     cy.get('.step')
       .should('have.length', 2)
@@ -35,8 +38,9 @@ describe('Config overrides with chat profiles', () => {
     cy.get('[data-test="select-item:MCP Enabled"]').click();
     cy.get('#confirm').click();
 
-    // Wait for the profile to switch
-    cy.get('#starter-mcp-test', { timeout: 10000 }).should('not.be.disabled').click();
+    // Verify we're on a thread page after profile switch
+    cy.location('pathname').should('match', /^\/thread\//);
+    cy.get('#starter-mcp-test').should('not.be.disabled').click();
 
     cy.get('.step')
       .should('have.length', 2)
@@ -51,7 +55,7 @@ describe('Config overrides with chat profiles', () => {
       );
 
     // Test that MCP button (lucide plug) exists on MCP Enabled profile
-    cy.get('.lucide-plug', { timeout: 10000 }).should('exist').should('be.visible');
+    cy.get('.lucide-plug').should('exist').should('be.visible');
 
     // Test switching to MCP Disabled profile
     cy.get('#chat-profiles').click();
@@ -75,7 +79,7 @@ describe('Config overrides with chat profiles', () => {
     cy.get('#confirm').click();
 
     // Verify MCP button appears again when switching back to MCP Enabled
-    cy.get('.lucide-plug', { timeout: 10000 }).should('exist').should('be.visible');
+    cy.get('.lucide-plug').should('exist').should('be.visible');
 
     cy.get('#starter-mcp-test').should('exist');
   });
@@ -85,6 +89,9 @@ describe('Config overrides with chat profiles', () => {
     cy.get("input[name='email']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
+    
+    // Verify we're on the main page after login
+    cy.location('pathname').should('eq', '/');
     cy.get('#chat-input').should('exist');
 
     cy.get('#chat-profiles').click();
@@ -124,8 +131,9 @@ describe('Config overrides with chat profiles', () => {
     // Select MCP Enabled profile
     cy.get('[data-test="select-item:MCP Enabled"]').click();
 
-    // Wait for the profile to be selected and verify MCP button appears
-    cy.get('.lucide-plug', { timeout: 10000 }).should('exist');
+    // Verify we're on a thread page after profile selection
+    cy.location('pathname').should('match', /^\/thread\//);
+    cy.get('.lucide-plug').should('exist');
 
     // Verify the profile has been changed
     submitMessage('hello');
