@@ -560,27 +560,16 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             logger.info("SQLAlchemy: get_all_user_threads")
         user_threads_query = """
             SELECT
-                t."id" AS thread_id,
-                t."createdAt" AS thread_createdat,
-                t."name" AS thread_name,
-                t."userId" AS user_id,
-                t."userIdentifier" AS user_identifier,
-                t."tags" AS thread_tags,
-                t."metadata" AS thread_metadata,
-                MAX(s."createdAt") AS updatedAt
-            FROM threads t
-            LEFT JOIN steps s ON t."id" = s."threadId"
-            WHERE t."userId" = :user_id OR t."id" = :thread_id
-            GROUP BY
-                t."id",
-                t."createdAt",
-                t."name",
-                t."userId",
-                t."userIdentifier",
-                t."tags",
-                t."metadata"
-            ORDER BY updatedAt DESC NULLS LAST
-            LIMIT :limit
+                "id" AS thread_id,
+                "createdAt" AS thread_createdat,
+                "name" AS thread_name,
+                "userId" AS user_id,
+                "userIdentifier" AS user_identifier,
+                "tags" AS thread_tags,
+                "metadata" AS thread_metadata
+            FROM threads
+            WHERE "userId" = :user_id OR "id" = :thread_id
+            ORDER BY "createdAt" DESC
         """
         user_threads = await self.execute_sql(
             query=user_threads_query,
