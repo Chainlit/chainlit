@@ -570,6 +570,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             FROM threads
             WHERE "userId" = :user_id OR "id" = :thread_id
             ORDER BY "createdAt" DESC
+            LIMIT :limit
         """
         user_threads = await self.execute_sql(
             query=user_threads_query,
