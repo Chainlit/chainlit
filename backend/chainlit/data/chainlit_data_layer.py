@@ -9,9 +9,9 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 import aiofiles
 import asyncpg  # type: ignore
 
-from chainlit.data.storage_clients.gcs import GCSStorageClient
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
+from chainlit.data.storage_clients.gcs import GCSStorageClient
 from chainlit.data.utils import queue_until_user_message
 from chainlit.element import ElementDict
 from chainlit.logger import logger
