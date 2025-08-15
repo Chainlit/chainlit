@@ -14,6 +14,7 @@ Provider = Literal[
     "okta",
     "auth0",
     "descope",
+    "zitadel",
 ]
 
 
