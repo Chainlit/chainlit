@@ -87,9 +87,11 @@ class BaseSession:
 
     @property
     def files_dir(self):
-        from chainlit.config import FILES_DIRECTORY
+        from pathlib import Path
 
-        return FILES_DIRECTORY / self.id
+        from chainlit.config import config
+
+        return Path(config.features.spontaneous_file_upload.files_dir) / self.id
 
     async def persist_file(
         self,
