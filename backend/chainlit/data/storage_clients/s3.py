@@ -42,12 +42,17 @@ class S3StorageClient(BaseStorageClient):
         data: Union[bytes, str],
         mime: str = "application/octet-stream",
         overwrite: bool = True,
-        content_disposition: str = "",
+        content_disposition: str | None = None,
     ) -> Dict[str, Any]:
         try:
-            self.client.put_object(
-                Bucket=self.bucket, Key=object_key, Body=data, ContentType=mime, ContentDisposition=content_disposition
-            )
+            if content_disposition is not None:
+                self.client.put_object(
+                    Bucket=self.bucket, Key=object_key, Body=data, ContentType=mime, ContentDisposition=content_disposition
+                )
+            else:
+                self.client.put_object(
+                    Bucket=self.bucket, Key=object_key, Body=data, ContentType=mime
+                )
             endpoint = os.environ.get("DEV_AWS_ENDPOINT", "amazonaws.com")
             url = f"https://{self.bucket}.s3.{endpoint}/{object_key}"
             return {"object_key": object_key, "url": url}

@@ -61,7 +61,7 @@ class AzureStorageClient(BaseStorageClient):
         data: Union[bytes, str],
         mime: str = "application/octet-stream",
         overwrite: bool = True,
-        content_disposition: str = "",
+        content_disposition: str | None = None,
     ) -> Dict[str, Any]:
         try:
             file_client: DataLakeFileClient = self.container_client.get_file_client(
