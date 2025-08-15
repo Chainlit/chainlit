@@ -408,7 +408,9 @@ class ChainlitConfigOverrides(BaseModel):
 
 
 class ChainlitConfig(BaseModel):
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, revalidate_instances="always"
+    )
 
     # Directory where the Chainlit project is located
     root: str = APP_ROOT

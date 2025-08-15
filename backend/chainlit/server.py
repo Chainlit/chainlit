@@ -828,7 +828,7 @@ async def project_settings(
                             exclude_none=True
                         ),
                         deep=True,
-                    ).model_dump()
+                    )
                 )
 
     return JSONResponse(
