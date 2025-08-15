@@ -822,8 +822,11 @@ async def project_settings(
                 current_profile = next(
                     (p for p in chat_profiles if p.name == chat_profile), None
                 )
-                
-                if current_profile and (overrides := getattr(current_profile, "config_overrides", None)):
+
+                if current_profile and (
+                    overrides := getattr(current_profile, "config_overrides", None)
+                ):
+
                     def apply_model_override(base_config, override_attr):
                         if override := getattr(overrides, override_attr, None):
                             return base_config.model_copy(
@@ -835,10 +838,12 @@ async def project_settings(
                     features_config = apply_model_override(features_config, "features")
 
                     if project_override := getattr(overrides, "project", None):
-                        project_overrides = project_override.model_dump(exclude_none=True)
+                        project_overrides = project_override.model_dump(
+                            exclude_none=True
+                        )
                         if "user_env" in project_overrides:
                             project_config["userEnv"] = project_overrides["user_env"]
-                            
+
         except Exception as e:
             logger.warning(f"Error applying chat profile config overrides: {e}")
 
