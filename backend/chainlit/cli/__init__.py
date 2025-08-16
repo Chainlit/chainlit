@@ -196,8 +196,6 @@ def chainlit_run(
         no_cache = True
         # This is required to have OpenAI LLM providers available for the CI run
         os.environ["OPENAI_API_KEY"] = "sk-FAKE-OPENAI-API-KEY"
-        # This is required for authentication tests
-        os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
 
     config.run.headless = headless
     config.run.debug = debug
