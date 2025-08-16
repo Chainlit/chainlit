@@ -196,7 +196,7 @@ describe('Copilot', () => {
         cy.step('Check input placeholder');
         cy.get('#chat-input', opts).should(
           'have.attr',
-          'data-placeholder',
+          'placeholder',
           placeholder
         );
       });

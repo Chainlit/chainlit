@@ -2,10 +2,25 @@ import { cn } from '@/lib/utils';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 import * as React from 'react';
 
-const TooltipProvider = TooltipPrimitive.Provider;
+// Centralized tooltip timing
+export const TOOLTIP_DELAY_MS = 500;
+export const TOOLTIP_SKIP_DELAY_MS = 0;
+
+type ProviderProps = React.ComponentProps<typeof TooltipPrimitive.Provider>;
+
+const TooltipProvider = ({
+  delayDuration = TOOLTIP_DELAY_MS,
+  skipDelayDuration = TOOLTIP_SKIP_DELAY_MS,
+  ...props
+}: ProviderProps) => (
+  <TooltipPrimitive.Provider
+    delayDuration={delayDuration}
+    skipDelayDuration={skipDelayDuration}
+    {...props}
+  />
+);
 
 const Tooltip = TooltipPrimitive.Root;
-
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
 const TooltipContent = React.forwardRef<

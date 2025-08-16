@@ -65,6 +65,27 @@ const CommandList = React.forwardRef<
 
 CommandList.displayName = CommandPrimitive.List.displayName;
 
+const CommandListScrollable = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.List>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.List> & {
+    maxItems?: number;
+  }
+>(({ className, children, ...props }, ref) => (
+  <CommandPrimitive.List
+    ref={ref}
+    className={cn(
+      'max-h-[300px] overflow-y-auto overflow-x-hidden',
+      'command-list-container',
+      className
+    )}
+    {...props}
+  >
+    {children}
+  </CommandPrimitive.List>
+));
+
+CommandListScrollable.displayName = 'CommandListScrollable';
+
 const CommandEmpty = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive.Empty>,
   React.ComponentPropsWithoutRef<typeof CommandPrimitive.Empty>
@@ -122,6 +143,31 @@ const CommandItem = React.forwardRef<
 
 CommandItem.displayName = CommandPrimitive.Item.displayName;
 
+const CommandItemAnimated = React.forwardRef<
+  React.ElementRef<typeof CommandPrimitive.Item>,
+  React.ComponentPropsWithoutRef<typeof CommandPrimitive.Item> & {
+    isSelected?: boolean;
+    index?: number;
+  }
+>(({ className, isSelected, index, ...props }, ref) => (
+  <CommandPrimitive.Item
+    ref={ref}
+    data-index={index}
+    className={cn(
+      "relative flex cursor-pointer gap-2 select-none items-center rounded-md px-2 py-2 text-sm outline-none",
+      "transition-all duration-150",
+      "hover:scale-[1.02]",
+      "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
+      "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+      isSelected && "bg-accent text-accent-foreground scale-[1.02]",
+      className
+    )}
+    {...props}
+  />
+));
+
+CommandItemAnimated.displayName = 'CommandItemAnimated';
+
 const CommandShortcut = ({
   className,
   ...props
@@ -143,9 +189,11 @@ export {
   CommandDialog,
   CommandInput,
   CommandList,
+  CommandListScrollable,
   CommandEmpty,
   CommandGroup,
   CommandItem,
+  CommandItemAnimated,
   CommandShortcut,
   CommandSeparator
 };

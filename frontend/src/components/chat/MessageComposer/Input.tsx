@@ -10,12 +10,13 @@ import { useRecoilValue } from 'recoil';
 
 import { ICommand, commandsState } from '@chainlit/react-client';
 
+import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 import Icon from '@/components/Icon';
 import {
   Command,
   CommandGroup,
-  CommandItem,
-  CommandList
+  CommandItemAnimated,
+  CommandListScrollable
 } from '@/components/ui/command';
 
 interface Props {
@@ -27,7 +28,7 @@ interface Props {
   setSelectedCommand: (command: ICommand | undefined) => void;
   onChange: (value: string) => void;
   onPaste?: (event: any) => void;
-  onEnter?: (event: React.KeyboardEvent<HTMLDivElement>) => void;
+  onEnter?: () => void;
 }
 
 export interface InputMethods {
@@ -54,51 +55,18 @@ const Input = forwardRef<InputMethods, Props>(
     const [showCommands, setShowCommands] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [commandInput, setCommandInput] = useState('');
-    const contentEditableRef = useRef<HTMLDivElement>(null);
-    const lastCommandSpanRef = useRef<HTMLElement | null>(null);
-    const mutationObserverRef = useRef<MutationObserver | null>(null);
-    const isUpdatingRef = useRef(false);
-
-    const getContentWithoutCommand = () => {
-      if (!contentEditableRef.current) return '';
-
-      // Create a clone of the content
-      const clone = contentEditableRef.current.cloneNode(
-        true
-      ) as HTMLDivElement;
-      clone.className += 'hidden';
-
-      contentEditableRef.current.parentNode?.appendChild(clone);
-
-      // Remove command span from clone
-      const commandSpan = clone.querySelector('.command-span');
-      if (commandSpan) {
-        commandSpan.remove();
-      }
-
-      const text = clone.innerText ?? '';
-
-      contentEditableRef.current.parentNode?.removeChild(clone);
-
-      return text;
-    };
+    const [value, setValue] = useState('');
+    const [lastMouseMove, setLastMouseMove] = useState(0);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const reset = () => {
+      setValue('');
       if (!selectedCommand?.persistent) {
         setSelectedCommand(undefined);
-        if (contentEditableRef.current) {
-          contentEditableRef.current.innerHTML = '';
-        }
-      } else if (contentEditableRef.current) {
-        // if selectedCommand?.persistent is true , keep .command-span tag and clear content
-        const commandSpan =
-          contentEditableRef.current.querySelector('.command-span');
-        if (commandSpan) {
-          contentEditableRef.current.innerHTML = commandSpan.outerHTML;
-        }
       }
       setSelectedIndex(0);
       setCommandInput('');
+      setShowCommands(false);
       onChange('');
     };
 
@@ -106,108 +74,11 @@ const Input = forwardRef<InputMethods, Props>(
       reset
     }));
 
-    // Set up mutation observer to detect command span removal
     useEffect(() => {
-      if (!contentEditableRef.current) return;
-
-      contentEditableRef.current.focus();
-
-      mutationObserverRef.current = new MutationObserver((mutations) => {
-        if (isUpdatingRef.current) return;
-
-        mutations.forEach((mutation) => {
-          if (
-            mutation.type === 'childList' &&
-            mutation.removedNodes.length > 0
-          ) {
-            // Check if the removed node was our command span
-            const wasCommandSpanRemoved = Array.from(
-              mutation.removedNodes
-            ).some((node) =>
-              (node as HTMLElement).classList?.contains('command-span')
-            );
-
-            if (wasCommandSpanRemoved && !mutation.addedNodes.length) {
-              handleCommandSelect(undefined);
-            }
-          }
-        });
-      });
-
-      mutationObserverRef.current.observe(contentEditableRef.current, {
-        childList: true,
-        subtree: true
-      });
-
-      return () => {
-        mutationObserverRef.current?.disconnect();
-      };
-    }, []);
-
-    // Handle selectedCommand prop changes
-    useEffect(() => {
-      const content = contentEditableRef.current;
-      if (!content) return;
-
-      isUpdatingRef.current = true;
-
-      try {
-        // Find existing command span
-        const existingCommandSpan = content.querySelector('.command-span');
-
-        if (selectedCommand && !selectedCommand.button) {
-          // Create new command block
-          const newCommandBlock = document.createElement('div');
-          newCommandBlock.className =
-            'command-span font-bold inline-flex text-[#08f] items-center pr-1';
-          newCommandBlock.contentEditable = 'false';
-          newCommandBlock.innerHTML = `<span>${selectedCommand.id}</span>`;
-
-          // Store reference to the command span
-          lastCommandSpanRef.current = newCommandBlock;
-
-          if (existingCommandSpan) {
-            existingCommandSpan.replaceWith(newCommandBlock);
-          } else {
-            // Add new command span at the start
-            if (content.firstChild) {
-              content.insertBefore(newCommandBlock, content.firstChild);
-            } else {
-              content.appendChild(newCommandBlock);
-            }
-          }
-
-          // Ensure cursor is placed after the command span
-          const selection = window.getSelection();
-          const range = document.createRange();
-
-          // Set cursor after the command span
-          range.setStartAfter(newCommandBlock);
-          range.collapse(true);
-
-          // Apply the selection
-          selection?.removeAllRanges();
-          selection?.addRange(range);
-
-          // Force focus on the content editable
-          content.focus();
-          selection?.addRange(range);
-
-          // Trigger onChange with content excluding command
-          onChange(getContentWithoutCommand());
-        } else if (existingCommandSpan) {
-          // Remove existing command span
-          existingCommandSpan.remove();
-          lastCommandSpanRef.current = null;
-          onChange(getContentWithoutCommand());
-        }
-      } finally {
-        // Use setTimeout to ensure all DOM updates are complete
-        setTimeout(() => {
-          isUpdatingRef.current = false;
-        }, 0);
+      if (textareaRef.current && autoFocus) {
+        textareaRef.current.focus();
       }
-    }, [selectedCommand, onChange]);
+    }, [autoFocus]);
 
     const normalizedInput = commandInput.toLowerCase().slice(1);
 
@@ -220,45 +91,18 @@ const Input = forwardRef<InputMethods, Props>(
       });
 
     useEffect(() => {
-      const textarea = contentEditableRef.current;
-      if (!textarea || !onPaste) return;
+      // Reset selected index when filtered commands change
+      setSelectedIndex(0);
+      setLastMouseMove(0);
+    }, [filteredCommands.length]);
 
-      const handlePaste = (event: ClipboardEvent) => {
-        event.preventDefault();
+    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newValue = e.target.value;
+      setValue(newValue);
+      onChange(newValue);
 
-        const textData = event.clipboardData?.getData('text/plain');
-        if (textData) {
-          const escapedText = document.createTextNode(textData).textContent;
-          if (escapedText) {
-            document.execCommand('insertText', false, escapedText);
-          }
-          const inputEvent = new Event('input', {
-            bubbles: true,
-            composed: true
-          });
-          textarea.dispatchEvent(inputEvent);
-        }
-        onPaste(event);
-      };
-
-      // Use the capture phase to ensure we catch the event before it can bubble
-      textarea.addEventListener('paste', handlePaste, true);
-
-      return () => {
-        textarea.removeEventListener('paste', handlePaste, true);
-      };
-    }, [onPaste]);
-
-    const handleInput = (e: React.FormEvent<HTMLDivElement>) => {
-      if (isUpdatingRef.current) return;
-
-      const textContent = getContentWithoutCommand();
-      onChange(textContent);
-
-      // For command detection, use the full content including command input
-      const fullContent = e.currentTarget.textContent || '';
-      const words = fullContent.split(' ');
-
+      // Command detection for dropdown
+      const words = newValue.split(' ');
       if (words.length === 1 && words[0].startsWith('/')) {
         setShowCommands(true);
         setCommandInput(words[0]);
@@ -266,107 +110,211 @@ const Input = forwardRef<InputMethods, Props>(
         setShowCommands(false);
         setCommandInput('');
       }
-
-      // If there's no real content, remove the <br>
-      if (!fullContent.trim()) {
-        e.currentTarget.innerHTML = '';
-      }
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-      if (!showCommands) {
-        if (e.key === 'Enter' && !e.shiftKey && onEnter && !isComposing) {
-          e.preventDefault();
-          onEnter(e);
-        }
-        return;
-      }
-
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setSelectedIndex((prev) =>
-          prev < filteredCommands.length - 1 ? prev + 1 : prev
-        );
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setSelectedIndex((prev) => (prev > 0 ? prev - 1 : prev));
-      } else if (e.key === 'Enter' && filteredCommands.length > 0) {
-        e.preventDefault();
-        const selectedCommand = filteredCommands[selectedIndex];
-        handleCommandSelect(selectedCommand);
-      } else if (e.key === 'Escape') {
-        setShowCommands(false);
-      }
-    };
-
-    const handleCommandSelect = (command?: ICommand) => {
+    const handleCommandSelect = (command: ICommand) => {
       setShowCommands(false);
+      setSelectedCommand(command);
 
-      // Set a small timeout to ensure state updates are processed
+      // Remove the command text from the input
+      const newValue = value.replace(commandInput, '').trimStart();
+      setValue(newValue);
+      onChange(newValue);
+
+      setSelectedIndex(0);
+      setCommandInput('');
+
+      // Focus back on textarea
       setTimeout(() => {
-        setSelectedCommand(command);
-
-        // Clean up the command input from contentEditable
-        if (contentEditableRef.current && command && commandInput) {
-          const content = contentEditableRef.current.textContent || '';
-          const cleanedContent = content.replace(commandInput, '').trimStart();
-          contentEditableRef.current.textContent = cleanedContent;
-        }
-
-        setSelectedIndex(0);
-        setCommandInput('');
+        textareaRef.current?.focus();
       }, 0);
+    };
+
+    const handleMouseMove = (index: number) => {
+      const now = Date.now();
+      // Only update if mouse actually moved (not just from render)
+      if (now - lastMouseMove > 50) {
+        setSelectedIndex(index);
+        setLastMouseMove(now);
+      }
+    };
+
+    const handleMouseLeave = () => {
+      // Keep the last hovered item selected when mouse leaves
+      setLastMouseMove(Date.now());
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      // Handle command selection - check this FIRST before other key handling
+      if (showCommands && filteredCommands.length > 0) {
+        // Check if mouse was recently moved
+        const timeSinceMouseMove = Date.now() - lastMouseMove;
+        const isUsingKeyboard = timeSinceMouseMove > 100;
+
+        switch (e.key) {
+          case 'ArrowDown':
+            e.preventDefault();
+            e.stopPropagation();
+            if (isUsingKeyboard) {
+              setSelectedIndex((prev) =>
+                prev < filteredCommands.length - 1 ? prev + 1 : 0
+              );
+            }
+            return;
+
+          case 'ArrowUp':
+            e.preventDefault();
+            e.stopPropagation();
+            if (isUsingKeyboard) {
+              setSelectedIndex((prev) =>
+                prev > 0 ? prev - 1 : filteredCommands.length - 1
+              );
+            }
+            return;
+
+          case 'Enter': {
+            e.preventDefault();
+            e.stopPropagation();
+            const selectedCmd = filteredCommands[selectedIndex];
+            if (selectedCmd) {
+              handleCommandSelect(selectedCmd);
+            }
+            return;
+          }
+
+          case 'Escape':
+            e.preventDefault();
+            e.stopPropagation();
+            setShowCommands(false);
+            setCommandInput('');
+            setSelectedIndex(0);
+            return;
+
+          case 'Tab': {
+            e.preventDefault();
+            e.stopPropagation();
+            const tabCmd = filteredCommands[selectedIndex];
+            if (tabCmd) {
+              handleCommandSelect(tabCmd);
+            }
+            return;
+          }
+        }
+      }
+
+      // Handle regular enter only if command menu is not showing
+      if (e.key === 'Enter' && !e.shiftKey && onEnter && !isComposing && !showCommands) {
+        e.preventDefault();
+        onEnter();
+      }
     };
 
     return (
       <div className="relative w-full">
-        <div
+        <style>{`
+          @keyframes slide-up {
+            0% {
+              opacity: 0;
+              transform: translateY(10px) scale(0.95);
+            }
+            100% {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+
+          .command-menu-animate {
+            animation: slide-up 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+          }
+
+          .command-item-stagger {
+            animation: slide-up 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+          }
+
+          .command-list-container::-webkit-scrollbar {
+            width: 4px;
+          }
+
+          .command-list-container::-webkit-scrollbar-track {
+            background: transparent;
+          }
+
+          .command-list-container::-webkit-scrollbar-thumb {
+            background-color: hsl(var(--muted-foreground) / 0.3);
+            border-radius: 2px;
+          }
+
+          .command-list-container {
+            scrollbar-width: thin;
+            scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+          }
+        `}</style>
+
+        <AutoResizeTextarea
+          ref={textareaRef}
           id={id}
           autoFocus={autoFocus}
-          ref={contentEditableRef}
-          contentEditable="plaintext-only"
-          data-placeholder={placeholder}
-          className={cn(
-            'min-h-10 max-h-[250px] whitespace-pre-wrap overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',
-            className
-          )}
-          onInput={handleInput}
+          value={value}
+          onChange={handleChange}
           onKeyDown={handleKeyDown}
+          onPaste={onPaste}
           onCompositionStart={() => setIsComposing(true)}
           onCompositionEnd={() => setIsComposing(false)}
+          placeholder={placeholder}
+          className={cn(
+            'w-full resize-none bg-transparent placeholder:text-muted-foreground focus:outline-none',
+            className
+          )}
+          maxHeight={250}
         />
 
-        {showCommands && filteredCommands.length ? (
-          <div className="absolute z-50 -top-4 left-0 -translate-y-full">
-            <Command className="rounded-lg border shadow-md">
-              <CommandList>
-                <CommandGroup>
+        {showCommands && filteredCommands.length > 0 && (
+          <div
+            className="absolute z-50 left-0 command-menu-animate"
+            style={{
+              bottom: '100%',
+              marginBottom: '12px'
+            }}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Command className="rounded-lg border shadow-md bg-background">
+              <CommandListScrollable maxItems={5}>
+                <CommandGroup className="p-2">
                   {filteredCommands.map((command, index) => (
-                    <CommandItem
+                    <CommandItemAnimated
                       key={command.id}
+                      index={index}
+                      isSelected={index === selectedIndex}
+                      onMouseMove={() => handleMouseMove(index)}
                       onSelect={() => handleCommandSelect(command)}
                       className={cn(
-                        'cursor-pointer command-item flex items-center space-x-2 p-2',
-                        index === selectedIndex ? 'bg-accent' : ''
+                        'command-item space-x-2',
+                        'command-item-stagger'
                       )}
+                      style={{
+                        animationDelay: `${index * 20}ms`
+                      }}
                     >
                       <Icon
                         name={command.icon}
-                        className="!size-5 text-muted-foreground"
+                        className={cn(
+                          '!size-5 text-muted-foreground transition-transform duration-150',
+                          index === selectedIndex && 'scale-110'
+                        )}
                       />
-                      <div>
+                      <div className="flex-1">
                         <div className="font-medium">{command.id}</div>
                         <div className="text-sm text-muted-foreground">
                           {command.description}
                         </div>
                       </div>
-                    </CommandItem>
+                    </CommandItemAnimated>
                   ))}
                 </CommandGroup>
-              </CommandList>
+              </CommandListScrollable>
             </Command>
           </div>
-        ) : null}
+        )}
       </div>
     );
   }
