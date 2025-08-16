@@ -326,7 +326,7 @@ async def audio_start(sid):
     session = WebsocketSession.require(sid)
 
     context = init_ws_context(session)
-    if config.code.on_audio_start:
+    if config.features.audio.enabled:
         connected = bool(await config.code.on_audio_start())
         connection_state = "on" if connected else "off"
         await context.emitter.update_audio_connection(connection_state)
@@ -339,7 +339,7 @@ async def audio_chunk(sid, payload: InputAudioChunkPayload):
 
     init_ws_context(session)
 
-    if config.code.on_audio_chunk:
+    if config.features.audio.enabled:
         asyncio.create_task(config.code.on_audio_chunk(InputAudioChunk(**payload)))
 
 
@@ -355,7 +355,7 @@ async def audio_end(sid):
             session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread("audio"))
 
-        if config.code.on_audio_end:
+        if config.features.audio.enabled:
             await config.code.on_audio_end()
 
     except asyncio.CancelledError:

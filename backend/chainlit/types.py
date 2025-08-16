@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 from pathlib import Path
 from typing import (
@@ -36,8 +38,8 @@ class ThreadDict(TypedDict):
     userIdentifier: Optional[str]
     tags: Optional[List[str]]
     metadata: Optional[Dict]
-    steps: List["StepDict"]
-    elements: Optional[List["ElementDict"]]
+    steps: List[StepDict]
+    elements: Optional[List[ElementDict]]
 
 
 class Pagination(BaseModel):
@@ -46,9 +48,9 @@ class Pagination(BaseModel):
 
 
 class ThreadFilter(BaseModel):
-    feedback: Optional[Literal[0, 1]] = None
-    userId: Optional[str] = None
-    search: Optional[str] = None
+    feedback: Literal[0, 1] | None = None
+    userId: str | None = None
+    search: str | None = None
 
 
 @dataclass
@@ -65,7 +67,7 @@ class PageInfo:
         }
 
     @classmethod
-    def from_dict(cls, page_info_dict: Dict) -> "PageInfo":
+    def from_dict(cls, page_info_dict: Dict) -> PageInfo:
         hasNextPage = page_info_dict.get("hasNextPage", False)
         startCursor = page_info_dict.get("startCursor", None)
         endCursor = page_info_dict.get("endCursor", None)
@@ -100,7 +102,7 @@ class PaginatedResponse(Generic[T]):
     @classmethod
     def from_dict(
         cls, paginated_response_dict: Dict, the_class: HasFromDict[T]
-    ) -> "PaginatedResponse[T]":
+    ) -> PaginatedResponse[T]:
         pageInfo = PageInfo.from_dict(paginated_response_dict.get("pageInfo", {}))
 
         data = [the_class.from_dict(d) for d in paginated_response_dict.get("data", [])]
@@ -159,7 +161,7 @@ class FileDict(TypedDict):
 
 
 class MessagePayload(TypedDict):
-    message: "StepDict"
+    message: StepDict
     fileReferences: Optional[List[FileReference]]
 
 
@@ -251,7 +253,7 @@ class ConnectStreamableHttpMCPRequest(BaseModel):
     name: str
     url: str
     # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
-    headers: Optional[Dict[str, str]] = None
+    headers: Dict[str, str] | None = None
 
 
 ConnectMCPRequest = Union[
@@ -293,6 +295,7 @@ class ChatProfile(DataClassJsonMixin):
     icon: Optional[str] = None
     default: bool = False
     starters: Optional[List[Starter]] = None
+    config_overrides: Any = None
 
 
 FeedbackStrategy = Literal["BINARY"]
