@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useRecoilValue } from 'recoil';
 
-import { sideViewState, useAuth, useConfig } from '@chainlit/react-client';
+import { useAuth, useChatStore, useConfig } from '@chainlit/react-client';
 
 import ElementSideView from '@/components/ElementSideView';
 import LeftSidebar from '@/components/LeftSidebar';
@@ -20,7 +20,7 @@ const Page = ({ children }: Props) => {
   const { config } = useConfig();
   const { data } = useAuth();
   const userEnv = useRecoilValue(userEnvState);
-  const sideView = useRecoilValue(sideViewState);
+  const sideView = useChatStore((state) => state.sideView);
 
   if (config?.userEnv) {
     for (const key of config.userEnv || []) {

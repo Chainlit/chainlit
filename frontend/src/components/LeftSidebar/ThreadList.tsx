@@ -3,14 +3,13 @@ import { size } from 'lodash';
 import { useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
   ChainlitContext,
   ClientError,
   ThreadHistory,
-  threadHistoryState,
+  useAuthStore,
   useChatInteract,
   useChatMessages,
   useChatSession
@@ -78,7 +77,7 @@ export function ThreadList({
   const [threadIdToDelete, setThreadIdToDelete] = useState<string>();
   const [threadIdToRename, setThreadIdToRename] = useState<string>();
   const [threadNewName, setThreadNewName] = useState<string>();
-  const setThreadHistory = useSetRecoilState(threadHistoryState);
+  const setThreadHistory = useAuthStore((state) => state.setThreadHistory);
   const apiClient = useContext(ChainlitContext);
 
   const sortedTimeGroupKeys = useMemo(() => {

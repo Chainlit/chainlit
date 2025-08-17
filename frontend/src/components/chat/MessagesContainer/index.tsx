@@ -1,6 +1,5 @@
 import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useMemo } from 'react';
-import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -8,13 +7,13 @@ import {
   IFeedback,
   IMessageElement,
   IStep,
-  messagesState,
-  sideViewState,
   updateMessageById,
   useChatData,
   useChatInteract,
   useChatMessages,
-  useConfig
+  useChatStore,
+  useConfig,
+  useMessagesStore
 } from '@chainlit/react-client';
 
 import { Messages } from '@/components/chat/Messages';
@@ -30,8 +29,9 @@ const MessagesContainer = ({ navigate }: Props) => {
   const { elements, askUser, loading, actions } = useChatData();
   const { messages } = useChatMessages();
   const { uploadFile: _uploadFile } = useChatInteract();
-  const setMessages = useSetRecoilState(messagesState);
-  const setSideView = useSetRecoilState(sideViewState);
+
+  const setMessages = useMessagesStore((state) => state.setMessages);
+  const setSideView = useChatStore((state) => state.setSideView);
 
   const { t } = useTranslation();
 

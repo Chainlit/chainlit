@@ -1,7 +1,6 @@
 import { cn } from '@/lib/utils';
-import { useRecoilValue } from 'recoil';
 
-import { ICommand, commandsState } from '@chainlit/react-client';
+import { ICommand, useChatStore } from '@chainlit/react-client';
 
 import Icon from '@/components/Icon';
 import { Button } from '@/components/ui/button';
@@ -23,8 +22,8 @@ export const CommandButtons = ({
   selectedCommandId,
   onCommandSelect
 }: Props) => {
-  const commands = useRecoilValue(commandsState);
-  const commandButtons = commands.filter((c) => !!c.button);
+  const commands = useChatStore((state) => state.commands);
+  const commandButtons = commands.filter((command) => !!command.button);
 
   if (!commandButtons.length) return null;
 

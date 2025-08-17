@@ -4,9 +4,8 @@ import {
   PopoverTrigger
 } from '@radix-ui/react-popover';
 import { every } from 'lodash';
-import { useRecoilValue } from 'recoil';
 
-import { ICommand, commandsState } from '@chainlit/react-client';
+import { ICommand, useChatStore } from '@chainlit/react-client';
 
 import Icon from '@/components/Icon';
 import { ToolBox } from '@/components/icons/ToolBox';
@@ -33,8 +32,8 @@ export const CommandPopoverButton = ({
   disabled = false,
   onCommandSelect
 }: Props) => {
-  const commands = useRecoilValue(commandsState);
-  const allButtons = every(commands.map((c) => !!c.button));
+  const commands = useChatStore((state) => state.commands);
+  const allButtons = every(commands.map((command) => !!command.button));
 
   if (!commands.length || allButtons) return null;
 

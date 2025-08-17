@@ -1,8 +1,7 @@
 import { Plug } from 'lucide-react';
 import { useState } from 'react';
-import { useRecoilState } from 'recoil';
 
-import { mcpState, useConfig } from '@chainlit/react-client';
+import { useConfig, useMcpStore } from '@chainlit/react-client';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -30,7 +29,7 @@ interface Props {
 
 const McpButton = ({ disabled }: Props) => {
   const { config } = useConfig();
-  const [mcps] = useRecoilState(mcpState);
+  const mcps = useMcpStore((state) => state.mcps);
 
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('add');

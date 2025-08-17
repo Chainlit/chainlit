@@ -8,7 +8,6 @@ import {
   useState
 } from 'react';
 import { Runner } from 'react-runner';
-import { useRecoilValue } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -16,9 +15,9 @@ import {
   IAction,
   ICustomElement,
   IElement,
-  sessionIdState,
   useAuth,
-  useChatInteract
+  useChatInteract,
+  useSessionState
 } from '@chainlit/react-client';
 
 import Alert from '@/components/Alert';
@@ -28,7 +27,8 @@ import * as Renderer from './Renderer';
 
 const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
   const apiClient = useContext(ChainlitContext);
-  const sessionId = useRecoilValue(sessionIdState);
+  const sessionId = useSessionState((state) => state.sessionId);
+
   const { sendMessage } = useChatInteract();
   const { user } = useAuth();
   const { askUser } = useContext(MessageContext);

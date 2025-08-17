@@ -1,39 +1,7 @@
 import { debounce } from 'lodash';
 import { useCallback, useContext, useEffect } from 'react';
-import {
-  useRecoilState,
-  useRecoilValue,
-  useResetRecoilState,
-  useSetRecoilState
-} from 'recoil';
 import io from 'socket.io-client';
 import { toast } from 'sonner';
-import {
-  actionState,
-  askUserState,
-  audioConnectionState,
-  callFnState,
-  chatProfileState,
-  chatSettingsInputsState,
-  chatSettingsValueState,
-  commandsState,
-  currentThreadIdState,
-  elementState,
-  firstUserInteraction,
-  isAiSpeakingState,
-  loadingState,
-  mcpState,
-  messagesState,
-  resumeThreadErrorState,
-  sessionIdState,
-  sessionState,
-  sideViewState,
-  tasklistState,
-  threadIdToResumeState,
-  tokenCountState,
-  wavRecorderState,
-  wavStreamPlayerState
-} from 'src/state';
 import {
   IAction,
   ICommand,
@@ -53,38 +21,58 @@ import {
 import { OutputAudioChunk } from './types/audio';
 
 import { ChainlitContext } from './context';
+import { useChatStore } from './store/chat';
+import { useMcpStore } from './store/mcp';
+import { useMessagesStore } from './store/messages';
+import { useSessionState } from './store/session';
+import { useThreadStore } from './store/thread';
+import { useUserState } from './store/user';
 import type { IToken } from './useChatData';
 
 const useChatSession = () => {
   const client = useContext(ChainlitContext);
-  const sessionId = useRecoilValue(sessionIdState);
+  const sessionId = useSessionState((state) => state.sessionId);
 
-  const [session, setSession] = useRecoilState(sessionState);
-  const setIsAiSpeaking = useSetRecoilState(isAiSpeakingState);
-  const setAudioConnection = useSetRecoilState(audioConnectionState);
-  const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
-  const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
-  const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
-  const setLoading = useSetRecoilState(loadingState);
-  const setMcps = useSetRecoilState(mcpState);
-  const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
-  const wavRecorder = useRecoilValue(wavRecorderState);
-  const setMessages = useSetRecoilState(messagesState);
-  const setAskUser = useSetRecoilState(askUserState);
-  const setCallFn = useSetRecoilState(callFnState);
-  const setCommands = useSetRecoilState(commandsState);
-  const setSideView = useSetRecoilState(sideViewState);
-  const setElements = useSetRecoilState(elementState);
-  const setTasklists = useSetRecoilState(tasklistState);
-  const setActions = useSetRecoilState(actionState);
-  const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
-  const setTokenCount = useSetRecoilState(tokenCountState);
-  const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
-  const idToResume = useRecoilValue(threadIdToResumeState);
-  const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
+  const session = useSessionState((state) => state.session);
+  const setSession = useSessionState((state) => state.setSession);
+  const setIsAiSpeaking = useChatStore((state) => state.setIsAiSpeaking);
+  const setAudioConnection = useChatStore((state) => state.setAudioConnection);
+  const setChatSettingsInputs = useChatStore(
+    (state) => state.setChatSettingsInputs
+  );
+  const resetChatSettingsValue = useChatStore(
+    (state) => state.resetChatSettingsValue
+  );
+  const setChatSettingsValue = useChatStore(
+    (state) => state.setChatSettingsValue
+  );
+  const setFirstUserInteraction = useUserState(
+    (state) => state.setFirstUserInteraction
+  );
+  const setLoading = useChatStore((state) => state.setLoading);
+  const setMcps = useMcpStore((state) => state.setMcps);
+  const wavStreamPlayer = useChatStore((state) => state.wavStreamPlayer);
+  const wavRecorder = useChatStore((state) => state.wavRecorder);
+  const setMessages = useMessagesStore((state) => state.setMessages);
+  const setAskUser = useUserState((state) => state.setAskUser);
+  const setCallFn = useChatStore((state) => state.setCallFn);
+  const setCommands = useChatStore((state) => state.setCommands);
+  const setSideView = useChatStore((state) => state.setSideView);
+  const setElements = useMessagesStore((state) => state.setElements);
+  const setTasklists = useMessagesStore((state) => state.setTaskList);
+  const setActions = useMessagesStore((state) => state.setActions);
+  const setTokenCount = useMessagesStore((state) => state.setTokenCount);
+  const chatProfile = useChatStore((state) => state.chatProfile);
+  const setChatProfile = useChatStore((state) => state.setChatProfile);
+  const idToResume = useThreadStore((state) => state.idToResume);
+  const setThreadResumeError = useThreadStore(
+    (state) => state.setResumeThreadError
+  );
 
-  const [currentThreadId, setCurrentThreadId] =
-    useRecoilState(currentThreadIdState);
+  const currentThreadId = useThreadStore((state) => state.currentThreadId);
+  const setCurrentThreadId = useThreadStore(
+    (state) => state.setCurrentThreadId
+  );
 
   // Use currentThreadId as thread id in websocket header
   useEffect(() => {
@@ -126,9 +114,11 @@ const useChatSession = () => {
           chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
         }
       });
+
       setSession((old) => {
         old?.socket?.removeAllListeners();
         old?.socket?.close();
+
         return {
           socket
         };
