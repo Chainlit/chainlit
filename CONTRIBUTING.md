@@ -75,7 +75,7 @@ The following command will install Python dependencies, Node (pnpm) dependencies
 
 ```sh
 cd backend
-uv sync --group tests --group mypy --group dev --group custom-data
+uv sync --extra tests --extra mypy --extra dev --extra custom-data
 ```
 
 ## Start the Chainlit server from source

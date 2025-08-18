@@ -7,10 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Changed
-- **BREAKING**: Migrated from Poetry to uv for Python dependency management
-- Updated all GitHub workflows to use uv instead of Poetry
-- Updated build system to use hatchling instead of poetry-core
-- Updated development documentation and setup instructions for uv
+- Migrated from Poetry to uv for Python dependency management
 
 ## [2.6.9] - 2025-08-14
 
