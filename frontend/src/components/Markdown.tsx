@@ -9,6 +9,7 @@ import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { visit } from 'unist-util-visit';
+import { Button } from '@/components/ui/button';
 
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
@@ -88,6 +89,60 @@ const cursorPlugin = () => {
   };
 };
 
+const vtpLinkRehypePlugin = () => {
+  return (tree: any) => {
+    visit(tree, 'text', (node: any, index, parent) => {
+      if (node.value && typeof node.value === 'string') {
+        const vtpPattern = /\/files\/by-key\/[^\s]+\.vtp/g;
+        const matches = [...(node.value.matchAll(vtpPattern) || [])];
+
+        if (matches.length > 0) {
+          const newNodes: any[] = [];
+          let lastIndex = 0;
+
+          matches.forEach((match) => {
+            const [fullMatch] = match;
+            const startIndex = match.index!;
+            const endIndex = startIndex + fullMatch.length;
+
+            if (startIndex > lastIndex) {
+              newNodes.push({
+                type: 'text',
+                value: node.value!.slice(lastIndex, startIndex)
+              });
+            }
+
+            const fullFilename = fullMatch.split('/').pop() || 'VTP File';
+            const baseFilename = fullFilename.replace('.vtp', '');
+            const filename = baseFilename.length > 8 ?
+              baseFilename.slice(-8) + '.vtp' :
+              fullFilename;
+
+            newNodes.push({
+              type: 'element',
+              tagName: 'vtplink',
+              properties: { url: fullMatch, filename },
+              children: []
+            });
+
+            lastIndex = endIndex;
+          });
+
+          if (lastIndex < node.value!.length) {
+            newNodes.push({
+              type: 'text',
+              value: node.value!.slice(lastIndex)
+            });
+          }
+
+          parent!.children.splice(index, 1, ...newNodes);
+        }
+      }
+    });
+
+  };
+};
+
 const Markdown = ({
   allowHtml,
   latex,
@@ -98,7 +153,7 @@ const Markdown = ({
   const apiClient = useContext(ChainlitContext);
 
   const rehypePlugins = useMemo(() => {
-    let rehypePlugins: PluggableList = [];
+    let rehypePlugins: PluggableList = [vtpLinkRehypePlugin];
     if (allowHtml) {
       rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
     }
@@ -275,6 +330,18 @@ const Markdown = ({
         },
         // @ts-expect-error custom plugin
         blinkingCursor: () => <BlinkingCursor whitespace />,
+        // @ts-expect-error custom plugin for VTP links
+        vtplink: ({ url, filename }: { url: string; filename: string }) => (
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="not-prose">
+            <a href={url} target="_blank" rel="noopener noreferrer">
+              {filename}
+            </a>
+          </Button>
+        ),
         alert: ({
           type,
           children,
