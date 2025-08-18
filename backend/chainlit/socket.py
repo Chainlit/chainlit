@@ -188,6 +188,13 @@ async def connection_successful(sid):
         else:
             await context.emitter.send_resume_thread_error("Thread not found.")
 
+    # Auto-connect to MCP servers before on_chat_start
+    from chainlit.mcp_connection import auto_connect_mcp_servers
+    try:
+        await auto_connect_mcp_servers()
+    except Exception as e:
+        logger.error(f"MCP auto-connection failed: {e}")
+    
     if config.code.on_chat_start:
         task = asyncio.create_task(config.code.on_chat_start())
         context.session.current_task = task

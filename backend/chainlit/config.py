@@ -139,6 +139,20 @@ reaction_on_message_received = false
     # Please don't comment this line for now, we need it to parse the executable name.
     allowed_executables = [ "npx", "uvx" ]
 
+# Configure MCP servers to auto-connect on chat start
+# [[features.mcp.servers]]
+# name = "csv-editor"
+# client = "streamable-http"
+# url = "http://localhost:3001/mcp"
+# auto_connect = true
+# timeout = 30
+
+# [[features.mcp.servers]]
+# name = "local-tools"
+# client = "stdio"
+# command = "npx my-mcp-server"
+# auto_connect = true
+
 [UI]
 # Name of the assistant.
 name = "Assistant"
@@ -269,6 +283,26 @@ class McpStdioFeature(BaseModel):
     allowed_executables: Optional[list[str]] = None
 
 
+class McpServerConfig(BaseModel):
+    name: str
+    client: Literal["stdio", "sse", "streamable-http"]
+    auto_connect: bool = True
+    timeout: Optional[int] = 30
+    # For HTTP-based clients
+    url: Optional[str] = None
+    headers: Optional[Dict[str, str]] = None
+    # For stdio clients
+    command: Optional[str] = None
+
+    def model_post_init(self, __context) -> None:
+        if self.client in ["sse", "streamable-http"] and not self.url:
+            raise ValueError(f"Server '{self.name}': 'url' is required for client type '{self.client}'")
+        if self.client == "stdio" and not self.command:
+            raise ValueError(f"Server '{self.name}': 'command' is required for client type 'stdio'")
+        if self.timeout is not None and self.timeout <= 0:
+            raise ValueError(f"Server '{self.name}': 'timeout' must be positive")
+
+
 class SlackFeature(BaseModel):
     reaction_on_message_received: bool = False
 
@@ -280,6 +314,7 @@ class McpFeature(BaseModel):
         default_factory=McpStreamableHttpFeature
     )
     stdio: McpStdioFeature = Field(default_factory=McpStdioFeature)
+    servers: Optional[List[McpServerConfig]] = None
 
 
 class FeaturesSettings(BaseModel):
