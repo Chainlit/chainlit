@@ -29,6 +29,18 @@
 </p>
 
 <p align="center">
+    <!-- Keep these links. Translations will automatically update with the README. -->
+    <a href="https://zdoc.app/de/Chainlit/chainlit">Deutsch</a> | 
+    <a href="https://zdoc.app/es/Chainlit/chainlit">Español</a> | 
+    <a href="https://zdoc.app/fr/Chainlit/chainlit">français</a> | 
+    <a href="https://zdoc.app/ja/Chainlit/chainlit">日本語</a> | 
+    <a href="https://zdoc.app/ko/Chainlit/chainlit">한국어</a> | 
+    <a href="https://zdoc.app/pt/Chainlit/chainlit">Português</a> | 
+    <a href="https://zdoc.app/ru/Chainlit/chainlit">Русский</a> | 
+    <a href="https://zdoc.app/zh/Chainlit/chainlit">中文</a>
+</p>
+
+<p align="center">
     <a href="https://trendshift.io/repositories/6708" target="_blank"><img src="https://trendshift.io/api/badge/repositories/6708" alt="Chainlit%2Fchainlit | Trendshift" style="width: 250px; height: 45px;" width="250" height="45"/></a>
 </p>
 
