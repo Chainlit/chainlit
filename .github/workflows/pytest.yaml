@@ -17,15 +17,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
-      - uses: ./.github/actions/poetry-python-install
-        name: Install Python, poetry and Python dependencies
+      - uses: ./.github/actions/uv-python-install
+        name: Install Python, uv and Python dependencies
         with:
           python-version: ${{ matrix.python-version }}
-          poetry-install-args: --with tests --with mypy --with custom-data
-          poetry-working-directory: ${{ env.BACKEND_DIR }}
+          extra-dependencies: --extra tests --extra mypy --extra custom-data
+          working-directory: ${{ env.BACKEND_DIR }}
       - name: Install fastapi ${{ matrix.fastapi-version }}
-        run: poetry add fastapi@^${{ matrix.fastapi-version}}
+        run: uv add fastapi@^${{ matrix.fastapi-version}}
         working-directory: ${{ env.BACKEND_DIR }}
       - name: Run Pytest
-        run: poetry run pytest --cov=chainlit/
+        run: uv run pytest --cov=chainlit/
         working-directory: ${{ env.BACKEND_DIR }}

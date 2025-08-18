@@ -30,12 +30,12 @@ jobs:
         name: Install Node, pnpm and dependencies.
         with:
           pnpm-install-args: --no-frozen-lockfile
-      - uses: ./.github/actions/poetry-python-install
-        name: Install Python, poetry and Python dependencies
+      - uses: ./.github/actions/uv-python-install
+        name: Install Python, uv and Python dependencies
         with:
-          poetry-working-directory: ${{ env.BACKEND_DIR }}
+          working-directory: ${{ env.BACKEND_DIR }}
       - name: Build Python distribution
-        run: sed -i '/\[tool.poetry.build\]/,/^script = .*/d' pyproject.toml && poetry build
+        run: uv build
         working-directory: ${{ env.BACKEND_DIR }}
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

@@ -22,11 +22,11 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           runTests: false
-      - uses: ./.github/actions/poetry-python-install
-        name: Install Python, poetry and Python & pnpm (poetry does it automatically) dependencies
+      - uses: ./.github/actions/uv-python-install
+        name: Install Python, uv and Python & pnpm (uv does it automatically) dependencies
         with:
-          poetry-working-directory: ${{ env.BACKEND_DIR }}
-          poetry-install-args: --with tests
+          working-directory: ${{ env.BACKEND_DIR }}
+          extra-dependencies: --group tests
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
