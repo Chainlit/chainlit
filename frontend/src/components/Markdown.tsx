@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
-import { useContext, useMemo } from 'react';
+import { useContext, useMemo, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
@@ -24,6 +24,11 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table';
+import {
+  ResizablePanel,
+  ResizablePanelGroup
+} from '@/components/ui/resizable';
+import Geometry from '@/components/Geometry';
 
 import BlinkingCursor from './BlinkingCursor';
 import CodeSnippet from './CodeSnippet';
@@ -143,6 +148,35 @@ const vtpLinkRehypePlugin = () => {
   };
 };
 
+const VtpLink = ({ url, filename }: { url: string; filename: string }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleClick = () => {
+    setIsOpen(!isOpen);
+  };
+
+  return (
+    <div className="w-full my-2 not-prose">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleClick}
+      >
+        {filename}
+      </Button>
+      {isOpen && (
+        <div className="h-96 w-full mt-2">
+          <ResizablePanelGroup direction="horizontal" className="flex-grow rounded-lg border">
+            <ResizablePanel defaultSize={100}>
+              <Geometry vtpUrl={url} />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Markdown = ({
   allowHtml,
   latex,
@@ -185,6 +219,13 @@ const Markdown = ({
       components={{
         ...alertComponents, // add alert components
         code(props) {
+          const { node, children } = props;
+          const hasVtpLink =
+            node.children.some((child: any) => child.tagName === 'vtplink');
+
+          if (hasVtpLink) {
+            return <>{children}</>;
+          }
           return (
             <code
               {...omit(props, ['node'])}
@@ -332,15 +373,7 @@ const Markdown = ({
         blinkingCursor: () => <BlinkingCursor whitespace />,
         // @ts-expect-error custom plugin for VTP links
         vtplink: ({ url, filename }: { url: string; filename: string }) => (
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="not-prose">
-            <a href={url} target="_blank" rel="noopener noreferrer">
-              {filename}
-            </a>
-          </Button>
+          <VtpLink url={url} filename={filename} />
         ),
         alert: ({
           type,
@@ -358,3 +391,4 @@ const Markdown = ({
 };
 
 export { Markdown };
+
