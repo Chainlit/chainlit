@@ -22,6 +22,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           extra-dependencies: --extra tests --extra mypy --extra custom-data
           working-directory: ${{ env.BACKEND_DIR }}
+      - name: Build UI components
+        run: pnpm run buildUi
+        timeout-minutes: 5
       - name: Run Pytest
         run: uv run pytest --cov=chainlit/
         working-directory: ${{ env.BACKEND_DIR }}
