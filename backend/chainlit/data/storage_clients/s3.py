@@ -47,7 +47,11 @@ class S3StorageClient(BaseStorageClient):
         try:
             if content_disposition is not None:
                 self.client.put_object(
-                    Bucket=self.bucket, Key=object_key, Body=data, ContentType=mime, ContentDisposition=content_disposition
+                    Bucket=self.bucket,
+                    Key=object_key,
+                    Body=data,
+                    ContentType=mime,
+                    ContentDisposition=content_disposition,
                 )
             else:
                 self.client.put_object(
