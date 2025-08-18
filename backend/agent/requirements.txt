@@ -3,6 +3,7 @@ langchain-core
 langgraph
 langgraph-api
 
+asyncpg
 poetry
 chainlit
 matplotlib

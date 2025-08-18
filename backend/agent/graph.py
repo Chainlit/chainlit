@@ -145,6 +145,20 @@ from chainlit.types import ThreadDict
 async def resume(thread: ThreadDict):
     pass
 
+@cl.oauth_callback
+def callback(
+    provider_id: str,
+    token: str,
+    raw_user_data: Dict[str, str],
+    default_user: cl.User,
+) -> Optional[cl.User]:
+    return default_user
+
+@cl.on_chat_start
+async def start():
+    app_user = cl.user_session.get("user")
+    await cl.Message(f"Hello {app_user.identifier}").send()
+
 @cl.on_message
 async def handle_message(message: cl.Message):
     state = cl.user_session.get("agent_state", {"messages": []})

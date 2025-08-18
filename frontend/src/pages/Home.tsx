@@ -41,12 +41,12 @@ export default function Home() {
   return (
     <Page>
       <ResizablePanelGroup direction="horizontal" className="flex-grow">
-        <ResizablePanel defaultSize={70}>
-          <Geometry vtpUrl={currentVtpUrl} />
-        </ResizablePanel>
-        <ResizableHandle withHandle />
         <ResizablePanel defaultSize={30}>
           <Chat />
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={70}>
+          <Geometry vtpUrl={currentVtpUrl} />
         </ResizablePanel>
       </ResizablePanelGroup>
     </Page>
