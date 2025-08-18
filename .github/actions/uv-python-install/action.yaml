@@ -15,7 +15,7 @@ inputs:
     required: false
     default: .
   extra-dependencies:
-    description: Extra dependencies groups to install, e.g. --group tests.
+    description: Extra dependencies to install, e.g. --extra tests --extra dev.
     required: false
 
 runs:

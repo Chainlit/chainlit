@@ -22,7 +22,7 @@ Always reference these instructions first and fallback to search or bash command
    
    # Install Python dependencies - takes ~2 minutes, NEVER CANCEL
    cd backend
-   uv sync --group tests --group mypy --group dev --group custom-data
+   uv sync --extra tests --extra mypy --extra dev --extra custom-data
    # Timeout: Use 300+ seconds (5+ minutes)
    
    # Install Node.js dependencies - takes ~3 minutes, NEVER CANCEL  

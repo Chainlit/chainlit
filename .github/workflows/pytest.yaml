@@ -10,7 +10,6 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12', '3.13']
-        fastapi-version: ['0.116']
     env:
       BACKEND_DIR: ./backend
     steps:
@@ -23,9 +22,6 @@ jobs:
           python-version: ${{ matrix.python-version }}
           extra-dependencies: --extra tests --extra mypy --extra custom-data
           working-directory: ${{ env.BACKEND_DIR }}
-      - name: Install fastapi ${{ matrix.fastapi-version }}
-        run: uv add fastapi@^${{ matrix.fastapi-version}}
-        working-directory: ${{ env.BACKEND_DIR }}
       - name: Run Pytest
         run: uv run pytest --cov=chainlit/
         working-directory: ${{ env.BACKEND_DIR }}
