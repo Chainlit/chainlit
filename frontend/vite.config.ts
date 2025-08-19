@@ -12,18 +12,6 @@ export default defineConfig(({ mode }) => {
     build: {
       sourcemap: true
     },
-    server: {
-      proxy: {
-        '/files': {
-          target: env.VITE_BACKEND_URL,
-          changeOrigin: true
-        },
-        '/upload': {
-          target: env.VITE_BACKEND_URL,
-          changeOrigin: true
-        }
-      }
-    },
     plugins: [react(), tsconfigPaths(), svgr()],
     resolve: {
       alias: {

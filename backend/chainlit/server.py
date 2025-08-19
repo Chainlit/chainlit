@@ -26,7 +26,13 @@ from fastapi import (
     status,
 )
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import (
+    FileResponse,
+    HTMLResponse,
+    JSONResponse,
+    RedirectResponse,
+    StreamingResponse,
+)
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
@@ -74,6 +80,12 @@ from chainlit.types import (
 from chainlit.user import PersistedUser, User
 
 from ._utils import is_path_inside
+
+import io
+from fastapi import Path as FastAPIPath
+from botocore.exceptions import ClientError
+from chainlit.data.storage_clients.s3 import S3StorageClient
+
 
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
@@ -1475,6 +1487,82 @@ async def get_file(
         return FileResponse(file["path"], media_type=file["type"])
     else:
         raise HTTPException(status_code=404, detail="File not found")
+
+
+@router.get("/files/by-key/{s3_key:path}")
+async def serve_file_by_key(s3_key: str = FastAPIPath(..., description="The full S3 key path")):
+    """
+    Endpoint to serve files by full S3 key path.
+    """
+    # S3 configuration
+    AWS_REGION = os.getenv("APP_AWS_REGION", "eu-north-1")
+    AWS_ACCESS_KEY = os.getenv("APP_AWS_ACCESS_KEY")
+    AWS_SECRET_KEY = os.getenv("APP_AWS_SECRET_KEY")
+    BUCKET_NAME = os.getenv("BUCKET_NAME", "keystone-user-content-files")
+
+    if not all([AWS_ACCESS_KEY, AWS_SECRET_KEY, BUCKET_NAME]):
+        raise HTTPException(status_code=500, detail="AWS credentials not available.")
+
+    storage_client = S3StorageClient(
+        bucket=BUCKET_NAME,
+        region_name=AWS_REGION,
+        aws_access_key_id=AWS_ACCESS_KEY,
+        aws_secret_access_key=AWS_SECRET_KEY,
+    )
+
+    if not getattr(storage_client, "client", None):
+        raise HTTPException(status_code=500, detail="S3 client not initialized.")
+
+    def get_content_type(filename: str) -> str:
+        extension = filename.lower().split(".")[-1]
+        content_types = {
+            "vtp": "application/octet-stream",
+            "pdf": "application/pdf",
+            "jpg": "image/jpeg",
+            "jpeg": "image/jpeg",
+            "png": "image/png",
+            "gif": "image/gif",
+            "webp": "image/webp",
+            "py": "text/x-python",
+            "dwg": "application/acad",
+            "dxf": "application/dxf",
+        }
+        return content_types.get(extension, "application/octet-stream")
+
+    try:
+        # Get the file from S3
+        try:
+            response = storage_client.client.get_object(Bucket=storage_client.bucket, Key=s3_key)
+        except ClientError as e:
+            if e.response['Error']['Code'] == 'NoSuchKey':
+                raise HTTPException(status_code=404, detail=f"File not found at key: {s3_key}")
+            else:
+                raise HTTPException(status_code=500, detail=f"Error retrieving file: {e}")
+
+        # Get file content and determine content type
+        file_content = response['Body'].read()
+        filename = s3_key.split('/')[-1]
+        content_type = get_content_type(filename)
+
+        # Get original filename from metadata if available
+        original_name = response.get('Metadata', {}).get('originalname', filename)
+
+        # Create streaming response
+        return StreamingResponse(
+            io.BytesIO(file_content),
+            media_type=content_type,
+            headers={
+                "Content-Disposition": f"inline; filename=\"{original_name}\"",
+                "Cache-Control": "public, max-age=3600",
+                "Content-Length": str(len(file_content))
+            }
+        )
+
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error serving file: {e}")
 
 
 @router.get("/favicon")

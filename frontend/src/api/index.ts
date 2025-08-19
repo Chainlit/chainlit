@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 
 import { ChainlitAPI, ClientError } from '@chainlit/react-client';
 
-const devServer = 'http://localhost:8003' + getRouterBasename();
+const devServer = 'http://localhost:8000' + getRouterBasename();
 const url = import.meta.env.DEV
   ? devServer
   : window.origin + getRouterBasename();

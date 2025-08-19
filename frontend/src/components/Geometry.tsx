@@ -1,4 +1,5 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useContext } from 'react';
+import { ChainlitContext } from '@chainlit/react-client';
 import '@kitware/vtk.js/Rendering/Profiles/Geometry';
 import vtkFullScreenRenderWindow from '@kitware/vtk.js/Rendering/Misc/FullScreenRenderWindow';
 import vtkRenderWindow from '@kitware/vtk.js/Rendering/Core/RenderWindow';
@@ -18,6 +19,7 @@ interface FourStoreyGeometryProps {
 const FourStoreyGeometry: React.FC<FourStoreyGeometryProps> = ({
   vtpUrl,
 }) => {
+  const apiClient = useContext(ChainlitContext);
   const containerRef = useRef<HTMLDivElement>(null);
   const fullScreenRendererRef = useRef<any>(null);
   const rendererRef = useRef<any>(null);
@@ -29,7 +31,8 @@ const FourStoreyGeometry: React.FC<FourStoreyGeometryProps> = ({
     if (!rendererRef.current || !renderWindowRef.current) return;
 
     try {
-      const response = await fetch(url);
+      const fullUrl = import.meta.env.DEV ? url : apiClient.buildEndpoint(url);
+      const response = await fetch(fullUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -170,4 +173,4 @@ const FourStoreyGeometry: React.FC<FourStoreyGeometryProps> = ({
   );
 };
 
-export default FourStoreyGeometry; 
+export default FourStoreyGeometry;
