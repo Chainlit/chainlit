@@ -1,6 +1,5 @@
 import asyncio
 from contextlib import AsyncExitStack
-from typing import Dict, Tuple
 
 from chainlit.config import McpServerConfig, config
 from chainlit.context import context
@@ -57,22 +56,6 @@ async def auto_connect_mcp_servers() -> None:
 
 async def _connect_single_server(server_config: McpServerConfig) -> None:
     """Connect to a single MCP server with timeout and error handling."""
-    from mcp import ClientSession
-    from mcp.client.sse import sse_client
-    from mcp.client.stdio import (
-        StdioServerParameters,
-        get_default_environment,
-        stdio_client,
-    )
-    from mcp.client.streamable_http import streamablehttp_client
-
-    from chainlit.mcp import (
-        HttpMcpConnection,
-        McpConnection,
-        SseMcpConnection,
-        StdioMcpConnection,
-        validate_mcp_command,
-    )
     
     session = context.session
     if not session:
