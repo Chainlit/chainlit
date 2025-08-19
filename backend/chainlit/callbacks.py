@@ -389,7 +389,9 @@ def author_rename(
     return func
 
 
-def on_mcp_connect(func: Callable[[McpConnection, ClientSession], None]) -> Callable:
+def on_mcp_connect(
+    func: Callable[[McpConnection, ClientSession], Awaitable[None]],
+) -> Callable[[McpConnection, ClientSession], Awaitable[None]]:
     """
     Called everytime an MCP is connected
     """
@@ -398,7 +400,9 @@ def on_mcp_connect(func: Callable[[McpConnection, ClientSession], None]) -> Call
     return func
 
 
-def on_mcp_disconnect(func: Callable[[str, ClientSession], None]) -> Callable:
+def on_mcp_disconnect(
+    func: Callable[[str, ClientSession], Awaitable[None]],
+) -> Callable[[str, ClientSession], Awaitable[None]]:
     """
     Called everytime an MCP is disconnected
     """

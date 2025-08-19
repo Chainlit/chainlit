@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.6.5"
+version = "2.6.9"
 keywords = [
     'LLM',
     'Agents',
@@ -176,7 +176,9 @@ ignore = [
     "E712",
     "E501",
     "UP006",
+    "UP007",
     "UP035",
+    "UP045",
     "PIE790",
     "RUF005",
     "RUF006",

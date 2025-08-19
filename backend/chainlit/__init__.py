@@ -123,6 +123,7 @@ __getattr__ = make_module_getattr(
         "instrument_openai": "chainlit.openai",
         "instrument_mistralai": "chainlit.mistralai",
         "SemanticKernelFilter": "chainlit.semantic_kernel",
+        "server": "chainlit.server",
     }
 )
 
