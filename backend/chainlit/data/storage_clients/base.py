@@ -15,6 +15,7 @@ class BaseStorageClient(ABC):
         data: Union[bytes, str],
         mime: str = "application/octet-stream",
         overwrite: bool = True,
+        content_disposition: str | None = None,
     ) -> Dict[str, Any]:
         pass
 
