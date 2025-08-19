@@ -32,7 +32,6 @@ export interface IChainlitConfig {
   ui: {
     name: string;
     description?: string;
-    font_family?: string;
     default_theme?: 'light' | 'dark';
     layout?: 'default' | 'wide';
     default_sidebar_state?: 'open' | 'closed';
@@ -70,6 +69,9 @@ export interface IChainlitConfig {
     mcp?: {
       enabled?: boolean;
       sse?: {
+        enabled?: boolean;
+      };
+      streamable_http?: {
         enabled?: boolean;
       };
       stdio?: {

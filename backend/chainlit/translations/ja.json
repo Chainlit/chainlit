@@ -112,7 +112,7 @@
       "settings": {
         "title": "設定パネル"
       },
-      "watermark": "開発元："
+      "watermark": "大規模言語モデルは間違いを犯す可能性があります。重要な情報については確認を検討してください。"
     },
     "threadHistory": {
       "sidebar": {

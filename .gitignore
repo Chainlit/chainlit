@@ -11,8 +11,7 @@ venv
 .venv
 .DS_Store
 
-.chainlit
-!cypress/e2e/**/*/.chainlit/*
+**/.chainlit/*
 chainlit.md
 
 cypress/screenshots
@@ -61,3 +60,5 @@ dist-ssr
 
 backend/README.md
 backend/.dmypy.json
+
+.history

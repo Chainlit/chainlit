@@ -34,15 +34,6 @@ export interface InputMethods {
   reset: () => void;
 }
 
-const escapeHtml = (unsafe: string) => {
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
-};
-
 const Input = forwardRef<InputMethods, Props>(
   (
     {
@@ -75,6 +66,9 @@ const Input = forwardRef<InputMethods, Props>(
       const clone = contentEditableRef.current.cloneNode(
         true
       ) as HTMLDivElement;
+      clone.className += 'hidden';
+
+      contentEditableRef.current.parentNode?.appendChild(clone);
 
       // Remove command span from clone
       const commandSpan = clone.querySelector('.command-span');
@@ -82,18 +76,11 @@ const Input = forwardRef<InputMethods, Props>(
         commandSpan.remove();
       }
 
-      return (
-        clone.innerHTML
-          ?.replace(/<br\s*\/?>/g, '\n') // Convert <br> to newlines
-          .replace(/<div>/g, '\n') // Convert <div> to newlines
-          .replace(/<\/div>/g, '') // Remove closing div tags
-          .replace(/&nbsp;/g, ' ') // Convert &nbsp; to spaces
-          .replace(/<[^>]*>/g, '') // Remove any other HTML tags
-          .replace(/&lt;/g, '<') // Convert &lt; back to
-          .replace(/&gt;/g, '>') // Convert &gt; back to >
-          .replace(/&amp;/g, '&')
-          .replace('\u200B', '') || ''
-      );
+      const text = clone.innerText ?? '';
+
+      contentEditableRef.current.parentNode?.removeChild(clone);
+
+      return text;
     };
 
     const reset = () => {
@@ -102,13 +89,12 @@ const Input = forwardRef<InputMethods, Props>(
         if (contentEditableRef.current) {
           contentEditableRef.current.innerHTML = '';
         }
-      }else if(contentEditableRef.current){
+      } else if (contentEditableRef.current) {
         // if selectedCommand?.persistent is true , keep .command-span tag and clear content
-        const commandSpan = contentEditableRef.current.querySelector('.command-span');
+        const commandSpan =
+          contentEditableRef.current.querySelector('.command-span');
         if (commandSpan) {
           contentEditableRef.current.innerHTML = commandSpan.outerHTML;
-          // Zero-width space
-          contentEditableRef.current.appendChild(document.createTextNode('\u200B'));
         }
       }
       setSelectedIndex(0);
@@ -173,7 +159,7 @@ const Input = forwardRef<InputMethods, Props>(
           // Create new command block
           const newCommandBlock = document.createElement('div');
           newCommandBlock.className =
-            'command-span font-bold inline-flex text-[#08f] items-center mr-1';
+            'command-span font-bold inline-flex text-[#08f] items-center pr-1';
           newCommandBlock.contentEditable = 'false';
           newCommandBlock.innerHTML = `<span>${selectedCommand.id}</span>`;
 
@@ -191,20 +177,12 @@ const Input = forwardRef<InputMethods, Props>(
             }
           }
 
-          let textNode;
-
-          // Create a text node after the command span if none exists
-          if (!newCommandBlock.nextSibling) {
-            textNode = document.createTextNode('\u200B');
-            content.appendChild(textNode); // Zero-width space
-          }
-
           // Ensure cursor is placed after the command span
           const selection = window.getSelection();
           const range = document.createRange();
 
           // Set cursor after the command span
-          range.setStartAfter(textNode || newCommandBlock);
+          range.setStartAfter(newCommandBlock);
           range.collapse(true);
 
           // Apply the selection
@@ -250,16 +228,10 @@ const Input = forwardRef<InputMethods, Props>(
 
         const textData = event.clipboardData?.getData('text/plain');
         if (textData) {
-          const escapedText = escapeHtml(textData);
-          
-          // Remove trailing newlines to prevent extra line breaks
-          const trimmedText = escapedText.replace(/\n+$/, '');
-          
-          // Insert as plain text to avoid browser adding extra formatting
-          document.execCommand('insertText', false, trimmedText);
-
-          textarea.focus();
-
+          const escapedText = document.createTextNode(textData).textContent;
+          if (escapedText) {
+            document.execCommand('insertText', false, escapedText);
+          }
           const inputEvent = new Event('input', {
             bubbles: true,
             composed: true
@@ -270,10 +242,10 @@ const Input = forwardRef<InputMethods, Props>(
       };
 
       // Use the capture phase to ensure we catch the event before it can bubble
-      textarea.addEventListener('paste', handlePaste);
+      textarea.addEventListener('paste', handlePaste, true);
 
       return () => {
-        textarea.removeEventListener('paste', handlePaste);
+        textarea.removeEventListener('paste', handlePaste, true);
       };
     }, [onPaste]);
 
@@ -296,7 +268,7 @@ const Input = forwardRef<InputMethods, Props>(
       }
 
       // If there's no real content, remove the <br>
-      if (!fullContent.trim() || fullContent.trim() === '\u200B') {
+      if (!fullContent.trim()) {
         e.currentTarget.innerHTML = '';
       }
     };
@@ -352,7 +324,7 @@ const Input = forwardRef<InputMethods, Props>(
           id={id}
           autoFocus={autoFocus}
           ref={contentEditableRef}
-          contentEditable
+          contentEditable="plaintext-only"
           data-placeholder={placeholder}
           className={cn(
             'min-h-10 max-h-[250px] whitespace-pre-wrap overflow-y-auto w-full focus:outline-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0 empty:before:content-[attr(data-placeholder)] empty:before:text-muted-foreground',

@@ -20,7 +20,6 @@ from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import sio
 from chainlit.session import WebsocketSession
-from chainlit.telemetry import trace_event
 from chainlit.types import InputAudioChunk, InputAudioChunkPayload, MessagePayload
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_sessions
@@ -34,7 +33,6 @@ def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
         session.emit_call = emit_call_fn
-        trace_event("session_restored")
         return True
     return False
 
@@ -64,8 +62,6 @@ async def resume_thread(session: WebsocketSession):
             session.chat_profile = chat_profile
         if chat_settings := metadata.get("chat_settings"):
             session.chat_settings = chat_settings
-
-        trace_event("thread_resumed")
 
         return thread
     elif thread.get("metadata").get("is_shared") == True:
@@ -136,20 +132,19 @@ async def copy_thread(session: WebsocketSession, user: User, thread: Dict):
 
 
 def load_user_env(user_env):
+    if user_env:
+        user_env_dict = json.loads(user_env)
     # Check user env
     if config.project.user_env:
-        # Check if requested user environment variables are provided
-        if user_env:
-            user_env = json.loads(user_env)
-            for key in config.project.user_env:
-                if key not in user_env:
-                    trace_event("missing_user_env")
-                    raise ConnectionRefusedError(
-                        "Missing user environment variable: " + key
-                    )
-        else:
+        if not user_env_dict:
             raise ConnectionRefusedError("Missing user environment variables")
-    return user_env
+        # Check if requested user environment variables are provided
+        for key in config.project.user_env:
+            if key not in user_env_dict:
+                raise ConnectionRefusedError(
+                    "Missing user environment variable: " + key
+                )
+    return user_env_dict
 
 
 def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
@@ -226,7 +221,6 @@ async def connect(sid, environ, auth):
         environ=environ,
     )
 
-    trace_event("connection_successful")
     return True
 
 
@@ -309,8 +303,6 @@ async def disconnect(sid):
 @sio.on("stop")  # pyright: ignore [reportOptionalCall]
 async def stop(sid):
     if session := WebsocketSession.get(sid):
-        trace_event("stop_task")
-
         init_ws_context(session)
         await Message(content="Task manually stopped.").send()
 
@@ -400,7 +392,7 @@ async def audio_start(sid):
     session = WebsocketSession.require(sid)
 
     context = init_ws_context(session)
-    if config.code.on_audio_start:
+    if config.features.audio.enabled:
         connected = bool(await config.code.on_audio_start())
         connection_state = "on" if connected else "off"
         await context.emitter.update_audio_connection(connection_state)
@@ -413,7 +405,7 @@ async def audio_chunk(sid, payload: InputAudioChunkPayload):
 
     init_ws_context(session)
 
-    if config.code.on_audio_chunk:
+    if config.features.audio.enabled:
         asyncio.create_task(config.code.on_audio_chunk(InputAudioChunk(**payload)))
 
 
@@ -429,7 +421,7 @@ async def audio_end(sid):
             session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread("audio"))
 
-        if config.code.on_audio_end:
+        if config.features.audio.enabled:
             await config.code.on_audio_end()
 
     except asyncio.CancelledError:

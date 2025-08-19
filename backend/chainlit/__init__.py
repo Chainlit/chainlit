@@ -70,6 +70,7 @@ from .callbacks import (
     on_chat_end,
     on_chat_resume,
     on_chat_start,
+    on_feedback,
     on_logout,
     on_mcp_connect,
     on_mcp_disconnect,
@@ -120,6 +121,7 @@ __getattr__ = make_module_getattr(
         "instrument_openai": "chainlit.openai",
         "instrument_mistralai": "chainlit.mistralai",
         "SemanticKernelFilter": "chainlit.semantic_kernel",
+        "server": "chainlit.server",
     }
 )
 
@@ -182,6 +184,7 @@ __all__ = [
     "on_chat_end",
     "on_chat_resume",
     "on_chat_start",
+    "on_feedback",
     "on_logout",
     "on_mcp_connect",
     "on_mcp_disconnect",

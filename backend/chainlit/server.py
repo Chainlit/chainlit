@@ -25,10 +25,12 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
+from starlette.types import Receive, Scope, Send
 from typing_extensions import Annotated
 from watchfiles import awatch
 
@@ -46,6 +48,7 @@ from chainlit.config import (
     DEFAULT_HOST,
     FILES_DIRECTORY,
     PACKAGE_ROOT,
+    ChainlitConfig,
     config,
     load_module,
     public_dir,
@@ -206,7 +209,8 @@ sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
-app.mount(f"{config.run.root_path}/ws/socket.io", asgi_app)
+SOCKET_IO_PATH = f"{config.run.root_path}/ws/socket.io"
+app.mount(SOCKET_IO_PATH, asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -215,6 +219,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class SafariWebSocketsCompatibleGZipMiddleware(GZipMiddleware):
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        # Prevent gzip compression for HTTP requests to socket.io path due to a bug in Safari
+        if URL(scope=scope).path.startswith(SOCKET_IO_PATH):
+            await self.app(scope, receive, send)
+        else:
+            await super().__call__(scope, receive, send)
+
+
+app.add_middleware(SafariWebSocketsCompatibleGZipMiddleware)
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
 router = APIRouter(prefix=config.run.root_path)
@@ -712,7 +731,7 @@ async def get_user(current_user: UserParam) -> GenericUser:
 
 
 _language_pattern = (
-    "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,3})?(-[a-zA-Z0-9]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
+    "^[a-zA-Z]{2,3}(-[a-zA-Z0-9]{2,4})?(-[a-zA-Z0-9]{2,8})?(-x-[a-zA-Z0-9]{1,8})?$"
 )
 
 
@@ -759,18 +778,26 @@ async def project_settings(
     language: str = Query(
         default="en-US", description="Language code", pattern=_language_pattern
     ),
+    chat_profile: Optional[str] = Query(
+        default=None, description="Current chat profile name"
+    ),
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
 
     # Load the markdown file based on the provided language
-
     markdown = get_markdown_str(config.root, language)
 
     profiles = []
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
-            profiles = [p.to_dict() for p in chat_profiles]
+            # Custom serialization to handle ChainlitConfigOverrides
+            for p in chat_profiles:
+                profile_dict = p.to_dict()
+                # Remove config_overrides from the serialized profile since it's used server-side only
+                if "config_overrides" in profile_dict:
+                    del profile_dict["config_overrides"]
+                profiles.append(profile_dict)
 
     starters = []
     if config.code.set_starters:
@@ -778,23 +805,37 @@ async def project_settings(
         if starters:
             starters = [s.to_dict() for s in starters]
 
-    if config.code.on_audio_chunk:
-        config.features.audio.enabled = True
-
-    if config.code.on_mcp_connect:
-        config.features.mcp.enabled = True
-
     debug_url = None
     data_layer = get_data_layer()
 
     if data_layer and config.run.debug:
         debug_url = await data_layer.build_debug_url()
 
+    config_with_overrides = config
+
+    # Apply profile-specific configuration overrides
+    if chat_profile and config.code.set_chat_profiles:
+        # Find the current chat profile and apply overrides
+        chat_profiles = await config.code.set_chat_profiles(current_user)
+        if chat_profiles:
+            current_profile = next(
+                (p for p in chat_profiles if p.name == chat_profile), None
+            )
+            if current_profile and current_profile.config_overrides:
+                config_with_overrides = ChainlitConfig.model_validate(
+                    config.model_copy(
+                        update=current_profile.config_overrides.model_dump(
+                            exclude_none=True
+                        ),
+                        deep=True,
+                    )
+                )
+
     return JSONResponse(
         content={
-            "ui": config.ui.to_dict(),
-            "features": config.features.to_dict(),
-            "userEnv": config.project.user_env,
+            "ui": config_with_overrides.ui.model_dump(),
+            "features": config_with_overrides.features.model_dump(),
+            "userEnv": config_with_overrides.project.user_env,
             "dataPersistence": get_data_layer() is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
@@ -818,6 +859,15 @@ async def update_feedback(
 
     try:
         feedback_id = await data_layer.upsert_feedback(feedback=update.feedback)
+
+        if config.code.on_feedback:
+            try:
+                await config.code.on_feedback(update.feedback)
+            except Exception as callback_error:
+                logger.error(
+                    f"Error in user-provided on_feedback callback: {callback_error}"
+                )
+                # Optionally, you could continue without raising an exception to avoid disrupting the endpoint.
     except Exception as e:
         raise HTTPException(detail=str(e), status_code=500) from e
 
@@ -1097,9 +1147,16 @@ async def connect_mcp(
         get_default_environment,
         stdio_client,
     )
+    from mcp.client.streamable_http import streamablehttp_client
 
     from chainlit.context import init_ws_context
-    from chainlit.mcp import SseMcpConnection, StdioMcpConnection, validate_mcp_command
+    from chainlit.mcp import (
+        HttpMcpConnection,
+        McpConnection,
+        SseMcpConnection,
+        StdioMcpConnection,
+        validate_mcp_command,
+    )
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -1114,7 +1171,7 @@ async def connect_mcp(
                 status_code=401,
             )
 
-    mcp_enabled = config.code.on_mcp_connect is not None
+    mcp_enabled = config.features.mcp.enabled
     if mcp_enabled:
         if payload.name in session.mcp_sessions:
             old_client_session, old_exit_stack = session.mcp_sessions[payload.name]
@@ -1127,6 +1184,7 @@ async def connect_mcp(
 
         try:
             exit_stack = AsyncExitStack()
+            mcp_connection: McpConnection
 
             if payload.clientType == "sse":
                 if not config.features.mcp.sse.enabled:
@@ -1135,10 +1193,17 @@ async def connect_mcp(
                         detail="SSE MCP is not enabled",
                     )
 
-                mcp_connection = SseMcpConnection(url=payload.url, name=payload.name)  # type: SseMcpConnection
+                mcp_connection = SseMcpConnection(
+                    url=payload.url,
+                    name=payload.name,
+                    headers=getattr(payload, "headers", None),
+                )
 
                 transport = await exit_stack.enter_async_context(
-                    sse_client(url=mcp_connection.url)
+                    sse_client(
+                        url=mcp_connection.url,
+                        headers=mcp_connection.headers,
+                    )
                 )
             elif payload.clientType == "stdio":
                 if not config.features.mcp.stdio.enabled:
@@ -1148,24 +1213,43 @@ async def connect_mcp(
                     )
 
                 env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
-                mcp_connection = StdioMcpConnection(  # type: ignore[no-redef]
+                mcp_connection = StdioMcpConnection(
                     command=command, args=args, name=payload.name
-                )  # type: StdioMcpConnection
+                )
 
                 env = get_default_environment()
                 env.update(env_from_cmd)
                 # Create the server parameters
                 server_params = StdioServerParameters(
-                    command=command,
-                    args=args,
-                    env=env,
+                    command=command, args=args, env=env
                 )
 
                 transport = await exit_stack.enter_async_context(
                     stdio_client(server_params)
                 )
 
-            read, write = transport
+            elif payload.clientType == "streamable-http":
+                if not config.features.mcp.streamable_http.enabled:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="HTTP MCP is not enabled",
+                    )
+                mcp_connection = HttpMcpConnection(
+                    url=payload.url,
+                    name=payload.name,
+                    headers=getattr(payload, "headers", None),
+                )
+                transport = await exit_stack.enter_async_context(
+                    streamablehttp_client(
+                        url=mcp_connection.url,
+                        headers=mcp_connection.headers,
+                    )
+                )
+
+            # The transport can return (read, write) for stdio, sse
+            # Or (read, write, get_session_id) for streamable-http
+            # We are only interested in the read and write streams here.
+            read, write = transport[:2]
 
             mcp_session: ClientSession = await exit_stack.enter_async_context(
                 ClientSession(
@@ -1205,7 +1289,13 @@ async def connect_mcp(
                 "command": payload.fullCommand
                 if payload.clientType == "stdio"
                 else None,
-                "url": payload.url if payload.clientType == "sse" else None,
+                "url": getattr(payload, "url", None)
+                if payload.clientType in ["sse", "streamable-http"]
+                else None,
+                # Include optional headers for SSE and streamable-http connections
+                "headers": getattr(payload, "headers", None)
+                if payload.clientType in ["sse", "streamable-http"]
+                else None,
             },
         }
     )

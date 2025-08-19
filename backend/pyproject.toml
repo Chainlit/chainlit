@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit"
-version = "2.6.0"
+version = "2.6.9"
 keywords = [
     'LLM',
     'Agents',
@@ -25,12 +25,15 @@ classifiers = [
     "Programming Language :: JavaScript",
     "Topic :: Software Development :: User Interfaces",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Environment :: Web Environment"
+    "Environment :: Web Environment",
 ]
 repository = "https://github.com/Chainlit/chainlit"
 readme = "README.md"
 exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
-include = ["chainlit/frontend/dist/**/*", "chainlit/copilot/dist/**/*"]
+include = [
+    { path = "chainlit/frontend/dist/**/*", format = ["sdist", "wheel"] },
+    { path = "chainlit/copilot/dist/**/*", format = ["sdist", "wheel"] }
+]
 
 [tool.poetry.scripts]
 # command_name = module_for_handler : function_for_handler
@@ -44,26 +47,26 @@ python = ">=3.10,<4.0.0"
 httpx = ">=0.23.0"
 literalai = "0.1.201"
 dataclasses_json = "^0.6.7"
-fastapi = ">=0.115.3,<0.116"
-starlette = ">=0.41.2"
-uvicorn = ">=0.25.0"
+fastapi = ">=0.116.1,<0.117"
+starlette = ">=0.47.2"
+uvicorn = ">=0.35.0"
 python-socketio = "^5.11.0"
 aiofiles = ">=23.1.0,<25.0.0"
 syncer = "^2.0.3"
 asyncer = "^0.0.8"
-mcp = "^1.3.0"
+mcp = "^1.11.0"
 nest-asyncio = "^1.6.0"
 click = "^8.1.3"
 tomli = "^2.0.1"
 pydantic = ">=2.7.2,<3"
 python-dotenv = "^1.0.0"
-uptrace = "^1.29.0"
 watchfiles = "^0.20.0"
 filetype = "^1.2.0"
 lazify = "^0.4.0"
 packaging = ">=23.1"
 python-multipart = "^0.0.18"
 pyjwt = "^2.8.0"
+audioop-lts = { version = "0.2.1", python = "^3.13" }
 
 [tool.poetry.group.tests]
 optional = true
@@ -74,7 +77,7 @@ pytest-asyncio = "^0.23.8"
 pytest-cov = "^5.0.0"
 openai = "^1.11.1"
 langchain = "^0.2.4"
-llama-index = "^0.10.45"
+llama-index = "^0.13.0"
 semantic-kernel = "^1.24.0"
 tenacity = "^8.4.1"
 transformers = "^4.38"
@@ -114,22 +117,16 @@ module = [
     "plotly",
     "nest_asyncio",
     "socketio.*",
-    "uptrace",
     "syncer",
     "azure.storage.filedatalake",
     "google-cloud-storage",
     "azure.storage.blob",
     "azure.storage.blob.aio",
     "google.auth",
-    "google.oauth2"
+    "google.oauth2",
 ]
 
 ignore_missing_imports = true
-
-
-
-
-
 
 
 [tool.poetry.group.custom-data]
@@ -141,11 +138,11 @@ SQLAlchemy = "^2.0.28"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
-azure-storage-blob="^12.24.0"
+azure-storage-blob = "^12.24.0"
 google-cloud-storage = "^2.19.0"
 
 [build-system]
-requires = ["poetry-core==1.9.1"]
+requires = ["poetry-core==2.1.3"]
 build-backend = "poetry.core.masonry.api"
 
 
@@ -157,8 +154,37 @@ asyncio_mode = "auto"
 target-version = "py39"
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "LOG", "UP", "T10", "ISC", "ICN", "LOG", "G", "PIE", "PT", "Q", "RSE", "FURB", "RUF"]
-ignore = ["E712", "E501", "UP006", "UP035","PIE790", "RUF005", "RUF006", "RUF012", "ISC001"]
+select = [
+    "E",
+    "F",
+    "I",
+    "LOG",
+    "UP",
+    "T10",
+    "ISC",
+    "ICN",
+    "LOG",
+    "G",
+    "PIE",
+    "PT",
+    "Q",
+    "RSE",
+    "FURB",
+    "RUF",
+]
+ignore = [
+    "E712",
+    "E501",
+    "UP006",
+    "UP007",
+    "UP035",
+    "UP045",
+    "PIE790",
+    "RUF005",
+    "RUF006",
+    "RUF012",
+    "ISC001",
+]
 
 [tool.ruff.lint.isort]
 combine-as-imports = true

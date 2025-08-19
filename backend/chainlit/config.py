@@ -17,9 +17,7 @@ from typing import (
 )
 
 import tomli
-from dataclasses_json import DataClassJsonMixin
-from pydantic import Field
-from pydantic.dataclasses import dataclass
+from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import Headers
 
 from chainlit.data.base import BaseDataLayer
@@ -34,13 +32,19 @@ if TYPE_CHECKING:
 
     from chainlit.action import Action
     from chainlit.message import Message
-    from chainlit.types import ChatProfile, InputAudioChunk, Starter, ThreadDict
+    from chainlit.types import (
+        ChatProfile,
+        Feedback,
+        InputAudioChunk,
+        Starter,
+        ThreadDict,
+    )
     from chainlit.user import User
 else:
     # Pydantic needs to resolve forward annotations. Because all of these are used
     # within `typing.Callable`, alias to `Any` as Pydantic does not perform validation
     # of callable argument/return types anyway.
-    Request = Response = Action = Message = ChatProfile = InputAudioChunk = Starter = ThreadDict = User = Any  # fmt: off
+    Request = Response = Action = Message = ChatProfile = InputAudioChunk = Starter = ThreadDict = User = Feedback = Any  # fmt: off
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -61,10 +65,6 @@ config_translation_dir = os.path.join(config_dir, "translations")
 
 # Default config file created if none exists
 DEFAULT_CONFIG_STR = f"""[project]
-# Whether to enable telemetry (default: false). No personal data is collected.
-enable_telemetry = false
-
-
 # List of environment variables to be provided by each user to use the app.
 user_env = []
 
@@ -96,6 +96,10 @@ auto_tag_thread = true
 # Allow users to edit their own messages
 edit_message = true
 
+[features.slack]
+# Add emoji reaction when message is received (requires reactions:write OAuth scope)
+reaction_on_message_received = false
+
 # Authorize users to spontaneously upload files with messages
 [features.spontaneous_file_upload]
     enabled = true
@@ -113,10 +117,19 @@ edit_message = true
     max_size_mb = 500
 
 [features.audio]
+    # Enable audio features
+    enabled = false
     # Sample rate of the audio
     sample_rate = 24000
 
+[features.mcp]
+    # Enable Model Context Protocol (MCP) features
+    enabled = false
+
 [features.mcp.sse]
+    enabled = true
+
+[features.mcp.streamable-http]
     enabled = true
 
 [features.mcp.stdio]
@@ -198,8 +211,7 @@ DEFAULT_PORT = 8000
 DEFAULT_ROOT_PATH = ""
 
 
-@dataclass()
-class RunSettings:
+class RunSettings(BaseModel):
     # Name of the module (python file) used in the run command
     module_name: Optional[str] = None
     host: str = DEFAULT_HOST
@@ -214,64 +226,67 @@ class RunSettings:
     ci: bool = False
 
 
-@dataclass()
-class PaletteOptions(DataClassJsonMixin):
+class PaletteOptions(BaseModel):
     main: Optional[str] = ""
     light: Optional[str] = ""
     dark: Optional[str] = ""
 
 
-@dataclass()
-class TextOptions(DataClassJsonMixin):
+class TextOptions(BaseModel):
     primary: Optional[str] = ""
     secondary: Optional[str] = ""
 
 
-@dataclass()
-class Palette(DataClassJsonMixin):
+class Palette(BaseModel):
     primary: Optional[PaletteOptions] = None
     background: Optional[str] = ""
     paper: Optional[str] = ""
     text: Optional[TextOptions] = None
 
 
-@dataclass
-class SpontaneousFileUploadFeature(DataClassJsonMixin):
+class SpontaneousFileUploadFeature(BaseModel):
     enabled: Optional[bool] = None
     accept: Optional[Union[List[str], Dict[str, List[str]]]] = None
     max_files: Optional[int] = None
     max_size_mb: Optional[int] = None
 
 
-@dataclass
-class AudioFeature(DataClassJsonMixin):
+class AudioFeature(BaseModel):
     sample_rate: int = 24000
     enabled: bool = False
 
 
-@dataclass
-class McpSseFeature(DataClassJsonMixin):
+class McpSseFeature(BaseModel):
     enabled: bool = True
 
 
-@dataclass
-class McpStdioFeature(DataClassJsonMixin):
+class McpStreamableHttpFeature(BaseModel):
+    enabled: bool = True
+
+
+class McpStdioFeature(BaseModel):
     enabled: bool = True
     allowed_executables: Optional[list[str]] = None
 
 
-@dataclass
-class McpFeature(DataClassJsonMixin):
+class SlackFeature(BaseModel):
+    reaction_on_message_received: bool = False
+
+
+class McpFeature(BaseModel):
     enabled: bool = False
     sse: McpSseFeature = Field(default_factory=McpSseFeature)
+    streamable_http: McpStreamableHttpFeature = Field(
+        default_factory=McpStreamableHttpFeature
+    )
     stdio: McpStdioFeature = Field(default_factory=McpStdioFeature)
 
 
-@dataclass()
-class FeaturesSettings(DataClassJsonMixin):
+class FeaturesSettings(BaseModel):
     spontaneous_file_upload: Optional[SpontaneousFileUploadFeature] = None
     audio: Optional[AudioFeature] = Field(default_factory=AudioFeature)
     mcp: McpFeature = Field(default_factory=McpFeature)
+    slack: SlackFeature = Field(default_factory=SlackFeature)
     latex: bool = False
     user_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
@@ -279,20 +294,17 @@ class FeaturesSettings(DataClassJsonMixin):
     edit_message: bool = True
 
 
-@dataclass
-class HeaderLink(DataClassJsonMixin):
+class HeaderLink(BaseModel):
     name: str
     icon_url: str
     url: str
     display_name: Optional[str] = None
 
 
-@dataclass()
-class UISettings(DataClassJsonMixin):
+class UISettings(BaseModel):
     name: str
     description: str = ""
     cot: Literal["hidden", "tool_call", "full"] = "full"
-    font_family: Optional[str] = None
     default_theme: Optional[Literal["light", "dark"]] = "dark"
     layout: Optional[Literal["default", "wide"]] = "default"
     default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
@@ -322,8 +334,7 @@ class UISettings(DataClassJsonMixin):
     header_links: Optional[List[HeaderLink]] = None
 
 
-@dataclass()
-class CodeSettings:
+class CodeSettings(BaseModel):
     # App action functions
     action_callbacks: Dict[str, Callable[["Action"], Any]]
 
@@ -341,6 +352,7 @@ class CodeSettings:
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[["Message"], Any]] = None
+    on_feedback: Optional[Callable[["Feedback"], Any]] = None
     on_audio_start: Optional[Callable[[], Any]] = None
     on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[], Any]] = None
@@ -370,12 +382,10 @@ class CodeSettings:
     data_layer: Optional[Callable[[], BaseDataLayer]] = None
 
 
-@dataclass()
-class ProjectSettings(DataClassJsonMixin):
+class ProjectSettings(BaseModel):
     allow_origins: List[str] = Field(default_factory=lambda: ["*"])
     # Socket.io client transports option
     transports: Optional[List[str]] = None
-    enable_telemetry: bool = False
     # List of environment variables to be provided by each user to use the app. If empty, no environment variables will be asked to the user.
     user_env: Optional[List[str]] = None
     # Path to the local langchain cache database
@@ -389,10 +399,21 @@ class ProjectSettings(DataClassJsonMixin):
     cache: bool = False
 
 
-@dataclass()
-class ChainlitConfig:
+class ChainlitConfigOverrides(BaseModel):
+    """Configuration overrides that can be applied to specific chat profiles."""
+
+    ui: Optional[UISettings] = None
+    features: Optional[FeaturesSettings] = None
+    project: Optional[ProjectSettings] = None
+
+
+class ChainlitConfig(BaseModel):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True, revalidate_instances="always"
+    )
+
     # Directory where the Chainlit project is located
-    root = APP_ROOT
+    root: str = APP_ROOT
     # Chainlit server URL. Used only for cloud features
     chainlit_server: str
     run: RunSettings
@@ -488,7 +509,7 @@ def load_module(target: str, force_refresh: bool = False):
         site_package_dirs = site.getsitepackages()
 
         # Clear the modules related to the app from sys.modules
-        for module_name, module in list(sys.modules.items()):
+        for module_name, module in sys.modules.items():
             if (
                 hasattr(module, "__file__")
                 and module.__file__
