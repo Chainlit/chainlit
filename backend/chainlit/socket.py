@@ -66,19 +66,19 @@ async def resume_thread(session: WebsocketSession):
 
 
 def load_user_env(user_env):
+    if user_env:
+        user_env_dict = json.loads(user_env)
     # Check user env
     if config.project.user_env:
-        # Check if requested user environment variables are provided
-        if user_env:
-            user_env = json.loads(user_env)
-            for key in config.project.user_env:
-                if key not in user_env:
-                    raise ConnectionRefusedError(
-                        "Missing user environment variable: " + key
-                    )
-        else:
+        if not user_env_dict:
             raise ConnectionRefusedError("Missing user environment variables")
-    return user_env
+        # Check if requested user environment variables are provided
+        for key in config.project.user_env:
+            if key not in user_env_dict:
+                raise ConnectionRefusedError(
+                    "Missing user environment variable: " + key
+                )
+    return user_env_dict
 
 
 def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
@@ -326,7 +326,7 @@ async def audio_start(sid):
     session = WebsocketSession.require(sid)
 
     context = init_ws_context(session)
-    if config.code.on_audio_start:
+    if config.features.audio.enabled:
         connected = bool(await config.code.on_audio_start())
         connection_state = "on" if connected else "off"
         await context.emitter.update_audio_connection(connection_state)
@@ -339,7 +339,7 @@ async def audio_chunk(sid, payload: InputAudioChunkPayload):
 
     init_ws_context(session)
 
-    if config.code.on_audio_chunk:
+    if config.features.audio.enabled:
         asyncio.create_task(config.code.on_audio_chunk(InputAudioChunk(**payload)))
 
 
@@ -355,7 +355,7 @@ async def audio_end(sid):
             session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread("audio"))
 
-        if config.code.on_audio_end:
+        if config.features.audio.enabled:
             await config.code.on_audio_end()
 
     except asyncio.CancelledError:

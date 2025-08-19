@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@chainlit/app/src/components/ui/popover';
+import { useConfig } from '@chainlit/react-client';
 
 import Header from './components/Header';
 
@@ -26,7 +27,8 @@ interface Props {
 
 const Widget = ({ config, error }: Props) => {
   const [expanded, setExpanded] = useState(config?.expanded || false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(config?.opened || false);
+  const projectConfig = useConfig();
 
   useEffect(() => {
     window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
@@ -105,12 +107,16 @@ const Widget = ({ config, error }: Props) => {
             : 'copilot-container-collapsed'
         )}
       >
-        <div id="chainlit-copilot" className="flex flex-col h-full w-full">
+        <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
           {error ? (
             <Alert variant="error">{error}</Alert>
           ) : (
             <>
-              <Header expanded={expanded} setExpanded={setExpanded} />
+              <Header
+                expanded={expanded}
+                setExpanded={setExpanded}
+                projectConfig={projectConfig}
+              />
               <div className="flex flex-grow overflow-y-auto">
                 <ChatWrapper />
               </div>

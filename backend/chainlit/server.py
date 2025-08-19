@@ -25,10 +25,12 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette.datastructures import URL
 from starlette.middleware.cors import CORSMiddleware
+from starlette.types import Receive, Scope, Send
 from typing_extensions import Annotated
 from watchfiles import awatch
 
@@ -46,6 +48,7 @@ from chainlit.config import (
     DEFAULT_HOST,
     FILES_DIRECTORY,
     PACKAGE_ROOT,
+    ChainlitConfig,
     config,
     load_module,
     public_dir,
@@ -206,7 +209,8 @@ sio = socketio.AsyncServer(cors_allowed_origins=[], async_mode="asgi")
 asgi_app = socketio.ASGIApp(socketio_server=sio, socketio_path="")
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
-app.mount(f"{config.run.root_path}/ws/socket.io", asgi_app)
+SOCKET_IO_PATH = f"{config.run.root_path}/ws/socket.io"
+app.mount(SOCKET_IO_PATH, asgi_app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -215,6 +219,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class SafariWebSocketsCompatibleGZipMiddleware(GZipMiddleware):
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+
+        # Prevent gzip compression for HTTP requests to socket.io path due to a bug in Safari
+        if URL(scope=scope).path.startswith(SOCKET_IO_PATH):
+            await self.app(scope, receive, send)
+        else:
+            await super().__call__(scope, receive, send)
+
+
+app.add_middleware(SafariWebSocketsCompatibleGZipMiddleware)
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
 router = APIRouter(prefix=config.run.root_path)
@@ -759,18 +778,26 @@ async def project_settings(
     language: str = Query(
         default="en-US", description="Language code", pattern=_language_pattern
     ),
+    chat_profile: Optional[str] = Query(
+        default=None, description="Current chat profile name"
+    ),
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
 
     # Load the markdown file based on the provided language
-
     markdown = get_markdown_str(config.root, language)
 
     profiles = []
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
-            profiles = [p.to_dict() for p in chat_profiles]
+            # Custom serialization to handle ChainlitConfigOverrides
+            for p in chat_profiles:
+                profile_dict = p.to_dict()
+                # Remove config_overrides from the serialized profile since it's used server-side only
+                if "config_overrides" in profile_dict:
+                    del profile_dict["config_overrides"]
+                profiles.append(profile_dict)
 
     starters = []
     if config.code.set_starters:
@@ -778,23 +805,37 @@ async def project_settings(
         if starters:
             starters = [s.to_dict() for s in starters]
 
-    if config.code.on_audio_chunk:
-        config.features.audio.enabled = True
-
-    if config.code.on_mcp_connect:
-        config.features.mcp.enabled = True
-
     debug_url = None
     data_layer = get_data_layer()
 
     if data_layer and config.run.debug:
         debug_url = await data_layer.build_debug_url()
 
+    config_with_overrides = config
+
+    # Apply profile-specific configuration overrides
+    if chat_profile and config.code.set_chat_profiles:
+        # Find the current chat profile and apply overrides
+        chat_profiles = await config.code.set_chat_profiles(current_user)
+        if chat_profiles:
+            current_profile = next(
+                (p for p in chat_profiles if p.name == chat_profile), None
+            )
+            if current_profile and current_profile.config_overrides:
+                config_with_overrides = ChainlitConfig.model_validate(
+                    config.model_copy(
+                        update=current_profile.config_overrides.model_dump(
+                            exclude_none=True
+                        ),
+                        deep=True,
+                    )
+                )
+
     return JSONResponse(
         content={
-            "ui": config.ui.to_dict(),
-            "features": config.features.to_dict(),
-            "userEnv": config.project.user_env,
+            "ui": config_with_overrides.ui.model_dump(),
+            "features": config_with_overrides.features.model_dump(),
+            "userEnv": config_with_overrides.project.user_env,
             "dataPersistence": get_data_layer() is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
@@ -1130,7 +1171,7 @@ async def connect_mcp(
                 status_code=401,
             )
 
-    mcp_enabled = config.code.on_mcp_connect is not None
+    mcp_enabled = config.features.mcp.enabled
     if mcp_enabled:
         if payload.name in session.mcp_sessions:
             old_client_session, old_exit_stack = session.mcp_sessions[payload.name]

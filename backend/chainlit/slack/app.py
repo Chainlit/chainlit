@@ -250,6 +250,16 @@ async def download_slack_files(session: HTTPSession, files, token):
     return elements
 
 
+async def add_reaction_if_enabled(event, emoji: str = "eyes"):
+    if config.features.slack.reaction_on_message_received:
+        try:
+            await slack_app.client.reactions_add(
+                channel=event["channel"], timestamp=event["ts"], name=emoji
+            )
+        except Exception as e:
+            logger.warning(f"Failed to add reaction: {e}")
+
+
 async def process_slack_message(
     event,
     say,
@@ -258,6 +268,8 @@ async def process_slack_message(
     bind_thread_to_user=False,
     thread_ts: Optional[str] = None,
 ):
+    await add_reaction_if_enabled(event)
+
     user = await get_user(event["user"])
 
     channel_id = event["channel"]
@@ -352,9 +364,11 @@ async def handle_message(message, say):
 async def thumb_down(ack, context, body):
     await ack()
     step_id = body["actions"][0]["value"]
+    thread_ts = body["message"]["thread_ts"]
+    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 
     if data_layer := get_data_layer():
-        feedback = Feedback(forId=step_id, value=0)
+        feedback = Feedback(forId=step_id, value=0, threadId=thread_id)
         await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]
@@ -378,9 +392,11 @@ async def thumb_down(ack, context, body):
 async def thumb_up(ack, context, body):
     await ack()
     step_id = body["actions"][0]["value"]
+    thread_ts = body["message"]["thread_ts"]
+    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 
     if data_layer := get_data_layer():
-        feedback = Feedback(forId=step_id, value=1)
+        feedback = Feedback(forId=step_id, value=1, threadId=thread_id)
         await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]

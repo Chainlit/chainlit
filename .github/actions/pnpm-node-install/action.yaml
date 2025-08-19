@@ -17,16 +17,16 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        run_install: false
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-    - name: Enable corepack
-      run: corepack enable
-      shell: bash
-    - name: Install pnpm
-      run: corepack install
-      shell: bash
+        cache: 'pnpm'
+        cache-dependency-path: '**/pnpm-lock.yaml'
     - name: Install JS dependencies
       run: pnpm install ${{ inputs.pnpm-install-args }}
       shell: bash
