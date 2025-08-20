@@ -15,6 +15,7 @@ from chainlit.config import (
     SpontaneousFileUploadFeature,
 )
 from chainlit.server import app
+from chainlit.types import AskFileSpec
 from chainlit.user import PersistedUser
 
 
@@ -499,36 +500,36 @@ def test_upload_file_unauthorized(
     assert response.status_code == 422
 
 
-# def test_upload_file_disabled(
-#     test_client: TestClient,
-#     test_config: ChainlitConfig,
-#     mock_session_get_by_id_patched: Mock,
-#     monkeypatch: pytest.MonkeyPatch,
-# ):
-#     """Test file upload being disabled by config."""
+def test_upload_file_disabled(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test file upload being disabled by config."""
 
-#     # Set accept in config
-#     monkeypatch.setattr(
-#         test_config.features,
-#         "spontaneous_file_upload",
-#         SpontaneousFileUploadFeature(enabled=False),
-#     )
+    # Set accept in config
+    monkeypatch.setattr(
+        test_config.features,
+        "spontaneous_file_upload",
+        SpontaneousFileUploadFeature(enabled=False),
+    )
 
-#     # Prepare the files to upload
-#     file_content = b"Sample file content"
-#     files = {
-#         "file": ("test_upload.txt", file_content, "text/plain"),
-#     }
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
 
-#     # Make the POST request to upload the file
-#     response = test_client.post(
-#         "/project/file",
-#         files=files,
-#         params={"session_id": mock_session_get_by_id_patched.id},
-#     )
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        params={"session_id": mock_session_get_by_id_patched.id},
+    )
 
-#     # Verify the response
-#     assert response.status_code == 400
+    # Verify the response
+    assert response.status_code == 400
 
 
 @pytest.mark.parametrize(
@@ -638,7 +639,7 @@ def test_upload_file_size_check(
     monkeypatch.setattr(
         test_config.features,
         "spontaneous_file_upload",
-        SpontaneousFileUploadFeature(max_size_mb=max_size_mb),
+        SpontaneousFileUploadFeature(max_size_mb=max_size_mb, enabled=True),
     )
 
     # Prepare the files to upload
@@ -662,6 +663,84 @@ def test_upload_file_size_check(
         "/project/file",
         files=files,
         params={"session_id": mock_session_get_by_id_patched.id},
+    )
+
+    # Verify the response
+    assert response.status_code == expected_status
+
+
+@pytest.mark.parametrize(
+    (
+        "file_content",
+        "content_multiplier",
+        "max_size_mb",
+        "parent_id",
+        "expected_status",
+        "accept",
+    ),
+    [
+        (b"1", 1, 1, "mocked_parent_id", 200, ["text/plain"]),
+        (b"11", 1024 * 1024, 1, "mocked_parent_id", 400, ["text/plain"]),
+        (b"11", 1, 1, "invalid_parent_id", 404, ["text/plain"]),
+        (b"11", 1, 1, "mocked_parent_id", 400, ["image/gif"]),
+    ],
+)
+def test_ask_file_with_spontaneous_upload_disabled(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+    file_content: bytes,
+    content_multiplier: int,
+    max_size_mb: int,
+    parent_id: str,
+    expected_status: int,
+    accept: list[str],
+):
+    """Test file upload being disabled by config."""
+
+    # Set accept in config
+    monkeypatch.setattr(
+        test_config.features,
+        "spontaneous_file_upload",
+        SpontaneousFileUploadFeature(enabled=False),
+    )
+
+    # Prepare the files to upload
+    file_content = file_content * content_multiplier
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
+
+    expected_file_id = "mocked_file_id"
+    mock_session_get_by_id_patched.persist_file = AsyncMock(
+        return_value={
+            "id": expected_file_id,
+            "name": "test_upload.txt",
+            "type": "text/plain",
+            "size": len(file_content),
+        }
+    )
+
+    mock_session_get_by_id_patched.files_spec = {
+        "mocked_parent_id": AskFileSpec(
+            step_id="mocked_file_spec",
+            timeout=1,
+            type="file",
+            accept=accept,
+            max_files=1,
+            max_size_mb=max_size_mb,
+        )
+    }
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        params={
+            "session_id": mock_session_get_by_id_patched.id,
+            "ask_parent_id": parent_id,
+        },
     )
 
     # Verify the response
