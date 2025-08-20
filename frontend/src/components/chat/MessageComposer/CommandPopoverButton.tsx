@@ -7,7 +7,6 @@ import {
 import { every } from 'lodash';
 import { Settings2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilValue } from 'recoil';
 
 import { ICommand, commandsState } from '@chainlit/react-client';
@@ -27,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { useTranslation } from 'components/i18n/Translator';
 
 import { useCommandNavigation } from '@/hooks/useCommandNavigation';
 

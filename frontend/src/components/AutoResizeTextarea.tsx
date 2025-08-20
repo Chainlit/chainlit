@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Textarea } from '@/components/ui/textarea';
 
-interface Props extends React.ComponentProps<'textarea'> {
+interface Props extends Omit<React.ComponentProps<'textarea'>, 'onPaste'> {
   maxHeight?: number;
   placeholder?: string;
   onPaste?: (event: ClipboardEvent) => void;

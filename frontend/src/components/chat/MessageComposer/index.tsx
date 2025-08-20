@@ -1,5 +1,4 @@
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,6 +12,7 @@ import {
 
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'components/i18n/Translator';
 
 import { chatSettingsOpenState } from '@/state/project';
 import {
@@ -211,7 +211,10 @@ export default function MessageComposer({
         <div className="flex items-center gap-1">
           <SubmitButton
             onSubmit={submit}
-            disabled={disabled || (!value.trim() && !selectedCommand && attachments.length === 0)}
+            disabled={
+              disabled ||
+              (!value.trim() && !selectedCommand && attachments.length === 0)
+            }
           />
         </div>
       </div>
