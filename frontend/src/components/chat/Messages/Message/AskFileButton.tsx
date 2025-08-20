@@ -20,9 +20,11 @@ interface UploadState {
 
 interface _AskFileButtonProps {
   askUser: IAsk;
+  parentId?: string;
   uploadFile: (
     file: File,
-    onProgress: (progress: number) => void
+    onProgress: (progress: number) => void,
+    parentId?: string
   ) => {
     xhr: XMLHttpRequest;
     promise: Promise<IFileRef>;
@@ -93,16 +95,20 @@ const _AskFileButton = ({
     const promises: Promise<IFileRef>[] = [];
 
     const newUploads = files.map((file, index) => {
-      const { xhr, promise } = uploadFile(file, (progress) => {
-        setUploads((prev) =>
-          prev.map((upload, i) => {
-            if (i === index) {
-              return { ...upload, progress };
-            }
-            return upload;
-          })
-        );
-      });
+      const { xhr, promise } = uploadFile(
+        file,
+        (progress) => {
+          setUploads((prev) =>
+            prev.map((upload, i) => {
+              if (i === index) {
+                return { ...upload, progress };
+              }
+              return upload;
+            })
+          );
+        },
+        askUser?.parentId
+      );
       promises.push(promise);
       return { progress: 0, uploaded: false, cancel: () => xhr.abort() };
     });
