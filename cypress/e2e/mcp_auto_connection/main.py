@@ -31,11 +31,11 @@ async def chat_profile(current_user: cl.User):
 async def on_chat_start():
     """Handle chat start and report current configuration."""
     chat_profile = cl.user_session.get("chat_profile")
-    
+
     # Get the current session's MCP connections (if any)
     session = cl.user_session.get()
-    mcp_sessions = getattr(session, 'mcp_sessions', {})
-    
+    mcp_sessions = getattr(session, "mcp_sessions", {})
+
     # Create status message based on profile
     if chat_profile == "MCP Enabled Profile":
         content = f"""🔌 **MCP Auto-Connection Test**
@@ -78,16 +78,16 @@ This is a standard chat profile without special MCP configuration.
 async def on_message(message: cl.Message):
     """Handle user messages and provide MCP connection info."""
     session = cl.user_session.get()
-    mcp_sessions = getattr(session, 'mcp_sessions', {})
+    mcp_sessions = getattr(session, "mcp_sessions", {})
     chat_profile = cl.user_session.get("chat_profile")
-    
+
     if message.content.lower() in ["status", "mcp", "connections"]:
         if mcp_sessions:
             server_list = []
             for name, (session_obj, _) in mcp_sessions.items():
                 status = "Connected" if session_obj else "Failed"
                 server_list.append(f"• **{name}:** {status}")
-            
+
             content = f"""📊 **Current MCP Connections**
 
 {chr(10).join(server_list)}
@@ -103,7 +103,7 @@ async def on_message(message: cl.Message):
 
 💡 To test auto-connection, configure MCP servers in your `config.toml` file with `auto_connect = true`.
 """
-            
+
         await cl.Message(content=content).send()
     else:
         await cl.Message(
