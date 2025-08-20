@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 interface Props extends React.ComponentProps<'textarea'> {
   maxHeight?: number;
   placeholder?: string;
-  onPaste?: (event: any) => void;
+  onPaste?: (event: ClipboardEvent) => void;
   onEnter?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
@@ -26,10 +26,10 @@ const AutoResizeTextarea = ({
     const textarea = textareaRef.current;
     if (!textarea || !onPaste) return;
 
-    textarea.addEventListener('paste', onPaste as any);
+    textarea.addEventListener('paste', onPaste);
 
     return () => {
-      textarea.removeEventListener('paste', onPaste as any);
+      textarea.removeEventListener('paste', onPaste);
     };
   }, [onPaste]);
 

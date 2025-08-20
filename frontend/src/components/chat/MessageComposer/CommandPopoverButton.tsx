@@ -1,12 +1,13 @@
+import { cn } from '@/lib/utils';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger
 } from '@radix-ui/react-popover';
-import { cn } from '@/lib/utils';
 import { every } from 'lodash';
 import { Settings2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useRecoilValue } from 'recoil';
 
 import { ICommand, commandsState } from '@chainlit/react-client';
@@ -20,12 +21,14 @@ import {
   CommandListScrollable
 } from '@/components/ui/command';
 import {
+  TOOLTIP_DELAY_MS,
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-  TOOLTIP_DELAY_MS
+  TooltipTrigger
 } from '@/components/ui/tooltip';
+
+import { useCommandNavigation } from '@/hooks/useCommandNavigation';
 
 interface Props {
   disabled?: boolean;
@@ -38,11 +41,10 @@ export const CommandPopoverButton = ({
   selectedCommandId,
   onCommandSelect
 }: Props) => {
+  const { t } = useTranslation();
   const commands = useRecoilValue(commandsState);
   const [open, setOpen] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const [lastMouseMove, setLastMouseMove] = useState(0);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const hoverTimerRef = useRef<number | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -54,6 +56,25 @@ export const CommandPopoverButton = ({
   );
 
   const nonButtonCommands = commands.filter((c) => !c.button);
+
+  // Handle direct command selection (for mouse clicks)
+  const handleCommandSelect = (command: ICommand) => {
+    onCommandSelect(command);
+    setOpen(false);
+    cancelTooltipOpen();
+  };
+
+  const { selectedIndex, handleMouseMove, handleMouseLeave, handleKeyDown } =
+    useCommandNavigation({
+      items: nonButtonCommands,
+      isOpen: open,
+      onSelect: handleCommandSelect, // This will be used for keyboard selection
+      onClose: () => {
+        setOpen(false);
+        cancelTooltipOpen();
+        buttonRef.current?.focus();
+      }
+    });
 
   // Handle animation when selection changes
   useEffect(() => {
@@ -82,8 +103,6 @@ export const CommandPopoverButton = ({
         hoverTimerRef.current = null;
       }
       setTooltipOpen(false);
-      setSelectedIndex(0);
-      setLastMouseMove(0);
     }
   }, [open]);
 
@@ -105,223 +124,118 @@ export const CommandPopoverButton = ({
     setTooltipOpen(false);
   };
 
-  const handleMouseMove = (index: number) => {
-    const now = Date.now();
-    // Only update if mouse actually moved (not just from render)
-    if (now - lastMouseMove > 50) {
-      setSelectedIndex(index);
-      setLastMouseMove(now);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    // Keep the last hovered item selected when mouse leaves
-    setLastMouseMove(Date.now());
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!open || nonButtonCommands.length === 0) return;
-
-    // Check if mouse was recently moved
-    const timeSinceMouseMove = Date.now() - lastMouseMove;
-    const isUsingKeyboard = timeSinceMouseMove > 100;
-
-    switch (e.key) {
-      case 'ArrowDown':
-        e.preventDefault();
-        e.stopPropagation();
-        if (isUsingKeyboard) {
-          setSelectedIndex((prev) =>
-            prev < nonButtonCommands.length - 1 ? prev + 1 : 0
-          );
-        }
-        break;
-
-      case 'ArrowUp':
-        e.preventDefault();
-        e.stopPropagation();
-        if (isUsingKeyboard) {
-          setSelectedIndex((prev) =>
-            prev > 0 ? prev - 1 : nonButtonCommands.length - 1
-          );
-        }
-        break;
-
-      case 'Enter': {
-        e.preventDefault();
-        e.stopPropagation();
-        const selectedCmd = nonButtonCommands[selectedIndex];
-        if (selectedCmd) {
-          onCommandSelect(selectedCmd);
-          setOpen(false);
-          cancelTooltipOpen();
-        }
-        break;
-      }
-
-      case 'Escape':
-        e.preventDefault();
-        e.stopPropagation();
-        setOpen(false);
-        cancelTooltipOpen();
-        // Return focus to trigger button (tooltip won't open on focus)
-        buttonRef.current?.focus();
-        break;
-    }
-  };
-
-  const handleCommandSelect = (command: ICommand) => {
-    onCommandSelect(command);
-    setOpen(false);
-    cancelTooltipOpen();
-  };
-
   if (!commands.length || allButtons) return null;
 
   return (
-    <>
-      <style>{`
-        @keyframes command-shift {
-          0% { transform: translateX(-10px); opacity: 0.8; }
-          50% { transform: translateX(5px); }
-          100% { transform: translateX(0); opacity: 1; }
-        }
-
-        .animate-command-shift {
-          animation: command-shift 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .command-list-container::-webkit-scrollbar {
-          width: 4px;
-        }
-
-        .command-list-container::-webkit-scrollbar-track {
-          background: transparent;
-        }
-
-        .command-list-container::-webkit-scrollbar-thumb {
-          background-color: hsl(var(--muted-foreground) / 0.3);
-          border-radius: 2px;
-        }
-
-        .command-list-container {
-          scrollbar-width: thin;
-          scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
-        }
-
-        .command-button-transition {
-          transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
-                      padding 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-      `}</style>
-
-      <div
-        className={cn(
-          'command-popover-wrapper',
-          'transition-all duration-300 ease-out',
-          isAnimating && 'animate-command-shift'
-        )}
+    <div
+      className={cn(
+        'command-popover-wrapper',
+        'transition-all duration-300 ease-out',
+        isAnimating && 'animate-command-shift'
+      )}
+    >
+      <Popover
+        open={open}
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (v) cancelTooltipOpen(); // suppress tooltip while popover is open
+        }}
       >
-        <Popover
-          open={open}
-          onOpenChange={(v) => {
-            setOpen(v);
-            if (v) cancelTooltipOpen(); // suppress tooltip while popover is open
-          }}
-        >
-          <TooltipProvider>
-            {/* Controlled tooltip so it only opens after our delay and never on focus */}
-            <Tooltip open={!open && tooltipOpen}>
-              <TooltipTrigger asChild>
-                <PopoverTrigger asChild>
-                  <Button
-                    ref={buttonRef}
-                    id="command-button"
-                    variant="ghost"
-                    size="sm"
-                    aria-haspopup="menu"
-                    aria-expanded={open}
-                    aria-controls="command-popover"
+        <TooltipProvider>
+          {/* Controlled tooltip so it only opens after our delay and never on focus */}
+          <Tooltip open={!open && tooltipOpen}>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <Button
+                  ref={buttonRef}
+                  id="command-button"
+                  variant="ghost"
+                  size="sm"
+                  aria-haspopup="menu"
+                  aria-expanded={open}
+                  aria-controls="command-popover"
+                  className={cn(
+                    'flex items-center h-9 rounded-full font-medium text-[13px]',
+                    'hover:bg-muted hover:dark:bg-muted transition-all duration-200 transition-width-padding',
+                    'focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
+                    open && 'bg-muted/50',
+                    hasSelectedNonButtonCommand ? 'p-2' : 'px-3 gap-1.5'
+                  )}
+                  disabled={disabled}
+                  onMouseEnter={scheduleTooltipOpen}
+                  onMouseLeave={cancelTooltipOpen}
+                >
+                  <Settings2
                     className={cn(
-                      'flex items-center h-9 rounded-full font-medium text-[13px]',
-                      'hover:bg-muted hover:dark:bg-muted transition-all duration-200',
-                      'focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
-                      'command-button-transition',
-                      open && 'bg-muted/50',
-                      hasSelectedNonButtonCommand ? 'p-2' : 'px-3 gap-1.5'
+                      '!size-5 transition-transform duration-200',
+                      open && 'rotate-45'
                     )}
-                    disabled={disabled}
-                    onMouseEnter={scheduleTooltipOpen}
-                    onMouseLeave={cancelTooltipOpen}
+                  />
+                  {!hasSelectedNonButtonCommand && (
+                    <span className="overflow-hidden transition-all duration-300 opacity-100 w-auto max-w-[100px]">
+                      {t('chat.input.tools')}
+                    </span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>
+                {hasSelectedNonButtonCommand
+                  ? t('chat.input.changeTool')
+                  : t('chat.input.availableTools')}
+              </p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+
+        <PopoverContent
+          id="command-popover"
+          align="start"
+          sideOffset={12}
+          data-popover-content
+          tabIndex={0}
+          className={cn(
+            'p-2 rounded-lg border shadow-md bg-background',
+            'animate-in fade-in-0 zoom-in-95 duration-200',
+            'focus:outline-none'
+          )}
+          onKeyDown={handleKeyDown}
+          onMouseLeave={handleMouseLeave}
+        >
+          <Command className="overflow-hidden bg-transparent">
+            <CommandListScrollable maxItems={5} className="custom-scrollbar">
+              <CommandGroup className="p-0">
+                {nonButtonCommands.map((command, index) => (
+                  <CommandItemAnimated
+                    key={command.id}
+                    index={index}
+                    isSelected={index === selectedIndex}
+                    onMouseMove={() => handleMouseMove(index)}
+                    onSelect={() => handleCommandSelect(command)} // Direct call for mouse clicks
+                    className="space-x-2"
                   >
-                    <Settings2
+                    <Icon
+                      name={command.icon}
                       className={cn(
-                        '!size-5 transition-transform duration-200',
-                        open && 'rotate-45'
+                        '!size-5 text-muted-foreground transition-transform duration-150',
+                        index === selectedIndex && 'scale-110'
                       )}
                     />
-                    {!hasSelectedNonButtonCommand && (
-                      <span className="overflow-hidden transition-all duration-300 opacity-100 w-auto max-w-[100px]">
-                        Tools
-                      </span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{hasSelectedNonButtonCommand ? 'Change Tool' : 'Available Tools'}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <PopoverContent
-            id="command-popover"
-            align="start"
-            sideOffset={12}
-            data-popover-content
-            tabIndex={0}
-            className={cn(
-              'p-2 rounded-lg border shadow-md bg-background',
-              'animate-in fade-in-0 zoom-in-95 duration-200',
-              'focus:outline-none'
-            )}
-            onKeyDown={handleKeyDown}
-            onMouseLeave={handleMouseLeave}
-          >
-            <Command className="overflow-hidden bg-transparent">
-              <CommandListScrollable maxItems={5}>
-                <CommandGroup className="p-0">
-                  {nonButtonCommands.map((command, index) => (
-                    <CommandItemAnimated
-                      key={command.id}
-                      index={index}
-                      isSelected={index === selectedIndex}
-                      onMouseMove={() => handleMouseMove(index)}
-                      onSelect={() => handleCommandSelect(command)}
-                      className="space-x-2"
-                    >
-                      <Icon
-                        name={command.icon}
-                        className={cn(
-                          '!size-5 text-muted-foreground transition-transform duration-150',
-                          index === selectedIndex && 'scale-110'
-                        )}
-                      />
-                      <div className="flex-1">
-                        <div className="font-medium">{command.id}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {command.description}
-                        </div>
+                    <div className="flex-1">
+                      <div className="font-medium">{command.id}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {command.description}
                       </div>
-                    </CommandItemAnimated>
-                  ))}
-                </CommandGroup>
-              </CommandListScrollable>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
-    </>
+                    </div>
+                  </CommandItemAnimated>
+                ))}
+              </CommandGroup>
+            </CommandListScrollable>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 };
 

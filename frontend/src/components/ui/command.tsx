@@ -73,11 +73,7 @@ const CommandListScrollable = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <CommandPrimitive.List
     ref={ref}
-    className={cn(
-      'max-h-[300px] overflow-y-auto overflow-x-hidden',
-      'command-list-container',
-      className
-    )}
+    className={cn('max-h-[300px] overflow-y-auto overflow-x-hidden', className)}
     {...props}
   >
     {children}
@@ -154,12 +150,12 @@ const CommandItemAnimated = React.forwardRef<
     ref={ref}
     data-index={index}
     className={cn(
-      "relative flex cursor-pointer gap-2 select-none items-center rounded-md px-2 py-2 text-sm outline-none",
-      "transition-all duration-150",
-      "hover:scale-[1.02]",
-      "data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50",
-      "[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
-      isSelected && "bg-accent text-accent-foreground scale-[1.02]",
+      'relative flex cursor-pointer gap-2 select-none items-center rounded-md px-2 py-2 text-sm outline-none',
+      'transition-all duration-150',
+      'hover:scale-[1.02]',
+      'data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50',
+      '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
+      isSelected && 'bg-accent text-accent-foreground scale-[1.02]',
       className
     )}
     {...props}
