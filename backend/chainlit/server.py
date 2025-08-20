@@ -878,6 +878,25 @@ async def update_feedback(
         feedback_id = await data_layer.upsert_feedback(feedback=update.feedback)
 
         if config.code.on_feedback:
+            # Initialize context for the callback so cl.user_session is available
+            from chainlit.context import init_http_context
+            
+            # Extract auth token from request headers if available
+            auth_token = None
+            if hasattr(request, 'headers'):
+                auth_header = request.headers.get('Authorization')
+                if auth_header and auth_header.startswith('Bearer '):
+                    auth_token = auth_header[7:]  # Remove 'Bearer ' prefix
+            
+            # Initialize context with thread_id from feedback and current user
+            context = init_http_context(
+                thread_id=update.feedback.threadId,
+                user=current_user,
+                auth_token=auth_token,
+                user_env={},  # Could be extracted from request if needed
+                client_type="webapp"
+            )
+            
             try:
                 await config.code.on_feedback(update.feedback)
             except Exception as callback_error:
