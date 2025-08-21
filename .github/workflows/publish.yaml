@@ -50,7 +50,7 @@ jobs:
           ls unpacked/chainlit/frontend/dist
           ls unpacked/chainlit/copilot/dist
         working-directory: ${{ env.BACKEND_DIR }}
-        
+
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
