@@ -122,6 +122,110 @@ export default {
     {
       pattern:
         /^(filter-none|blur(?:-\w+)?|brightness-\d+|contrast-\d+|grayscale(?:-\d+)?|hue-rotate-\d+|-hue-rotate-\d+|invert(?:-\d+)?|saturate-\d+|sepia(?:-\d+)?)$/
+    },
+    // Common layout utilities for custom elements
+    {
+      pattern: /^(flex|grid|block|inline|hidden|inline-block|inline-flex)$/
+    },
+    {
+      pattern: /^(space-[xy]-\d+|gap-\d+|gap-[xy]-\d+)$/
+    },
+    {
+      pattern:
+        /^(items|justify|content)-(start|end|center|between|around|evenly|stretch|baseline)$/
+    },
+    {
+      pattern: /^(flex|grid)-(row|col|wrap|nowrap|grow|shrink)(-reverse)?$/
+    },
+    {
+      pattern: /^grid-cols-\d+$/
+    },
+    // Spacing utilities
+    {
+      pattern: /^[mp][tlrbxy]?-(\d+|px|auto)$/
+    },
+    {
+      pattern: /^(w|h)-(full|\d+|px|auto|screen|min|max|fit)$/
+    },
+    {
+      pattern: /^(min-|max-)?(w|h)-(\d+|full|screen|min|max|fit)$/
+    },
+    // Text utilities
+    {
+      pattern: /^text-(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl|6xl|7xl|8xl|9xl)$/
+    },
+    {
+      pattern: /^text-(left|center|right|justify)$/
+    },
+    {
+      pattern:
+        /^text-(muted-foreground|primary|secondary|destructive|accent|card-foreground)$/
+    },
+    {
+      pattern:
+        /^font-(thin|extralight|light|normal|medium|semibold|bold|extrabold|black)$/
+    },
+    {
+      pattern: /^(tracking|leading)-(tighter|tight|normal|wide|wider|widest)$/
+    },
+    // Color utilities
+    {
+      pattern:
+        /^(bg|text|border)-(transparent|current|black|white|gray|red|green|blue|yellow|indigo|purple|pink)(-\d{50,950})?$/
+    },
+    {
+      pattern:
+        /^(bg|text|border)-(primary|secondary|accent|muted|card|popover|destructive)(-foreground)?$/
+    },
+    // Border utilities
+    {
+      pattern: /^border(-[tlrbxy])?(-\d+)?$/
+    },
+    {
+      pattern: /^border-(solid|dashed|dotted|double|none)$/
+    },
+    {
+      pattern: /^rounded(-\w+)?$/
+    },
+    {
+      pattern: /^border-[tlrbxy]-\d+$/
+    },
+    {
+      pattern:
+        /^border-[tlrbxy]-(black|white|gray|red|green|blue|yellow|indigo|purple|pink)(-\d{50,950})?$/
+    },
+    // Common state utilities
+    {
+      pattern:
+        /^(hover|focus|active|disabled|group-hover|focus-within):(bg|text|border)-(primary|secondary|accent|muted|gray|green|red|blue)(-\d{50,950})?$/
+    },
+    {
+      pattern:
+        /^hover:bg-(accent|gray|green|red|blue)(-\d{50,950})?(\/\d{1,2})?$/
+    },
+    // Position and display
+    {
+      pattern: /^(static|fixed|absolute|relative|sticky)$/
+    },
+    {
+      pattern: /^(top|right|bottom|left|inset)-(\d+|px|auto|full)$/
+    },
+    // Other common utilities
+    {
+      pattern: /^cursor-(pointer|default|move|not-allowed|text|wait|help)$/
+    },
+    {
+      pattern: /^transition(-\w+)?$/
+    },
+    {
+      pattern: /^(opacity|z)-\d+$/
+    },
+    {
+      pattern:
+        /^overflow-(auto|hidden|visible|scroll|x-auto|y-auto|x-hidden|y-hidden)$/
+    },
+    {
+      pattern: /^shadow(-\w+)?$/
     }
   ],
   plugins: [animate]
