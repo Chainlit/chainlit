@@ -1,6 +1,6 @@
 [project]
 name = "chainlit"
-version = "2.7.1"
+version = "2.7.1.1"
 keywords = [
     "LLM",
     "Agents",
