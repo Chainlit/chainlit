@@ -472,6 +472,22 @@ class ChainlitConfig(BaseSettings):
             )
 
         return translation
+    
+    def with_overrides(self, overrides: "ChainlitConfigOverrides | None") -> "ChainlitConfig":
+        """ex: new_config = config.with_overrides(config_overrides)"""
+        base = self.model_dump()
+        patch = overrides.model_dump(exclude_unset=True) if overrides else {}
+
+        def _merge(a, b):
+            if isinstance(a, dict) and isinstance(b, dict):
+                out = dict(a)
+                for k, v in b.items():
+                    out[k] = _merge(out.get(k), v)
+                return out
+            return b  # replace scalars/lists entirely
+
+        merged = _merge(base, patch) if patch else base
+        return type(self).model_validate(merged)
 
     @classmethod
     def settings_customise_sources(
