@@ -59,6 +59,7 @@
     "react-resizable-panels": "^2.1.7",
     "react-router-dom": "^6.15.0",
     "react-runner": "^1.0.5",
+    "recharts": "2.15.4",
     "recoil": "^0.7.7",
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",
