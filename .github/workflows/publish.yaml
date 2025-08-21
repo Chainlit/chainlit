@@ -25,7 +25,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref_name }} # Troubleshoooting publish
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
         with:
@@ -41,14 +41,6 @@ jobs:
 
       - name: Build Python distribution
         run: uv build
-        working-directory: ${{ env.BACKEND_DIR }}
-
-      - name: List wheel contents
-        run: |
-          pip install wheel
-          python -m wheel unpack dist/chainlit-*.whl -d unpacked
-          ls unpacked/chainlit/frontend/dist
-          ls unpacked/chainlit/copilot/dist
         working-directory: ${{ env.BACKEND_DIR }}
         
       - name: Publish package distributions to PyPI
