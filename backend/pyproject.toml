@@ -117,13 +117,13 @@ exclude = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["chainlit"]
-include = [
+artifacts = [
   "chainlit/frontend/dist/**/*",
   "chainlit/copilot/dist/**/*"
 ]
 
 [tool.hatch.build.targets.sdist]
-include = [
+artifacts = [
   "chainlit/frontend/dist/**/*",
   "chainlit/copilot/dist/**/*"
 ]
