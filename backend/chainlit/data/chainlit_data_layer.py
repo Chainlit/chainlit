@@ -11,7 +11,6 @@ import asyncpg  # type: ignore
 
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
-from chainlit.data.storage_clients.gcs import GCSStorageClient
 from chainlit.data.utils import queue_until_user_message
 from chainlit.element import ElementDict
 from chainlit.logger import logger
@@ -200,9 +199,14 @@ class ChainlitDataLayer(BaseDataLayer):
             path = f"files/{element.id}"
 
         if content is not None:
+            # Import GCSStorageClient only when needed to avoid requiring optional dependencies
+            try:
+                from chainlit.data.storage_clients.gcs import GCSStorageClient
+            except ImportError:
+                GCSStorageClient = None
             content_disposition = (
                 f'attachment; filename="{element.name}"'
-                if not isinstance(self.storage_client, GCSStorageClient)
+                if not (GCSStorageClient and isinstance(self.storage_client, GCSStorageClient))
                 else None
             )
             await self.storage_client.upload_file(
