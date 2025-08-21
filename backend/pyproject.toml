@@ -1,6 +1,6 @@
 [project]
 name = "chainlit"
-version = "2.7.0"
+version = "2.7.1"
 keywords = [
     "LLM",
     "Agents",
@@ -109,11 +109,23 @@ custom-data = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = [
+  "chainlit/frontend/**/*",
+  "chainlit/copilot/**/**/"
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["chainlit"]
 include = [
-    "chainlit/frontend/dist/**/*",
-    "chainlit/copilot/dist/**/*"
+  "chainlit/frontend/dist/**/*",
+  "chainlit/copilot/dist/**/*"
+]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "chainlit/frontend/dist/**/*",
+  "chainlit/copilot/dist/**/*"
 ]
 
 [tool.mypy]
