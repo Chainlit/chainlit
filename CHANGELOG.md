@@ -7,6 +7,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [2.7.0] - 2025-08-20
 
+- Fix publishing to work with uv
+
+## [2.7.0] - 2025-08-20
+
 ### Added
 - New ChatGPT-style command selection and improve message input handling
 - Added the ability to override certain config.toml settings for Chat Profiles, so some profiles can have MCP and some can't for example. [Documentation Updated](https://docs.chainlit.io/api-reference/chat-profiles#dynamic-configuration).
