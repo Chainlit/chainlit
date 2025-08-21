@@ -15,6 +15,7 @@ from typing import (
     Optional,
     Union,
 )
+from pydantic import Field, AliasChoices
 from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource
 import tomli
 from pydantic import BaseModel, ConfigDict, Field
@@ -419,10 +420,11 @@ class ChainlitConfig(BaseSettings):
         arbitrary_types_allowed=True,
     )
 
-    # Directory where the Chainlit project is located
     root: str = APP_ROOT
-    # Chainlit server URL. Used only for cloud features
-    chainlit_server: str = Field(default="https://cloud.chainlit.io")
+    chainlit_server: str = Field(
+        default="https://cloud.chainlit.io",
+        validation_alias=AliasChoices("CHAINLIT_SERVER", "CHAINLIT_CHAINLIT_SERVER"),
+    )
     run: RunSettings = Field(default_factory=RunSettings)
     features: FeaturesSettings
     ui: UISettings
@@ -474,43 +476,17 @@ class ChainlitConfig(BaseSettings):
         return translation
     
     def with_overrides(self, overrides: "ChainlitConfigOverrides | None") -> "ChainlitConfig":
-        """ex: new_config = config.with_overrides(config_overrides)"""
         base = self.model_dump()
         patch = overrides.model_dump(exclude_unset=True) if overrides else {}
-
         def _merge(a, b):
             if isinstance(a, dict) and isinstance(b, dict):
                 out = dict(a)
                 for k, v in b.items():
                     out[k] = _merge(out.get(k), v)
                 return out
-            return b  # replace scalars/lists entirely
-
+            return b
         merged = _merge(base, patch) if patch else base
         return type(self).model_validate(merged)
-
-    @classmethod
-    def settings_customise_sources(
-        cls,
-        init_settings: PydanticBaseSettingsSource,
-        env_settings: PydanticBaseSettingsSource,
-        dotenv_settings: PydanticBaseSettingsSource,
-        file_secret_settings: PydanticBaseSettingsSource,
-    ) -> tuple[PydanticBaseSettingsSource, ...]:
-        class LegacyEnvSource(PydanticBaseSettingsSource):
-            def __call__(self) -> dict[str, Any]:
-                v = os.getenv("CHAINLIT_SERVER")
-                return {"chainlit_server": v} if v else {}
-
-        # Env should override TOML/init kwargs; keep legacy CHAINLIT_SERVER compat
-        return (
-            LegacyEnvSource(cls),
-            env_settings,
-            dotenv_settings,
-            file_secret_settings,
-            init_settings,
-        )
-
 
 
 def init_config(log: bool = False):
