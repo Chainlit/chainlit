@@ -194,15 +194,6 @@ export default {
       pattern:
         /^border-[tlrbxy]-(black|white|gray|red|green|blue|yellow|indigo|purple|pink)(-\d{50,950})?$/
     },
-    // Common state utilities
-    {
-      pattern:
-        /^(hover|focus|active|disabled|group-hover|focus-within):(bg|text|border)-(primary|secondary|accent|muted|gray|green|red|blue)(-\d{50,950})?$/
-    },
-    {
-      pattern:
-        /^hover:bg-(accent|gray|green|red|blue)(-\d{50,950})?(\/\d{1,2})?$/
-    },
     // Position and display
     {
       pattern: /^(static|fixed|absolute|relative|sticky)$/
