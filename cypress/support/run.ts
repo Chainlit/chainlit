@@ -29,7 +29,7 @@ export const runChainlit = async (
       );
     }
 
-    const command = 'poetry';
+    const command = 'uv';
 
     const args = [
       '--project',
