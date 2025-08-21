@@ -1,6 +1,6 @@
 # Chainlit Development Instructions
 
-Chainlit is a Python framework for building conversational AI applications with Python backend and React frontend. It uses Poetry for Python dependency management and pnpm for Node.js packages.
+Chainlit is a Python framework for building conversational AI applications with Python backend and React frontend. It uses uv for Python dependency management and pnpm for Node.js packages.
 
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
 
@@ -12,9 +12,9 @@ Always reference these instructions first and fallback to search or bash command
 
 1. **Install Dependencies (Required first)**:
    ```bash
-   # Install Poetry (if not available)
+   # Install uv (if not available)
    python3 -m pip install pipx
-   python3 -m pipx install poetry==2.1.3
+   python3 -m pipx install uv
    export PATH="$HOME/.local/bin:$PATH"
    
    # Install pnpm (if not available)  
@@ -22,7 +22,7 @@ Always reference these instructions first and fallback to search or bash command
    
    # Install Python dependencies - takes ~2 minutes, NEVER CANCEL
    cd backend
-   poetry install --with tests --with mypy --with dev --with custom-data --no-root
+   uv sync --extra tests --extra mypy --extra dev --extra custom-data
    # Timeout: Use 300+ seconds (5+ minutes)
    
    # Install Node.js dependencies - takes ~3 minutes, NEVER CANCEL  
@@ -43,7 +43,7 @@ Always reference these instructions first and fallback to search or bash command
    # Backend tests - takes ~17 seconds, NEVER CANCEL
    cd backend
    export PATH="$HOME/.local/bin:$PATH"
-   poetry run pytest --cov=chainlit/
+   uv run pytest --cov=chainlit/
    # Timeout: Use 120+ seconds (2+ minutes)
    
    # Frontend tests - takes ~4 seconds
@@ -60,7 +60,7 @@ Always reference these instructions first and fallback to search or bash command
    # Start backend (in one terminal)
    cd backend
    export PATH="$HOME/.local/bin:$PATH" 
-   poetry run chainlit run chainlit/hello.py -h
+   uv run chainlit run chainlit/hello.py -h
    # Available at http://localhost:8000
    
    # Start frontend dev server (in another terminal)
@@ -74,7 +74,7 @@ Always reference these instructions first and fallback to search or bash command
 ### Manual Validation Requirements
 - **ALWAYS** manually validate any changes by running complete scenarios.
 - **ALWAYS** test the Chainlit application after making changes.
-- Create a test app and verify it runs: `poetry run chainlit run /path/to/test.py -h`
+- Create a test app and verify it runs: `uv run chainlit run /path/to/test.py -h`
 - **ALWAYS** run through at least one complete user workflow after making changes.
 
 ### Linting and Formatting - takes ~2 minutes, NEVER CANCEL

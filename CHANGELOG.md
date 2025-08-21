@@ -4,6 +4,11 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Changed
+- Migrated from Poetry to uv for Python dependency management
+
 ## [2.6.9] - 2025-08-14
 
 ### Added
