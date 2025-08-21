@@ -15,7 +15,7 @@ from typing import (
     Optional,
     Union,
 )
-
+from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource
 import tomli
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import Headers
@@ -407,16 +407,23 @@ class ChainlitConfigOverrides(BaseModel):
     project: Optional[ProjectSettings] = None
 
 
-class ChainlitConfig(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True, revalidate_instances="always"
+class ChainlitConfig(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_prefix="CHAINLIT_",
+        env_file=(".env",),
+        env_file_encoding="utf-8",
+        env_nested_delimiter="__",
+        secrets_dir=("/var/run/secrets", "/run/secrets"),
+        case_sensitive=False,
+        extra="ignore",
+        arbitrary_types_allowed=True,
     )
 
     # Directory where the Chainlit project is located
     root: str = APP_ROOT
     # Chainlit server URL. Used only for cloud features
-    chainlit_server: str
-    run: RunSettings
+    chainlit_server: str = Field(default="https://cloud.chainlit.io")
+    run: RunSettings = Field(default_factory=RunSettings)
     features: FeaturesSettings
     ui: UISettings
     project: ProjectSettings
@@ -466,8 +473,31 @@ class ChainlitConfig(BaseModel):
 
         return translation
 
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        class LegacyEnvSource(PydanticBaseSettingsSource):
+            def __call__(self) -> dict[str, Any]:
+                v = os.getenv("CHAINLIT_SERVER")
+                return {"chainlit_server": v} if v else {}
 
-def init_config(log=False):
+        # Env should override TOML/init kwargs; keep legacy CHAINLIT_SERVER compat
+        return (
+            LegacyEnvSource(cls),
+            env_settings,
+            dotenv_settings,
+            file_secret_settings,
+            init_settings,
+        )
+
+
+
+def init_config(log: bool = False):
     """Initialize the configuration file if it doesn't exist."""
     if not os.path.exists(config_file):
         os.makedirs(config_dir, exist_ok=True)
@@ -520,10 +550,12 @@ def load_module(target: str, force_refresh: bool = False):
 
     spec = util.spec_from_file_location(target, target)
     if not spec or not spec.loader:
+        sys.path.pop(0)
         return
 
     module = util.module_from_spec(spec)
     if not module:
+        sys.path.pop(0)
         return
 
     spec.loader.exec_module(module)
@@ -574,30 +606,22 @@ def reload_config():
     global config
     if config is None:
         return
+    new_cfg = ChainlitConfig(**load_settings())
+    config.root = new_cfg.root
+    config.chainlit_server = new_cfg.chainlit_server
+    config.run = new_cfg.run
+    config.features = new_cfg.features
+    config.ui = new_cfg.ui
+    config.project = new_cfg.project
+    config.code = new_cfg.code
 
-    settings = load_settings()
-
-    config.features = settings["features"]
-    config.code = settings["code"]
-    config.ui = settings["ui"]
-    config.project = settings["project"]
 
 
 def load_config():
     """Load the configuration from the config file."""
     init_config()
-
     settings = load_settings()
-
-    chainlit_server = os.environ.get("CHAINLIT_SERVER", "https://cloud.chainlit.io")
-
-    config = ChainlitConfig(
-        chainlit_server=chainlit_server,
-        run=RunSettings(),
-        **settings,
-    )
-
-    return config
+    return ChainlitConfig(**settings)
 
 
 def lint_translations():
@@ -611,8 +635,8 @@ def lint_translations():
             if file.endswith(".json"):
                 # Load the translation file
                 to_lint = os.path.join(config_translation_dir, file)
-                with open(to_lint, encoding="utf-8") as f:
-                    translation = json.load(f)
+                with open(to_lint, encoding="utf-8") as f2:
+                    translation = json.load(f2)
 
                     # Lint the translation file
                     lint_translation_json(file, truth, translation)
