@@ -47,8 +47,8 @@ jobs:
         run: |
           pip install wheel
           python -m wheel unpack dist/chainlit-*.whl -d unpacked
-          ls unpacked/chainlit/frontend/dist
-          ls unpacked/chainlit/copilot/dist
+          ls unpacked/chainlit-*/chainlit/frontend/dist
+          ls unpacked/chainlit-*/chainlit/copilot/dist
         working-directory: ${{ env.BACKEND_DIR }}
 
       - name: Publish package distributions to PyPI
