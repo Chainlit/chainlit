@@ -16,7 +16,11 @@ from typing import (
     Union,
 )
 from pydantic import Field, AliasChoices
-from pydantic_settings import BaseSettings, SettingsConfigDict, PydanticBaseSettingsSource
+from pydantic_settings import (
+    BaseSettings,
+    SettingsConfigDict,
+    PydanticBaseSettingsSource,
+)
 import tomli
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import Headers
@@ -473,10 +477,13 @@ class ChainlitConfig(BaseSettings):
             )
 
         return translation
-    
-    def with_overrides(self, overrides: "ChainlitConfigOverrides | None") -> "ChainlitConfig":
+
+    def with_overrides(
+        self, overrides: "ChainlitConfigOverrides | None"
+    ) -> "ChainlitConfig":
         base = self.model_dump()
         patch = overrides.model_dump(exclude_unset=True) if overrides else {}
+
         def _merge(a, b):
             if isinstance(a, dict) and isinstance(b, dict):
                 out = dict(a)
@@ -484,6 +491,7 @@ class ChainlitConfig(BaseSettings):
                     out[k] = _merge(out.get(k), v)
                 return out
             return b
+
         merged = _merge(base, patch) if patch else base
         return type(self).model_validate(merged)
 
@@ -605,7 +613,6 @@ def reload_config():
     config.ui = new_cfg.ui
     config.project = new_cfg.project
     config.code = new_cfg.code
-
 
 
 def load_config():

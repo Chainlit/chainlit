@@ -821,11 +821,15 @@ async def project_settings(
             starters = [it.to_dict() for it in s]
 
     data_layer = get_data_layer()
-    debug_url = await data_layer.build_debug_url() if data_layer and config.run.debug else None
+    debug_url = (
+        await data_layer.build_debug_url() if data_layer and config.run.debug else None
+    )
 
     cfg = config
     if chat_profile and chat_profiles:
-        current_profile = next((p for p in chat_profiles if p.name == chat_profile), None)
+        current_profile = next(
+            (p for p in chat_profiles if p.name == chat_profile), None
+        )
         if current_profile and getattr(current_profile, "config_overrides", None):
             cfg = config.with_overrides(current_profile.config_overrides)
 
@@ -1158,10 +1162,8 @@ async def connect_mcp(
     )
     from chainlit.session import WebsocketSession
 
-
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
-
     config: ChainlitConfig = session.get_config()
 
     if current_user:
