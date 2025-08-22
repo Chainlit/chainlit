@@ -1,4 +1,8 @@
 import json
+
+# Deprecation warning for users of this provider
+import sys
+import warnings
 from typing import Dict, List, Literal, Optional, Union, cast
 
 import aiofiles
@@ -34,10 +38,6 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
-
-# Deprecation warning for users of this provider
-import sys
-import warnings
 
 
 def _show_deprecation_warning():
