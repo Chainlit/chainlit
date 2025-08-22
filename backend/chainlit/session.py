@@ -251,12 +251,12 @@ class WebsocketSession(BaseSession):
         self.thread_queues: Dict[str, ThreadQueue] = {}
         self.mcp_sessions = {}
 
-        self.config: ChainlitConfig = self._get_config()
+        self.config: ChainlitConfig = self.get_config()
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
 
-    def _get_config(self) -> "ChainlitConfig":
+    def get_config(self) -> "ChainlitConfig":
         """
         Return the config for this session: overridden if chat profile exists and has overrides, else global config.
         """
