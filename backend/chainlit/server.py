@@ -1268,7 +1268,8 @@ async def connect_mcp(
             session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
 
             # Call the callback
-            await config.code.on_mcp_connect(mcp_connection, mcp_session)
+            if config.code.on_mcp_connect:
+                await config.code.on_mcp_connect(mcp_connection, mcp_session)
 
         except Exception as e:
             raise HTTPException(
