@@ -14,9 +14,9 @@ from chainlit.types import AskFileSpec, FileReference
 if TYPE_CHECKING:
     from mcp import ClientSession
 
+    from chainlit.config import ChainlitConfig
     from chainlit.types import FileDict
     from chainlit.user import PersistedUser, User
-    from chainlit.config import ChainlitConfig
 
 ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
 
@@ -261,6 +261,7 @@ class WebsocketSession(BaseSession):
         Return the config for this session: overridden if chat profile exists and has overrides, else global config.
         """
         from chainlit.config import config as global_config
+
         # If no chat profile, always fallback to global config
         if not self.chat_profile:
             return global_config
@@ -271,10 +272,17 @@ class WebsocketSession(BaseSession):
         cfg = global_config
         if global_config.code.set_chat_profiles:
             import asyncio
+
             try:
-                profiles = asyncio.get_event_loop().run_until_complete(global_config.code.set_chat_profiles(self.user))
-                current_profile = next((p for p in profiles if p.name == self.chat_profile), None)
-                if current_profile and getattr(current_profile, "config_overrides", None):
+                profiles = asyncio.get_event_loop().run_until_complete(
+                    global_config.code.set_chat_profiles(self.user)
+                )
+                current_profile = next(
+                    (p for p in profiles if p.name == self.chat_profile), None
+                )
+                if current_profile and getattr(
+                    current_profile, "config_overrides", None
+                ):
                     cfg = global_config.with_overrides(current_profile.config_overrides)
             except Exception:
                 pass

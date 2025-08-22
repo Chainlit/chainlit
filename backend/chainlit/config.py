@@ -15,14 +15,13 @@ from typing import (
     Optional,
     Union,
 )
-from pydantic import Field, AliasChoices
+
+import tomli
+from pydantic import AliasChoices, BaseModel, Field
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
-    PydanticBaseSettingsSource,
 )
-import tomli
-from pydantic import BaseModel, ConfigDict, Field
 from starlette.datastructures import Headers
 
 from chainlit.data.base import BaseDataLayer
