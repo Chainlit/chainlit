@@ -27,6 +27,7 @@ from chainlit.types import (
 from chainlit.user import PersistedUser, User
 
 if TYPE_CHECKING:
+    from chainlit.data.storage_clients.gcs import GCSStorageClient
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
@@ -199,17 +200,9 @@ class ChainlitDataLayer(BaseDataLayer):
             path = f"files/{element.id}"
 
         if content is not None:
-            # Import GCSStorageClient only when needed to avoid requiring optional dependencies
-            try:
-                from chainlit.data.storage_clients.gcs import GCSStorageClient
-            except ImportError:
-                GCSStorageClient = None
             content_disposition = (
                 f'attachment; filename="{element.name}"'
-                if not (
-                    GCSStorageClient
-                    and isinstance(self.storage_client, GCSStorageClient)
-                )
+                if not isinstance(self.storage_client, GCSStorageClient)
                 else None
             )
             await self.storage_client.upload_file(
