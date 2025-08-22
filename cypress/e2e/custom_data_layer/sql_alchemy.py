@@ -1,8 +1,11 @@
+import os
 from typing import Optional
 
 import chainlit as cl
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.data.storage_clients.azure import AzureStorageClient
+
+os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
 
 storage_client = AzureStorageClient(
     account_url="<your_account_url>", container="<your_container>"

@@ -40,6 +40,7 @@ def mock_session_factory(persisted_test_user: PersistedUser) -> Callable[..., Mo
         mock.emit = AsyncMock()
         mock.has_first_interaction = kwargs.get("has_first_interaction", True)
         mock.files = kwargs.get("files", {})
+        mock.files_spec = kwargs.get("files_spec", {})
 
         return mock
 

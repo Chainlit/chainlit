@@ -4,6 +4,46 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.7.1.1] - 2025-08-21
+
+- Fix publishing to include frontend and copilot folders
+
+## [2.7.1] - 2025-08-20
+
+- Fix publishing to work with uv
+
+## [2.7.0] - 2025-08-20
+
+### Added
+- New ChatGPT-style command selection and improve message input handling
+- Added the ability to override certain config.toml settings for Chat Profiles, so some profiles can have MCP and some can't for example. [Documentation Updated](https://docs.chainlit.io/api-reference/chat-profiles#dynamic-configuration).
+  - You must now explicity enable audio and MCP as these are no longer inferred by the presence of `on_audio_start` or `on_mcp_connect` callbacks
+  - Delete your `config.toml`, run `chainlit init`, and update your settings
+- Added copilot setup instructions for GitHub Copilot SWE Agent
+- Added Slack socket mode support
+- AskFileButton can now upload file with proper checking and it's own limits
+- Added content-disposition metadata to azure blob uploads to persist download file name
+- Migrated from poetry to uv
+
+### Fixed
+- Changed thread sorting to use updated time instead of creation time
+- Add missing headers when connecting Streamable HTTP MCP
+- Remove undocumented `CHAINLIT_CUSTOM_AUTH` environment variable used in Copilot
+
+## [2.6.9] - 2025-08-14
+
+### Added
+- Add GitHub Copilot instructions for automated PRs
+- (Slack) Add threadId for user feedback
+- (Copilot) Add new optional opened property has been added to the widget config
+
+### Fixed
+- Fix blinking cursor indicator
+- (Copilot) Rename copilot inner div id `chainlit-copilot` to `chainlit-copilot-chat` due to naming conflict with the outer div
+- Disable gzip for websocket-relaed http endpoint (Safari compatibility)
+- Prevent constant refresh on the login screen when using custom authenication
+- Fix MCP type hints
+
 ## [2.6.8] - 2025-08-08
 
 ### Other
