@@ -410,8 +410,8 @@ class ChainlitConfigOverrides(BaseModel):
 
 class ChainlitConfig(BaseSettings):
     root: str = APP_ROOT
-    chainlit_server: str
-    run: RunSettings
+    chainlit_server: str = Field(default="")
+    run: RunSettings = Field(default_factory=RunSettings)
     features: FeaturesSettings
     ui: UISettings
     project: ProjectSettings
