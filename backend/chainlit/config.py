@@ -17,11 +17,8 @@ from typing import (
 )
 
 import tomli
-from pydantic import AliasChoices, BaseModel, Field
-from pydantic_settings import (
-    BaseSettings,
-    SettingsConfigDict,
-)
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings
 from starlette.datastructures import Headers
 
 from chainlit.data.base import BaseDataLayer
@@ -412,22 +409,9 @@ class ChainlitConfigOverrides(BaseModel):
 
 
 class ChainlitConfig(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_prefix="CHAINLIT_",
-        env_file=(".env",),
-        env_file_encoding="utf-8",
-        env_nested_delimiter="__",
-        case_sensitive=False,
-        extra="ignore",
-        arbitrary_types_allowed=True,
-    )
-
     root: str = APP_ROOT
-    chainlit_server: str = Field(
-        default="https://cloud.chainlit.io",
-        validation_alias=AliasChoices("CHAINLIT_SERVER", "CHAINLIT_CHAINLIT_SERVER"),
-    )
-    run: RunSettings = Field(default_factory=RunSettings)
+    chainlit_server: str
+    run: RunSettings
     features: FeaturesSettings
     ui: UISettings
     project: ProjectSettings
