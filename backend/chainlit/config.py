@@ -414,7 +414,6 @@ class ChainlitConfig(BaseSettings):
         env_file=(".env",),
         env_file_encoding="utf-8",
         env_nested_delimiter="__",
-        secrets_dir=("/var/run/secrets", "/run/secrets"),
         case_sensitive=False,
         extra="ignore",
         arbitrary_types_allowed=True,

@@ -1104,6 +1104,7 @@ async def call_action(
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
+    config: ChainlitConfig = session.get_config()
 
     action = Action(**payload.action)
 
@@ -1157,8 +1158,11 @@ async def connect_mcp(
     )
     from chainlit.session import WebsocketSession
 
+
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
+
+    config: ChainlitConfig = session.get_config()
 
     if current_user:
         if (
