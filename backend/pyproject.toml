@@ -55,6 +55,7 @@ dependencies = [
     "python-multipart>=0.0.18,<1.0.0",
     "pyjwt>=2.8.0,<3.0.0",
     "audioop-lts>=0.2.1,<0.3.0; python_version>='3.13'",
+    "pydantic-settings>=2.10.1"
 ]
 
 [project.urls]

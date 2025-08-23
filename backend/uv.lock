@@ -679,7 +679,7 @@ wheels = [
 
 [[package]]
 name = "chainlit"
-version = "2.6.9"
+version = "2.7.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
@@ -696,6 +696,7 @@ dependencies = [
     { name = "nest-asyncio" },
     { name = "packaging" },
     { name = "pydantic" },
+    { name = "pydantic-settings" },
     { name = "pyjwt" },
     { name = "python-dotenv" },
     { name = "python-multipart" },
@@ -782,6 +783,7 @@ requires-dist = [
     { name = "pandas-stubs", marker = "python_full_version >= '3.9' and extra == 'mypy'", specifier = ">=2.2.2,<3.0.0" },
     { name = "plotly", marker = "extra == 'tests'", specifier = ">=5.18.0,<6.0.0" },
     { name = "pydantic", specifier = ">=2.7.2,<3" },
+    { name = "pydantic-settings", specifier = ">=2.10.1" },
     { name = "pyjwt", specifier = ">=2.8.0,<3.0.0" },
     { name = "pytest", marker = "extra == 'tests'", specifier = ">=8.3.2,<9.0.0" },
     { name = "pytest-asyncio", marker = "extra == 'tests'", specifier = ">=0.23.8,<1.0.0" },
