@@ -864,6 +864,12 @@ async def update_feedback(
 
         if config.code.on_feedback:
             try:
+                from chainlit.context import init_ws_context
+                from chainlit.session import WebsocketSession
+
+                session = WebsocketSession.get_by_id(update.sessionId)
+                init_ws_context(session)
+
                 await config.code.on_feedback(update.feedback)
             except Exception as callback_error:
                 logger.error(

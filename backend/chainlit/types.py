@@ -330,3 +330,4 @@ class Feedback:
 
 class UpdateFeedbackRequest(BaseModel):
     feedback: Feedback
+    sessionId: str
