@@ -89,7 +89,7 @@ pnpm run formatUi
 # Format Python code using ruff (preferred)
 cd backend
 export PATH="$HOME/.local/bin:$PATH"
-poetry run ruff format chainlit/ tests/
+uv run ruff format chainlit/ tests/
 
 # NOTE: pnpm run formatPython may fail if black is not installed
 # Use ruff format instead as shown above
@@ -109,7 +109,7 @@ poetry run ruff format chainlit/ tests/
 ├── CONTRIBUTING.md  
 ├── package.json              # Root pnpm workspace config
 ├── pnpm-workspace.yaml       # Workspace definition
-├── backend/                  # Python backend with Poetry
+├── backend/                  # Python backend with uv
 ├── frontend/                 # React frontend app
 ├── libs/
 │   ├── react-client/         # React client library
@@ -121,7 +121,7 @@ poetry run ruff format chainlit/ tests/
 ```
 
 ### Working with the Backend
-- **Technology**: Python 3.10+ with Poetry, FastAPI, SocketIO
+- **Technology**: Python 3.10+ with uv, FastAPI, SocketIO
 - **Entry point**: `backend/chainlit/` 
 - **Tests**: `backend/tests/`
 - **Dependencies**: Defined in `backend/pyproject.toml`
@@ -145,12 +145,12 @@ async def main(message: cl.Message):
     await cl.Message(content=f"You said: {message.content}").send()
 
 # Run it
-poetry run chainlit run app.py -w
+uv run chainlit run app.py -w
 ```
 
 ### Timing Expectations
 - **pnpm install**: ~3 minutes (may fail on Cypress - this is normal)
-- **poetry install**: ~2 minutes  
+- **uv install**: ~2 minutes  
 - **pnpm run buildUi**: ~1 minute
 - **pnpm run lint**: ~2 minutes
 - **Backend tests**: ~17 seconds
@@ -160,9 +160,9 @@ poetry run chainlit run app.py -w
 ### Common Gotchas
 - **NEVER CANCEL** long-running operations - they need time to complete.
 - Cypress download often fails in CI environments - this is expected.
-- Use `poetry run` prefix for all Python commands in backend.
-- Use `export PATH="$HOME/.local/bin:$PATH"` to ensure Poetry is available.
-- The `pnpm run formatPython` command may fail - use `poetry run ruff format` instead.
+- Use `uv run` prefix for all Python commands in backend.
+- Use `export PATH="$HOME/.local/bin:$PATH"` to ensure uv is available.
+- The `pnpm run formatPython` command may fail - use `uv run ruff format` instead.
 - Frontend dev server connects to backend at localhost:8000.
 - Always start backend before frontend for development.
 
@@ -172,11 +172,11 @@ poetry run chainlit run app.py -w
 - **Frontend app**: `frontend/src/App.tsx`
 - **React client**: `libs/react-client/src/`
 - **CI workflows**: `.github/workflows/ci.yaml`
-- **Poetry config**: `backend/pyproject.toml`
+- **uv config**: `backend/pyproject.toml`
 - **Frontend config**: `frontend/package.json`
 
 ## Requirements
 - **Python**: >= 3.10
 - **Node.js**: >= 20 (24+ recommended)
-- **Poetry**: 2.1.3 (install via pipx)
+- **uv**: 2.1.3 (install via pipx)
 - **pnpm**: Latest (install via npm)
