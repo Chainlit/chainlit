@@ -14,6 +14,7 @@ from chainlit.types import AskFileSpec, FileReference
 if TYPE_CHECKING:
     from mcp import ClientSession
 
+    from chainlit.config import ChainlitConfig
     from chainlit.types import FileDict
     from chainlit.user import PersistedUser, User
 
@@ -250,8 +251,43 @@ class WebsocketSession(BaseSession):
         self.thread_queues: Dict[str, ThreadQueue] = {}
         self.mcp_sessions = {}
 
+        self.config: ChainlitConfig = self.get_config()
+
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
+
+    def get_config(self) -> "ChainlitConfig":
+        """
+        Return the config for this session: overridden if chat profile exists and has overrides, else global config.
+        """
+        from chainlit.config import config as global_config
+
+        # If no chat profile, always fallback to global config
+        if not self.chat_profile:
+            return global_config
+        # If already computed, use self.config
+        if hasattr(self, "config") and self.config:
+            return self.config
+        # Try to compute overrides
+        cfg = global_config
+        if global_config.code.set_chat_profiles:
+            import asyncio
+
+            try:
+                profiles = asyncio.get_event_loop().run_until_complete(
+                    global_config.code.set_chat_profiles(self.user)
+                )
+                current_profile = next(
+                    (p for p in profiles if p.name == self.chat_profile), None
+                )
+                if current_profile and getattr(
+                    current_profile, "config_overrides", None
+                ):
+                    cfg = global_config.with_overrides(current_profile.config_overrides)
+            except Exception:
+                pass
+        self.config = cfg
+        return cfg
 
     def restore(self, new_socket_id: str):
         """Associate a new socket id to the session."""
