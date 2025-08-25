@@ -39,7 +39,9 @@ describe('Copilot', () => {
   });
 
   it('should be able to embed the copilot', () => {
+    cy.get('#chainlit-copilot').should('not.exist');
     mountWidget();
+    cy.get('#chainlit-copilot').should('exist');
     cy.window().then((win) => {
       win.addEventListener('chainlit-call-fn', (e) => {
         // @ts-expect-error is not a valid prop
@@ -57,8 +59,21 @@ describe('Copilot', () => {
 
     cy.step('Open copilot');
 
+    cy.get('#chainlit-copilot-button', opts).should(
+      'have.attr',
+      'aria-expanded',
+      'false'
+    );
+    cy.get('#chainlit-copilot-chat', opts).should('not.exist');
+
     cy.get('#chainlit-copilot-button', opts).click();
-    cy.get('#chainlit-copilot', opts).should('exist');
+
+    cy.get('#chainlit-copilot-button', opts).should(
+      'have.attr',
+      'aria-expanded',
+      'true'
+    );
+    cy.get('#chainlit-copilot-chat', opts).should('exist');
 
     cy.get('.step', opts).should('have.length', 1);
     cy.contains('.step', 'Hi from copilot!', opts).should('be.visible');
@@ -89,7 +104,7 @@ describe('Copilot', () => {
     cy.step('Open copilot');
 
     cy.get('#chainlit-copilot-button', opts).click();
-    cy.get('#chainlit-copilot', opts).should('exist');
+    cy.get('#chainlit-copilot-chat', opts).should('exist');
 
     let firstThreadId: string;
     getCopilotThreadId().then((threadId) => {
@@ -176,15 +191,28 @@ describe('Copilot', () => {
         });
         cy.step('Open copilot');
         cy.get('#chainlit-copilot-button', opts).click();
-        cy.get('#chainlit-copilot', opts).should('exist');
+        cy.get('#chainlit-copilot-chat', opts).should('exist');
 
         cy.step('Check input placeholder');
         cy.get('#chat-input', opts).should(
           'have.attr',
-          'data-placeholder',
+          'placeholder',
           placeholder
         );
       });
     });
+  });
+
+  it('should be opened if config.opened is true', () => {
+    mountWidget({
+      opened: true
+    });
+
+    cy.get('#chainlit-copilot-button', opts).should(
+      'have.attr',
+      'aria-expanded',
+      'true'
+    );
+    cy.get('#chainlit-copilot-chat', opts).should('exist');
   });
 });

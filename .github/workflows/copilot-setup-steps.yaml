@@ -1,0 +1,49 @@
+name: "Copilot Setup Steps"
+
+# Automatically run the setup steps when they are changed to allow for easy validation, and
+# allow manual testing through the repository's "Actions" tab
+# This workflow optimizes the GitHub Copilot coding agent's ephemeral development environment
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yaml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yaml
+
+jobs:
+  # The job MUST be called `copilot-setup-steps` or it will not be picked up by Copilot.
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Set the permissions to the lowest permissions possible needed for your steps.
+    # Copilot will be given its own token for its operations.
+    permissions:
+      # If you want to clone the repository as part of your setup steps, for example to install dependencies, you'll need the `contents: read` permission. If you don't clone the repository in your setup steps, Copilot will do this for you automatically after the steps complete.
+      contents: read
+
+    # You can define any steps you want, and they will run before the agent starts.
+    # If you do not check out your code, Copilot will do this for you.
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Node.js, pnpm and dependencies
+        uses: ./.github/actions/pnpm-node-install
+        with:
+          node-version: "24.3.0"
+          pnpm-install-args: "--frozen-lockfile"
+
+      - name: Install Python, uv and dependencies
+        uses: ./.github/actions/uv-python-install
+        with:
+          python-version: "3.10"
+          uv-version: "latest"
+          working-directory: "./backend"
+          extra-dependencies: "--extra tests --extra mypy --extra dev --extra custom-data"
+
+      - name: Build UI components
+        run: pnpm run buildUi
+        timeout-minutes: 5

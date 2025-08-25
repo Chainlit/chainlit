@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Union
 
 import httpx
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
+from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from slack_bolt.async_app import AsyncApp
 
 from chainlit.config import config
@@ -123,6 +124,16 @@ slack_app = AsyncApp(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
 )
+
+
+async def start_socket_mode():
+    """
+    Initializes and starts the Slack app in Socket Mode asynchronously.
+
+    Uses the SLACK_WEBSOCKET_TOKEN from environment variables to authenticate.
+    """
+    handler = AsyncSocketModeHandler(slack_app, os.environ.get("SLACK_WEBSOCKET_TOKEN"))
+    await handler.start_async()
 
 
 def init_slack_context(
@@ -364,9 +375,11 @@ async def handle_message(message, say):
 async def thumb_down(ack, context, body):
     await ack()
     step_id = body["actions"][0]["value"]
+    thread_ts = body["message"]["thread_ts"]
+    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 
     if data_layer := get_data_layer():
-        feedback = Feedback(forId=step_id, value=0)
+        feedback = Feedback(forId=step_id, value=0, threadId=thread_id)
         await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]
@@ -390,9 +403,11 @@ async def thumb_down(ack, context, body):
 async def thumb_up(ack, context, body):
     await ack()
     step_id = body["actions"][0]["value"]
+    thread_ts = body["message"]["thread_ts"]
+    thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 
     if data_layer := get_data_layer():
-        feedback = Feedback(forId=step_id, value=1)
+        feedback = Feedback(forId=step_id, value=1, threadId=thread_id)
         await data_layer.upsert_feedback(feedback)
 
     text = body["message"]["text"]
