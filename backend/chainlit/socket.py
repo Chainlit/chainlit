@@ -108,7 +108,6 @@ async def _authenticate_connection(
 
 @sio.on("connect")  # pyright: ignore [reportOptionalCall]
 async def connect(sid, environ, auth):
-    print(f"WebSocket connection attempt from {sid} with auth: {auth}")
     user = token = None
 
     if require_login():
