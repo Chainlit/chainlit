@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Union
 
 import httpx
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
+from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from slack_bolt.async_app import AsyncApp
 
 from chainlit.config import config
@@ -123,6 +124,16 @@ slack_app = AsyncApp(
     token=os.environ.get("SLACK_BOT_TOKEN"),
     signing_secret=os.environ.get("SLACK_SIGNING_SECRET"),
 )
+
+
+async def start_socket_mode():
+    """
+    Initializes and starts the Slack app in Socket Mode asynchronously.
+
+    Uses the SLACK_WEBSOCKET_TOKEN from environment variables to authenticate.
+    """
+    handler = AsyncSocketModeHandler(slack_app, os.environ.get("SLACK_WEBSOCKET_TOKEN"))
+    await handler.start_async()
 
 
 def init_slack_context(

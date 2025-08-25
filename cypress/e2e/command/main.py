@@ -8,6 +8,19 @@ commands = [
         "icon": "pen-line",
         "description": "Collaborate on writing and code",
     },
+    {
+        "id": "Sticky",
+        "icon": "pin",
+        "description": "Persistent tool stays selected",
+        "persistent": True,
+    },
+    {
+        "id": "StickyButton",
+        "icon": "bookmark",
+        "description": "Persistent button tool",
+        "button": True,
+        "persistent": True,
+    },
 ]
 
 
@@ -18,6 +31,8 @@ async def start():
 
 @cl.on_message
 async def message(msg: cl.Message):
+    # Clear all commands after choosing Picture to test UI behavior with zero commands
+    # This simulates a scenario where certain commands might change the available tool set
     if msg.command == "Picture":
         await cl.context.emitter.set_commands([])
 

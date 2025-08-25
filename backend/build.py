@@ -1,4 +1,4 @@
-"""Build script gets called on poetry/pip build."""
+"""Build script gets called on uv/pip build."""
 
 import os
 import pathlib
@@ -70,7 +70,7 @@ def build():
     print(
         "\n-- Building frontend, this might take a while!\n\n"
         "   If you don't need to build the frontend and just want dependencies installed, use:\n"
-        "   `poetry install --no-root`\n"
+        "   `uv sync --no-build`\n"
     )
 
     try:
