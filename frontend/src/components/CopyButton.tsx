@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import '@/polyfills/clipboard-polyfill';
 
 interface Props {
   content: unknown;
