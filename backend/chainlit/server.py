@@ -804,57 +804,42 @@ async def project_settings(
     # Load the markdown file based on the provided language
     markdown = get_markdown_str(config.root, language)
 
-    profiles = []
+    chat_profiles = []
+    profiles: list[dict] = []
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
-            # Custom serialization to handle ChainlitConfigOverrides
             for p in chat_profiles:
-                profile_dict = p.to_dict()
-                # Remove config_overrides from the serialized profile since it's used server-side only
-                if "config_overrides" in profile_dict:
-                    del profile_dict["config_overrides"]
-                profiles.append(profile_dict)
+                d = p.to_dict()
+                d.pop("config_overrides", None)
+                profiles.append(d)
 
     starters = []
     if config.code.set_starters:
-        starters = await config.code.set_starters(current_user)
-        if starters:
-            starters = [s.to_dict() for s in starters]
+        s = await config.code.set_starters(current_user)
+        if s:
+            starters = [it.to_dict() for it in s]
 
-    debug_url = None
     data_layer = get_data_layer()
+    debug_url = (
+        await data_layer.build_debug_url() if data_layer and config.run.debug else None
+    )
 
-    if data_layer and config.run.debug:
-        debug_url = await data_layer.build_debug_url()
-
-    config_with_overrides = config
-
-    # Apply profile-specific configuration overrides
-    if chat_profile and config.code.set_chat_profiles:
-        # Find the current chat profile and apply overrides
-        chat_profiles = await config.code.set_chat_profiles(current_user)
-        if chat_profiles:
-            current_profile = next(
-                (p for p in chat_profiles if p.name == chat_profile), None
-            )
-            if current_profile and current_profile.config_overrides:
-                config_with_overrides = ChainlitConfig.model_validate(
-                    config.model_copy(
-                        update=current_profile.config_overrides.model_dump(
-                            exclude_none=True
-                        ),
-                        deep=True,
-                    )
-                )
+    cfg = config
+    if chat_profile and chat_profiles:
+        current_profile = next(
+            (p for p in chat_profiles if p.name == chat_profile), None
+        )
+        if current_profile and getattr(current_profile, "config_overrides", None):
+            cfg = config.with_overrides(current_profile.config_overrides)
 
     return JSONResponse(
         content={
-            "ui": config_with_overrides.ui.model_dump(),
-            "features": config_with_overrides.features.model_dump(),
-            "userEnv": config_with_overrides.project.user_env,
-            "maskUserEnv": config_with_overrides.project.mask_user_env,
-            "dataPersistence": get_data_layer() is not None,
+            "ui": cfg.ui.model_dump(),
+            "features": cfg.features.model_dump(),
+            "userEnv": cfg.project.user_env,
+            "maskUserEnv": cfg.project.mask_user_env,
+            "dataPersistence": data_layer is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
             "chatProfiles": profiles,
@@ -880,6 +865,12 @@ async def update_feedback(
 
         if config.code.on_feedback:
             try:
+                from chainlit.context import init_ws_context
+                from chainlit.session import WebsocketSession
+
+                session = WebsocketSession.get_by_id(update.sessionId)
+                init_ws_context(session)
+
                 await config.code.on_feedback(update.feedback)
             except Exception as callback_error:
                 logger.error(
@@ -1124,6 +1115,7 @@ async def call_action(
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
+    config: ChainlitConfig = session.get_config()
 
     action = Action(**payload.action)
 
@@ -1179,6 +1171,7 @@ async def connect_mcp(
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
+    config: ChainlitConfig = session.get_config()
 
     if current_user:
         if (
@@ -1282,7 +1275,8 @@ async def connect_mcp(
             session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
 
             # Call the callback
-            await config.code.on_mcp_connect(mcp_connection, mcp_session)
+            if config.code.on_mcp_connect:
+                await config.code.on_mcp_connect(mcp_connection, mcp_session)
 
         except Exception as e:
             raise HTTPException(

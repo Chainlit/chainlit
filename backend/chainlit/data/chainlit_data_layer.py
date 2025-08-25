@@ -11,7 +11,6 @@ import asyncpg  # type: ignore
 
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
-from chainlit.data.storage_clients.gcs import GCSStorageClient
 from chainlit.data.utils import queue_until_user_message
 from chainlit.element import ElementDict
 from chainlit.logger import logger
@@ -28,6 +27,7 @@ from chainlit.types import (
 from chainlit.user import PersistedUser, User
 
 if TYPE_CHECKING:
+    from chainlit.data.storage_clients.gcs import GCSStorageClient
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
