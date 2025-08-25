@@ -838,6 +838,7 @@ async def project_settings(
             "ui": cfg.ui.model_dump(),
             "features": cfg.features.model_dump(),
             "userEnv": cfg.project.user_env,
+            "maskUserEnv": cfg.project.mask_user_env,
             "dataPersistence": data_layer is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
