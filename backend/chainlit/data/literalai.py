@@ -1,4 +1,8 @@
 import json
+
+# Deprecation warning for users of this provider
+import sys
+import warnings
 from typing import Dict, List, Literal, Optional, Union, cast
 
 import aiofiles
@@ -34,6 +38,18 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
+
+
+def _show_deprecation_warning():
+    message = (
+        "\n\033[93mWARNING: The LiteralAI data provider is being deprecated and will be turned off on October 31st, 2025.\033[0m\n"
+        "Please migrate your data layer to another provider as soon as possible.\n"
+    )
+    print(message, file=sys.stderr)
+    warnings.warn(message, DeprecationWarning, stacklevel=2)
+
+
+_show_deprecation_warning()
 
 
 class LiteralToChainlitConverter:

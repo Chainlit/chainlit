@@ -207,9 +207,10 @@ export class ChainlitAPI extends APIBase {
   }
 
   async setFeedback(
-    feedback: IFeedback
+    feedback: IFeedback,
+    sessionId: string
   ): Promise<{ success: boolean; feedbackId: string }> {
-    const res = await this.put(`/feedback`, { feedback });
+    const res = await this.put(`/feedback`, { feedback, sessionId });
     return res.json();
   }
 
@@ -245,7 +246,8 @@ export class ChainlitAPI extends APIBase {
   uploadFile(
     file: File,
     onProgress: (progress: number) => void,
-    sessionId: string
+    sessionId: string,
+    parentId?: string
   ) {
     const xhr = new XMLHttpRequest();
     xhr.withCredentials = true;
@@ -254,9 +256,12 @@ export class ChainlitAPI extends APIBase {
       const formData = new FormData();
       formData.append('file', file);
 
+      const ask_parent_id = parentId ? `&ask_parent_id=${parentId}` : '';
       xhr.open(
         'POST',
-        this.buildEndpoint(`/project/file?session_id=${sessionId}`),
+        this.buildEndpoint(
+          `/project/file?session_id=${sessionId}${ask_parent_id}`
+        ),
         true
       );
 

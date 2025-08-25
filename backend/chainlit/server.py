@@ -61,6 +61,7 @@ from chainlit.markdown import get_markdown_str
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 from chainlit.types import (
+    AskFileSpec,
     CallActionRequest,
     ConnectMCPRequest,
     DeleteFeedbackRequest,
@@ -147,6 +148,14 @@ async def lifespan(app: FastAPI):
 
         discord_task = asyncio.create_task(client.start(discord_bot_token))
 
+    slack_task = None
+
+    # Slack Socket Handler if env variable SLACK_WEBSOCKET_TOKEN is set
+    if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_WEBSOCKET_TOKEN"):
+        from chainlit.slack.app import start_socket_mode
+
+        slack_task = asyncio.create_task(start_socket_mode())
+
     try:
         yield
     finally:
@@ -162,6 +171,10 @@ async def lifespan(app: FastAPI):
             if discord_task:
                 discord_task.cancel()
                 await discord_task
+
+            if slack_task:
+                slack_task.cancel()
+                await slack_task
         except asyncio.exceptions.CancelledError:
             pass
 
@@ -294,10 +307,14 @@ async def serve_copilot_file(
 
 
 # -------------------------------------------------------------------------------
-#                               SLACK HANDLER
+#                               SLACK HTTP HANDLER
 # -------------------------------------------------------------------------------
 
-if os.environ.get("SLACK_BOT_TOKEN") and os.environ.get("SLACK_SIGNING_SECRET"):
+if (
+    os.environ.get("SLACK_BOT_TOKEN")
+    and os.environ.get("SLACK_SIGNING_SECRET")
+    and not os.environ.get("SLACK_WEBSOCKET_TOKEN")
+):
     from chainlit.slack.app import slack_app_handler
 
     @router.post("/slack/events")
@@ -787,56 +804,41 @@ async def project_settings(
     # Load the markdown file based on the provided language
     markdown = get_markdown_str(config.root, language)
 
-    profiles = []
+    chat_profiles = []
+    profiles: list[dict] = []
     if config.code.set_chat_profiles:
         chat_profiles = await config.code.set_chat_profiles(current_user)
         if chat_profiles:
-            # Custom serialization to handle ChainlitConfigOverrides
             for p in chat_profiles:
-                profile_dict = p.to_dict()
-                # Remove config_overrides from the serialized profile since it's used server-side only
-                if "config_overrides" in profile_dict:
-                    del profile_dict["config_overrides"]
-                profiles.append(profile_dict)
+                d = p.to_dict()
+                d.pop("config_overrides", None)
+                profiles.append(d)
 
     starters = []
     if config.code.set_starters:
-        starters = await config.code.set_starters(current_user)
-        if starters:
-            starters = [s.to_dict() for s in starters]
+        s = await config.code.set_starters(current_user)
+        if s:
+            starters = [it.to_dict() for it in s]
 
-    debug_url = None
     data_layer = get_data_layer()
+    debug_url = (
+        await data_layer.build_debug_url() if data_layer and config.run.debug else None
+    )
 
-    if data_layer and config.run.debug:
-        debug_url = await data_layer.build_debug_url()
-
-    config_with_overrides = config
-
-    # Apply profile-specific configuration overrides
-    if chat_profile and config.code.set_chat_profiles:
-        # Find the current chat profile and apply overrides
-        chat_profiles = await config.code.set_chat_profiles(current_user)
-        if chat_profiles:
-            current_profile = next(
-                (p for p in chat_profiles if p.name == chat_profile), None
-            )
-            if current_profile and current_profile.config_overrides:
-                config_with_overrides = ChainlitConfig.model_validate(
-                    config.model_copy(
-                        update=current_profile.config_overrides.model_dump(
-                            exclude_none=True
-                        ),
-                        deep=True,
-                    )
-                )
+    cfg = config
+    if chat_profile and chat_profiles:
+        current_profile = next(
+            (p for p in chat_profiles if p.name == chat_profile), None
+        )
+        if current_profile and getattr(current_profile, "config_overrides", None):
+            cfg = config.with_overrides(current_profile.config_overrides)
 
     return JSONResponse(
         content={
-            "ui": config_with_overrides.ui.model_dump(),
-            "features": config_with_overrides.features.model_dump(),
-            "userEnv": config_with_overrides.project.user_env,
-            "dataPersistence": get_data_layer() is not None,
+            "ui": cfg.ui.model_dump(),
+            "features": cfg.features.model_dump(),
+            "userEnv": cfg.project.user_env,
+            "dataPersistence": data_layer is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
             "chatProfiles": profiles,
@@ -862,6 +864,12 @@ async def update_feedback(
 
         if config.code.on_feedback:
             try:
+                from chainlit.context import init_ws_context
+                from chainlit.session import WebsocketSession
+
+                session = WebsocketSession.get_by_id(update.sessionId)
+                init_ws_context(session)
+
                 await config.code.on_feedback(update.feedback)
             except Exception as callback_error:
                 logger.error(
@@ -1106,6 +1114,7 @@ async def call_action(
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
+    config: ChainlitConfig = session.get_config()
 
     action = Action(**payload.action)
 
@@ -1161,6 +1170,7 @@ async def connect_mcp(
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
+    config: ChainlitConfig = session.get_config()
 
     if current_user:
         if (
@@ -1264,7 +1274,8 @@ async def connect_mcp(
             session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
 
             # Call the callback
-            await config.code.on_mcp_connect(mcp_connection, mcp_session)
+            if config.code.on_mcp_connect:
+                await config.code.on_mcp_connect(mcp_connection, mcp_session)
 
         except Exception as e:
             raise HTTPException(
@@ -1348,6 +1359,7 @@ async def upload_file(
     current_user: UserParam,
     session_id: str,
     file: UploadFile,
+    ask_parent_id: Optional[str] = None,
 ):
     """Upload a file to the session files directory."""
 
@@ -1376,8 +1388,15 @@ async def upload_file(
         assert file.filename, "No filename for uploaded file"
         assert file.content_type, "No content type for uploaded file"
 
+        spec: AskFileSpec = session.files_spec.get(ask_parent_id, None)
+        if not spec and ask_parent_id:
+            raise HTTPException(
+                status_code=404,
+                detail="Parent message not found",
+            )
+
         try:
-            validate_file_upload(file)
+            validate_file_upload(file, spec=spec)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
 
@@ -1390,27 +1409,28 @@ async def upload_file(
         await file.close()
 
 
-def validate_file_upload(file: UploadFile):
-    """Validate the file upload as configured in config.features.spontaneous_file_upload.
+def validate_file_upload(file: UploadFile, spec: Optional[AskFileSpec] = None):
+    """Validate the file upload as configured in config.features.spontaneous_file_upload or by AskFileSpec
+    for a specific message.
+
     Args:
         file (UploadFile): The file to validate.
+        spec (AskFileSpec): The file spec to validate against if any.
     Raises:
         ValueError: If the file is not allowed.
     """
-    # TODO: This logic/endpoint is shared across spontaneous uploads and the AskFileMessage API.
-    # Commenting this check until we find a better solution
+    if not spec and config.features.spontaneous_file_upload is None:
+        """Default for a missing config is to allow the fileupload without any restrictions"""
+        return
 
-    # if config.features.spontaneous_file_upload is None:
-    #     """Default for a missing config is to allow the fileupload without any restrictions"""
-    #     return
-    # if not config.features.spontaneous_file_upload.enabled:
-    #     raise ValueError("File upload is not enabled")
+    if not spec and not config.features.spontaneous_file_upload.enabled:
+        raise ValueError("File upload is not enabled")
 
-    validate_file_mime_type(file)
-    validate_file_size(file)
+    validate_file_mime_type(file, spec)
+    validate_file_size(file, spec)
 
 
-def validate_file_mime_type(file: UploadFile):
+def validate_file_mime_type(file: UploadFile, spec: Optional[AskFileSpec]):
     """Validate the file mime type as configured in config.features.spontaneous_file_upload.
     Args:
         file (UploadFile): The file to validate.
@@ -1418,14 +1438,14 @@ def validate_file_mime_type(file: UploadFile):
         ValueError: If the file type is not allowed.
     """
 
-    if (
+    if not spec and (
         config.features.spontaneous_file_upload is None
         or config.features.spontaneous_file_upload.accept is None
     ):
         "Accept is not configured, allowing all file types"
         return
 
-    accept = config.features.spontaneous_file_upload.accept
+    accept = config.features.spontaneous_file_upload.accept if not spec else spec.accept
 
     assert isinstance(accept, List) or isinstance(accept, dict), (
         "Invalid configuration for spontaneous_file_upload, accept must be a list or a dict"
@@ -1433,11 +1453,11 @@ def validate_file_mime_type(file: UploadFile):
 
     if isinstance(accept, List):
         for pattern in accept:
-            if fnmatch.fnmatch(file.content_type, pattern):
+            if fnmatch.fnmatch(str(file.content_type), pattern):
                 return
     elif isinstance(accept, dict):
         for pattern, extensions in accept.items():
-            if fnmatch.fnmatch(file.content_type, pattern):
+            if fnmatch.fnmatch(str(file.content_type), pattern):
                 if len(extensions) == 0:
                     return
                 for extension in extensions:
@@ -1448,24 +1468,25 @@ def validate_file_mime_type(file: UploadFile):
     raise ValueError("File type not allowed")
 
 
-def validate_file_size(file: UploadFile):
+def validate_file_size(file: UploadFile, spec: Optional[AskFileSpec]):
     """Validate the file size as configured in config.features.spontaneous_file_upload.
     Args:
         file (UploadFile): The file to validate.
     Raises:
         ValueError: If the file size is too large.
     """
-    if (
+    if not spec and (
         config.features.spontaneous_file_upload is None
         or config.features.spontaneous_file_upload.max_size_mb is None
     ):
         return
 
-    if (
-        file.size is not None
-        and file.size
-        > config.features.spontaneous_file_upload.max_size_mb * 1024 * 1024
-    ):
+    max_size_mb = (
+        config.features.spontaneous_file_upload.max_size_mb
+        if not spec
+        else spec.max_size_mb
+    )
+    if file.size is not None and file.size > max_size_mb * 1024 * 1024:
         raise ValueError("File size too large")
 
 

@@ -1,23 +1,26 @@
-[tool.poetry]
+[project]
 name = "chainlit"
-version = "2.6.9"
+version = "2.7.1.1"
 keywords = [
-    'LLM',
-    'Agents',
-    'MCP',
-    'gen ai',
-    'chat ui',
-    'chatbot ui',
-    'openai',
-    'copilot',
-    'langchain',
-    'conversational ai',
+    "LLM",
+    "Agents",
+    "MCP",
+    "gen ai",
+    "chat ui",
+    "chatbot ui",
+    "openai",
+    "copilot",
+    "langchain",
+    "conversational ai",
 ]
 description = "Build Conversational AI."
-authors = ["Willy Douhard", "Dan Andre Constantini"]
-license = "Apache-2.0"
-homepage = "https://chainlit.io/"
-documentation = "https://docs.chainlit.io/"
+authors = [
+    { name = "Willy Douhard" },
+    { name = "Dan Andre Constantini" }
+]
+license = { text = "Apache-2.0" }
+readme = "README.md"
+requires-python = ">=3.10,<4.0.0"
 classifiers = [
     "Framework :: FastAPI",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -27,85 +30,107 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Environment :: Web Environment",
 ]
-repository = "https://github.com/Chainlit/chainlit"
-readme = "README.md"
-exclude = ["chainlit/frontend/**/*", "chainlit/copilot/**/**/"]
-include = [
-    { path = "chainlit/frontend/dist/**/*", format = ["sdist", "wheel"] },
-    { path = "chainlit/copilot/dist/**/*", format = ["sdist", "wheel"] }
+
+dependencies = [
+    "httpx>=0.23.0",
+    "literalai==0.1.201",
+    "dataclasses_json>=0.6.7,<0.7.0",
+    "fastapi>=0.116.1,<0.117",
+    "starlette>=0.47.2",
+    "uvicorn>=0.35.0",
+    "python-socketio>=5.11.0,<6.0.0",
+    "aiofiles>=23.1.0,<25.0.0",
+    "syncer>=2.0.3,<3.0.0",
+    "asyncer>=0.0.8,<0.1.0",
+    "mcp>=1.11.0,<2.0.0",
+    "nest-asyncio>=1.6.0,<2.0.0",
+    "click>=8.1.3,<9.0.0",
+    "tomli>=2.0.1,<3.0.0",
+    "pydantic>=2.7.2,<3",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "watchfiles>=0.20.0,<1.0.0",
+    "filetype>=1.2.0,<2.0.0",
+    "lazify>=0.4.0,<0.5.0",
+    "packaging>=23.1",
+    "python-multipart>=0.0.18,<1.0.0",
+    "pyjwt>=2.8.0,<3.0.0",
+    "audioop-lts>=0.2.1,<0.3.0; python_version>='3.13'",
+    "pydantic-settings>=2.10.1"
 ]
 
-[tool.poetry.scripts]
-# command_name = module_for_handler : function_for_handler
-chainlit = 'chainlit.cli:cli'
+[project.urls]
+Homepage = "https://chainlit.io/"
+Documentation = "https://docs.chainlit.io/"
+Repository = "https://github.com/Chainlit/chainlit"
 
-[tool.poetry.build]
-script = "build.py"
+[project.scripts]
+chainlit = "chainlit.cli:cli"
 
-[tool.poetry.dependencies]
-python = ">=3.10,<4.0.0"
-httpx = ">=0.23.0"
-literalai = "0.1.201"
-dataclasses_json = "^0.6.7"
-fastapi = ">=0.116.1,<0.117"
-starlette = ">=0.47.2"
-uvicorn = ">=0.35.0"
-python-socketio = "^5.11.0"
-aiofiles = ">=23.1.0,<25.0.0"
-syncer = "^2.0.3"
-asyncer = "^0.0.8"
-mcp = "^1.11.0"
-nest-asyncio = "^1.6.0"
-click = "^8.1.3"
-tomli = "^2.0.1"
-pydantic = ">=2.7.2,<3"
-python-dotenv = "^1.0.0"
-watchfiles = "^0.20.0"
-filetype = "^1.2.0"
-lazify = "^0.4.0"
-packaging = ">=23.1"
-python-multipart = "^0.0.18"
-pyjwt = "^2.8.0"
-audioop-lts = { version = "0.2.1", python = "^3.13" }
+[project.optional-dependencies]
+tests = [
+    "pytest>=8.3.2,<9.0.0",
+    "pytest-asyncio>=0.23.8,<1.0.0",
+    "pytest-cov>=5.0.0,<6.0.0",
+    "openai>=1.11.1,<2.0.0",
+    "langchain>=0.2.4,<0.3.0",
+    "llama-index>=0.13.0,<1.0.0",
+    "semantic-kernel>=1.24.0,<2.0.0",
+    "tenacity>=8.4.1,<9.0.0",
+    "transformers>=4.38,<5.0",
+    "matplotlib>=3.7.1,<4.0.0",
+    "plotly>=5.18.0,<6.0.0",
+    "slack_bolt>=1.18.1,<2.0.0",
+    "discord>=2.3.2,<3.0.0",
+    "botbuilder-core>=4.15.0,<5.0.0",
+    "aiosqlite>=0.20.0,<1.0.0",
+    "pandas>=2.2.2,<3.0.0",
+    "moto>=5.0.14,<6.0.0",
+]
+dev = [
+    "ruff>=0.9.0,<1.0.0",
+]
+mypy = [
+    "mypy>=1.13,<2.0.0",
+    "types-requests>=2.31.0.2,<3.0.0",
+    "types-aiofiles>=23.1.0.5,<24.0.0",
+    "mypy-boto3-dynamodb>=1.34.113,<2.0.0",
+    "pandas-stubs>=2.2.2,<3.0.0; python_version>='3.9'",
+]
+custom-data = [
+    "asyncpg>=0.30.0,<1.0.0",
+    "SQLAlchemy>=2.0.28,<3.0.0",
+    "boto3>=1.34.73,<2.0.0",
+    "azure-identity>=1.14.1,<2.0.0",
+    "azure-storage-file-datalake>=12.14.0,<13.0.0",
+    "azure-storage-blob>=12.24.0,<13.0.0",
+    "google-cloud-storage>=2.19.0,<3.0.0",
+]
 
-[tool.poetry.group.tests]
-optional = true
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
-[tool.poetry.group.tests.dependencies]
-pytest = "^8.3.2"
-pytest-asyncio = "^0.23.8"
-pytest-cov = "^5.0.0"
-openai = "^1.11.1"
-langchain = "^0.2.4"
-llama-index = "^0.13.0"
-semantic-kernel = "^1.24.0"
-tenacity = "^8.4.1"
-transformers = "^4.38"
-matplotlib = "^3.7.1"
-plotly = "^5.18.0"
-slack_bolt = "^1.18.1"
-discord = "^2.3.2"
-botbuilder-core = "^4.15.0"
-aiosqlite = "^0.20.0"
-pandas = "^2.2.2"
-moto = "^5.0.14"
+[tool.hatch.build]
+exclude = [
+  "chainlit/frontend/**/*",
+  "chainlit/copilot/**/**/"
+]
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.9.0"
+[tool.hatch.build.targets.wheel]
+packages = ["chainlit"]
+artifacts = [
+  "chainlit/frontend/dist/**/*",
+  "chainlit/copilot/dist/**/*"
+]
 
-[tool.poetry.group.mypy]
-optional = true
-
-[tool.poetry.group.mypy.dependencies]
-mypy = "^1.13"
-types-requests = "^2.31.0.2"
-types-aiofiles = "^23.1.0.5"
-mypy-boto3-dynamodb = "^1.34.113"
-pandas-stubs = { version = "^2.2.2", python = ">=3.9" }
+[tool.hatch.build.targets.sdist]
+artifacts = [
+  "chainlit/frontend/dist/**/*",
+  "chainlit/copilot/dist/**/*"
+]
 
 [tool.mypy]
 python_version = "3.10"
-
 
 [[tool.mypy.overrides]]
 module = [
@@ -127,24 +152,6 @@ module = [
 ]
 
 ignore_missing_imports = true
-
-
-[tool.poetry.group.custom-data]
-optional = true
-
-[tool.poetry.group.custom-data.dependencies]
-asyncpg = "^0.30.0"
-SQLAlchemy = "^2.0.28"
-boto3 = "^1.34.73"
-azure-identity = "^1.14.1"
-azure-storage-file-datalake = "^12.14.0"
-azure-storage-blob = "^12.24.0"
-google-cloud-storage = "^2.19.0"
-
-[build-system]
-requires = ["poetry-core==2.1.3"]
-build-backend = "poetry.core.masonry.api"
-
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
