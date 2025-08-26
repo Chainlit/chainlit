@@ -69,6 +69,11 @@
       "stop": "रेकॉर्डिंग थांबवा",
       "connecting": "कनेक्ट करत आहे"
     },
+    "commands": {
+      "button": "साधने",
+      "changeTool": "साधन बदला",
+      "availableTools": "उपलब्ध साधने"
+    },
     "fileUpload": {
       "dragDrop": "फाइल्स येथे ड्रॅग आणि ड्रॉप करा",
       "browse": "फाइल्स ब्राउझ करा",
