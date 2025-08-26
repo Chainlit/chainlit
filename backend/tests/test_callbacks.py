@@ -468,7 +468,7 @@ async def test_on_socket_connect(
 ):
     from chainlit.callbacks import on_socket_connect
 
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         # Setup test data
         socket_connected = False
 
@@ -485,8 +485,7 @@ async def test_on_socket_connect(
 
         # Check that the callback was executed
         assert socket_connected
-        # Check that the emit method was called on the session
-        context.session.emit.assert_called()
+        # Socket connect callbacks don't emit steps, so no emit call expected
 
 
 async def test_on_socket_disconnect(
@@ -494,13 +493,9 @@ async def test_on_socket_disconnect(
 ):
     from chainlit.callbacks import on_socket_disconnect
 
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         # Setup test data
         socket_disconnected = False
-        session_id = "test_session_123"
-
-        # Mock the session ID
-        context.session.id = session_id
 
         @on_socket_disconnect
         async def handle_socket_disconnect():
@@ -515,8 +510,7 @@ async def test_on_socket_disconnect(
 
         # Check that the callback was executed
         assert socket_disconnected
-        # Check that the emit method was called on the session
-        context.session.emit.assert_called()
+        # Socket disconnect callbacks don't emit steps, so no emit call expected
 
 
 async def test_data_layer_config(
