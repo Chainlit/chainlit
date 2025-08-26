@@ -69,6 +69,11 @@
       "stop": "עצור הקלטה",
       "connecting": "מתחבר"
     },
+    "commands": {
+      "button": "כלים",
+      "changeTool": "שנה כלי",
+      "availableTools": "כלים זמינים"
+    },
     "fileUpload": {
       "dragDrop": "גרור ושחרר קבצים כאן",
       "browse": "עיין בקבצים",

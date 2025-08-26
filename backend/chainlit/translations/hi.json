@@ -78,6 +78,11 @@
         "cancelled": "का अपलोड रद्द किया गया"
       }
     },
+    "commands": {
+      "button": "उपकरण",
+      "changeTool": "उपकरण बदलें",
+      "availableTools": "उपलब्ध उपकरण"
+    },
     "messages": {
       "status": {
         "using": "उपयोग कर रहे हैं",
