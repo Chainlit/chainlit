@@ -69,6 +69,11 @@
       "stop": "রেকর্ডিং বন্ধ করুন",
       "connecting": "সংযোগ করা হচ্ছে"
     },
+    "commands": {
+      "button": "টুলস",
+      "changeTool": "টুল পরিবর্তন করুন",
+      "availableTools": "উপলব্ধ টুলস"
+    },
     "fileUpload": {
       "dragDrop": "এখানে ফাইল টেনে আনুন",
       "browse": "ফাইল ব্রাউজ করুন",

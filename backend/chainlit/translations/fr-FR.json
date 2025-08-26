@@ -64,6 +64,11 @@
                 "attachFiles": "Joindre des fichiers"
             }
         },
+        "commands": {
+            "button": "Outils",
+            "changeTool": "Changer d'outil",
+            "availableTools": "Outils disponibles"
+        },
         "speech": {
             "start": "Démarrer l'enregistrement",
             "stop": "Arrêter l'enregistrement",

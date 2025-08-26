@@ -4,6 +4,22 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.7.2] - 2025-08-26
+
+### Added
+- Added LiteralAI data layer deprecation warning
+- Added context to `@cl.on_feedback` callback
+- Added Traditional Chinese (Taiwan) translations
+- Added configurable user_env persistence to database
+  - New `persist_user_env` and `mask_user_env` field in `config.toml`
+- Added new command translations to all languages
+- Added CODEOWNERS
+
+### Fixed
+- Improved dynamic config overrides for chat profiles
+- Import GCSStorageClient only when needed to avoid requiring optional dependencies
+- Updated CONTRIBUTING.md for `uv` usage
+
 ## [2.7.1.1] - 2025-08-21
 
 - Fix publishing to include frontend and copilot folders
