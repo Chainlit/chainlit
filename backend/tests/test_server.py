@@ -15,6 +15,7 @@ from chainlit.config import (
     SpontaneousFileUploadFeature,
 )
 from chainlit.server import app
+from chainlit.types import AskFileSpec
 from chainlit.user import PersistedUser
 
 
@@ -25,11 +26,10 @@ def test_client():
 
 @pytest.fixture
 def mock_load_translation(test_config: ChainlitConfig, monkeypatch: pytest.MonkeyPatch):
-    monkeypatch.setattr(
-        test_config, "load_translation", Mock(return_value={"key": "value"})
-    )
+    mock_method = Mock(return_value={"key": "value"})
+    monkeypatch.setattr("chainlit.config.ChainlitConfig.load_translation", mock_method)
 
-    return test_config.load_translation
+    return mock_method
 
 
 def test_project_translations_default_language(
@@ -500,36 +500,36 @@ def test_upload_file_unauthorized(
     assert response.status_code == 422
 
 
-# def test_upload_file_disabled(
-#     test_client: TestClient,
-#     test_config: ChainlitConfig,
-#     mock_session_get_by_id_patched: Mock,
-#     monkeypatch: pytest.MonkeyPatch,
-# ):
-#     """Test file upload being disabled by config."""
+def test_upload_file_disabled(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test file upload being disabled by config."""
 
-#     # Set accept in config
-#     monkeypatch.setattr(
-#         test_config.features,
-#         "spontaneous_file_upload",
-#         SpontaneousFileUploadFeature(enabled=False),
-#     )
+    # Set accept in config
+    monkeypatch.setattr(
+        test_config.features,
+        "spontaneous_file_upload",
+        SpontaneousFileUploadFeature(enabled=False),
+    )
 
-#     # Prepare the files to upload
-#     file_content = b"Sample file content"
-#     files = {
-#         "file": ("test_upload.txt", file_content, "text/plain"),
-#     }
+    # Prepare the files to upload
+    file_content = b"Sample file content"
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
 
-#     # Make the POST request to upload the file
-#     response = test_client.post(
-#         "/project/file",
-#         files=files,
-#         params={"session_id": mock_session_get_by_id_patched.id},
-#     )
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        params={"session_id": mock_session_get_by_id_patched.id},
+    )
 
-#     # Verify the response
-#     assert response.status_code == 400
+    # Verify the response
+    assert response.status_code == 400
 
 
 @pytest.mark.parametrize(
@@ -639,7 +639,7 @@ def test_upload_file_size_check(
     monkeypatch.setattr(
         test_config.features,
         "spontaneous_file_upload",
-        SpontaneousFileUploadFeature(max_size_mb=max_size_mb),
+        SpontaneousFileUploadFeature(max_size_mb=max_size_mb, enabled=True),
     )
 
     # Prepare the files to upload
@@ -669,6 +669,84 @@ def test_upload_file_size_check(
     assert response.status_code == expected_status
 
 
+@pytest.mark.parametrize(
+    (
+        "file_content",
+        "content_multiplier",
+        "max_size_mb",
+        "parent_id",
+        "expected_status",
+        "accept",
+    ),
+    [
+        (b"1", 1, 1, "mocked_parent_id", 200, ["text/plain"]),
+        (b"11", 1024 * 1024, 1, "mocked_parent_id", 400, ["text/plain"]),
+        (b"11", 1, 1, "invalid_parent_id", 404, ["text/plain"]),
+        (b"11", 1, 1, "mocked_parent_id", 400, ["image/gif"]),
+    ],
+)
+def test_ask_file_with_spontaneous_upload_disabled(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_session_get_by_id_patched: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+    file_content: bytes,
+    content_multiplier: int,
+    max_size_mb: int,
+    parent_id: str,
+    expected_status: int,
+    accept: list[str],
+):
+    """Test file upload being disabled by config."""
+
+    # Set accept in config
+    monkeypatch.setattr(
+        test_config.features,
+        "spontaneous_file_upload",
+        SpontaneousFileUploadFeature(enabled=False),
+    )
+
+    # Prepare the files to upload
+    file_content = file_content * content_multiplier
+    files = {
+        "file": ("test_upload.txt", file_content, "text/plain"),
+    }
+
+    expected_file_id = "mocked_file_id"
+    mock_session_get_by_id_patched.persist_file = AsyncMock(
+        return_value={
+            "id": expected_file_id,
+            "name": "test_upload.txt",
+            "type": "text/plain",
+            "size": len(file_content),
+        }
+    )
+
+    mock_session_get_by_id_patched.files_spec = {
+        "mocked_parent_id": AskFileSpec(
+            step_id="mocked_file_spec",
+            timeout=1,
+            type="file",
+            accept=accept,
+            max_files=1,
+            max_size_mb=max_size_mb,
+        )
+    }
+
+    # Make the POST request to upload the file
+    response = test_client.post(
+        "/project/file",
+        files=files,
+        params={
+            "session_id": mock_session_get_by_id_patched.id,
+            "ask_parent_id": parent_id,
+        },
+    )
+
+    # Verify the response
+    assert response.status_code == expected_status
+
+
 def test_project_translations_file_path_traversal(
     test_client: TestClient, monkeypatch: pytest.MonkeyPatch
 ):
@@ -687,3 +765,158 @@ def test_project_translations_file_path_traversal(
 
     # Should give error status
     assert response.status_code == 422
+
+
+def test_project_settings_with_chat_profile_config_overrides(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test that /project/settings endpoint returns merged configuration when chat_profile is specified."""
+    from chainlit.config import (
+        ChainlitConfigOverrides,
+        FeaturesSettings,
+        McpFeature,
+        UISettings,
+    )
+    from chainlit.types import ChatProfile
+
+    # Mock chat profiles with different config overrides
+    mock_profiles = [
+        ChatProfile(
+            name="basic",
+            markdown_description="Basic profile without overrides",
+            default=True,
+        ),
+        ChatProfile(
+            name="mcp-enabled",
+            markdown_description="Profile with MCP enabled",
+            config_overrides=ChainlitConfigOverrides(
+                features=FeaturesSettings(mcp=McpFeature(enabled=True)),
+                ui=UISettings(name="MCP Assistant", default_theme="dark"),
+            ),
+        ),
+        ChatProfile(
+            name="light-theme",
+            markdown_description="Profile with light theme",
+            config_overrides=ChainlitConfigOverrides(
+                ui=UISettings(
+                    name="Light Theme App",
+                    default_theme="light",
+                    description="Light theme app",
+                )
+            ),
+        ),
+    ]
+
+    # Mock the chat profiles callback
+    async def mock_get_chat_profiles(user):
+        # Use asyncio.sleep to make this truly async
+        import asyncio
+
+        await asyncio.sleep(0)
+        return mock_profiles
+
+    test_config.code.set_chat_profiles = mock_get_chat_profiles
+
+    # Test 1: Default profile (no overrides)
+    response = test_client.get("/project/settings", params={"chat_profile": "basic"})
+    assert response.status_code == 200
+    config_data = response.json()
+
+    # Should return base configuration without overrides
+    assert config_data["ui"]["name"] == test_config.ui.name  # Original name
+    assert (
+        config_data["features"]["mcp"]["enabled"] == test_config.features.mcp.enabled
+    )  # Original MCP setting
+
+    # Test 2: MCP-enabled profile
+    response = test_client.get(
+        "/project/settings", params={"chat_profile": "mcp-enabled"}
+    )
+    assert response.status_code == 200
+    config_data = response.json()
+
+    # Should return merged configuration with MCP enabled and custom UI
+    assert config_data["features"]["mcp"]["enabled"] is True  # Overridden
+    assert config_data["ui"]["name"] == "MCP Assistant"  # Overridden
+    assert config_data["ui"]["default_theme"] == "dark"  # Overridden
+
+    # Test 3: Light theme profile
+    response = test_client.get(
+        "/project/settings", params={"chat_profile": "light-theme"}
+    )
+    assert response.status_code == 200
+    config_data = response.json()
+
+    # Should return merged configuration with light theme
+    assert config_data["ui"]["default_theme"] == "light"  # Overridden
+    assert config_data["ui"]["description"] == "Light theme app"  # Overridden
+    assert (
+        config_data["features"]["mcp"]["enabled"] == test_config.features.mcp.enabled
+    )  # Not overridden
+
+    # Test 4: Non-existent profile (should return base config)
+    response = test_client.get(
+        "/project/settings", params={"chat_profile": "non-existent"}
+    )
+    assert response.status_code == 200
+    config_data = response.json()
+
+    # Should return base configuration
+    assert config_data["ui"]["name"] == test_config.ui.name
+    assert config_data["features"]["mcp"]["enabled"] == test_config.features.mcp.enabled
+
+    # Test 5: No profile specified (should return base config)
+    response = test_client.get("/project/settings")
+    assert response.status_code == 200
+    config_data = response.json()
+
+    # Should return base configuration
+    assert config_data["ui"]["name"] == test_config.ui.name
+    assert config_data["features"]["mcp"]["enabled"] == test_config.features.mcp.enabled
+
+
+def test_project_settings_config_overrides_serialization(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test that config_overrides field is not included in serialized chat profiles."""
+    from chainlit.config import ChainlitConfigOverrides, FeaturesSettings, McpFeature
+    from chainlit.types import ChatProfile
+
+    # Mock chat profile with config overrides
+    mock_profile = ChatProfile(
+        name="test-profile",
+        markdown_description="Test profile",
+        config_overrides=ChainlitConfigOverrides(
+            features=FeaturesSettings(mcp=McpFeature(enabled=True))
+        ),
+    )
+
+    async def mock_get_chat_profiles(user):
+        # Use asyncio.sleep to make this truly async
+        import asyncio
+
+        await asyncio.sleep(0)
+        return [mock_profile]
+
+    test_config.code.set_chat_profiles = mock_get_chat_profiles
+
+    # Get the project settings
+    response = test_client.get(
+        "/project/settings", params={"chat_profile": "test-profile"}
+    )
+    assert response.status_code == 200
+    config_data = response.json()
+
+    # Check that chatProfiles are included in the response
+    assert "chatProfiles" in config_data
+    assert len(config_data["chatProfiles"]) == 1
+
+    # Check that config_overrides is NOT included in the serialized profile
+    profile_data = config_data["chatProfiles"][0]
+    assert "config_overrides" not in profile_data
+    assert profile_data["name"] == "test-profile"
+    assert profile_data["markdown_description"] == "Test profile"
