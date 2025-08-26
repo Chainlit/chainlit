@@ -838,6 +838,7 @@ async def project_settings(
             "ui": cfg.ui.model_dump(),
             "features": cfg.features.model_dump(),
             "userEnv": cfg.project.user_env,
+            "maskUserEnv": cfg.project.mask_user_env,
             "dataPersistence": data_layer is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
@@ -864,6 +865,12 @@ async def update_feedback(
 
         if config.code.on_feedback:
             try:
+                from chainlit.context import init_ws_context
+                from chainlit.session import WebsocketSession
+
+                session = WebsocketSession.get_by_id(update.sessionId)
+                init_ws_context(session)
+
                 await config.code.on_feedback(update.feedback)
             except Exception as callback_error:
                 logger.error(

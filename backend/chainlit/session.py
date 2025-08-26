@@ -144,13 +144,21 @@ class BaseSession:
         return {"id": file_id}
 
     def to_persistable(self) -> Dict:
+        from chainlit.config import config
         from chainlit.user_session import user_sessions
 
         user_session = user_sessions.get(self.id) or {}  # type: Dict
         user_session["chat_settings"] = self.chat_settings
         user_session["chat_profile"] = self.chat_profile
         user_session["client_type"] = self.client_type
-        metadata = clean_metadata(user_session)
+
+        # Check config setting for whether to persist user environment variables
+        user_session_copy = user_session.copy()
+        if not config.project.persist_user_env:
+            # Remove user environment variables (API keys) before persisting to database
+            user_session_copy["env"] = {}
+
+        metadata = clean_metadata(user_session_copy)
         return metadata
 
 

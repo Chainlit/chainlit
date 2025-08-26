@@ -78,6 +78,14 @@ user_session_timeout = 1296000  # 15 days
 # Enable third parties caching (e.g., LangChain cache)
 cache = false
 
+# Whether to persist user environment variables (API keys) to the database
+# Set to true to store user env vars in DB, false to exclude them for security
+persist_user_env = false
+
+# Whether to mask user environment variables (API keys) in the UI with password type
+# Set to true to show API keys as ***, false to show them as plain text
+mask_user_env = false
+
 # Authorized origins
 allow_origins = ["*"]
 
@@ -398,6 +406,10 @@ class ProjectSettings(BaseModel):
     user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
+    # Whether to persist user environment variables (API keys) to the database
+    persist_user_env: Optional[bool] = False
+    # Whether to mask user environment variables (API keys) in the UI with password type
+    mask_user_env: Optional[bool] = False
 
 
 class ChainlitConfigOverrides(BaseModel):
