@@ -168,7 +168,7 @@
   "navigation": {
     "header": {
       "chat": "Chat",
-      "readme": "Readme",
+      "readme": "Léeme",
       "theme": {
         "light": "Tema claro",
         "dark": "Tema oscuro",
@@ -186,7 +186,7 @@
     "user": {
       "menu": {
         "settings": "Configuración",
-        "settingsKey": "C",
+        "settingsKey": "S",
         "apiKeys": "Claves API",
         "logout": "Cerrar sesión"
       }
