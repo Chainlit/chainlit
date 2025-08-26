@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union, overload
 
 from fastapi import Request, Response
 from mcp import ClientSession
@@ -240,17 +240,27 @@ def set_chat_profiles(
     return func
 
 
+@overload
 def set_starters(
     func: Callable[[Optional["User"]], Awaitable[List["Starter"]]],
-) -> Callable:
+) -> Callable[[Optional["User"]], Awaitable[List["Starter"]]]: ...
+
+
+@overload
+def set_starters(
+    func: Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]],
+) -> Callable: ...
+
+
+def set_starters(func):
     """
     Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
 
     Args:
-        func (Callable[[Optional["User"]], Awaitable[List["Starter"]]]): The function declaring the starters.
+        func (Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]): The function declaring the starters with optional user and language arguments.
 
     Returns:
-        Callable[[Optional["User"]], Awaitable[List["Starter"]]]: The decorated function.
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]: The decorated function.
     """
 
     config.code.set_starters = wrap_user_function(func)

@@ -363,9 +363,9 @@ class CodeSettings(BaseModel):
     set_chat_profiles: Optional[
         Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
     ] = None
-    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
-        None
-    )
+    set_starters: Optional[
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]
+    ] = None
     # Auth callbacks
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
