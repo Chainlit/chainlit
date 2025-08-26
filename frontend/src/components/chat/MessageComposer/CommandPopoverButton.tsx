@@ -173,7 +173,7 @@ export const CommandPopoverButton = ({
                   />
                   {!hasSelectedNonButtonCommand && (
                     <span className="overflow-hidden transition-all duration-300 opacity-100 w-auto max-w-[100px]">
-                      {t('chat.input.tools')}
+                      {t('chat.commands.button')}
                     </span>
                   )}
                 </Button>
@@ -182,8 +182,8 @@ export const CommandPopoverButton = ({
             <TooltipContent>
               <p>
                 {hasSelectedNonButtonCommand
-                  ? t('chat.input.changeTool')
-                  : t('chat.input.availableTools')}
+                  ? t('chat.commands.changeTool')
+                  : t('chat.commands.availableTools')}
               </p>
             </TooltipContent>
           </Tooltip>

@@ -78,6 +78,11 @@
           "cancelled": "Upload geannuleerd van"
         }
       },
+      "commands": {
+        "button": "Hulpmiddelen",
+        "changeTool": "Wijzig hulpmiddel",
+        "availableTools": "Beschikbare hulpmiddelen"
+      },
       "messages": {
         "status": {
           "using": "In gebruik",

@@ -69,9 +69,13 @@
         "stop": "録音停止",
         "connecting": "接続中"
       },
+      "commands": {
+        "button": "ツール",
+        "changeTool": "ツールを変更",
+        "availableTools": "利用可能なツール"
+      },
       "fileUpload": {
         "dragDrop": "ここにファイルをドラッグ＆ドロップ",
-        "browse": "ファイルを参照",
         "sizeLimit": "制限：",
         "errors": {
           "failed": "アップロードに失敗しました",

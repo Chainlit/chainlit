@@ -64,6 +64,11 @@
         "attachFiles": "கோப்புகளை இணை"
       }
     },
+    "commands": {
+      "button": "கருவிகள்",
+      "changeTool": "கருவியை மாற்றவும்",
+      "availableTools": "கிடைக்கும் கருவிகள்"
+    },
     "speech": {
       "start": "பதிவு தொடங்கு",
       "stop": "பதிவை நிறுத்து",
