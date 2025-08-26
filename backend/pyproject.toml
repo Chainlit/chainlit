@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainlit-chandru20"
-version = "2.7.0"
+version = "2.7.3"
 keywords = [
     'LLM',
     'Agents',
@@ -167,6 +167,7 @@ optional = true
 [tool.poetry.group.custom-data.dependencies]
 asyncpg = "^0.30.0"
 SQLAlchemy = "^2.0.28"
+aiosqlite = "^0.20.0"
 boto3 = "^1.34.73"
 azure-identity = "^1.14.1"
 azure-storage-file-datalake = "^12.14.0"
