@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union, overload
 
 from fastapi import Request, Response
 from mcp import ClientSession
@@ -223,9 +223,19 @@ def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
     return func
 
 
+@overload
 def set_chat_profiles(
     func: Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]],
-) -> Callable:
+) -> Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]: ...
+
+
+@overload
+def set_chat_profiles(
+    func: Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]],
+) -> Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]]: ...
+
+
+def set_chat_profiles(func):
     """
     Programmatic declaration of the available chat profiles (can depend on the User from the session if authentication is setup).
 

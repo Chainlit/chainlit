@@ -1,6 +1,7 @@
 import asyncio
 import json
 import mimetypes
+import re
 import shutil
 import uuid
 from contextlib import AsyncExitStack
@@ -251,6 +252,15 @@ class WebsocketSession(BaseSession):
         self.thread_queues: Dict[str, ThreadQueue] = {}
         self.mcp_sessions = {}
 
+        match = (
+            re.match(
+                r"^\s*([a-zA-Z0-9-]+)", environ.get("HTTP_ACCEPT_LANGUAGE", "en-US")
+            )
+            if environ
+            else None
+        )
+        self.language = match.group(1) if match else "en-US"
+
         self.config: ChainlitConfig = self.get_config()
 
         ws_sessions_id[self.id] = self
@@ -275,7 +285,7 @@ class WebsocketSession(BaseSession):
 
             try:
                 profiles = asyncio.get_event_loop().run_until_complete(
-                    global_config.code.set_chat_profiles(self.user)
+                    global_config.code.set_chat_profiles(self.user, self.language)
                 )
                 current_profile = next(
                     (p for p in profiles if p.name == self.chat_profile), None
