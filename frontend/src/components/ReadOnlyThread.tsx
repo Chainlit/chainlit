@@ -2,7 +2,7 @@ import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -13,6 +13,7 @@ import {
   IStep,
   IThread,
   nestMessages,
+  sessionIdState,
   sideViewState,
   useApi,
   useConfig
@@ -43,6 +44,7 @@ const ReadOnlyThread = ({ id }: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { t } = useTranslation();
   const layoutMaxWidth = useLayoutMaxWidth();
+  const sessionId = useRecoilValue(sessionIdState);
 
   useEffect(() => {
     if (!thread) {
@@ -61,7 +63,7 @@ const ReadOnlyThread = ({ id }: Props) => {
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
-      toast.promise(apiClient.setFeedback(feedback), {
+      toast.promise(apiClient.setFeedback(feedback, sessionId), {
         loading: 'Updating',
         success: (res) => {
           setSteps((prev) =>

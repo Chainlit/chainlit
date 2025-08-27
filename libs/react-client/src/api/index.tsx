@@ -207,9 +207,10 @@ export class ChainlitAPI extends APIBase {
   }
 
   async setFeedback(
-    feedback: IFeedback
+    feedback: IFeedback,
+    sessionId: string
   ): Promise<{ success: boolean; feedbackId: string }> {
-    const res = await this.put(`/feedback`, { feedback });
+    const res = await this.put(`/feedback`, { feedback, sessionId });
     return res.json();
   }
 

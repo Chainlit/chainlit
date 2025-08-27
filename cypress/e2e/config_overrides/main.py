@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 import chainlit as cl
@@ -7,6 +8,8 @@ from chainlit.config import (
     McpFeature,
     UISettings,
 )
+
+os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
 
 starters = [
     cl.Starter(

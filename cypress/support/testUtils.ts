@@ -12,15 +12,16 @@ export function submitMessage(message: string) {
 }
 
 export function submitMessageCopilot(message: string) {
+  // Type the message in the copilot textarea
   cy.get(`#chat-input`, { includeShadowDom: true })
     .should('be.visible')
-    .should('have.attr', 'contenteditable', 'plaintext-only')
     .should('not.be.disabled')
-    .then(($el) => {
-      cy.wrap($el).click().type(`${message}{enter}`, {
-        scrollBehavior: false
-      });
-    });
+    .clear()
+    .type(message, { scrollBehavior: false });
+  
+  // Submit by pressing Enter
+  cy.get(`#chat-input`, { includeShadowDom: true })
+    .type('{enter}', { scrollBehavior: false });
 }
 
 export function openHistory() {
