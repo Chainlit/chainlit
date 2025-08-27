@@ -249,7 +249,7 @@ def set_starters(
 @overload
 def set_starters(
     func: Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]],
-) -> Callable: ...
+) -> Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]: ...
 
 
 def set_starters(func):
