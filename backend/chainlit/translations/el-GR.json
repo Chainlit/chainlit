@@ -23,7 +23,7 @@
         "email": {
           "label": "Διεύθυνση ηλεκτρονικού ταχυδρομείου",
           "required": "Το email είναι υποχρεωτικό πεδίο",
-          "placeholder": "tu@ejemplo.com"
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "Κωδικός πρόσβασης",

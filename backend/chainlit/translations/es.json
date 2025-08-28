@@ -23,7 +23,7 @@
         "email": {
           "label": "Correo electrónico",
           "required": "el correo electrónico es obligatorio",
-          "placeholder": "tu@ejemplo.com"
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "Contraseña",

@@ -22,12 +22,12 @@
       "form": {
         "email": {
           "label": "ઈમેલ એડ્રેસ",
-          "required": "ઈમેલ આવશ્યક છે"
+          "required": "ઈમેલ આવશ્યક છે",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "પાસવર્ડ",
-          "required": "પાસવર્ડ આવશ્યક છે",
-          "placeholder": "me@example.com"
+          "required": "પાસવર્ડ આવશ્યક છે"
         },
         "actions": {
           "signin": "સાઇન ઇન કરો"
