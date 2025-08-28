@@ -391,7 +391,7 @@ async def test_set_chat_profiles(
     async with mock_chainlit_context:
 
         @set_chat_profiles
-        async def get_chat_profiles(user):
+        async def get_chat_profiles(user, language):
             return [
                 ChatProfile(name="Test Profile", markdown_description="A test profile")
             ]
@@ -400,7 +400,7 @@ async def test_set_chat_profiles(
         assert test_config.code.set_chat_profiles is not None
 
         # Call the registered callback
-        result = await test_config.code.set_chat_profiles(None)
+        result = await test_config.code.set_chat_profiles(None, None)
 
         # Check the result
         assert result is not None
@@ -409,6 +409,42 @@ async def test_set_chat_profiles(
         assert isinstance(result[0], ChatProfile)
         assert result[0].name == "Test Profile"
         assert result[0].markdown_description == "A test profile"
+
+
+async def test_set_chat_profiles_language(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import set_chat_profiles
+    from chainlit.types import ChatProfile
+
+    async with mock_chainlit_context:
+
+        @set_chat_profiles
+        async def get_chat_profiles(user, language):
+            if language == "fr-CA":
+                return [
+                    ChatProfile(
+                        name="Profil de test", markdown_description="Un profil de test"
+                    )
+                ]
+
+            return [
+                ChatProfile(name="Test Profile", markdown_description="A test profile")
+            ]
+
+        # Test that the callback is properly registered
+        assert test_config.code.set_chat_profiles is not None
+
+        # Call the registered callback
+        result = await test_config.code.set_chat_profiles(None, "fr-CA")
+
+        # Check the result
+        assert result is not None
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], ChatProfile)
+        assert result[0].name == "Profil de test"
+        assert result[0].markdown_description == "Un profil de test"
 
 
 async def test_set_starters(mock_chainlit_context, test_config: config.ChainlitConfig):
@@ -430,7 +466,7 @@ async def test_set_starters(mock_chainlit_context, test_config: config.ChainlitC
         assert test_config.code.set_starters is not None
 
         # Call the registered callback
-        result = await test_config.code.set_starters(None)
+        result = await test_config.code.set_starters(None, None)
 
         # Check the result
         assert result is not None
@@ -439,6 +475,46 @@ async def test_set_starters(mock_chainlit_context, test_config: config.ChainlitC
         assert isinstance(result[0], Starter)
         assert result[0].label == "Test Label"
         assert result[0].message == "Test Message"
+
+
+async def test_set_starters_language(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import set_starters
+    from chainlit.types import Starter
+
+    async with mock_chainlit_context:
+
+        @set_starters
+        async def get_starters(user, language):
+            if language == "fr-CA":
+                return [
+                    Starter(
+                        label="Étiquette de test",
+                        message="Message de test",
+                    )
+                ]
+
+            return [
+                Starter(
+                    label="Test Label",
+                    message="Test Message",
+                )
+            ]
+
+        # Test that the callback is properly registered
+        assert test_config.code.set_starters is not None
+
+        # Call the registered callback
+        result = await test_config.code.set_starters(None, "fr-CA")
+
+        # Check the result
+        assert result is not None
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], Starter)
+        assert result[0].label == "Étiquette de test"
+        assert result[0].message == "Message de test"
 
 
 async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitConfig):
@@ -540,7 +616,7 @@ async def test_set_chat_profiles_with_config_overrides(
     async with mock_chainlit_context:
 
         @set_chat_profiles
-        async def get_chat_profiles(user):
+        async def get_chat_profiles(user, language):
             return [
                 ChatProfile(
                     name="Basic Profile",
@@ -567,7 +643,7 @@ async def test_set_chat_profiles_with_config_overrides(
         assert test_config.code.set_chat_profiles is not None
 
         # Call the registered callback
-        result = await test_config.code.set_chat_profiles(None)
+        result = await test_config.code.set_chat_profiles(None, None)
 
         # Check the result
         assert result is not None
