@@ -159,7 +159,7 @@ export const CommandPopoverButton = ({
                     'hover:bg-muted hover:dark:bg-muted transition-all duration-200 transition-width-padding',
                     'focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
                     open && 'bg-muted/50',
-                    hasSelectedNonButtonCommand ? 'p-2' : 'px-3 gap-1.5'
+                    hasSelectedNonButtonCommand ? 'min-w-[36px] px-0 gap-0' : 'px-3 gap-1.5'
                   )}
                   disabled={disabled}
                   onMouseEnter={scheduleTooltipOpen}
@@ -173,7 +173,7 @@ export const CommandPopoverButton = ({
                   />
                   {!hasSelectedNonButtonCommand && (
                     <span className="overflow-hidden transition-all duration-300 opacity-100 w-auto max-w-[100px]">
-                      {t('chat.input.tools')}
+                      {t('chat.commands.button')}
                     </span>
                   )}
                 </Button>
@@ -182,8 +182,8 @@ export const CommandPopoverButton = ({
             <TooltipContent>
               <p>
                 {hasSelectedNonButtonCommand
-                  ? t('chat.input.changeTool')
-                  : t('chat.input.availableTools')}
+                  ? t('chat.commands.changeTool')
+                  : t('chat.commands.availableTools')}
               </p>
             </TooltipContent>
           </Tooltip>

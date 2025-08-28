@@ -33,6 +33,7 @@ except ImportError:
     GCSStorageClient = None  # type: ignore[assignment,misc]
 
 if TYPE_CHECKING:
+    from chainlit.data.storage_clients.gcs import GCSStorageClient
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
@@ -483,7 +484,7 @@ class ChainlitDataLayer(BaseDataLayer):
         for thread in threads:
             thread_dict = ThreadDict(
                 id=str(thread["id"]),
-                createdAt=thread["createdAt"].isoformat(),
+                createdAt=thread["updatedAt"].isoformat(),
                 name=thread["name"],
                 userId=str(thread["userId"]) if thread["userId"] else None,
                 userIdentifier=thread["user_identifier"],

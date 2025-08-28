@@ -17,7 +17,8 @@ from typing import (
 )
 
 import tomli
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
+from pydantic_settings import BaseSettings
 from starlette.datastructures import Headers
 
 from chainlit.data.base import BaseDataLayer
@@ -76,6 +77,14 @@ user_session_timeout = 1296000  # 15 days
 
 # Enable third parties caching (e.g., LangChain cache)
 cache = false
+
+# Whether to persist user environment variables (API keys) to the database
+# Set to true to store user env vars in DB, false to exclude them for security
+persist_user_env = false
+
+# Whether to mask user environment variables (API keys) in the UI with password type
+# Set to true to show API keys as ***, false to show them as plain text
+mask_user_env = false
 
 # Authorized origins
 allow_origins = ["*"]
@@ -360,11 +369,11 @@ class CodeSettings(BaseModel):
     on_mcp_disconnect: Optional[Callable] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[
-        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]]
     ] = None
-    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
-        None
-    )
+    set_starters: Optional[
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]
+    ] = None
     # Auth callbacks
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
@@ -397,6 +406,10 @@ class ProjectSettings(BaseModel):
     user_session_timeout: int = 1296000  # 15 days
     # Enable third parties caching (e.g LangChain cache)
     cache: bool = False
+    # Whether to persist user environment variables (API keys) to the database
+    persist_user_env: Optional[bool] = False
+    # Whether to mask user environment variables (API keys) in the UI with password type
+    mask_user_env: Optional[bool] = False
 
 
 class ChainlitConfigOverrides(BaseModel):
@@ -407,16 +420,10 @@ class ChainlitConfigOverrides(BaseModel):
     project: Optional[ProjectSettings] = None
 
 
-class ChainlitConfig(BaseModel):
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True, revalidate_instances="always"
-    )
-
-    # Directory where the Chainlit project is located
+class ChainlitConfig(BaseSettings):
     root: str = APP_ROOT
-    # Chainlit server URL. Used only for cloud features
-    chainlit_server: str
-    run: RunSettings
+    chainlit_server: str = Field(default="")
+    run: RunSettings = Field(default_factory=RunSettings)
     features: FeaturesSettings
     ui: UISettings
     project: ProjectSettings
@@ -466,8 +473,25 @@ class ChainlitConfig(BaseModel):
 
         return translation
 
+    def with_overrides(
+        self, overrides: "ChainlitConfigOverrides | None"
+    ) -> "ChainlitConfig":
+        base = self.model_dump()
+        patch = overrides.model_dump(exclude_unset=True) if overrides else {}
 
-def init_config(log=False):
+        def _merge(a, b):
+            if isinstance(a, dict) and isinstance(b, dict):
+                out = dict(a)
+                for k, v in b.items():
+                    out[k] = _merge(out.get(k), v)
+                return out
+            return b
+
+        merged = _merge(base, patch) if patch else base
+        return type(self).model_validate(merged)
+
+
+def init_config(log: bool = False):
     """Initialize the configuration file if it doesn't exist."""
     if not os.path.exists(config_file):
         os.makedirs(config_dir, exist_ok=True)
@@ -520,10 +544,12 @@ def load_module(target: str, force_refresh: bool = False):
 
     spec = util.spec_from_file_location(target, target)
     if not spec or not spec.loader:
+        sys.path.pop(0)
         return
 
     module = util.module_from_spec(spec)
     if not module:
+        sys.path.pop(0)
         return
 
     spec.loader.exec_module(module)
@@ -574,30 +600,21 @@ def reload_config():
     global config
     if config is None:
         return
-
-    settings = load_settings()
-
-    config.features = settings["features"]
-    config.code = settings["code"]
-    config.ui = settings["ui"]
-    config.project = settings["project"]
+    new_cfg = ChainlitConfig(**load_settings())
+    config.root = new_cfg.root
+    config.chainlit_server = new_cfg.chainlit_server
+    config.run = new_cfg.run
+    config.features = new_cfg.features
+    config.ui = new_cfg.ui
+    config.project = new_cfg.project
+    config.code = new_cfg.code
 
 
 def load_config():
     """Load the configuration from the config file."""
     init_config()
-
     settings = load_settings()
-
-    chainlit_server = os.environ.get("CHAINLIT_SERVER", "https://cloud.chainlit.io")
-
-    config = ChainlitConfig(
-        chainlit_server=chainlit_server,
-        run=RunSettings(),
-        **settings,
-    )
-
-    return config
+    return ChainlitConfig(**settings)
 
 
 def lint_translations():
@@ -611,8 +628,8 @@ def lint_translations():
             if file.endswith(".json"):
                 # Load the translation file
                 to_lint = os.path.join(config_translation_dir, file)
-                with open(to_lint, encoding="utf-8") as f:
-                    translation = json.load(f)
+                with open(to_lint, encoding="utf-8") as f2:
+                    translation = json.load(f2)
 
                     # Lint the translation file
                     lint_translation_json(file, truth, translation)

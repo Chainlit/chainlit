@@ -1,0 +1,219 @@
+{
+  "common": {
+    "actions": {
+      "cancel": "取消",
+      "confirm": "確認",
+      "continue": "繼續",
+      "goBack": "返回",
+      "reset": "重設",
+      "submit": "送出"
+    },
+    "status": {
+      "loading": "載入中...",
+      "error": {
+        "default": "發生錯誤",
+        "serverConnection": "無法連線到伺服器"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "登入以存取應用程式",
+      "form": {
+        "email": {
+          "label": "電子信箱",
+          "required": "信箱是必填項目"
+        },
+        "password": {
+          "label": "密碼",
+          "required": "密碼是必填項目"
+        },
+        "actions": {
+          "signin": "登入"
+        },
+        "alternativeText": {
+          "or": "或"
+        }
+      },
+      "errors": {
+        "default": "無法登入",
+        "signin": "請嘗試使用其它帳號登入",
+        "oauthSignin": "請嘗試使用其它帳號登入",
+        "redirectUriMismatch": "重新導向URI與OAuth App設定不相符",
+        "oauthCallback": "請嘗試使用其它帳號登入",
+        "oauthCreateAccount": "請嘗試使用其它帳號登入",
+        "emailCreateAccount": "請嘗試使用其它帳號登入",
+        "callback": "請嘗試使用其它帳號登入",
+        "oauthAccountNotLinked": "為確認您的身份，請以原本使用的帳號登入",
+        "emailSignin": "電子郵件發送失敗",
+        "emailVerify": "請驗證您的電子信箱，新的驗證郵件已發送",
+        "credentialsSignin": "登入失敗。請檢查您提供的資訊是否正確",
+        "sessionRequired": "請登入以存取此頁面"
+      }
+    },
+    "provider": {
+      "continue": "繼續使用{{provider}}"
+    }
+  },
+  "chat": {
+    "input": {
+      "placeholder": "在此輸入您的訊息...",
+      "actions": {
+        "send": "發送訊息",
+        "stop": "停止任務",
+        "attachFiles": "附加檔案"
+      }
+    },
+    "speech": {
+      "start": "開始錄音",
+      "stop": "停止錄音",
+      "connecting": "連線中"
+    },
+    "fileUpload": {
+      "dragDrop": "拖曳檔案到這裡",
+      "browse": "瀏覽檔案",
+      "sizeLimit": "限制：",
+      "errors": {
+        "failed": "上傳失敗",
+        "cancelled": "已取消上傳"
+      }
+    },
+    "commands": {
+      "button": "工具",
+      "changeTool": "更換工具",
+      "availableTools": "可用工具"
+    },
+    "messages": {
+      "status": {
+        "using": "正在使用",
+        "used": "已使用"
+      },
+      "actions": {
+        "copy": {
+          "button": "複製到剪貼簿",
+          "success": "已複製！"
+        }
+      },
+      "feedback": {
+        "positive": "有幫助",
+        "negative": "沒有幫助",
+        "edit": "編輯回饋",
+        "dialog": {
+          "title": "新增評論",
+          "submit": "送出回饋"
+        },
+        "status": {
+          "updating": "更新中",
+          "updated": "回饋已更新"
+        }
+      }
+    },
+    "history": {
+      "title": "最近輸入",
+      "empty": "空空如也...",
+      "show": "顯示歷史"
+    },
+    "settings": {
+      "title": "設定面板"
+    },
+    "watermark": "大型語言模型可能會犯錯。請核實重要資訊。"
+  },
+  "threadHistory": {
+    "sidebar": {
+      "title": "歷史對話",
+      "filters": {
+        "search": "搜尋",
+        "placeholder": "搜尋對話..."
+      },
+      "timeframes": {
+        "today": "今天",
+        "yesterday": "昨天",
+        "previous7days": "過去7天",
+        "previous30days": "過去30天"
+      },
+      "empty": "未找到對話",
+      "actions": {
+        "close": "關閉側邊欄",
+        "open": "打開側邊欄"
+      }
+    },
+    "thread": {
+      "untitled": "未命名對話",
+      "menu": {
+          "rename": "重新命名",
+          "delete": "刪除"
+        },
+      "actions": {
+        "delete": {
+          "title": "確認刪除",
+          "description": "這將刪除該對話及其所有訊息和元件。此操作無法復原。",
+          "success": "對話已刪除",
+          "inProgress": "正在刪除對話"
+        },
+        "rename": {
+          "title": "重新命名對話",
+          "description": "為此對話輸入新名稱",
+          "form": {
+            "name": {
+              "label": "名稱",
+              "placeholder": "輸入新名稱"
+            }
+          },
+          "success": "對話已重新命名！",
+          "inProgress": "正在重新命名對話"
+        }
+      }
+    }
+  },
+  "navigation": {
+    "header": {
+      "chat": "聊天",
+      "readme": "說明",
+      "theme": {
+        "light": "淺色主題",
+        "dark": "深色主題",
+        "system": "跟隨系統"
+      }
+    },
+    "newChat": {
+      "button": "新建對話",
+      "dialog": {
+        "title": "創建新對話",
+        "description": "這將清除您當前的聊天記錄。確定要繼續嗎？",
+        "tooltip": "新建對話"
+      }
+    },
+    "user": {
+      "menu": {
+        "settings": "設定",
+        "settingsKey": "S",
+        "apiKeys": "API金鑰",
+        "logout": "登出"
+      }
+    }
+  },
+  "apiKeys": {
+    "title": "所需API金鑰",
+    "description": "使用此應用程式需要以下API金鑰。這些金鑰儲存在您設備的本地儲存空間中。",
+    "success": {
+      "saved": "儲存成功"
+    }
+  },
+  "alerts": {
+    "info": "資訊",
+    "note": "注釋",
+    "tip": "提示",
+    "important": "重要",
+    "warning": "警告",
+    "caution": "注意",
+    "debug": "除錯",
+    "example": "範例",
+    "success": "成功",
+    "help": "幫助",
+    "idea": "想法",
+    "pending": "待處理",
+    "security": "安全",
+    "beta": "測試",
+    "best-practice": "最佳實踐"
+  }
+}

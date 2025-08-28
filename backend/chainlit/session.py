@@ -1,6 +1,7 @@
 import asyncio
 import json
 import mimetypes
+import re
 import shutil
 import uuid
 from contextlib import AsyncExitStack
@@ -14,6 +15,7 @@ from chainlit.types import AskFileSpec, FileReference
 if TYPE_CHECKING:
     from mcp import ClientSession
 
+    from chainlit.config import ChainlitConfig
     from chainlit.types import FileDict
     from chainlit.user import PersistedUser, User
 
@@ -143,13 +145,21 @@ class BaseSession:
         return {"id": file_id}
 
     def to_persistable(self) -> Dict:
+        from chainlit.config import config
         from chainlit.user_session import user_sessions
 
         user_session = user_sessions.get(self.id) or {}  # type: Dict
         user_session["chat_settings"] = self.chat_settings
         user_session["chat_profile"] = self.chat_profile
         user_session["client_type"] = self.client_type
-        metadata = clean_metadata(user_session)
+
+        # Check config setting for whether to persist user environment variables
+        user_session_copy = user_session.copy()
+        if not config.project.persist_user_env:
+            # Remove user environment variables (API keys) before persisting to database
+            user_session_copy["env"] = {}
+
+        metadata = clean_metadata(user_session_copy)
         return metadata
 
 
@@ -250,8 +260,52 @@ class WebsocketSession(BaseSession):
         self.thread_queues: Dict[str, ThreadQueue] = {}
         self.mcp_sessions = {}
 
+        match = (
+            re.match(
+                r"^\s*([a-zA-Z0-9-]+)", environ.get("HTTP_ACCEPT_LANGUAGE", "en-US")
+            )
+            if environ
+            else None
+        )
+        self.language = match.group(1) if match else "en-US"
+
+        self.config: ChainlitConfig = self.get_config()
+
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
+
+    def get_config(self) -> "ChainlitConfig":
+        """
+        Return the config for this session: overridden if chat profile exists and has overrides, else global config.
+        """
+        from chainlit.config import config as global_config
+
+        # If no chat profile, always fallback to global config
+        if not self.chat_profile:
+            return global_config
+        # If already computed, use self.config
+        if hasattr(self, "config") and self.config:
+            return self.config
+        # Try to compute overrides
+        cfg = global_config
+        if global_config.code.set_chat_profiles:
+            import asyncio
+
+            try:
+                profiles = asyncio.get_event_loop().run_until_complete(
+                    global_config.code.set_chat_profiles(self.user, self.language)
+                )
+                current_profile = next(
+                    (p for p in profiles if p.name == self.chat_profile), None
+                )
+                if current_profile and getattr(
+                    current_profile, "config_overrides", None
+                ):
+                    cfg = global_config.with_overrides(current_profile.config_overrides)
+            except Exception:
+                pass
+        self.config = cfg
+        return cfg
 
     def restore(self, new_socket_id: str):
         """Associate a new socket id to the session."""

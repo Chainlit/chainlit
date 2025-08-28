@@ -64,6 +64,11 @@
         "attachFiles": "Attach files"
       }
     },
+    "commands": {
+      "button": "Tools",
+      "changeTool": "Change Tool",
+      "availableTools": "Available Tools"
+    },
     "speech": {
       "start": "Start recording",
       "stop": "Stop recording",

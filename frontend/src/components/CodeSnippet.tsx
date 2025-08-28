@@ -16,6 +16,10 @@ interface CodeSnippetProps {
 const HighlightedCode = ({ language, children }: CodeSnippetProps) => {
   const codeRef = useRef<HTMLElement>(null);
 
+  if (!hljs.getLanguage(language)) {
+    language = 'txt';
+  }
+
   useEffect(() => {
     if (codeRef.current) {
       const highlighted =
