@@ -475,7 +475,7 @@ class ChainlitDataLayer(BaseDataLayer):
         for thread in threads:
             thread_dict = ThreadDict(
                 id=str(thread["id"]),
-                createdAt=thread["createdAt"].isoformat(),
+                createdAt=thread["updatedAt"].isoformat(),
                 name=thread["name"],
                 userId=str(thread["userId"]) if thread["userId"] else None,
                 userIdentifier=thread["user_identifier"],
