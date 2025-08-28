@@ -78,6 +78,11 @@
         "cancelled": "已取消上传"
       }
     },
+    "commands": {
+      "button": "工具",
+      "changeTool": "更换工具",
+      "availableTools": "可用工具"
+    },
     "messages": {
       "status": {
         "using": "使用中",
@@ -212,3 +217,4 @@
     "best-practice": "最佳实践"
   }
 }
+

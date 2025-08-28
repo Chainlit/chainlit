@@ -807,7 +807,7 @@ async def project_settings(
     chat_profiles = []
     profiles: list[dict] = []
     if config.code.set_chat_profiles:
-        chat_profiles = await config.code.set_chat_profiles(current_user)
+        chat_profiles = await config.code.set_chat_profiles(current_user, language)
         if chat_profiles:
             for p in chat_profiles:
                 d = p.to_dict()
@@ -816,7 +816,7 @@ async def project_settings(
 
     starters = []
     if config.code.set_starters:
-        s = await config.code.set_starters(current_user)
+        s = await config.code.set_starters(current_user, language)
         if s:
             starters = [it.to_dict() for it in s]
 
@@ -838,6 +838,7 @@ async def project_settings(
             "ui": cfg.ui.model_dump(),
             "features": cfg.features.model_dump(),
             "userEnv": cfg.project.user_env,
+            "maskUserEnv": cfg.project.mask_user_env,
             "dataPersistence": data_layer is not None,
             "threadResumable": bool(config.code.on_chat_resume),
             "markdown": markdown,
