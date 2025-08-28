@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "电子邮箱",
-          "required": "邮箱是必填项"
+          "required": "邮箱是必填项",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "密码",
@@ -76,6 +77,10 @@
       "errors": {
         "failed": "上传失败",
         "cancelled": "已取消上传"
+      },
+      "actions": {
+        "cancelUpload": "取消上传",
+        "removeAttachment": "移除附件"
       }
     },
     "commands": {
@@ -100,7 +105,8 @@
         "edit": "编辑反馈",
         "dialog": {
           "title": "添加评论",
-          "submit": "提交反馈"
+          "submit": "提交反馈",
+          "yourFeedback": "您的反馈..."
         },
         "status": {
           "updating": "更新中",
@@ -114,7 +120,8 @@
       "show": "显示历史"
     },
     "settings": {
-      "title": "设置面板"
+      "title": "设置面板",
+      "customize": "在此自定义您的聊天设置"
     },
     "watermark": "大语言模型可能会犯错。请核实重要信息。"
   },
