@@ -27,7 +27,13 @@ const VoiceButton = ({ disabled }: Props) => {
 
   useHotkeys(
     'p',
-    () => {
+    (e: KeyboardEvent) => {
+      const target = (e?.target as HTMLElement) || null;
+      const tagName = target?.tagName;
+      const isTyping =
+        tagName === 'INPUT' || tagName === 'TEXTAREA' || target?.isContentEditable;
+      if (isTyping) return;
+
       if (!isEnabled) return;
       if (audioConnection === 'on') return endConversation();
       return startConversation();
