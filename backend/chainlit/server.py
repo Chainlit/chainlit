@@ -816,7 +816,7 @@ async def project_settings(
 
     starters = []
     if config.code.set_starters:
-        s = await config.code.set_starters(current_user)
+        s = await config.code.set_starters(current_user, language)
         if s:
             starters = [it.to_dict() for it in s]
 
