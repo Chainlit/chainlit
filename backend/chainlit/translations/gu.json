@@ -69,6 +69,11 @@
       "stop": "રેકોર્ડિંગ બંધ કરો",
       "connecting": "કનેક્ટ થઈ રહ્યું છે"
     },
+    "commands": {
+      "button": "ટૂલ્સ",
+      "changeTool": "ટૂલ બદલો",
+      "availableTools": "ઉપલબ્ધ ટૂલ્સ"
+    },
     "fileUpload": {
       "dragDrop": "અહીં ફાઇલ્સ ખેંચો અને છોડો",
       "browse": "ફાઇલ્સ બ્રાઉઝ કરો",

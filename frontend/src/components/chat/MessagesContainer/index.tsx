@@ -1,6 +1,6 @@
 import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useMemo } from 'react';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -9,6 +9,7 @@ import {
   IMessageElement,
   IStep,
   messagesState,
+  sessionIdState,
   sideViewState,
   updateMessageById,
   useChatData,
@@ -32,6 +33,7 @@ const MessagesContainer = ({ navigate }: Props) => {
   const { uploadFile: _uploadFile } = useChatInteract();
   const setMessages = useSetRecoilState(messagesState);
   const setSideView = useSetRecoilState(sideViewState);
+  const sessionId = useRecoilValue(sessionIdState);
 
   const { t } = useTranslation();
 
@@ -44,7 +46,7 @@ const MessagesContainer = ({ navigate }: Props) => {
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
-      toast.promise(apiClient.setFeedback(feedback), {
+      toast.promise(apiClient.setFeedback(feedback, sessionId), {
         loading: t('chat.messages.feedback.status.updating'),
         success: (res) => {
           setMessages((prev) =>
