@@ -807,7 +807,7 @@ async def project_settings(
     chat_profiles = []
     profiles: list[dict] = []
     if config.code.set_chat_profiles:
-        chat_profiles = await config.code.set_chat_profiles(current_user)
+        chat_profiles = await config.code.set_chat_profiles(current_user, language)
         if chat_profiles:
             for p in chat_profiles:
                 d = p.to_dict()

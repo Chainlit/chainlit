@@ -369,7 +369,7 @@ class CodeSettings(BaseModel):
     on_mcp_disconnect: Optional[Callable] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[
-        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]]
     ] = None
     set_starters: Optional[
         Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]

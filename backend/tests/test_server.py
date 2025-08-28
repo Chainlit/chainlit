@@ -810,7 +810,7 @@ def test_project_settings_with_chat_profile_config_overrides(
     ]
 
     # Mock the chat profiles callback
-    async def mock_get_chat_profiles(user):
+    async def mock_get_chat_profiles(user, language):
         # Use asyncio.sleep to make this truly async
         import asyncio
 
@@ -895,7 +895,7 @@ def test_project_settings_config_overrides_serialization(
         ),
     )
 
-    async def mock_get_chat_profiles(user):
+    async def mock_get_chat_profiles(user, language):
         # Use asyncio.sleep to make this truly async
         import asyncio
 
@@ -916,6 +916,87 @@ def test_project_settings_config_overrides_serialization(
     assert len(config_data["chatProfiles"]) == 1
 
     # Check that config_overrides is NOT included in the serialized profile
+    profile_data = config_data["chatProfiles"][0]
+    assert "config_overrides" not in profile_data
+    assert profile_data["name"] == "test-profile"
+    assert profile_data["markdown_description"] == "Test profile"
+
+
+def test_project_settings_config_overrides_language(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Test that localized chat profiles use the right config overrides."""
+    from chainlit.config import ChainlitConfigOverrides, FeaturesSettings, McpFeature
+    from chainlit.types import ChatProfile
+
+    # Mock chat profile with config overrides
+    mock_profile_fr = ChatProfile(
+        name="test-profile-fr",
+        markdown_description="Test profil",
+        config_overrides=ChainlitConfigOverrides(
+            features=FeaturesSettings(mcp=McpFeature(enabled=True))
+        ),
+    )
+
+    mock_profile_en = ChatProfile(
+        name="test-profile",
+        markdown_description="Test profile",
+        config_overrides=ChainlitConfigOverrides(
+            features=FeaturesSettings(mcp=McpFeature(enabled=False))
+        ),
+    )
+
+    async def mock_get_chat_profiles(user, language):
+        # Use asyncio.sleep to make this truly async
+        import asyncio
+
+        await asyncio.sleep(0)
+        if language == "fr-CA":
+            return [mock_profile_fr]
+
+        return [mock_profile_en]
+
+    test_config.code.set_chat_profiles = mock_get_chat_profiles
+
+    # Get the project settings in French
+    response = test_client.get(
+        "/project/settings",
+        params={"language": "fr-CA", "chat_profile": "test-profile-fr"},
+    )
+    assert response.status_code == 200
+    config_data = response.json()
+
+    # Check that chatProfiles are included in the response
+    assert "chatProfiles" in config_data
+    assert len(config_data["chatProfiles"]) == 1
+
+    # Check that config_overrides is NOT included in the serialized profile
+    assert config_data["features"]["mcp"]["enabled"] is True  # Overridden
+
+    # Check that the profile_data matches the selected profile.
+    profile_data = config_data["chatProfiles"][0]
+    assert "config_overrides" not in profile_data
+    assert profile_data["name"] == "test-profile-fr"
+    assert profile_data["markdown_description"] == "Test profil"
+
+    # Get the project settings in English
+    response = test_client.get(
+        "/project/settings",
+        params={"language": "en-US", "chat_profile": "test-profile"},
+    )
+    assert response.status_code == 200
+    config_data = response.json()
+
+    # Check that chatProfiles are included in the response
+    assert "chatProfiles" in config_data
+    assert len(config_data["chatProfiles"]) == 1
+
+    # Check that config_overrides is NOT included in the serialized profile
+    assert config_data["features"]["mcp"]["enabled"] is False  # Overridden
+
+    # Check that the profile_data matches the selected profile.
     profile_data = config_data["chatProfiles"][0]
     assert "config_overrides" not in profile_data
     assert profile_data["name"] == "test-profile"
