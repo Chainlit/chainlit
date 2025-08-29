@@ -19,7 +19,7 @@ class Thread(SQLModel, table=True):
 	user_id: Optional[str] = None
 	user_identifier: Optional[str] = None
 	tags: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
-	metadata_: Optional[dict] = Field(default_factory=dict, sa_column=Column('metadata', JSON), alias='metadata')
+	metadata_: Optional[dict] = Field(default_factory=dict, sa_column=Column('metadata', JSON), alias='metadata', schema_extra={'serialization_alias': 'metadata'})
 	
 	model_config = ConfigDict(
 		alias_generator=to_camel,

@@ -12,7 +12,6 @@ from sqlalchemy import Column, JSON
 from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import PrivateAttr
 from pydantic import field_validator
-# If you want to keep compatibility with literalai types, import as needed
 from literalai import BaseGeneration
 from pydantic import ConfigDict
 from pydantic.alias_generators import to_camel
@@ -23,6 +22,7 @@ from chainlit.element import Element
 from chainlit.logger import logger
 from chainlit.types import FeedbackDict
 from chainlit.utils import utc_now
+from chainlit.context import context
 
 TrueStepType = Literal[
     "run", "tool", "llm", "embedding", "retrieval", "rerank", "undefined"
@@ -42,7 +42,7 @@ class Step(SQLModel, table=True):
     streaming: bool = Field(default=False, nullable=False)
     wait_for_answer: Optional[bool] = Field(default=None)
     is_error: Optional[bool] = Field(default=None)
-    metadata_: Optional[dict] = Field(default_factory=dict, sa_column=Column('metadata', JSON), alias='metadata')
+    metadata_: Optional[dict] = Field(default_factory=dict, sa_column=Column('metadata', JSON), alias='metadata', schema_extra={'serialization_alias': 'metadata'})
     input: Optional[str] = Field(default=None)
     output: Optional[str] = Field(default=None)
     created_at: Optional[str] = Field(default=None)
@@ -257,16 +257,14 @@ class Step(SQLModel, table=True):
         tasks = [el.send(for_id=self.id) for el in getattr(self, 'elements', [])]
         await asyncio.gather(*tasks)
 
-        from chainlit.context import check_add_step_in_cot, stub_step
         if not check_add_step_in_cot(self):
-            await context.emitter.send_step(stub_step(self))
+            await context.emitter.send_step(self.to_dict())
         else:
             await context.emitter.send_step(step_dict)
 
         return self
 
     async def stream_token(self, token: str, is_sequence=False, is_input=False):
-        from chainlit.context import context, check_add_step_in_cot, stub_step
         if not token:
             return
 
