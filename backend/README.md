@@ -101,6 +101,62 @@ chainlit run demo.py -w
 
 <img src="/images/quick-start.png" alt="Quick Start"></img>
 
+## 🔌 Model Context Protocol (MCP) Integration
+
+Chainlit supports the Model Context Protocol (MCP) to connect AI assistants with external tools and data sources. You can configure MCP servers to automatically connect when a chat session starts.
+
+### Static MCP Configuration
+
+Add MCP servers to your `.chainlit/config.toml` file for automatic connection:
+
+```toml
+[features.mcp]
+enabled = true
+
+# HTTP-based MCP server (e.g., web services)
+[[features.mcp.servers]]
+name = "csv-editor"
+client = "streamable-http"
+url = "http://localhost:3001/mcp"
+auto_connect = true
+timeout = 30
+
+# Command-line MCP server
+[[features.mcp.servers]]
+name = "local-tools"
+client = "stdio"
+command = "npx my-mcp-server"
+auto_connect = true
+
+# Server-sent events MCP server
+[[features.mcp.servers]]
+name = "sse-server"
+client = "sse"
+url = "http://localhost:3002/sse"
+auto_connect = false  # Manual connection only
+```
+
+### Using MCP in Your App
+
+```python
+import chainlit as cl
+from mcp import ClientSession
+
+@cl.on_mcp_connect
+async def mcp_connect(connection, session: ClientSession):
+    """Called when an MCP server connects."""
+    tools = await session.list_tools()
+    await cl.Message(f"Connected to {connection.name} with {len(tools.tools)} tools!").send()
+
+@cl.on_message
+async def main(message: cl.Message):
+    # MCP servers are automatically available in the session
+    session = cl.context.session
+    if hasattr(session, 'mcp_sessions'):
+        # Use MCP tools in your conversation logic
+        pass
+```
+
 ## 📚 More Examples - Cookbook
 
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
