@@ -47,6 +47,15 @@ def cli():
 
 # Define the function to run Chainlit with provided options
 def run_chainlit(target: str):
+    import os
+    import subprocess
+
+    def auto_run_alembic_upgrade():
+        try:
+            subprocess.run(["alembic", "upgrade", "head"], check=True)
+            logger.info("Alembic migrations applied (upgrade to head).")
+        except Exception as e:
+            logger.error(f"Failed to run Alembic migrations: {e}")
     host = os.environ.get("CHAINLIT_HOST", DEFAULT_HOST)
     port = int(os.environ.get("CHAINLIT_PORT", DEFAULT_PORT))
     root_path = os.environ.get("CHAINLIT_ROOT_PATH", DEFAULT_ROOT_PATH)
@@ -75,6 +84,28 @@ def run_chainlit(target: str):
     # Load the module provided by the user
     config.run.module_name = target
     load_module(config.run.module_name)
+
+    # Check if SQLModelDataLayer is used and warn about Alembic migrations
+    data_layer_func = getattr(config.code, "data_layer", None)
+    if data_layer_func:
+        try:
+            dl_instance = data_layer_func()
+            from chainlit.data.sql_model import SQLModelDataLayer
+            if isinstance(dl_instance, SQLModelDataLayer):
+                # Get current version
+                try:
+                    from chainlit.version import __version__
+                except Exception:
+                    __version__ = "unknown"
+                logger.info(f"SQLModelDataLayer detected. Chainlit version: {__version__}.")
+                auto_migrate = os.environ.get("CHAINLIT_AUTO_MIGRATE", "false").lower() in ["true", "1", "yes"]
+                if auto_migrate:
+                    logger.info("Auto-migration enabled. Running Alembic migrations...")
+                    auto_run_alembic_upgrade()
+                else:
+                    logger.info("Auto-migration disabled. Run 'alembic upgrade head' after updating models or upgrading Chainlit.")
+        except Exception as e:
+            logger.warning(f"Could not check data layer type: {e}")
 
     ensure_jwt_secret()
     assert_app()

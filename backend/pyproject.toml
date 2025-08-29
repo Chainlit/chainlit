@@ -56,7 +56,8 @@ dependencies = [
     "pyjwt>=2.8.0,<3.0.0",
     "audioop-lts>=0.2.1,<0.3.0; python_version>='3.13'",
     "pydantic-settings>=2.10.1",
-    "sqlmodel>=0.0.24"
+    "sqlmodel>=0.0.24",
+    "alembic>=1.16.5"
 ]
 
 [project.urls]
