@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "Email address",
-          "required": "email is a required field"
+          "required": "email is a required field",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "Password",
@@ -81,6 +82,10 @@
       "errors": {
         "failed": "Failed to upload",
         "cancelled": "Cancelled upload of"
+      },
+      "actions": {
+        "cancelUpload": "Cancel upload",
+        "removeAttachment": "Remove attachment"
       }
     },
     "messages": {
@@ -100,7 +105,8 @@
         "edit": "Edit feedback",
         "dialog": {
           "title": "Add a comment",
-          "submit": "Submit feedback"
+          "submit": "Submit feedback",
+          "yourFeedback": "Your feedback..."
         },
         "status": {
           "updating": "Updating",
@@ -114,7 +120,8 @@
       "show": "Show history"
     },
     "settings": {
-      "title": "Settings panel"
+      "title": "Settings panel",
+      "customize": "Customize your chat settings here"
     },
     "watermark": "LLMs can make mistakes. Check important info."
   },
