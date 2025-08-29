@@ -6,7 +6,8 @@
       "continue": "Continue",
       "goBack": "Go Back",
       "reset": "Reset",
-      "submit": "Submit"
+      "submit": "Submit",
+      "share": "Share"
     },
     "status": {
       "loading": "Loading...",
@@ -147,9 +148,10 @@
     "thread": {
       "untitled": "Untitled Conversation",
       "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
-        },
+        "rename": "Rename",
+        "delete": "Delete",
+        "share": "Share"
+      },
       "actions": {
         "delete": {
           "title": "Confirm deletion",
