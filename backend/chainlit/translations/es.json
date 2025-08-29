@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "Correo electrónico",
-          "required": "el correo electrónico es obligatorio"
+          "required": "el correo electrónico es obligatorio",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "Contraseña",
@@ -81,6 +82,10 @@
       "errors": {
         "failed": "Error al subir",
         "cancelled": "Carga cancelada de"
+      },
+      "actions": {
+        "cancelUpload": "Cancelar subida",
+        "removeAttachment": "Eliminar adjunto"
       }
     },
     "messages": {
@@ -100,7 +105,8 @@
         "edit": "Editar comentario",
         "dialog": {
           "title": "Agregar un comentario",
-          "submit": "Enviar comentario"
+          "submit": "Enviar comentario",
+          "yourFeedback": "Tu comentario..."
         },
         "status": {
           "updating": "Actualizando",
@@ -114,7 +120,8 @@
       "show": "Mostrar historial"
     },
     "settings": {
-      "title": "Panel de configuración"
+      "title": "Panel de configuración",
+      "customize": "Personaliza la configuración de tu chat aquí"
     },
     "watermark": "Los LLM pueden cometer errores. Verifica la información importante."
   },

@@ -22,7 +22,8 @@
             "form": {
                 "email": {
                     "label": "Adresse e-mail",
-                    "required": "l'e-mail est un champ obligatoire"
+                    "required": "l'e-mail est un champ obligatoire",
+                    "placeholder": "me@example.com"
                 },
                 "password": {
                     "label": "Mot de passe",
@@ -81,6 +82,10 @@
             "errors": {
                 "failed": "Échec du téléversement",
                 "cancelled": "Téléversement annulé de"
+            },
+            "actions": {
+                "cancelUpload": "Annuler le téléversement",
+                "removeAttachment": "Supprimer la pièce jointe"
             }
         },
         "messages": {
@@ -100,7 +105,8 @@
                 "edit": "Modifier le commentaire",
                 "dialog": {
                     "title": "Ajouter un commentaire",
-                    "submit": "Envoyer le commentaire"
+                    "submit": "Envoyer le commentaire",
+                    "yourFeedback": "Votre avis..."
                 },
                 "status": {
                     "updating": "Mise à jour",
@@ -114,7 +120,8 @@
             "show": "Afficher l'historique"
         },
         "settings": {
-            "title": "Panneau des paramètres"
+            "title": "Panneau des paramètres",
+            "customize": "Personnalisez vos paramètres de chat ici"
         },
         "watermark": "Construit avec"
     },
