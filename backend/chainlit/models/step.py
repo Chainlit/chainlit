@@ -5,10 +5,13 @@ import json
 import uuid
 from copy import deepcopy
 from functools import wraps
-from typing import Callable, Dict, List, Optional, TypedDict, Union, Literal
+from typing import Callable, Dict, List, Optional, TypedDict, Union, Literal, Any, get_args
 
 from sqlmodel import SQLModel, Field
+from sqlalchemy import Column, JSON
+from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import PrivateAttr
+from pydantic import field_validator
 # If you want to keep compatibility with literalai types, import as needed
 from literalai import BaseGeneration
 from pydantic import ConfigDict
@@ -29,28 +32,34 @@ MessageStepType = Literal["user_message", "assistant_message", "system_message"]
 
 StepType = Union[TrueStepType, MessageStepType]
 
-
 class Step(SQLModel, table=True):
-    id: Optional[str] = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    name: str = ""
-    type: str = "undefined"
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    name: str = Field(..., nullable=False)
+    type: str = Field(..., nullable=False)
+    thread_id: str = Field(..., foreign_key="thread.id", nullable=False)
     parent_id: Optional[str] = Field(default=None, foreign_key="step.id")
-    thread_id: Optional[str] = None
-    streaming: bool = False
-    persisted: bool = False
-    show_input: Union[bool, str] = "json"
-    is_error: Optional[bool] = False
-    metadata: Dict = Field(default_factory=dict)
-    tags: Optional[List[str]] = None
-    created_at: Optional[str] = None
-    start: Optional[str] = None
-    end: Optional[str] = None
-    generation: Optional[BaseGeneration] = None
-    language: Optional[str] = None
-    default_open: Optional[bool] = False
-    input: Optional[str] = ""
-    output: Optional[str] = ""
-
+    disable_feedback: bool = Field(default=False, nullable=False)
+    streaming: bool = Field(default=False, nullable=False)
+    wait_for_answer: Optional[bool] = Field(default=None)
+    is_error: Optional[bool] = Field(default=None)
+    metadata_: Optional[dict] = Field(default_factory=dict, sa_column=Column('metadata', JSON), alias='metadata')
+    input: Optional[str] = Field(default=None)
+    output: Optional[str] = Field(default=None)
+    created_at: Optional[str] = Field(default=None)
+    start: Optional[str] = Field(default=None)
+    end: Optional[str] = Field(default=None)
+    generation: Optional[dict] = Field(default_factory=dict, sa_column=Column('generation', JSON), alias='generation')
+    show_input: str = Field(default="json")
+    language: Optional[str] = Field(default=None)
+    indent: Optional[int] = Field(default=None)
+    tags: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    default_open: Optional[bool] = Field(default=False)
+    
+    model_config = ConfigDict(
+		alias_generator=to_camel,
+		populate_by_name=True,
+	)
+    
     # TODO define relationship with Element
     # elements: List[Element] = Relationship(back_populates="step")
     # thread: Optional[Thread] = Relationship(back_populates="steps")
@@ -65,6 +74,13 @@ class Step(SQLModel, table=True):
     _fail_on_persist_error: bool = PrivateAttr(default=False)
     _input: str = PrivateAttr(default="")
     _output: str = PrivateAttr(default="")
+
+    @field_validator("type", mode="before")
+    def validate_type(cls, v):
+        allowed = [v for arg in get_args(StepType) for v in (get_args(arg) if hasattr(arg, "__args__") else [arg])]
+        if v not in allowed:
+            raise ValueError(f"Invalid type: {v}. Must be one of: {allowed}")
+        return v
 
     @property
     def input_value(self):

@@ -1,7 +1,7 @@
-from typing import Optional, Dict, List, Literal, Union, ClassVar, TypeVar, Any, cast
+from typing import Optional, Dict, List, Literal, Union, ClassVar, TypeVar, Any, cast, get_args
 from sqlmodel import SQLModel, Field
 import uuid
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from pydantic.alias_generators import to_camel
 from syncer import asyncio
 import filetype
@@ -18,16 +18,16 @@ mime_types = {
 }
 
 ElementType = Literal[
-    "image",
-    "text",
-    "pdf",
-    "tasklist",
-    "audio",
-    "video",
-    "file",
-    "plotly",
-    "dataframe",
-    "custom",
+	"image",
+	"text",
+	"pdf",
+	"tasklist",
+	"audio",
+	"video",
+	"file",
+	"plotly",
+	"dataframe",
+	"custom",
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -35,24 +35,45 @@ ElementSize = Literal["small", "medium", "large"]
 class Element(SQLModel, table=True):
 	id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
 	thread_id: Optional[str] = None
-	type: ElementType
+	type: str = Field(..., nullable=False)
 	name: str = ""
 	url: Optional[str] = None
 	path: Optional[str] = None
 	object_key: Optional[str] = None
 	chainlit_key: Optional[str] = None
-	display: ElementDisplay
-	size: Optional[ElementSize] = None
+	display: str = Field(..., nullable=False)
+	size: Optional[str] = None
 	language: Optional[str] = None
 	mime: Optional[str] = None
 	for_id: Optional[str] = None
 	# Add other common fields as needed
-	
+
 	model_config = ConfigDict(
 		alias_generator=to_camel,
 		populate_by_name=True,
 	)
 	
+	@field_validator("type", mode="before")
+	def validate_type(cls, v):
+		allowed = list(get_args(ElementType))
+		if v not in allowed:
+			raise ValueError(f"Invalid type: {v}. Must be one of: {allowed}")
+		return v
+
+	@field_validator("display", mode="before")
+	def validate_display(cls, v):
+		allowed = list(get_args(ElementDisplay))
+		if v not in allowed:
+			raise ValueError(f"Invalid display: {v}. Must be one of: {allowed}")
+		return v
+	
+	@field_validator("size", mode="before")
+	def validate_size(cls, v):
+		allowed = list(get_args(ElementSize))
+		if v not in allowed:
+			raise ValueError(f"Invalid size: {v}. Must be one of: {allowed}")
+		return v
+
 	def to_dict(self):
 		return self.model_dump(by_alias=True)
 
@@ -79,7 +100,7 @@ class Element(SQLModel, table=True):
 			return Text(**kwargs)
 		else:
 			return File(**kwargs)
-		
+
 	@classmethod
 	def infer_type_from_mime(cls, mime_type: str):
 		"""Infer the element type from a mime type. Useful to know which element to instantiate from a file upload."""
@@ -154,51 +175,55 @@ ElementBased = TypeVar("ElementBased", bound=Element)
 
 # Subclasses for runtime logic (not persisted, but can be instantiated from Element)
 class Image(Element):
-	type: ClassVar[ElementType] = "image"
-	size: Optional[str] = "medium"
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("type", "image")
+        kwargs.setdefault("size", "medium")
+        super().__init__(*args, **kwargs)
 	
 class Text(Element):
-	type: ElementType = "text"
-	language: Optional[str] = None
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("type", "text")
+        kwargs.setdefault("language", None)
+        super().__init__(*args, **kwargs)
 	
-class Pdf(Element):
-	type: ElementType = "pdf"
-	mime: str = "application/pdf"
-	page: Optional[int] = None
+class Pdf(Element):	
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault("type", "pdf")
+        kwargs.setdefault("mime", "application/pdf")
+        super().__init__(*args, **kwargs)
+		
+    page: Optional[int] = None
 	
 class Pyplot(Element):
-    """Useful to send a pyplot to the UI."""
+	"""Useful to send a pyplot to the UI."""
+	def __init__(self, *args, figure=None, content=None, **kwargs):
+		kwargs.setdefault("type", "image")
+		kwargs.setdefault("size", "medium")
+		super().__init__(*args, **kwargs)
+		self.figure = figure
+		self.content = content if content is not None else b""
 
-    # We reuse the frontend image element to display the chart
-    type: ClassVar[ElementType] = "image"
-
-    size: ElementSize = "medium"
-    # The type is set to Any because the figure is not serializable
-    # and its actual type is checked in __post_init__.
-    figure: Any = None
-    content: bytes = b""
-
-    def __post_init__(self) -> None:
-        from matplotlib.figure import Figure
-        from io import BytesIO
-
-        if not isinstance(self.figure, Figure):
-            raise TypeError("figure must be a matplotlib.figure.Figure")
-
-        image = BytesIO()
-        self.figure.savefig(
-            image, dpi=200, bbox_inches="tight", backend="Agg", format="png"
-        )
-        self.content = image.getvalue()
-
-        super().__post_init__()
+	def __post_init__(self) -> None:
+		if hasattr(self, "figure") and self.figure is not None:
+			from matplotlib.figure import Figure
+			from io import BytesIO
+			if not isinstance(self.figure, Figure):
+				raise TypeError("figure must be a matplotlib.figure.Figure")
+			image = BytesIO()
+			self.figure.savefig(
+				image, dpi=200, bbox_inches="tight", backend="Agg", format="png"
+			)
+			self.content = image.getvalue()
+		super().__post_init__()
 		
 class TaskList(Element):
-	type: ElementType = "tasklist"
-	tasks: List = Field(default_factory=list)
-	status: str = "Ready"
-	name: str = "tasklist"
-	content: str = "dummy content to pass validation"
+	def __init__(self, *args, tasks=None, status="Ready", name="tasklist", content="dummy content to pass validation", **kwargs):
+		kwargs.setdefault("type", "tasklist")
+		super().__init__(*args, **kwargs)
+		self.tasks = tasks if tasks is not None else []
+		self.status = status
+		self.name = name
+		self.content = content
 
 	def __post_init__(self) -> None:
 		super().__post_init__()
@@ -220,7 +245,6 @@ class TaskList(Element):
 			{"title": task.title, "status": task.status.value, "forId": task.forId}
 			for task in self.tasks
 		]
-
 		# store stringified json in content so that it's correctly stored in the database
 		self.content = json.dumps(
 			{
@@ -232,65 +256,70 @@ class TaskList(Element):
 		)
 
 class Audio(Element):
-	type: ClassVar[ElementType] = "audio"
-	auto_play: bool = False
+	def __init__(self, *args, auto_play=False, **kwargs):
+		kwargs.setdefault("type", "audio")
+		super().__init__(*args, **kwargs)
+		self.auto_play = auto_play
 
 class Video(Element):
-    type: ClassVar[ElementType] = "video"
-    size: ElementSize = "medium"
-    # Override settings for each type of player in ReactPlayer
-    # https://github.com/cookpete/react-player?tab=readme-ov-file#config-prop
-    player_config: Optional[dict] = None
+	def __init__(self, *args, player_config=None, **kwargs):
+		kwargs.setdefault("type", "video")
+		kwargs.setdefault("size", "medium")
+		super().__init__(*args, **kwargs)
+		self.player_config = player_config
 	
 class File(Element):
-	type: ElementType = "file"
+	def __init__(self, *args, **kwargs):
+		kwargs.setdefault("type", "file")
+		super().__init__(*args, **kwargs)
 
 class Plotly(Element):
-	type: ElementType = "plotly"
-	size: Optional[str] = "medium"
-	figure: Optional[Any] = None
-	content: str = ""
+	def __init__(self, *args, figure=None, content="", **kwargs):
+		kwargs.setdefault("type", "plotly")
+		kwargs.setdefault("size", "medium")
+		super().__init__(*args, **kwargs)
+		self.figure = figure
+		self.content = content
 
 	def __post_init__(self) -> None:
-		from plotly import graph_objects as go, io as pio
-
-		if not isinstance(self.figure, go.Figure):
-			raise TypeError("figure must be a plotly.graph_objects.Figure")
-
-		self.figure.layout.autosize = True
-		self.figure.layout.width = None
-		self.figure.layout.height = None
-		self.content = pio.to_json(self.figure, validate=True)
-		self.mime = "application/json"
-
+		if hasattr(self, "figure") and self.figure is not None:
+			from plotly import graph_objects as go, io as pio
+			if not isinstance(self.figure, go.Figure):
+				raise TypeError("figure must be a plotly.graph_objects.Figure")
+			self.figure.layout.autosize = True
+			self.figure.layout.width = None
+			self.figure.layout.height = None
+			self.content = pio.to_json(self.figure, validate=True)
+			self.mime = "application/json"
 		super().__post_init__()
 
 class Dataframe(Element):
-	type: ElementType = "dataframe"
-	size: Optional[str] = "large"
-	data: Any = None  # The type is Any because it is checked in __post_init__.
+	def __init__(self, *args, data=None, **kwargs):
+		kwargs.setdefault("type", "dataframe")
+		kwargs.setdefault("size", "large")
+		super().__init__(*args, **kwargs)
+		self.data = data
 
 	def __post_init__(self) -> None:
-		"""Ensures the data is a pandas DataFrame and converts it to JSON."""
-		from pandas import DataFrame
-
-		if not isinstance(self.data, DataFrame):
-			raise TypeError("data must be a pandas.DataFrame")
-
-		self.content = self.data.to_json(orient="split", date_format="iso")
+		if hasattr(self, "data") and self.data is not None:
+			from pandas import DataFrame
+			if not isinstance(self.data, DataFrame):
+				raise TypeError("data must be a pandas.DataFrame")
+			self.content = self.data.to_json(orient="split", date_format="iso")
 		super().__post_init__()
 	
 class CustomElement(Element):
-    """Useful to send a custom element to the UI."""
+	"""Useful to send a custom element to the UI."""
+	def __init__(self, *args, mime="application/json", props=None, **kwargs):
+		kwargs.setdefault("type", "custom")
+		super().__init__(*args, **kwargs)
+		self.mime = mime
+		self.props = props if props is not None else {}
 
-    type: ClassVar[ElementType] = "custom"
-    mime: str = "application/json"
-    props: Dict = Field(default_factory=dict)
+	def __post_init__(self) -> None:
+		self.content = json.dumps(self.props)
+		super().__post_init__()
+		self.updatable = True
 
-    def __post_init__(self) -> None:
-        self.content = json.dumps(self.props)
-        super().__post_init__()
-        self.updatable = True
-
-    async def update(self):
-        await super().send(self.for_id)
+	async def update(self):
+		await super().send(self.for_id)
