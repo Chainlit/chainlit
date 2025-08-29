@@ -10,6 +10,7 @@ from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.element import Task, TaskStatus
 import json
+from sqlalchemy import Column, JSON
 
 mime_types = {
     "text": "text/plain",
@@ -46,7 +47,10 @@ class Element(SQLModel, table=True):
 	language: Optional[str] = None
 	mime: Optional[str] = None
 	for_id: Optional[str] = None
-	# Add other common fields as needed
+	page: Optional[int] = None
+	props: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
+	auto_play: Optional[bool] = None
+	player_config: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
 
 	model_config = ConfigDict(
 		alias_generator=to_camel,
@@ -81,25 +85,25 @@ class Element(SQLModel, table=True):
 	def from_dict(cls, **kwargs):
 		type_ = kwargs.get("type", "file")
 		if type_ == "image":
-			return Image(**kwargs)
+			return Image.model_validate(**kwargs)
 		elif type_ == "audio":
-			return Audio(**kwargs)
+			return Audio.model_validate(**kwargs)
 		elif type_ == "video":
-			return Video(**kwargs)
+			return Video.model_validate(**kwargs)
 		elif type_ == "plotly":
-			return Plotly(**kwargs)
+			return Plotly.model_validate(**kwargs)
 		elif type_ == "custom":
-			return CustomElement(**kwargs)
+			return CustomElement.model_validate(**kwargs)
 		elif type_ == "pdf":
-			return Pdf(**kwargs)
+			return Pdf.model_validate(**kwargs)
 		elif type_ == "tasklist":
-			return TaskList(**kwargs)
+			return TaskList.model_validate(**kwargs)
 		elif type_ == "dataframe":
-			return Dataframe(**kwargs)
+			return Dataframe.model_validate(**kwargs)
 		elif type_ == "text":
-			return Text(**kwargs)
+			return Text.model_validate(**kwargs)
 		else:
-			return File(**kwargs)
+			return File.model_validate(**kwargs)
 
 	@classmethod
 	def infer_type_from_mime(cls, mime_type: str):
@@ -175,34 +179,25 @@ ElementBased = TypeVar("ElementBased", bound=Element)
 
 # Subclasses for runtime logic (not persisted, but can be instantiated from Element)
 class Image(Element):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("type", "image")
-        kwargs.setdefault("size", "medium")
-        super().__init__(*args, **kwargs)
+	type: str = "image"
+	size: str = "medium"
 	
 class Text(Element):
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("type", "text")
-        kwargs.setdefault("language", None)
-        super().__init__(*args, **kwargs)
+	type: str = "text"
+	language: Optional[str] = None
 	
-class Pdf(Element):	
-    def __init__(self, *args, **kwargs):
-        kwargs.setdefault("type", "pdf")
-        kwargs.setdefault("mime", "application/pdf")
-        super().__init__(*args, **kwargs)
-		
-    page: Optional[int] = None
+class Pdf(Element):
+	type: str = "pdf"
+	mime: str = "application/pdf"
+	page: Optional[int] = None
 	
 class Pyplot(Element):
 	"""Useful to send a pyplot to the UI."""
-	def __init__(self, *args, figure=None, content=None, **kwargs):
-		kwargs.setdefault("type", "image")
-		kwargs.setdefault("size", "medium")
-		super().__init__(*args, **kwargs)
-		self.figure = figure
-		self.content = content if content is not None else b""
-
+	type: str = "image"
+	size: str = "medium"
+	figure: Any = None
+	content: bytes = b""
+	
 	def __post_init__(self) -> None:
 		if hasattr(self, "figure") and self.figure is not None:
 			from matplotlib.figure import Figure
@@ -217,14 +212,12 @@ class Pyplot(Element):
 		super().__post_init__()
 		
 class TaskList(Element):
-	def __init__(self, *args, tasks=None, status="Ready", name="tasklist", content="dummy content to pass validation", **kwargs):
-		kwargs.setdefault("type", "tasklist")
-		super().__init__(*args, **kwargs)
-		self.tasks = tasks if tasks is not None else []
-		self.status = status
-		self.name = name
-		self.content = content
-
+	type: str = "tasklist"
+	tasks: list = []
+	status: str = "Ready"
+	name: str = "tasklist"
+	content: str = "dummy content to pass validation"
+	
 	def __post_init__(self) -> None:
 		super().__post_init__()
 		self.updatable = True
@@ -256,31 +249,22 @@ class TaskList(Element):
 		)
 
 class Audio(Element):
-	def __init__(self, *args, auto_play=False, **kwargs):
-		kwargs.setdefault("type", "audio")
-		super().__init__(*args, **kwargs)
-		self.auto_play = auto_play
+	type: str = "audio"
+	auto_play: bool = False
 
 class Video(Element):
-	def __init__(self, *args, player_config=None, **kwargs):
-		kwargs.setdefault("type", "video")
-		kwargs.setdefault("size", "medium")
-		super().__init__(*args, **kwargs)
-		self.player_config = player_config
+	type: str = "video"
+	size: str = "medium"
 	
 class File(Element):
-	def __init__(self, *args, **kwargs):
-		kwargs.setdefault("type", "file")
-		super().__init__(*args, **kwargs)
+	type: str = "file"
 
 class Plotly(Element):
-	def __init__(self, *args, figure=None, content="", **kwargs):
-		kwargs.setdefault("type", "plotly")
-		kwargs.setdefault("size", "medium")
-		super().__init__(*args, **kwargs)
-		self.figure = figure
-		self.content = content
-
+	type: str = "plotly"
+	size: str = "medium"
+	figure: Any = None
+	content: str = ""
+	
 	def __post_init__(self) -> None:
 		if hasattr(self, "figure") and self.figure is not None:
 			from plotly import graph_objects as go, io as pio
@@ -294,12 +278,10 @@ class Plotly(Element):
 		super().__post_init__()
 
 class Dataframe(Element):
-	def __init__(self, *args, data=None, **kwargs):
-		kwargs.setdefault("type", "dataframe")
-		kwargs.setdefault("size", "large")
-		super().__init__(*args, **kwargs)
-		self.data = data
-
+	type: str = "dataframe"
+	size: str = "large"
+	data: Any = None
+	
 	def __post_init__(self) -> None:
 		if hasattr(self, "data") and self.data is not None:
 			from pandas import DataFrame
@@ -310,12 +292,9 @@ class Dataframe(Element):
 	
 class CustomElement(Element):
 	"""Useful to send a custom element to the UI."""
-	def __init__(self, *args, mime="application/json", props=None, **kwargs):
-		kwargs.setdefault("type", "custom")
-		super().__init__(*args, **kwargs)
-		self.mime = mime
-		self.props = props if props is not None else {}
-
+	type: str = "custom"
+	mime: str = "application/json"
+	
 	def __post_init__(self) -> None:
 		self.content = json.dumps(self.props)
 		super().__post_init__()
