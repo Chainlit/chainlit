@@ -679,7 +679,7 @@ wheels = [
 
 [[package]]
 name = "chainlit"
-version = "2.7.1.1"
+version = "2.7.2"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
@@ -701,6 +701,7 @@ dependencies = [
     { name = "python-dotenv" },
     { name = "python-multipart" },
     { name = "python-socketio" },
+    { name = "sqlmodel" },
     { name = "starlette" },
     { name = "syncer" },
     { name = "tomli" },
@@ -795,6 +796,7 @@ requires-dist = [
     { name = "semantic-kernel", marker = "extra == 'tests'", specifier = ">=1.24.0,<2.0.0" },
     { name = "slack-bolt", marker = "extra == 'tests'", specifier = ">=1.18.1,<2.0.0" },
     { name = "sqlalchemy", marker = "extra == 'custom-data'", specifier = ">=2.0.28,<3.0.0" },
+    { name = "sqlmodel", specifier = ">=0.0.24" },
     { name = "starlette", specifier = ">=0.47.2" },
     { name = "syncer", specifier = ">=2.0.3,<3.0.0" },
     { name = "tenacity", marker = "extra == 'tests'", specifier = ">=8.4.1,<9.0.0" },
@@ -5312,6 +5314,19 @@ wheels = [
 [package.optional-dependencies]
 asyncio = [
     { name = "greenlet" },
+]
+
+[[package]]
+name = "sqlmodel"
+version = "0.0.24"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "sqlalchemy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/86/4b/c2ad0496f5bdc6073d9b4cef52be9c04f2b37a5773441cc6600b1857648b/sqlmodel-0.0.24.tar.gz", hash = "sha256:cc5c7613c1a5533c9c7867e1aab2fd489a76c9e8a061984da11b4e613c182423", size = 116780, upload-time = "2025-03-07T05:43:32.887Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/16/91/484cd2d05569892b7fef7f5ceab3bc89fb0f8a8c0cde1030d383dbc5449c/sqlmodel-0.0.24-py3-none-any.whl", hash = "sha256:6778852f09370908985b667d6a3ab92910d0d5ec88adcaf23dbc242715ff7193", size = 28622, upload-time = "2025-03-07T05:43:30.37Z" },
 ]
 
 [[package]]
