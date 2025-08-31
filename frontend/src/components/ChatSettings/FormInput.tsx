@@ -1,5 +1,8 @@
 import { IInput } from 'types/Input';
 
+import { CheckboxInput, CheckboxInputProps } from './CheckboxInput';
+import { MultiSelectInput, MultiSelectInputProps } from './MultiSelectInput';
+import { RadioButtonGroup, RadioButtonGroupProps } from './RadioButtonGroup';
 import { SelectInput, SelectInputProps } from './SelectInput';
 import { SliderInput, SliderInputProps } from './SliderInput';
 import { SwitchInput, SwitchInputProps } from './SwitchInput';
@@ -21,7 +24,10 @@ type TFormInput =
   | (Omit<TagsInputProps, 'value'> & IFormInput<'tags', string[]>)
   | (Omit<SelectInputProps, 'value'> & IFormInput<'select', string>)
   | (Omit<TextInputProps, 'value'> & IFormInput<'textinput', string>)
-  | (Omit<TextInputProps, 'value'> & IFormInput<'numberinput', number>);
+  | (Omit<TextInputProps, 'value'> & IFormInput<'numberinput', number>)
+  | (Omit<MultiSelectInputProps, 'value'> & IFormInput<'multiselect', string[]>)
+  | (Omit<CheckboxInputProps, 'checked'> & IFormInput<'checkbox', boolean>)
+  | (Omit<RadioButtonGroupProps, 'value'> & IFormInput<'radio', string>);
 
 const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
   switch (element?.type) {
@@ -43,6 +49,12 @@ const FormInput = ({ element }: { element: TFormInput }): JSX.Element => {
           value={element.value?.toString() ?? '0'}
         />
       );
+    case 'multiselect':
+      return <MultiSelectInput {...element} value={element.value ?? []} />;
+    case 'checkbox':
+      return <CheckboxInput {...element} checked={!!element.value} />;
+    case 'radio':
+      return <RadioButtonGroup {...element} value={element.value ?? ''} />;
     default:
       // If the element type is not recognized, we indicate an unimplemented type.
       // This code path should not normally occur and serves as a fallback.
