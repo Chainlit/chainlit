@@ -222,5 +222,10 @@
     "security": "Ασφάλεια",
     "beta": "Beta",
     "best-practice": "Βέλτιστη Πρακτική"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "Επιλέξτε..."
+    }
   }
 }
