@@ -2,6 +2,12 @@ import { IInput } from '@/types';
 import * as React from 'react';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 
 import { InputStateHandler } from './InputStateHandler';
 
@@ -28,7 +34,6 @@ const CheckboxInput = ({
       id={id}
       hasError={hasError}
       description={description}
-      label={label}
       tooltip={tooltip}
     >
       <div className="flex items-center gap-2">
@@ -41,12 +46,19 @@ const CheckboxInput = ({
             setField?.(id, !!checked);
           }}
         />
-        <label
-          htmlFor={id}
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          {label}
-        </label>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <label
+                htmlFor={id}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                {label}
+              </label>
+            </TooltipTrigger>
+            <TooltipContent>{tooltip}</TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
     </InputStateHandler>
   );
