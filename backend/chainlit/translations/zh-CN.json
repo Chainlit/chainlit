@@ -222,6 +222,11 @@
     "security": "安全",
     "beta": "测试",
     "best-practice": "最佳实践"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "选择..."
+    }
   }
 }
 

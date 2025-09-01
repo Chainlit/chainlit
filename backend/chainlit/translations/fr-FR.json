@@ -222,5 +222,10 @@
         "security": "Sécurité",
         "beta": "Bêta",
         "best-practice": "Meilleure pratique"
+    },
+    "components": {
+        "MultiSelectInput": {
+        "placeholder": "Sélectionner..."
+        }
     }
 }

@@ -221,5 +221,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "選択..."
+    }
   }
-  }
+}
