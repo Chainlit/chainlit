@@ -6,6 +6,8 @@ import shutil
 import subprocess
 import sys
 
+from hatchling.builders.hooks.plugin.interface import BuildHookInterface
+
 
 class BuildError(Exception):
     """Custom exception for build failures"""
@@ -98,5 +100,6 @@ def build():
         sys.exit(1)
 
 
-if __name__ == "__main__":
-    build()
+class CustomBuildHook(BuildHookInterface):
+    def initialize(self, version, build_data):
+        build()

@@ -18,6 +18,7 @@ This document outlines the steps for maintainers to create a new release of the 
 
    - Update `version` in `[project]` of `backend/pyproject.toml`.
    - Update `version` in `backend/chainlit/version.py`.
+   - Run `uv lock` to include new version in `uv.lock`
 
 3. **Update the changelog**:
 
