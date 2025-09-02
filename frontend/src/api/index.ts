@@ -30,7 +30,7 @@ class ExtendedChainlitAPI extends ChainlitAPI {
     headers?: Record<string, string>
   ) {
     // Assumes the backend expects { clientType, name, url }
-    return fetch(`${this.httpEndpoint}mcp`, {
+    return fetch(`${this.httpEndpoint}/mcp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
