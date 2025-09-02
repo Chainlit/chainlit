@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "電子信箱",
-          "required": "信箱是必填項目"
+          "required": "信箱是必填項目",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "密碼",
@@ -76,6 +77,10 @@
       "errors": {
         "failed": "上傳失敗",
         "cancelled": "已取消上傳"
+      },
+      "actions": {
+        "cancelUpload": "取消上傳",
+        "removeAttachment": "移除附件"
       }
     },
     "commands": {
@@ -100,7 +105,8 @@
         "edit": "編輯回饋",
         "dialog": {
           "title": "新增評論",
-          "submit": "送出回饋"
+          "submit": "送出回饋",
+          "yourFeedback": "您的回饋..."
         },
         "status": {
           "updating": "更新中",
@@ -114,7 +120,8 @@
       "show": "顯示歷史"
     },
     "settings": {
-      "title": "設定面板"
+      "title": "設定面板",
+      "customize": "在此自定義您的聊天設定"
     },
     "watermark": "大型語言模型可能會犯錯。請核實重要資訊。"
   },
@@ -215,5 +222,10 @@
     "security": "安全",
     "beta": "測試",
     "best-practice": "最佳實踐"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "選擇..."
+    }
   }
 }

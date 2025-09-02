@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "மின்னஞ்சல் முகவரி",
-          "required": "மின்னஞ்சல் தேவையான புலம்"
+          "required": "மின்னஞ்சல் தேவையான புலம்",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "கடவுச்சொல்",
@@ -81,6 +82,10 @@
       "errors": {
         "failed": "பதிவேற்றம் தோல்வியடைந்தது",
         "cancelled": "பதிவேற்றம் ரத்து செய்யப்பட்டது"
+      },
+      "actions": {
+        "cancelUpload": "ரத்து செய்",
+        "removeAttachment": "இணைப்பை அகற்று"
       }
     },
     "messages": {
@@ -100,7 +105,8 @@
         "edit": "கருத்தை திருத்து",
         "dialog": {
           "title": "கருத்தைச் சேர்",
-          "submit": "கருத்தை சமர்ப்பி"
+          "submit": "கருத்தை சமர்ப்பி",
+          "yourFeedback": "உங்கள் கருத்து..."
         },
         "status": {
           "updating": "புதுப்பிக்கிறது",
@@ -114,7 +120,8 @@
       "show": "வரலாற்றைக் காட்டு"
     },
     "settings": {
-      "title": "அமைப்புகள் பலகம்"
+      "title": "அமைப்புகள் பலகம்",
+      "customize": "உங்கள் உரையாடல் அமைப்புகளை இங்கே தனிப்பயனாக்கவும்"
     },
     "watermark": "LLM கள் தவறுகள் செய்யலாம். முக்கியமான தகவல்களைச் சரிபார்ப்பதைக் கருத்தில் கொள்ளுங்கள்."
   },
@@ -215,5 +222,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "தேர்ந்தெடுக்கவும்..."
+    }
   }
 }

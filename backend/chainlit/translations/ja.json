@@ -22,7 +22,8 @@
         "form": {
           "email": {
             "label": "メールアドレス",
-            "required": "メールアドレスは必須項目です"
+            "required": "メールアドレスは必須項目です",
+            "placeholder": "me@example.com"
           },
           "password": {
             "label": "パスワード",
@@ -80,6 +81,10 @@
         "errors": {
           "failed": "アップロードに失敗しました",
           "cancelled": "アップロードをキャンセルしました："
+        },
+        "actions": {
+          "cancelUpload": "アップロードをキャンセル",
+          "removeAttachment": "添付ファイルを削除"
         }
       },
       "messages": {
@@ -99,7 +104,8 @@
           "edit": "フィードバックを編集",
           "dialog": {
             "title": "コメントを追加",
-            "submit": "フィードバックを送信"
+            "submit": "フィードバックを送信",
+            "yourFeedback": "あなたのフィードバック..."
           },
           "status": {
             "updating": "更新中",
@@ -113,7 +119,8 @@
         "show": "履歴を表示"
       },
       "settings": {
-        "title": "設定パネル"
+        "title": "設定パネル",
+        "customize": "ここでチャット設定をカスタマイズします"
       },
       "watermark": "大規模言語モデルは間違いを犯す可能性があります。重要な情報については確認を検討してください。"
     },
@@ -214,5 +221,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "選択..."
+    }
   }
-  }
+}
