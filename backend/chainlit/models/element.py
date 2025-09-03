@@ -1,7 +1,8 @@
-from typing import Optional, Dict, List, Literal, Union, ClassVar, TypeVar, Any, cast, get_args
+from typing import Optional, Dict, List, Union, ClassVar, TypeVar, Any, Literal, get_args
 from sqlmodel import SQLModel, Field
 import uuid
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict
+from pydantic.functional_validators import field_validator
 from pydantic import PrivateAttr
 from pydantic.alias_generators import to_camel
 import asyncio
@@ -15,12 +16,6 @@ from sqlalchemy import Column, JSON, ForeignKey, String
 
 APPLICATION_JSON = "application/json"
 
-mime_types = {
-	"text": "text/plain",
-	"tasklist": APPLICATION_JSON,
-	"plotly": APPLICATION_JSON,
-}
-
 ElementType = Literal[
 	"image",
 	"text",
@@ -33,31 +28,35 @@ ElementType = Literal[
 	"dataframe",
 	"custom",
 ]
+
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
 
-class Element(SQLModel, table=True):
-	__tablename__ = "elements"
-	
-	id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-	thread_id: Optional[str] = Field(default=None, sa_column=Column(String, ForeignKey("threads.id", ondelete="CASCADE"), nullable=True))
-	type: str = Field(..., nullable=False)
+mime_types: Dict[str, str] = {
+	"text": "text/plain",
+	"tasklist": APPLICATION_JSON,
+	"plotly": APPLICATION_JSON,
+}
+class ElementBase(SQLModel):
+	type: ElementType
 	name: str = ""
 	url: Optional[str] = None
 	path: Optional[str] = None
 	object_key: Optional[str] = None
 	chainlit_key: Optional[str] = None
-	display: str = Field(..., nullable=False)
-	size: Optional[str] = None
+	display: ElementDisplay = "inline"
+	size: Optional[ElementSize] = None
 	language: Optional[str] = None
 	mime: Optional[str] = None
-	for_id: Optional[str] = Field(default=None, sa_column=Column(String, ForeignKey("steps.id", ondelete="CASCADE"), nullable=True))
 	page: Optional[int] = None
-	props: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
+	props: Optional[dict] = None
 	auto_play: Optional[bool] = None
-	player_config: Optional[dict] = Field(default_factory=dict, sa_column=Column(JSON))
-	# Non-DB payload used by runtime logic (private attribute)
+	player_config: Optional[dict] = None
+	# runtime-only
 	_content: Optional[Union[str, bytes]] = PrivateAttr(default=None)
+	_persisted: bool = PrivateAttr(default=False)
+	_updatable: bool = PrivateAttr(default=False)
+	_bg_task: Any = PrivateAttr(default=None)
 
 	model_config = ConfigDict(
 		alias_generator=to_camel,
@@ -71,29 +70,6 @@ class Element(SQLModel, table=True):
 	@content.setter
 	def content(self, value: Optional[Union[str, bytes]]):
 		self._content = value
-	
-	@field_validator("type", mode="before")
-	def validate_type(cls, v):
-		allowed = list(get_args(ElementType))
-		if v not in allowed:
-			raise ValueError(f"Invalid type: {v}. Must be one of: {allowed}")
-		return v
-
-	@field_validator("display", mode="before")
-	def validate_display(cls, v):
-		allowed = list(get_args(ElementDisplay))
-		if v not in allowed:
-			raise ValueError(f"Invalid display: {v}. Must be one of: {allowed}")
-		return v
-	
-	@field_validator("size", mode="before")
-	def validate_size(cls, v):
-		if v is None:
-			return v
-		allowed = list(get_args(ElementSize))
-		if v not in allowed:
-			raise ValueError(f"Invalid size: {v}. Must be one of: {allowed}")
-		return v
 
 	def to_dict(self):
 		return self.model_dump(by_alias=True)
@@ -101,8 +77,11 @@ class Element(SQLModel, table=True):
 	@classmethod
 	def from_dict(cls, **kwargs):
 		# Default to file if missing
-		type_ = kwargs.get("type", "file")
-		model = TYPE_MAP.get(type_, File)
+		t = kwargs.get("type", "file")
+		if t not in TYPE_MAP:
+			t = "file"
+		kwargs["type"] = t
+		model = TYPE_MAP.get(t, File)
 		return model.model_validate(kwargs)
 
 	@classmethod
@@ -123,28 +102,51 @@ class Element(SQLModel, table=True):
 		else:
 			return "file"
 
-	async def _create(self, persist=True) -> None:
-		was_persisted = bool(getattr(self, "persisted", False))
-		if was_persisted and not getattr(self, "updatable", False):
-			return None
+		def _resolve_mime(self) -> None:
+			# Resolve MIME if needed
+			if self.mime:
+				return
+			key = self.type
+			if isinstance(key, str) and key in mime_types:
+				self.mime = mime_types[key]
+			elif self.path or isinstance(self.content, (bytes, bytearray)):
+				file_type = filetype.guess(self.path or self.content)
+				if file_type:
+					self.mime = file_type.mime
+			elif self.url:
+				import mimetypes
+				self.mime = mimetypes.guess_type(self.url)[0]
+
+		async def _persist_file_if_needed(self) -> None:
+			# Persist file if needed
+			if self.url:
+				return
+			if not self.chainlit_key or getattr(self, "updatable", False) or self._updatable:
+				file_dict = await context.session.persist_file(
+					name=self.name,
+					path=self.path,
+					content=self.content,
+					mime=self.mime or "",
+				)
+				self.chainlit_key = file_dict["id"]
+
+		async def _create(self, persist: bool = True, for_id: Optional[str] = None) -> None:
+			if self._persisted and not (getattr(self, "updatable", False) or self._updatable):
+				return None
+
+			self._resolve_mime()
+			await self._persist_file_if_needed()
 
 		data_layer = get_data_layer()
 		if data_layer and persist:
 			try:
-				self._bg_task = asyncio.create_task(data_layer.create_element(self))
+				# Map to DB element and persist
+				db_elem = Element.from_base(self, for_id=for_id)
+				self._bg_task = asyncio.create_task(data_layer.create_element(db_elem))
 			except Exception as e:
 				logger.error(f"Failed to create element: {e!s}")
 
-		if not self.url and (not self.chainlit_key or getattr(self, "updatable", False)):
-			file_dict = await context.session.persist_file(
-				name=self.name,
-				path=self.path,
-				content=self.content,
-				mime=self.mime or "",
-			)
-			self.chainlit_key = file_dict["id"]
-
-		self.persisted = True
+		self._persisted = True
 		return None
 
 	async def remove(self):
@@ -153,52 +155,34 @@ class Element(SQLModel, table=True):
 			await data_layer.delete_element(self.id, self.thread_id)
 		await context.emitter.emit("remove_element", {"id": self.id})
 
-	async def send(self, for_id: str, persist=True):
-		self.for_id = for_id
-
-		if not self.mime:
-			if hasattr(self, "type") and self.type in mime_types:
-				self.mime = mime_types[self.type]
-			elif self.path or isinstance(self.content, (bytes, bytearray)):
-				import filetype
-				file_type = filetype.guess(self.path or self.content)
-				if file_type:
-					self.mime = file_type.mime
-			elif self.url:
-				import mimetypes
-				self.mime = mimetypes.guess_type(self.url)[0]
-
-		await self._create(persist=persist)
+	async def send(self, for_id: str, persist: bool = True):
+		await self._create(persist=persist, for_id=for_id)
 
 		if not self.url and not self.chainlit_key:
 			raise ValueError("Must provide url or chainlit key to send element")
 
 		await context.emitter.send_element(self.to_dict())
 		
-ElementBased = TypeVar("ElementBased", bound=Element)
+ElementBased = TypeVar("ElementBased", bound=ElementBase)
 
-# Subclasses for runtime logic (not persisted, but can be instantiated from Element)
-class Image(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "image"
-	size: str = "medium"
+# Subclasses for runtime logic (not DB tables)
+class Image(ElementBase):
+	type: Literal["image"] = "image"
+	size: Optional[ElementSize] = "medium"
 	
-class Text(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "text"
+class Text(ElementBase):
+	type: Literal["text"] = "text"
 	language: Optional[str] = None
 	
-class Pdf(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "pdf"
+class Pdf(ElementBase):
+	type: Literal["pdf"] = "pdf"
 	mime: str = "application/pdf"
 	page: Optional[int] = None
 	
-class Pyplot(Element, table=False):
-	__tablename__: ClassVar[None] = None
+class Pyplot(ElementBase):
 	"""Useful to send a pyplot to the UI."""
-	type: str = "image"
-	size: str = "medium"
+	type: Literal["image"] = "image"
+	size: Optional[ElementSize] = "medium"
 	figure: Any = Field(default=None, exclude=True)
 	
 	def model_post_init(self, __context) -> None:
@@ -214,16 +198,16 @@ class Pyplot(Element, table=False):
 			self.content = image.getvalue()
 		super().model_post_init(__context)
 		
-class TaskList(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "tasklist"
+class TaskList(ElementBase):
+	type: Literal["tasklist"] = "tasklist"
 	tasks: List[Task] = Field(default_factory=list, exclude=True)
 	status: str = "Ready"
 	name: str = "tasklist"
 	
 	def model_post_init(self, __context) -> None:
 		super().model_post_init(__context)
-		self.updatable = True
+		self._updatable = True
+		setattr(self, "updatable", True)
 
 	async def add_task(self, task: Task):
 		self.tasks.append(task)
@@ -251,24 +235,20 @@ class TaskList(Element, table=False):
 			ensure_ascii=False,
 		)
 
-class Audio(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "audio"
+class Audio(ElementBase):
+	type: Literal["audio"] = "audio"
 	auto_play: bool = False
 
-class Video(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "video"
-	size: str = "medium"
+class Video(ElementBase):
+	type: Literal["video"] = "video"
+	size: Optional[ElementSize] = "medium"
 	
-class File(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "file"
+class File(ElementBase):
+	type: Literal["file"] = "file"
 
-class Plotly(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "plotly"
-	size: str = "medium"
+class Plotly(ElementBase):
+	type: Literal["plotly"] = "plotly"
+	size: Optional[ElementSize] = "medium"
 	figure: Any = Field(default=None, exclude=True)
 	
 	def model_post_init(self, __context) -> None:
@@ -283,10 +263,9 @@ class Plotly(Element, table=False):
 			self.mime = APPLICATION_JSON
 		super().model_post_init(__context)
 
-class Dataframe(Element, table=False):
-	__tablename__: ClassVar[None] = None
-	type: str = "dataframe"
-	size: str = "large"
+class Dataframe(ElementBase):
+	type: Literal["dataframe"] = "dataframe"
+	size: Optional[ElementSize] = "large"
 	data: Any = Field(default=None, exclude=True)
 	
 	def model_post_init(self, __context) -> None:
@@ -297,19 +276,104 @@ class Dataframe(Element, table=False):
 			self.content = self.data.to_json(orient="split", date_format="iso")
 		super().model_post_init(__context)
 	
-class CustomElement(Element, table=False):
-	__tablename__: ClassVar[None] = None
+class CustomElement(ElementBase):
 	"""Useful to send a custom element to the UI."""
-	type: str = "custom"
+	type: Literal["custom"] = "custom"
 	mime: str = APPLICATION_JSON
 	
 	def model_post_init(self, __context) -> None:
 		self.content = json.dumps(self.props)
 		super().model_post_init(__context)
-		self.updatable = True
+		self._updatable = True
+		setattr(self, "updatable", True)
 
 	async def update(self):
-		await super().send(self.for_id)
+		await super().send(for_id="")
+
+# DB model with table=True
+class Element(ElementBase, table=True):
+	__tablename__ = "elements"
+
+	id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+	thread_id: Optional[str] = Field(
+		default=None,
+		sa_column=Column(String, ForeignKey("threads.id", ondelete="CASCADE"), nullable=True),
+	)
+	for_id: Optional[str] = Field(
+		default=None,
+		sa_column=Column(String, ForeignKey("steps.id", ondelete="CASCADE"), nullable=True),
+	)
+	# Override Literal fields with DB-mappable types
+	type: str = Field(..., nullable=False)
+	display: str = Field(..., nullable=False)
+	size: Optional[str] = None
+	props: Optional[dict] = Field(default_factory=dict, sa_type=JSON)
+	player_config: Optional[dict] = Field(default_factory=dict, sa_type=JSON)
+
+	# Strict validation of DB fields using runtime Literal definitions
+	@field_validator("type", mode="before")
+	@classmethod
+	def _validate_type(cls, v: Any) -> str:
+		if v is None:
+			raise ValueError("type is required")
+		v_str = str(v)
+		if v_str not in get_args(ElementType):
+			raise ValueError(f"Invalid type: {v_str}")
+		return v_str
+
+	@field_validator("display", mode="before")
+	@classmethod
+	def _validate_display(cls, v: Any) -> str:
+		if v is None:
+			raise ValueError("display is required")
+		v_str = str(v)
+		if v_str not in get_args(ElementDisplay):
+			raise ValueError(f"Invalid display: {v_str}")
+		return v_str
+
+	@field_validator("size", mode="before")
+	@classmethod
+	def _validate_size(cls, v: Any) -> Optional[str]:
+		if v is None or v == "None":
+			return None
+		v_str = str(v)
+		if v_str not in get_args(ElementSize):
+			raise ValueError(f"Invalid size: {v_str}")
+		return v_str
+
+	@classmethod
+	def from_base(cls, base: ElementBase, for_id: Optional[str] = None) -> "Element":
+		return cls(
+			type=str(base.type),
+			name=base.name,
+			url=base.url,
+			path=base.path,
+			object_key=base.object_key,
+			chainlit_key=base.chainlit_key,
+			display=str(base.display),
+			size=str(base.size) if base.size is not None else None,
+			language=base.language,
+			mime=base.mime,
+			page=base.page,
+			props=base.props or {},
+			auto_play=base.auto_play,
+			player_config=base.player_config or {},
+			for_id=for_id,
+		)
+
+	# Validators to enforce allowed values on the DB model
+	@classmethod
+	def _allowed(cls, lit) -> List[str]:
+		return list(get_args(lit))
+
+	@classmethod
+	def _validate_choice(cls, value: Optional[str], lit) -> Optional[str]:
+		if value is None:
+			return value
+		allowed = cls._allowed(lit)
+		if value not in allowed:
+			raise ValueError(f"Invalid value: {value}. Must be one of: {allowed}")
+		return value
 
 # Simple mapping for type discrimination (Pyplot shares "image", so not included)
 TYPE_MAP: Dict[str, Any] = {
