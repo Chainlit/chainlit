@@ -3,7 +3,7 @@ import atexit
 import json
 import signal
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
@@ -40,6 +40,35 @@ if TYPE_CHECKING:
 ISO_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
+def _parse_flexible_iso(ts: str) -> datetime:
+    """Parse ISO timestamps with or without trailing 'Z' or '+00:00'.
+
+    Accepts values like:
+    - '2025-09-03T17:16:15.147000Z'
+    - '2025-09-03T17:16:15.147000+00:00'
+    - '2025-09-03T17:16:15.147000'
+    Falls back to the legacy strict format if needed.
+    Defaults to UTC when timezone is missing.
+    """
+    try:
+        iso_in = ts.replace("Z", "+00:00")
+        dt = datetime.fromisoformat(iso_in)
+        # Normalize to naive UTC to match DB TIMESTAMP columns
+        if dt.tzinfo is not None:
+            dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+        return dt
+    except Exception:
+        # Fallback to legacy strict parsing; ensure naive UTC
+        try:
+            dt = datetime.strptime(ts, ISO_FORMAT)
+        except Exception:
+            # Last resort: use current naive UTC time (datetime, not string)
+            dt = datetime.utcnow().replace(tzinfo=None)
+        if dt.tzinfo is not None:
+            dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+        return dt
+
+
 class ChainlitDataLayer(BaseDataLayer):
     def __init__(
         self,
@@ -62,7 +91,8 @@ class ChainlitDataLayer(BaseDataLayer):
             self.pool = await asyncpg.create_pool(self.database_url)
 
     async def get_current_timestamp(self) -> datetime:
-        return datetime.now()
+        # Return a naive UTC datetime object (not string)
+        return datetime.utcnow().replace(tzinfo=None)
 
     async def execute_query(
         self, query: str, params: Union[Dict, None] = None
@@ -374,7 +404,11 @@ class ChainlitDataLayer(BaseDataLayer):
         timestamp = await self.get_current_timestamp()
         created_at = step_dict.get("createdAt")
         if created_at:
-            timestamp = datetime.strptime(created_at, ISO_FORMAT)
+            try:
+                timestamp = _parse_flexible_iso(created_at)
+            except Exception:
+                # Keep current timestamp on parse failure
+                pass
 
         params = {
             "id": step_dict["id"],
@@ -583,7 +617,8 @@ class ChainlitDataLayer(BaseDataLayer):
             "userId": user_id,
             "tags": tags,
             "metadata": json.dumps(metadata or {}),
-            "updatedAt": datetime.now(),
+            # Store as naive UTC datetime to match DB TIMESTAMP
+            "updatedAt": datetime.utcnow().replace(tzinfo=None),
         }
 
         # Remove None values
