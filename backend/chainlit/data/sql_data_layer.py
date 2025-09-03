@@ -5,6 +5,8 @@ from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.data.utils import queue_until_user_message
 from typing import Optional, Any, Dict
+from datetime import datetime
+from pydantic import ValidationError
 from chainlit.models import PersistedUser, User, Feedback, Thread, Element, Step
 import json
 import ssl
@@ -16,8 +18,22 @@ from chainlit.types import (
     ThreadFilter,
     PageInfo
 )
+from sqlalchemy.engine import make_url
+from sqlalchemy.pool import NullPool
+from sqlalchemy import event
 
-class SQLModelDataLayer(BaseDataLayer):
+ALLOWED_ASYNC_DRIVERS = {
+    "postgresql+asyncpg",
+    "postgresql+psycopg",  # psycopg3 async
+    "sqlite+aiosqlite",
+    "mysql+aiomysql",
+    "mysql+asyncmy",
+    "mariadb+aiomysql",
+    "mariadb+asyncmy",
+    "mssql+aioodbc",
+}
+
+class SQLDataLayer(BaseDataLayer):
     def __init__(
         self,
         conninfo: str,
@@ -29,34 +45,38 @@ class SQLModelDataLayer(BaseDataLayer):
     ):
         self._conninfo = conninfo
         self.user_thread_limit = user_thread_limit
-        self.show_logger = show_logger
-        if connect_args is None:
-            connect_args = {}
+        self.show_logger = bool(show_logger)
+
+        connect_args = dict(connect_args or {})
+
+        # Validate async driver and prepare per-dialect settings
+        url = make_url(self._conninfo)
+        driver = url.drivername  # e.g., "postgresql+asyncpg"
+        backend = url.get_backend_name()  # e.g., "postgresql"
+        if driver not in ALLOWED_ASYNC_DRIVERS:
+            raise ValueError(f"Connection URL must use an async driver. Got '{driver}'. Use one of: {ALLOWED_ASYNC_DRIVERS}")
+
         if ssl_require:
             # Create an SSL context to require an SSL connection
             ssl_context = ssl.create_default_context()
-            ssl_context.check_hostname = False
-            ssl_context.verify_mode = ssl.CERT_NONE
-            connect_args["ssl"] = ssl_context
-        self.engine = AsyncEngine(
-            create_async_engine(
+            ssl_context.check_hostname = True
+            ssl_context.verify_mode = ssl.CERT_REQUIRED
+            connect_args.setdefault("ssl", ssl_context)
+        self.engine: AsyncEngine = create_async_engine(
                 self._conninfo,
                 connect_args=connect_args,
                 echo=self.show_logger,
             )
-        )
         self.async_session = async_sessionmaker(
             bind=self.engine, expire_on_commit=False, class_=AsyncSession
         )
         if storage_provider:
             self.storage_provider: Optional[BaseStorageClient] = storage_provider
             if self.show_logger:
-                logger.info("SQLModel storage client initialized")
+                logger.info("SQLDataLayer storage client initialized")
         else:
             self.storage_provider = None
-            logger.warning(
-                "SQLModel storage client is not initialized and elements will not be persisted!"
-            )
+            logger.warning("SQLDataLayer storage client is not initialized and elements will not be persisted!")
 
     async def init_db(self):
         """
@@ -67,59 +87,62 @@ class SQLModelDataLayer(BaseDataLayer):
         async with self.engine.begin() as conn:
             # await conn.run_sync(SQLModel.metadata.drop_all)  # Uncomment to drop tables
             await conn.run_sync(SQLModel.metadata.create_all)
+    
+    async def aclose(self) -> None:
+        await self.engine.dispose()
 
     async def create_user(self, user: User) -> Optional[PersistedUser]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(PersistedUser).where(PersistedUser.identifier == user.identifier))
             existing = result.scalar_one_or_none()
-            if not existing:
-                db_user = PersistedUser(identifier=user.identifier, metadata=user.metadata)
-                session.add(db_user)
-                await session.commit()
-                await session.refresh(db_user)
-                return PersistedUser(identifier=db_user.identifier, metadata=db_user.metadata)
-            return PersistedUser(identifier=existing.identifier, metadata=existing.metadata)
+            if existing:
+                return existing
+            db_user = PersistedUser(
+                identifier=user.identifier,
+                metadata=user.metadata,
+            )
+            session.add(db_user)
+            return db_user
         
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(PersistedUser).where(PersistedUser.identifier == identifier))
             user = result.scalar_one_or_none()
-            if user:
-                return PersistedUser(identifier=user.identifier, metadata=user.metadata)
-            return None
+            return user
 
     async def update_user(self, identifier: str, metadata: Optional[dict] = None) -> Optional[PersistedUser]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(PersistedUser).where(PersistedUser.identifier == identifier))
             user = result.scalar_one_or_none()
             if user:
                 if metadata is not None:
                     user.metadata = metadata
-                await session.commit()
                 await session.refresh(user)
                 return PersistedUser(identifier=user.identifier, metadata=user.metadata)
             return None
 
     async def delete_user(self, identifier: str) -> bool:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(PersistedUser).where(PersistedUser.identifier == identifier))
             user = result.scalar_one_or_none()
             if user:
                 await session.delete(user)
-                await session.commit()
                 return True
             return False
 
     async def create_thread(self, thread_data: dict) -> Optional[Dict]:
-        async with self.async_session() as session:
-            db_thread = Thread.model_validate(thread_data)
-            session.add(db_thread)
-            await session.commit()
-            await session.refresh(db_thread)
-            return db_thread.to_dict()
+        try:
+            thread = Thread.model_validate(thread_data)
+        except ValidationError as e:
+            logger.error(f"Thread data validation error: {e}")
+            return None
+        async with self.async_session.begin() as session:
+            session.add(thread)
+            await session.refresh(thread)
+            return thread.to_dict()
         
     async def get_thread(self, thread_id: str) -> Optional[Dict]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Thread).where(Thread.id == thread_id))
             thread = result.scalar_one_or_none()
             if thread:
@@ -127,7 +150,7 @@ class SQLModelDataLayer(BaseDataLayer):
             return None
         
     async def get_thread_author(self, thread_id: str) -> str:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Thread).where(Thread.id == thread_id))
             thread: Thread = result.scalar_one_or_none()
             if thread and thread.user_identifier:
@@ -135,38 +158,39 @@ class SQLModelDataLayer(BaseDataLayer):
             return ""
 
     async def update_thread(self, thread_id: str, **kwargs) -> Optional[Dict]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Thread).where(Thread.id == thread_id))
             thread = result.scalar_one_or_none()
             if thread:
                 for k, v in kwargs.items():
                     setattr(thread, k, v)
-                await session.commit()
                 await session.refresh(thread)
                 return thread.to_dict()
             return None
 
     async def delete_thread(self, thread_id: str) -> bool:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Thread).where(Thread.id == thread_id))
             thread = result.scalar_one_or_none()
             if thread:
                 await session.delete(thread)
-                await session.commit()
                 return True
             return False
     
     @queue_until_user_message()
     async def create_step(self, step_data: dict) -> Optional[Dict]:
-        async with self.async_session() as session:
-            db_step = Step.model_validate(step_data)
-            session.add(db_step)
-            await session.commit()
-            await session.refresh(db_step)
-            return db_step.to_dict()
+        try:
+            step = Step.model_validate(step_data)
+        except ValidationError as e:
+            logger.error(f"Thread data validation error: {e}")
+            return None
+        async with self.async_session.begin() as session:
+            session.add(step)
+            await session.refresh(step)
+            return step.to_dict()
 
     async def get_step(self, step_id: str) -> Optional[Dict]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Step).where(Step.id == step_id))
             step = result.scalar_one_or_none()
             if step:
@@ -175,25 +199,23 @@ class SQLModelDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def update_step(self, step_id: str, **kwargs) -> Optional[Dict]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Step).where(Step.id == step_id))
             step = result.scalar_one_or_none()
             if step:
                 for k, v in kwargs.items():
                     setattr(step, k, v)
-                await session.commit()
                 await session.refresh(step)
                 return step.to_dict()
             return None
 
     @queue_until_user_message()
     async def delete_step(self, step_id: str) -> bool:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Step).where(Step.id == step_id))
             step = result.scalar_one_or_none()
             if step:
                 await session.delete(step)
-                await session.commit()
                 return True
             return False
         
@@ -201,7 +223,7 @@ class SQLModelDataLayer(BaseDataLayer):
         feedback_id = feedback.id or str(uuid.uuid4())
         feedback_dict = feedback.dict()
         feedback_dict["id"] = feedback_id
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Feedback).where(Feedback.id == feedback_id))
             db_feedback = result.scalar_one_or_none()
             if db_feedback:
@@ -210,12 +232,11 @@ class SQLModelDataLayer(BaseDataLayer):
             else:
                 db_feedback = Feedback.model_validate(feedback_dict)
                 session.add(db_feedback)
-            await session.commit()
             await session.refresh(db_feedback)
             return db_feedback.id
 
     async def get_feedback(self, feedback_id: str) -> Optional[Dict]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Feedback).where(Feedback.id == feedback_id))
             feedback = result.scalar_one_or_none()
             if feedback:
@@ -223,17 +244,16 @@ class SQLModelDataLayer(BaseDataLayer):
             return None
 
     async def delete_feedback(self, feedback_id: str) -> bool:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(select(Feedback).where(Feedback.id == feedback_id))
             feedback = result.scalar_one_or_none()
             if feedback:
                 await session.delete(feedback)
-                await session.commit()
                 return True
             return False
         
     async def get_element(self, thread_id: str, element_id: str) -> Optional[Dict]:
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             result = await session.execute(
                 select(Element).where(Element.thread_id == thread_id, Element.id == element_id)
             )
@@ -252,10 +272,10 @@ class SQLModelDataLayer(BaseDataLayer):
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
         if self.show_logger:
-            logger.info(f"SQLModel: create_element, element_id = {element.id}")
+            logger.info(f"SQLDataLayer: create_element, element_id = {element.id}")
 
         if not self.storage_provider:
-            logger.warning("SQLModel: create_element error. No blob_storage_client is configured!")
+            logger.warning("SQLDataLayer: create_element error. No blob_storage_client is configured!")
             return
         if not element.for_id:
             return
@@ -299,19 +319,18 @@ class SQLModelDataLayer(BaseDataLayer):
         if "props" in element_dict_cleaned:
             element_dict_cleaned["props"] = json.dumps(element_dict_cleaned["props"])
 
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             db_element = Element.model_validate(element_dict_cleaned)
             session.add(db_element)
-            await session.commit()
             await session.refresh(db_element)
             return db_element.to_dict()
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
         if self.show_logger:
-            logger.info(f"SQLModel: delete_element, element_id={element_id}")
+            logger.info(f"SQLDataLayer: delete_element, element_id={element_id}")
 
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             query = select(Element).where(Element.id == element_id)
             if thread_id:
                 query = query.where(Element.thread_id == thread_id)
@@ -326,7 +345,6 @@ class SQLModelDataLayer(BaseDataLayer):
                 await self.storage_provider.delete_file(object_key=element['objectKey'])
             if element:
                 await session.delete(element)
-                await session.commit()
 
     async def build_debug_url(self) -> str:
         # Implement as needed, or return empty string for now
@@ -336,7 +354,7 @@ class SQLModelDataLayer(BaseDataLayer):
         self, pagination: Pagination, filters: ThreadFilter
     ) -> PaginatedResponse[Dict]:
         # Fetch threads for a user, apply pagination and filters
-        async with self.async_session() as session:
+        async with self.async_session.begin() as session:
             if filters.userId:
                 query = select(Thread).where(Thread.user_id == filters.userId)
             result = await session.execute(query)

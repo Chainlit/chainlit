@@ -8,7 +8,7 @@ from functools import wraps
 from typing import Callable, Dict, List, Optional, TypedDict, Union, Literal, Any, get_args
 
 from sqlmodel import SQLModel, Field
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, JSON, ForeignKey, String
 from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import PrivateAttr
 from pydantic import field_validator
@@ -33,11 +33,13 @@ MessageStepType = Literal["user_message", "assistant_message", "system_message"]
 StepType = Union[TrueStepType, MessageStepType]
 
 class Step(SQLModel, table=True):
+    __tablename__ = "steps"
+    
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
     name: str = Field(..., nullable=False)
     type: str = Field(..., nullable=False)
-    thread_id: str = Field(..., foreign_key="thread.id", nullable=False)
-    parent_id: Optional[str] = Field(default=None, foreign_key="step.id")
+    thread_id: str = Field(..., sa_column=Column(String, ForeignKey("threads.id", ondelete="CASCADE"), nullable=False))
+    parent_id: Optional[str] = Field(default=None, sa_column=Column(String, ForeignKey("steps.id", ondelete="CASCADE"), nullable=True))
     disable_feedback: bool = Field(default=False, nullable=False)
     streaming: bool = Field(default=False, nullable=False)
     wait_for_answer: Optional[bool] = Field(default=None)

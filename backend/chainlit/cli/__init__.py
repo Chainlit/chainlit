@@ -90,7 +90,7 @@ def run_chainlit(target: str):
     if data_layer_func:
         try:
             dl_instance = data_layer_func()
-            from chainlit.data.sql_model import SQLModelDataLayer
+            from backend.chainlit.data.sql_data_layer import SQLModelDataLayer
             if isinstance(dl_instance, SQLModelDataLayer):
                 # Get current version
                 try:

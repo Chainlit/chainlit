@@ -5,7 +5,7 @@ from pydantic import PrivateAttr, BaseModel
 import uuid
 from pydantic import ConfigDict
 from pydantic.alias_generators import to_camel
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, JSON, ForeignKey, String
 
 if TYPE_CHECKING:
 	from chainlit.element import ElementDict
@@ -13,10 +13,12 @@ if TYPE_CHECKING:
 
 # Unified thread model
 class Thread(SQLModel, table=True):
+	__tablename__ = "threads"
+	
 	id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
 	created_at: str = ""
 	name: Optional[str] = None
-	user_id: Optional[str] = None
+	user_id: Optional[str] = Field(default=None, sa_column=Column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True))
 	user_identifier: Optional[str] = None
 	tags: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
 	metadata_: Optional[dict] = Field(default_factory=dict, sa_column=Column('metadata', JSON), alias='metadata', schema_extra={'serialization_alias': 'metadata'})

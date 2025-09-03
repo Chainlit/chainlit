@@ -2,12 +2,16 @@ from typing import Dict, Optional, Literal, get_args
 from sqlmodel import SQLModel, Field
 from pydantic import BaseModel, field_validator, ConfigDict, conint
 from pydantic.alias_generators import to_camel
+import uuid
+from sqlalchemy import Column, ForeignKey, String
 
 FeedbackStrategy = Literal["BINARY"]
 
 class Feedback(SQLModel, table=True):
-	id: Optional[str] = Field(default=None, primary_key=True)
-	for_id: str
+	__tablename__ = "feedbacks"
+	
+	id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+	for_id: str = Field(sa_column=Column(String, ForeignKey("steps.id", ondelete="CASCADE")))
 	value: int = Field(..., ge=0, le=1)
 	thread_id: Optional[str] = None
 	comment: Optional[str] = None
