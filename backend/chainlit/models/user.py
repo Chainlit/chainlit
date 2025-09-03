@@ -25,15 +25,20 @@ class User(BaseModel):
 	display_name: Optional[str] = None
 	metadata: Dict = Field(default_factory=dict)
 
-# Persisted user (for database use)
+
 class PersistedUser(SQLModel, table=True):
 	__tablename__ = "users"
-	
+
 	id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
 	identifier: str
 	display_name: Optional[str] = None
-	metadata_: Optional[dict] = Field(default_factory=dict, sa_column=Column('metadata', JSON), alias='metadata', schema_extra={'serialization_alias': 'metadata'})
-	created_at: str = Field(default_factory=utc_now(), primary_key=True)
+	metadata_: Optional[dict] = Field(
+		default_factory=dict,
+		sa_column=Column("metadata", JSON),
+		alias="metadata",
+		schema_extra={"serialization_alias": "metadata"},
+	)
+	created_at: str = Field(default_factory=utc_now)
 
 	model_config = ConfigDict(
 		alias_generator=to_camel,

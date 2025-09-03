@@ -3,26 +3,32 @@ import asyncio
 import inspect
 import json
 import uuid
+import asyncio
+import inspect
+import json
+import uuid
 from copy import deepcopy
 from functools import wraps
-from typing import Callable, Dict, List, Optional, TypedDict, Union, Literal, Any, get_args
+from typing import Callable, Dict, List, Optional, Union, Literal, Any, get_args
 
 from sqlmodel import SQLModel, Field
 from sqlalchemy import Column, JSON, ForeignKey, String
-from sqlalchemy.dialects.postgresql import JSONB
 from pydantic import PrivateAttr
 from pydantic import field_validator
-from literalai import BaseGeneration
 from pydantic import ConfigDict
 from pydantic.alias_generators import to_camel
+
 from chainlit.config import config
 from chainlit.context import CL_RUN_NAMES, context, local_steps
 from chainlit.data import get_data_layer
-from chainlit.element import Element
 from chainlit.logger import logger
-from chainlit.types import FeedbackDict
 from chainlit.utils import utc_now
-from chainlit.context import context
+
+# Import the Element runtime class via models init to avoid circular import
+try:
+    from chainlit.models import Element  # type: ignore
+except Exception:  # pragma: no cover - optional during partial refactors
+    Element = Any  # fallback for type hints
 
 TrueStepType = Literal[
     "run", "tool", "llm", "embedding", "retrieval", "rerank", "undefined"
@@ -32,54 +38,85 @@ MessageStepType = Literal["user_message", "assistant_message", "system_message"]
 
 StepType = Union[TrueStepType, MessageStepType]
 
-class Step(SQLModel, table=True):
-    __tablename__ = "steps"
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
-    name: str = Field(..., nullable=False)
-    type: str = Field(..., nullable=False)
-    thread_id: str = Field(..., sa_column=Column(String, ForeignKey("threads.id", ondelete="CASCADE"), nullable=False))
-    parent_id: Optional[str] = Field(default=None, sa_column=Column(String, ForeignKey("steps.id", ondelete="CASCADE"), nullable=True))
-    disable_feedback: bool = Field(default=False, nullable=False)
-    streaming: bool = Field(default=False, nullable=False)
-    wait_for_answer: Optional[bool] = Field(default=None)
-    is_error: Optional[bool] = Field(default=None)
-    metadata_: Optional[dict] = Field(default_factory=dict, sa_column=Column('metadata', JSON), alias='metadata', schema_extra={'serialization_alias': 'metadata'})
-    input: Optional[str] = Field(default=None)
-    output: Optional[str] = Field(default=None)
-    created_at: Optional[str] = Field(default=None)
-    start: Optional[str] = Field(default=None)
-    end: Optional[str] = Field(default=None)
-    generation: Optional[dict] = Field(default_factory=dict, sa_column=Column('generation', JSON), alias='generation')
-    show_input: str = Field(default="json")
-    language: Optional[str] = Field(default=None)
-    indent: Optional[int] = Field(default=None)
-    tags: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+
+class StepBase(SQLModel):
+    """Runtime Step model. DB fields overridden in Step(table=True)."""
+
+    # Core fields (runtime view). The DB model will override types as str with validators.
+    name: str = Field(default="")
+    type: StepType = Field(default="undefined")
+
+    # Optional linkage; DB model defines FKs
+    thread_id: Optional[str] = None
+    parent_id: Optional[str] = None
+
+    # Rendering/behavior
+    disable_feedback: bool = Field(default=False)
+    streaming: bool = Field(default=False)
+    wait_for_answer: Optional[bool] = None
+    is_error: Optional[bool] = None
+
+    # Payload and metadata
+    input: Optional[str] = None
+    output: Optional[str] = None
+    created_at: Optional[str] = None
+    start: Optional[str] = None
+    end: Optional[str] = None
+    generation: Optional[dict] = None
+    show_input: Union[bool, str] = Field(default="json")
+    language: Optional[str] = None
+    indent: Optional[int] = None
+    tags: Optional[List[str]] = None
     default_open: Optional[bool] = Field(default=False)
-    
-    model_config = ConfigDict(
-		alias_generator=to_camel,
-		populate_by_name=True,
+    metadata_: Optional[dict] = Field(
+		default_factory=dict,
+		alias="metadata",
+		sa_column=Column("metadata", JSON),
+		schema_extra={"serialization_alias": "metadata"},
 	)
-    
-    # TODO define relationship with Element
-    # elements: List[Element] = Relationship(back_populates="step")
-    # thread: Optional[Thread] = Relationship(back_populates="steps")
 
     model_config = ConfigDict(
         alias_generator=to_camel,
         populate_by_name=True,
     )
 
-    # Private attributes for business logic (not persisted or serialized)
-    _elements: Optional[List[Element]] = PrivateAttr(default_factory=list)
+    # Private attributes for business logic (not persisted)
+    _elements: List[Any] = PrivateAttr(default_factory=list)
     _fail_on_persist_error: bool = PrivateAttr(default=False)
     _input: str = PrivateAttr(default="")
     _output: str = PrivateAttr(default="")
+    _persisted: bool = PrivateAttr(default=False)
+
+    # Convenience properties
+    @property
+    def persisted(self) -> bool:
+        return self._persisted
+
+    @persisted.setter
+    def persisted(self, v: bool) -> None:
+        self._persisted = bool(v)
+
+    @property
+    def elements(self) -> List[Any]:
+        return self._elements
+
+    @property
+    def fail_on_persist_error(self) -> bool:
+        return self._fail_on_persist_error
+
+    @fail_on_persist_error.setter
+    def fail_on_persist_error(self, v: bool) -> None:
+        self._fail_on_persist_error = bool(v)
 
     @field_validator("type", mode="before")
-    def validate_type(cls, v):
-        allowed = [v for arg in get_args(StepType) for v in (get_args(arg) if hasattr(arg, "__args__") else [arg])]
+    @classmethod
+    def _validate_type(cls, v: Any) -> Any:
+        # Accept literals on base; DB class enforces strict string values
+        allowed = [
+            value
+            for arg in get_args(StepType)
+            for value in (get_args(arg) if hasattr(arg, "__args__") else [arg])
+        ]
         if v not in allowed:
             raise ValueError(f"Invalid type: {v}. Must be one of: {allowed}")
         return v
@@ -113,6 +150,7 @@ class Step(SQLModel, table=True):
             elif isinstance(item, tuple):
                 return tuple(handle_bytes(i) for i in item)
             return item
+
         return handle_bytes(content)
 
     def _process_content(self, content, set_language=False):
@@ -171,12 +209,11 @@ class Step(SQLModel, table=True):
         previous_steps = local_steps.get() or []
         parent_step = previous_steps[-1] if previous_steps else None
 
-        if not self.parent_id:
-            if parent_step:
-                self.parent_id = parent_step.id
+        if not self.parent_id and parent_step:
+            self.parent_id = parent_step.id
         local_steps.set(previous_steps + [self])
 
-        task = asyncio.create_task(self.send())
+        asyncio.create_task(self.send())
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -191,7 +228,7 @@ class Step(SQLModel, table=True):
             current_steps.remove(self)
             local_steps.set(current_steps)
 
-        task = asyncio.create_task(self.update())
+        asyncio.create_task(self.update())
 
     async def update(self):
         if self.streaming:
@@ -202,7 +239,7 @@ class Step(SQLModel, table=True):
 
         if data_layer:
             try:
-                task = asyncio.create_task(data_layer.update_step(step_dict.copy()))
+                asyncio.create_task(data_layer.update_step(step_dict.copy()))
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -225,7 +262,7 @@ class Step(SQLModel, table=True):
 
         if data_layer:
             try:
-                task = asyncio.create_task(data_layer.delete_step(self.id))
+                asyncio.create_task(data_layer.delete_step(self.id))
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -249,7 +286,7 @@ class Step(SQLModel, table=True):
 
         if data_layer:
             try:
-                task = asyncio.create_task(data_layer.create_step(step_dict.copy()))
+                asyncio.create_task(data_layer.create_step(step_dict.copy()))
                 self.persisted = True
             except Exception as e:
                 if self.fail_on_persist_error:
@@ -259,6 +296,7 @@ class Step(SQLModel, table=True):
         tasks = [el.send(for_id=self.id) for el in getattr(self, 'elements', [])]
         await asyncio.gather(*tasks)
 
+        from chainlit.context import check_add_step_in_cot
         if not check_add_step_in_cot(self):
             await context.emitter.send_step(self.to_dict())
         else:
@@ -269,6 +307,8 @@ class Step(SQLModel, table=True):
     async def stream_token(self, token: str, is_sequence=False, is_input=False):
         if not token:
             return
+
+        from chainlit.context import check_add_step_in_cot, stub_step
 
         if is_sequence:
             if is_input:
@@ -296,13 +336,74 @@ class Step(SQLModel, table=True):
                 id=self.id, token=token, is_sequence=is_sequence, is_input=is_input
             )
 
+
+class Step(StepBase, table=True):
+    __tablename__ = "steps"
+
+    # DB identity and relations
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), primary_key=True)
+    thread_id: Optional[str] = Field(
+        default=None,
+        sa_column=Column(String, ForeignKey("threads.id", ondelete="CASCADE"), nullable=True),
+    )
+    parent_id: Optional[str] = Field(
+        default=None,
+        sa_column=Column(String, ForeignKey("steps.id", ondelete="CASCADE"), nullable=True),
+    )
+
+    # Override Literal and complex fields with DB-compatible types/columns
+    type: str = Field(..., nullable=False)
+    tags: Optional[List[str]] = Field(default_factory=list, sa_column=Column(JSON))
+    metadata_: Optional[dict] = Field(
+        default_factory=dict,
+        sa_column=Column("metadata", JSON),
+        alias="metadata",
+        schema_extra={"serialization_alias": "metadata"},
+    )
+    generation: Optional[dict] = Field(
+        default_factory=dict,
+        sa_column=Column("generation", JSON),
+        alias="generation",
+    )
+    show_input: str
+
+    model_config = ConfigDict(
+        alias_generator=to_camel,
+        populate_by_name=True,
+    )
+
+    @field_validator("type", mode="before")
+    @classmethod
+    def _validate_type_db(cls, v: Any) -> str:
+        if v is None:
+            raise ValueError("type is required")
+        v_str = str(v)
+        allowed = [
+            value
+            for arg in get_args(StepType)
+            for value in (get_args(arg) if hasattr(arg, "__args__") else [arg])
+        ]
+        if v_str not in allowed:
+            raise ValueError(f"Invalid type: {v}. Must be one of: {allowed}")
+        return v_str
+
+    @classmethod
+    def from_base(cls, base: "StepBase") -> "Step":
+        data = base.model_dump(by_alias=True)
+        # Map runtime metadata -> metadata_
+        if "metadata" in data and data.get("metadata") is not None:
+            data["metadata_"] = data.pop("metadata")
+        return cls.model_validate(data)
+
+
 def flatten_args_kwargs(func, args, kwargs):
     signature = inspect.signature(func)
     bound_arguments = signature.bind(*args, **kwargs)
     bound_arguments.apply_defaults()
     return {k: deepcopy(v) for k, v in bound_arguments.arguments.items()}
 
-def check_add_step_in_cot(step: Step):
+
+def check_add_step_in_cot(step: StepBase):
     is_message = step.type in [
         "user_message",
         "assistant_message",
@@ -312,25 +413,28 @@ def check_add_step_in_cot(step: Step):
         return False
     return True
 
-# Step decorator for async and sync functions, now using StepService
+
 def step(
-        original_function: Optional[Callable] = None,
-        *,
-        name: Optional[str] = "",
-        type: Optional[str] = "undefined",
-        id: Optional[str] = None,
-        parent_id: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict] = None,
-        language: Optional[str] = None,
-        show_input: Union[bool, str] = "json",
-        default_open: bool = False
-    ) -> Callable:
+    original_function: Optional[Callable] = None,
+    *,
+    name: Optional[str] = "",
+    type: Optional[str] = "undefined",
+    id: Optional[str] = None,
+    parent_id: Optional[str] = None,
+    tags: Optional[List[str]] = None,
+    metadata: Optional[Dict] = None,
+    language: Optional[str] = None,
+    show_input: Union[bool, str] = "json",
+    default_open: bool = False,
+) -> Callable:
+    """Decorator to wrap functions in a Step context."""
+
     def wrapper(func: Callable):
         nonlocal name
         if not name:
             name = func.__name__
         if inspect.iscoroutinefunction(func):
+
             @wraps(func)
             async def async_wrapper(*args, **kwargs):
                 async with Step(
@@ -343,21 +447,23 @@ def step(
                     show_input=show_input,
                     default_open=default_open,
                     metadata=metadata,
-                ) as step:
+                ) as step_obj:
                     try:
-                        step.input = flatten_args_kwargs(func, args, kwargs)
+                        step_obj.input = flatten_args_kwargs(func, args, kwargs)
                     except Exception:
                         pass
                     result = await func(*args, **kwargs)
                     try:
-                        if result and not step.output:
-                            step.output = result
+                        if result and not step_obj.output:
+                            step_obj.output = result
                     except Exception:
-                        step.is_error = True
-                        step.output = str(result)
+                        step_obj.is_error = True
+                        step_obj.output = str(result)
                     return result
+
             return async_wrapper
         else:
+
             @wraps(func)
             def sync_wrapper(*args, **kwargs):
                 with Step(
@@ -370,20 +476,22 @@ def step(
                     show_input=show_input,
                     default_open=default_open,
                     metadata=metadata,
-                ) as step:
+                ) as step_obj:
                     try:
-                        step.input = flatten_args_kwargs(func, args, kwargs)
+                        step_obj.input = flatten_args_kwargs(func, args, kwargs)
                     except Exception:
                         pass
                     result = func(*args, **kwargs)
                     try:
-                        if result and not step.output:
-                            step.output = result
+                        if result and not step_obj.output:
+                            step_obj.output = result
                     except Exception:
-                        step.is_error = True
-                        step.output = str(result)
+                        step_obj.is_error = True
+                        step_obj.output = str(result)
                     return result
+
             return sync_wrapper
+
     func = original_function
     if not func:
         return wrapper
