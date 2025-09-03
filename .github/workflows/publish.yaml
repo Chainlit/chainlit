@@ -64,6 +64,7 @@ jobs:
           packages-dir: backend/dist
           repository-url: https://test.pypi.org/legacy/
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          verbose: true
       
       - name: Publish package distributions to PyPI
         if: ${{ !inputs.use_testpypi }}
