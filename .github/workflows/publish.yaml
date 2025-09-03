@@ -2,6 +2,12 @@ name: Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      use_testpypi:
+        description: 'Publish to TestPyPI instead of PyPI'
+        required: false
+        default: false
+        type: boolean
   release:
     types: [published]
 
@@ -12,12 +18,12 @@ jobs:
     uses: ./.github/workflows/ci.yaml
     secrets: inherit
   build-n-publish:
-    name: Upload release to PyPI
+    name: Upload release to PyPI/TestPyPI
     runs-on: ubuntu-latest
     needs: [ci]
     env:
-      name: pypi
-      url: https://pypi.org/p/chainlit
+      name: ${{ inputs.use_testpypi && 'testpypi' || 'pypi' }}
+      url: ${{ inputs.use_testpypi && 'https://test.pypi.org/project/chainlit' || 'https://pypi.org/project/chainlit' }}
       BACKEND_DIR: ./backend
     permissions:
       contents: read
@@ -50,8 +56,17 @@ jobs:
           ls unpacked/chainlit-*/chainlit/frontend/dist
           ls unpacked/chainlit-*/chainlit/copilot/dist
         working-directory: ${{ env.BACKEND_DIR }}
-
+      
+      - name: Publish package distributions to TestPyPI
+        if: inputs.use_testpypi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: backend/dist
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+      
       - name: Publish package distributions to PyPI
+        if: ${{ !inputs.use_testpypi }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: backend/dist
