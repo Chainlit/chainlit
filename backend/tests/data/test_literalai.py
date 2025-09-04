@@ -1,4 +1,3 @@
-import datetime
 import uuid
 from unittest.mock import ANY, AsyncMock, Mock, patch
 
@@ -33,6 +32,7 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
+from chainlit.utils import utc_now
 
 
 @pytest.fixture
@@ -116,7 +116,7 @@ def test_step(test_thread: LiteralThread):
 def literal_test_user(test_user: User):
     return LiteralUser(
         id=str(uuid.uuid4()),
-        created_at=datetime.datetime.now().isoformat(),
+        created_at=utc_now(),
         identifier=test_user.identifier,
         metadata=test_user.metadata,
     )

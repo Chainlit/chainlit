@@ -1,4 +1,3 @@
-import datetime
 import os
 import pathlib
 from pathlib import Path
@@ -17,6 +16,7 @@ from chainlit.config import (
 from chainlit.server import app
 from chainlit.types import AskFileSpec
 from chainlit.user import PersistedUser
+from chainlit.utils import utc_now
 
 
 @pytest.fixture
@@ -421,7 +421,7 @@ def test_file_access_by_different_user(
         id="another_session_id",
         user=PersistedUser(
             id="another_user_id",
-            createdAt=datetime.datetime.now().isoformat(),
+            createdAt=utc_now(),
             identifier="another_user_identifier",
         ),
     )

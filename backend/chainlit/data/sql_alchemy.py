@@ -2,7 +2,6 @@ import json
 import ssl
 import uuid
 from dataclasses import asdict
-from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
@@ -28,6 +27,7 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
+from chainlit.utils import utc_now
 
 if TYPE_CHECKING:
     from chainlit.element import Element, ElementDict
@@ -103,7 +103,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 return None
 
     async def get_current_timestamp(self) -> str:
-        return datetime.now().isoformat() + "Z"
+        return utc_now()
 
     def clean_result(self, obj):
         """Recursively change UUID -> str and serialize dictionaries"""
@@ -232,9 +232,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         data = {
             "id": thread_id,
-            "createdAt": (
-                await self.get_current_timestamp() if metadata is None else None
-            ),
+            "createdAt": (await self.get_current_timestamp() if metadata is None else None),
             "name": (
                 name
                 if name is not None

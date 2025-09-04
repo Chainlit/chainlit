@@ -1,4 +1,3 @@
-import datetime
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Callable
@@ -14,13 +13,14 @@ from chainlit.data.base import BaseDataLayer
 from chainlit.session import HTTPSession, WebsocketSession
 from chainlit.user import PersistedUser
 from chainlit.user_session import UserSession
+from chainlit.utils import utc_now
 
 
 @pytest.fixture
 def persisted_test_user():
     return PersistedUser(
         id="test_user_id",
-        createdAt=datetime.datetime.now().isoformat(),
+        createdAt=utc_now(),
         identifier="test_user_identifier",
     )
 

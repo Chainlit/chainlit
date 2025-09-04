@@ -27,6 +27,10 @@ def timestamp_utc(timestamp: float):
     return dt.isoformat() + "Z"
 
 
+def to_utc(dt: datetime):
+    return dt.replace(tzinfo=None).isoformat() + "Z"
+
+
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
     """
     Wraps a user-defined function to accept arguments as a dictionary.

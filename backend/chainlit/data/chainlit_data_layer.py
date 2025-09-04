@@ -25,6 +25,7 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
+from chainlit.utils import to_utc
 
 # Import for runtime usage (isinstance checks)
 try:
@@ -93,7 +94,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def get_user(self, identifier: str) -> Optional[PersistedUser]:
         query = """
-        SELECT * FROM "User" 
+        SELECT * FROM "User"
         WHERE identifier = $1
         """
         result = await self.execute_query(query, {"identifier": identifier})
@@ -104,7 +105,7 @@ class ChainlitDataLayer(BaseDataLayer):
         return PersistedUser(
             id=str(row.get("id")),
             identifier=str(row.get("identifier")),
-            createdAt=row.get("createdAt").isoformat(),  # type: ignore
+            createdAt=to_utc(row.get("createdAt")),  # type: ignore
             metadata=json.loads(row.get("metadata", "{}")),
         )
 
@@ -130,7 +131,7 @@ class ChainlitDataLayer(BaseDataLayer):
         return PersistedUser(
             id=str(row.get("id")),
             identifier=str(row.get("identifier")),
-            createdAt=row.get("createdAt").isoformat(),  # type: ignore
+            createdAt=to_utc(row.get("createdAt")),  # type: ignore
             metadata=json.loads(row.get("metadata", "{}")),
         )
 
@@ -308,7 +309,7 @@ class ChainlitDataLayer(BaseDataLayer):
                     object_key=elements[0]["objectKey"]
                 )
         query = """
-        DELETE FROM "Element" 
+        DELETE FROM "Element"
         WHERE id = $1
         """
         params = {"id": element_id}
@@ -354,15 +355,15 @@ class ChainlitDataLayer(BaseDataLayer):
         ON CONFLICT (id) DO UPDATE SET
             "parentId" = COALESCE(EXCLUDED."parentId", "Step"."parentId"),
             input = COALESCE(EXCLUDED.input, "Step".input),
-            metadata = CASE 
-                WHEN EXCLUDED.metadata <> '{}' THEN EXCLUDED.metadata 
-                ELSE "Step".metadata 
+            metadata = CASE
+                WHEN EXCLUDED.metadata <> '{}' THEN EXCLUDED.metadata
+                ELSE "Step".metadata
             END,
             name = COALESCE(EXCLUDED.name, "Step".name),
             output = COALESCE(EXCLUDED.output, "Step".output),
-            type = CASE 
-                WHEN EXCLUDED.type = 'run' THEN "Step".type 
-                ELSE EXCLUDED.type 
+            type = CASE
+                WHEN EXCLUDED.type = 'run' THEN "Step".type
+                ELSE EXCLUDED.type
             END,
             "threadId" = COALESCE(EXCLUDED."threadId", "Step"."threadId"),
             "endTime" = COALESCE(EXCLUDED."endTime", "Step"."endTime"),
@@ -412,7 +413,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def get_thread_author(self, thread_id: str) -> str:
         query = """
-        SELECT u.identifier 
+        SELECT u.identifier
         FROM "Thread" t
         JOIN "User" u ON t."userId" = u.id
         WHERE t.id = $1
@@ -424,7 +425,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
     async def delete_thread(self, thread_id: str):
         elements_query = """
-        SELECT * FROM "Element" 
+        SELECT * FROM "Element"
         WHERE "threadId" = $1
         """
         elements_results = await self.execute_query(
@@ -444,8 +445,8 @@ class ChainlitDataLayer(BaseDataLayer):
         self, pagination: Pagination, filters: ThreadFilter
     ) -> PaginatedResponse[ThreadDict]:
         query = """
-        SELECT 
-            t.*, 
+        SELECT
+            t.*,
             u.identifier as user_identifier,
             (SELECT COUNT(*) FROM "Thread" WHERE "userId" = t."userId") as total
         FROM "Thread" t
@@ -484,7 +485,7 @@ class ChainlitDataLayer(BaseDataLayer):
         for thread in threads:
             thread_dict = ThreadDict(
                 id=str(thread["id"]),
-                createdAt=thread["updatedAt"].isoformat(),
+                createdAt=to_utc(thread["updatedAt"]),
                 name=thread["name"],
                 userId=str(thread["userId"]) if thread["userId"] else None,
                 userIdentifier=thread["user_identifier"],
@@ -520,9 +521,9 @@ class ChainlitDataLayer(BaseDataLayer):
 
         # Get steps and related feedback
         steps_query = """
-        SELECT  s.*, 
-                f.id feedback_id, 
-                f.value feedback_value, 
+        SELECT  s.*,
+                f.id feedback_id,
+                f.value feedback_value,
                 f."comment" feedback_comment
         FROM "Step" s left join "Feedback" f on s.id = f."stepId"
         WHERE s."threadId" = $1
@@ -532,7 +533,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
         # Get elements
         elements_query = """
-        SELECT * FROM "Element" 
+        SELECT * FROM "Element"
         WHERE "threadId" = $1
         """
         elements_results = await self.execute_query(
@@ -548,7 +549,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
         return ThreadDict(
             id=str(thread["id"]),
-            createdAt=thread["createdAt"].isoformat(),
+            createdAt=to_utc(thread["createdAt"]),
             name=thread["name"],
             userId=str(thread["userId"]) if thread["userId"] else None,
             userIdentifier=thread["user_identifier"],
@@ -632,11 +633,11 @@ class ChainlitDataLayer(BaseDataLayer):
             input=row.get("input", {}),
             output=row.get("output", {}),
             metadata=json.loads(row.get("metadata", "{}")),
-            createdAt=row["createdAt"].isoformat() if row.get("createdAt") else None,
-            start=row["startTime"].isoformat() if row.get("startTime") else None,
+            createdAt=to_utc(row["createdAt"]) if row.get("createdAt") else None,
+            start=to_utc(row["startTime"]) if row.get("startTime") else None,
             showInput=row.get("showInput"),
             isError=row.get("isError"),
-            end=row["endTime"].isoformat() if row.get("endTime") else None,
+            end=to_utc(row["endTime"]) if row.get("endTime") else None,
             feedback=self._extract_feedback_dict_from_step_row(row),
         )
 
