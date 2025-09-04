@@ -3,14 +3,14 @@ import { size } from 'lodash';
 import { useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
   ChainlitContext,
   ClientError,
   ThreadHistory,
-  sessionIdState,
+  // sessionIdState,
   threadHistoryState,
   useChatInteract,
   useChatMessages,
@@ -31,14 +31,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -57,6 +50,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { Translator } from '../i18n';
+import ShareDialog from '@/components/share/ShareDialog';
 import ThreadOptions from './ThreadOptions';
 
 interface ThreadListProps {
@@ -85,58 +79,18 @@ export function ThreadList({
   const { config } = useConfig();
   const dataPersistence = config?.dataPersistence;
   const threadSharingReady = Boolean((config as any)?.threadSharing);
-  const sessionId = useRecoilValue(sessionIdState);
+  // sessionId not needed here
 
   // Share thread state
   const [threadIdToShare, setThreadIdToShare] = useState<string | undefined>();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [isCopying, setIsCopying] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
-  const [hasBeenCopied, setHasBeenCopied] = useState(false);
-  const [sharedThreadId, setSharedThreadId] = useState<string | null>(null);
-
-  const shareLink = `${window.location.origin}/share/${
-    sharedThreadId || threadIdToShare || ''
-  }`;
+  // Share dialog state is centralized in ShareDialog; we only track which thread to share
 
   const handleShareThread = (threadId: string) => {
     if (!threadSharingReady) return;
     setThreadIdToShare(threadId);
     setIsShareDialogOpen(true);
-    setIsCopying(false);
-    setIsCopied(false);
-    setHasBeenCopied(false);
-    setSharedThreadId(null);
-  };
-
-  const handleCopyShareLink = async () => {
-    if (!threadIdToShare) return;
-    try {
-      if (!hasBeenCopied) {
-        setIsCopying(true);
-        await apiClient.shareThread(threadIdToShare, true);
-        setSharedThreadId(threadIdToShare);
-        await navigator.clipboard.writeText(shareLink);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsCopying(false);
-        setHasBeenCopied(true);
-        toast.success('Share link created!');
-      } else {
-        await navigator.clipboard.writeText(shareLink);
-      }
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch (err) {
-      setIsCopying(false);
-      toast.error(`Failed to create share link:${err}`);
-    }
-  };
-
-  const getShareButtonText = () => {
-    if (isCopying) return 'Copying...';
-    if (isCopied) return 'Copied';
-    if (!hasBeenCopied) return 'Create link';
-    return 'Copy link';
+  // ShareDialog handles its own internal state; we just open it
   };
 
   const sortedTimeGroupKeys = useMemo(() => {
@@ -340,43 +294,16 @@ export function ThreadList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <Dialog
+      <ShareDialog
         open={isShareDialogOpen}
         onOpenChange={(open) => {
           setIsShareDialogOpen(open);
           if (!open) {
             setThreadIdToShare(undefined);
-            setSharedThreadId(null);
-            setIsCopying(false);
-            setIsCopied(false);
-            setHasBeenCopied(false);
           }
         }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Share public link to chat</DialogTitle>
-          </DialogHeader>
-          <div className="flex items-center space-x-2 w-full">
-            <div className="grid flex-1 gap-2">
-              <div className="flex items-center justify-between rounded-md border px-3 py-2 w-full max-w-[250px]">
-                <span
-                  className="text-sm text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap w-full block"
-                  title={shareLink}
-                >
-                  {shareLink}
-                </span>
-              </div>
-            </div>
-            <Button
-              onClick={handleCopyShareLink}
-              disabled={isCopying || isCopied}
-            >
-              {getShareButtonText()}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        threadId={threadIdToShare || null}
+      />
       <TooltipProvider delayDuration={300}>
         {sortedTimeGroupKeys.map((group) => {
           const items = threadHistory!.timeGroupedThreads![group];

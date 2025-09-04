@@ -1104,7 +1104,16 @@ async def share_thread(
 
     thread_id = payload.threadId
 
-    await is_thread_author(current_user.identifier, thread_id)
+    try:
+        logger.debug(
+            "[share_thread] user=%s payload=%s",
+            getattr(current_user, "identifier", None),
+            payload.model_dump() if hasattr(payload, "model_dump") else payload,
+        )
+        await is_thread_author(current_user.identifier, thread_id)
+    except Exception as e:
+        logger.exception("[share_thread] author check failed: %s", e)
+        raise
 
     # Fetch current thread and metadata, then toggle is_shared
     thread = await data_layer.get_thread(thread_id=thread_id)
@@ -1126,7 +1135,16 @@ async def share_thread(
     else:
         # Optionally remove the timestamp on un-share to avoid confusion
         metadata.pop("shared_at", None)
-    await data_layer.update_thread(thread_id=thread_id, metadata=metadata)
+    try:
+        await data_layer.update_thread(thread_id=thread_id, metadata=metadata)
+        logger.debug(
+            "[share_thread] updated metadata for thread=%s to %s",
+            thread_id,
+            metadata,
+        )
+    except Exception as e:
+        logger.exception("[share_thread] update_thread failed: %s", e)
+        raise
 
     return JSONResponse(content={"success": True})
 

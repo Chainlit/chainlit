@@ -1,7 +1,7 @@
 import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -15,6 +15,8 @@ import {
   nestMessages,
   sessionIdState,
   sideViewState,
+  useChatData,
+  useChatMessages,
   useApi,
   useConfig
 } from '@chainlit/react-client';
@@ -31,11 +33,15 @@ type Props = {
 
 const ReadOnlyThread = ({ id }: Props) => {
   const { config } = useConfig();
+  const location = useLocation();
+  const isSharedRoute = location.pathname.startsWith('/share/');
+  const { messages: sharedMessages } = useChatMessages();
+  const { elements: sharedElements } = useChatData();
   const {
     data: thread,
     error: threadError,
     isLoading
-  } = useApi<IThread>(id ? `/project/thread/${id}` : null, {
+  } = useApi<IThread>(id && !isSharedRoute ? `/project/thread/${id}` : null, {
     revalidateOnFocus: false
   });
   const navigate = useNavigate();
@@ -47,12 +53,13 @@ const ReadOnlyThread = ({ id }: Props) => {
   const sessionId = useRecoilValue(sessionIdState);
 
   useEffect(() => {
+    if (isSharedRoute) return;
     if (!thread) {
       setSteps([]);
       return;
     }
     setSteps(thread.steps);
-  }, [thread]);
+  }, [thread, isSharedRoute]);
 
   useEffect(() => {
     if (threadError) {
@@ -140,9 +147,9 @@ const ReadOnlyThread = ({ id }: Props) => {
 
   const onError = useCallback((error: string) => toast.error(error), [toast]);
 
-  const elements = thread?.elements || [];
+  const elements = isSharedRoute ? sharedElements : thread?.elements || [];
   const actions: IAction[] = [];
-  const messages = nestMessages(steps);
+  const messages = isSharedRoute ? sharedMessages : nestMessages(steps);
 
   const memoizedContext = useMemo(() => {
     return {
@@ -168,7 +175,7 @@ const ReadOnlyThread = ({ id }: Props) => {
     onFeedbackDeleted
   ]);
 
-  if (isLoading) {
+  if (!isSharedRoute && isLoading) {
     return (
       <div className="flex flex-col h-full w-full items-center justify-center">
         <Loader className="!size-6" />
@@ -176,7 +183,7 @@ const ReadOnlyThread = ({ id }: Props) => {
     );
   }
 
-  if (!thread) {
+  if (!isSharedRoute && !thread) {
     return null;
   }
 
