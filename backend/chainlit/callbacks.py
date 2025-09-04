@@ -232,7 +232,9 @@ def on_socket_connect(func: Callable) -> Callable:
     Returns:
         Callable[[], Any]: The decorated hook.
     """
-    config.code.on_socket_connect = wrap_user_function(func)
+    config.code.on_socket_connect = wrap_user_function(
+        step(func, name="on_socket_connect", type="run"), with_task=True
+    )
     return func
 
 
@@ -247,8 +249,9 @@ def on_socket_disconnect(func: Callable) -> Callable:
     Returns:
         Callable[[], Any]: The decorated hook.
     """
-    config.code.on_socket_disconnect = wrap_user_function(func)
-
+    config.code.on_socket_disconnect = wrap_user_function(
+        step(func, name="on_socket_disconnect", type="run"), with_task=True
+    )
     return func
 
 
