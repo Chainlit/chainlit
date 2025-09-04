@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, Dict, Literal, Optional, Tuple, Union
+from typing import Any, Dict, Literal, Optional, Tuple, Union, cast
 from urllib.parse import unquote
 
 from starlette.requests import cookie_parser
@@ -19,7 +19,7 @@ from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import sio
 from chainlit.session import WebsocketSession
-from chainlit.types import InputAudioChunk, InputAudioChunkPayload, MessagePayload
+from chainlit.types import InputAudioChunk, InputAudioChunkPayload, MessagePayload, ThreadDict
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_sessions
 
@@ -455,6 +455,6 @@ async def open_shared_thread(sid, payload: Dict[str, Any]):
     md.pop("chat_settings", None)
     # Mark as read-only to help the UI disable inputs
     md["viewer_read_only"] = True
-    safe_thread = {**thread, "metadata": md}
+    thread["metadata"] = md
     # Do NOT set session.thread_id, user_sessions, chat_profile, or chat_settings here.
-    await context.emitter.resume_thread(safe_thread)
+    await context.emitter.resume_thread(thread)
