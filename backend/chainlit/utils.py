@@ -17,18 +17,18 @@ from chainlit.context import context
 from chainlit.logger import logger
 
 
-def utc_now():
+def utc_now() -> str:
     dt = datetime.now(timezone.utc).replace(tzinfo=None)
     return dt.isoformat() + "Z"
 
 
-def timestamp_utc(timestamp: float):
+def timestamp_utc(timestamp: float) -> str:
     dt = datetime.fromtimestamp(timestamp, timezone.utc).replace(tzinfo=None)
     return dt.isoformat() + "Z"
 
 
-def to_utc(dt: datetime):
-    return dt.replace(tzinfo=None).isoformat() + "Z"
+def to_utc(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).replace(tzinfo=None).isoformat() + "Z"
 
 
 def wrap_user_function(user_function: Callable, with_task=False) -> Callable:
