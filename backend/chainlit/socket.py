@@ -19,7 +19,12 @@ from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import sio
 from chainlit.session import WebsocketSession
-from chainlit.types import InputAudioChunk, InputAudioChunkPayload, MessagePayload, ThreadDict
+from chainlit.types import (
+    InputAudioChunk,
+    InputAudioChunkPayload,
+    MessagePayload,
+    ThreadDict,
+)
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_sessions
 
