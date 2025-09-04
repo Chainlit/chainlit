@@ -982,7 +982,7 @@ async def get_shared_thread(
 
     if not thread:
         raise HTTPException(status_code=404, detail="Thread not found")
-    print(f"2")
+    print("2")
     # Extract and normalize metadata (may be dict, strified JSON, or None)
     metadata = (thread.get("metadata") if isinstance(thread, dict) else {}) or {}
     if isinstance(metadata, str):
@@ -1152,7 +1152,7 @@ async def share_thread(
     thread = await data_layer.get_thread(thread_id=thread_id)
     print(f"zzz: {thread['metadata']}")
     metadata = (thread.get("metadata") if thread else {}) or {}
-    print(f"thread metadata before update: %s", metadata)
+    print("thread metadata before update: %s", metadata)
     if isinstance(metadata, str):
         try:
             metadata = json.loads(metadata)
@@ -1175,7 +1175,7 @@ async def share_thread(
             thread_id,
             metadata,
         )
-        print(f'updated metadata for thread=%s to %s', thread_id, metadata)
+        print("updated metadata for thread=%s to %s", thread_id, metadata)
     except Exception as e:
         logger.exception("[share_thread] update_thread failed: %s", e)
         raise
