@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, Dict, Literal, Optional, Tuple, Union, cast
+from typing import Any, Dict, Literal, Optional, Tuple, Union
 from urllib.parse import unquote
 
 from starlette.requests import cookie_parser
@@ -23,7 +23,6 @@ from chainlit.types import (
     InputAudioChunk,
     InputAudioChunkPayload,
     MessagePayload,
-    ThreadDict,
 )
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_sessions
