@@ -148,9 +148,14 @@
             "untitled": "Conversation sans titre",
             "menu": {
                 "rename": "Renommer",
+                "share": "Partager",
                 "delete": "Supprimer"
             },
             "actions": {
+                "share": {
+                    "title": "Partager le lien de la discussion",
+                    "button": "Partager"
+                },
                 "delete": {
                     "title": "Confirmer la suppression",
                     "description": "Cela supprimera le fil de discussion ainsi que ses messages et éléments. Cette action ne peut pas être annulée",

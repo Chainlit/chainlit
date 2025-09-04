@@ -148,9 +148,14 @@
       "untitled": "未命名對話",
       "menu": {
           "rename": "重新命名",
+          "share": "分享",
           "delete": "刪除"
         },
       "actions": {
+        "share": {
+          "title": "分享聊天連結",
+          "button": "分享"
+        },
         "delete": {
           "title": "確認刪除",
           "description": "這將刪除該對話及其所有訊息和元件。此操作無法復原。",

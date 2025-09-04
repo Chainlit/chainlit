@@ -147,10 +147,15 @@
       "thread": {
         "untitled": "Naamloos gesprek",
         "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
+          "rename": "Hernoemen",
+          "share": "Delen",
+          "delete": "Verwijderen"
         },
         "actions": {
+          "share": {
+            "title": "Deellink naar chat",
+            "button": "Delen"
+          },
           "delete": {
             "title": "Verwijdering bevestigen",
             "description": "Dit zal het gesprek en bijbehorende berichten en elementen verwijderen. Deze actie kan niet ongedaan worden gemaakt",

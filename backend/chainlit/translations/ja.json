@@ -146,10 +146,15 @@
       "thread": {
         "untitled": "無題の会話",
         "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
+          "rename": "名前を変更",
+          "share": "共有",
+          "delete": "削除"
         },
         "actions": {
+          "share": {
+            "title": "チャットのリンクを共有",
+            "button": "共有"
+          },
           "delete": {
             "title": "削除の確認",
             "description": "このスレッドとそのメッセージ、要素が削除されます。この操作は取り消せません",

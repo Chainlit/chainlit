@@ -3,17 +3,19 @@ import { size } from 'lodash';
 import { useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
   ChainlitContext,
   ClientError,
   ThreadHistory,
+  sessionIdState,
   threadHistoryState,
   useChatInteract,
   useChatMessages,
-  useChatSession
+  useChatSession,
+  useConfig
 } from '@chainlit/react-client';
 
 import Alert from '@/components/Alert';
@@ -80,6 +82,62 @@ export function ThreadList({
   const [threadNewName, setThreadNewName] = useState<string>();
   const setThreadHistory = useSetRecoilState(threadHistoryState);
   const apiClient = useContext(ChainlitContext);
+  const { config } = useConfig();
+  const dataPersistence = config?.dataPersistence;
+  const threadSharingReady = Boolean((config as any)?.threadSharing);
+  const sessionId = useRecoilValue(sessionIdState);
+
+  // Share thread state
+  const [threadIdToShare, setThreadIdToShare] = useState<string | undefined>();
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [hasBeenCopied, setHasBeenCopied] = useState(false);
+  const [sharedThreadId, setSharedThreadId] = useState<string | null>(null);
+
+  const shareLink = `${window.location.origin}/share/${
+    sharedThreadId || threadIdToShare || ''
+  }`;
+
+  const handleShareThread = (threadId: string) => {
+    if (!threadSharingReady) return;
+    setThreadIdToShare(threadId);
+    setIsShareDialogOpen(true);
+    setIsCopying(false);
+    setIsCopied(false);
+    setHasBeenCopied(false);
+    setSharedThreadId(null);
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!threadIdToShare) return;
+    try {
+      if (!hasBeenCopied) {
+        setIsCopying(true);
+        await apiClient.shareThread(threadIdToShare, true);
+        setSharedThreadId(threadIdToShare);
+        await navigator.clipboard.writeText(shareLink);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        setIsCopying(false);
+        setHasBeenCopied(true);
+        toast.success('Share link created!');
+      } else {
+        await navigator.clipboard.writeText(shareLink);
+      }
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      setIsCopying(false);
+      toast.error(`Failed to create share link:${err}`);
+    }
+  };
+
+  const getShareButtonText = () => {
+    if (isCopying) return 'Copying...';
+    if (isCopied) return 'Copied';
+    if (!hasBeenCopied) return 'Create link';
+    return 'Copy link';
+  };
 
   const sortedTimeGroupKeys = useMemo(() => {
     if (!threadHistory?.timeGroupedThreads) return [];
@@ -282,6 +340,43 @@ export function ThreadList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      <Dialog
+        open={isShareDialogOpen}
+        onOpenChange={(open) => {
+          setIsShareDialogOpen(open);
+          if (!open) {
+            setThreadIdToShare(undefined);
+            setSharedThreadId(null);
+            setIsCopying(false);
+            setIsCopied(false);
+            setHasBeenCopied(false);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Share public link to chat</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center space-x-2 w-full">
+            <div className="grid flex-1 gap-2">
+              <div className="flex items-center justify-between rounded-md border px-3 py-2 w-full max-w-[250px]">
+                <span
+                  className="text-sm text-muted-foreground overflow-hidden text-ellipsis whitespace-nowrap w-full block"
+                  title={shareLink}
+                >
+                  {shareLink}
+                </span>
+              </div>
+            </div>
+            <Button
+              onClick={handleCopyShareLink}
+              disabled={isCopying || isCopied}
+            >
+              {getShareButtonText()}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <TooltipProvider delayDuration={300}>
         {sortedTimeGroupKeys.map((group) => {
           const items = threadHistory!.timeGroupedThreads![group];
@@ -324,6 +419,11 @@ export function ThreadList({
                                     setThreadIdToRename(thread.id);
                                     setThreadNewName(thread.name);
                                   }}
+                                  onShare={
+                                    dataPersistence
+                                      ? () => handleShareThread(thread.id)
+                                      : undefined
+                                  }
                                   className={cn(
                                     'absolute z-20 bottom-0 top-0 right-0 bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
                                     isSelected &&

@@ -148,9 +148,14 @@
       "untitled": "Untitled Conversation",
       "menu": {
           "rename": "Rename",
+          "share": "Share",
           "delete": "Delete"
         },
       "actions": {
+        "share": {
+          "title": "Share link to chat",
+          "button": "Share"
+        },
         "delete": {
           "title": "Confirm deletion",
           "description": "This will delete the thread as well as its messages and elements. This action cannot be undone",

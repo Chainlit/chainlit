@@ -148,9 +148,14 @@
       "untitled": "Conversación sin título",
       "menu": {
         "rename": "Renombrar",
+        "share": "Compartir",
         "delete": "Eliminar"
       },
       "actions": {
+        "share": {
+          "title": "Compartir enlace del chat",
+          "button": "Compartir"
+        },
         "delete": {
           "title": "Confirmar eliminación",
           "description": "Esto eliminará la conversación, sus mensajes y elementos. Esta acción no se puede deshacer",
