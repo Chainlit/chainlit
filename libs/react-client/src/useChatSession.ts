@@ -241,8 +241,12 @@ const useChatSession = () => {
       });
 
       socket.on('resume_thread', (thread: IThread) => {
-        if (idToResume && thread.id !== idToResume) {
+        const isReadOnlyView = Boolean((thread as any)?.metadata?.viewer_read_only);
+        if (!isReadOnlyView && idToResume && thread.id !== idToResume) {
           window.location.href = `/thread/${thread.id}`;
+        }
+        if (!isReadOnlyView && idToResume) {
+          setCurrentThreadId(thread.id);
         }
         let messages: IStep[] = [];
         for (const step of thread.steps) {

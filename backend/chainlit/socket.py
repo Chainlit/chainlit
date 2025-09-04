@@ -419,19 +419,8 @@ async def open_shared_thread(sid, payload: Dict[str, Any]):
         await context.emitter.send_resume_thread_error(THREAD_NOT_FOUND_MSG)
         return
 
-    # Author check remains the same as resume flow. Authors should use the normal resume.
-    author = thread.get("userIdentifier")
-    if session.user and author == session.user.identifier:
-        # Fall back to existing resume logic without altering it.
-        resumed = await resume_thread(session)
-        if resumed:
-            await context.emitter.resume_thread(resumed)
-        else:
-            await context.emitter.send_resume_thread_error(THREAD_NOT_FOUND_MSG)
-        return
-
-    # Non-author viewer: require feature flag + user-defined callback to authorize and control sharing behavior.
-    # Sharing is disabled unless the callback exists and returns True for provided inputs.
+    # Require feature flag + user-defined callback to authorize sharing behavior.
+    # Authors will be implicitly allowed below.
     if not getattr(config.features, "allow_thread_sharing", False):
         await context.emitter.send_resume_thread_error("Sharing not enabled.")
         return
@@ -442,7 +431,12 @@ async def open_shared_thread(sid, payload: Dict[str, Any]):
         return
 
     share_token = payload.get("shareToken")
-    allowed = await on_shared(thread, session.user, share_token)
+    author = thread.get("userIdentifier")
+    # Authors can always view their own shared thread in read-only mode via this route.
+    if session.user and author == session.user.identifier:
+        allowed = True
+    else:
+        allowed = await on_shared(thread, session.user, share_token)
     if not allowed:
         await context.emitter.send_resume_thread_error("Access denied.")
         return
