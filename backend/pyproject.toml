@@ -116,6 +116,9 @@ exclude = [
   "chainlit/copilot/**/**/"
 ]
 
+[tool.hatch.build.hooks.custom]
+path = "build.py"
+
 [tool.hatch.build.targets.wheel]
 packages = ["chainlit"]
 artifacts = [
