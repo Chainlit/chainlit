@@ -11,7 +11,6 @@ import {
 } from '@chainlit/react-client';
 
 import AutoResumeThread from '@/components/AutoResumeThread';
-import AutoOpenSharedThread from '@/components/AutoOpenSharedThread';
 import { Loader } from '@/components/Loader';
 import { ReadOnlyThread } from '@/components/ReadOnlyThread';
 import Chat from '@/components/chat';
@@ -39,7 +38,7 @@ export default function ThreadPage() {
   return (
     <Page>
       <>
-        {isSharedRoute ? <AutoOpenSharedThread id={id!} /> : null}
+  {isSharedRoute ? <ReadOnlyThread id={id!} /> : null}
         {config?.threadResumable && !isCurrentThread && !isSharedRoute ? (
           <AutoResumeThread id={id!} />
         ) : null}

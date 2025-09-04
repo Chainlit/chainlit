@@ -15,8 +15,6 @@ import {
   nestMessages,
   sessionIdState,
   sideViewState,
-  useChatData,
-  useChatMessages,
   useApi,
   useConfig
 } from '@chainlit/react-client';
@@ -35,15 +33,16 @@ const ReadOnlyThread = ({ id }: Props) => {
   const { config } = useConfig();
   const location = useLocation();
   const isSharedRoute = location.pathname.startsWith('/share/');
-  const { messages: sharedMessages } = useChatMessages();
-  const { elements: sharedElements } = useChatData();
   const {
     data: thread,
     error: threadError,
     isLoading
-  } = useApi<IThread>(id && !isSharedRoute ? `/project/thread/${id}` : null, {
+  } = useApi<IThread>(
+    id ? (isSharedRoute ? `/project/share/${id}` : `/project/thread/${id}`) : null,
+    {
     revalidateOnFocus: false
-  });
+    }
+  );
   const navigate = useNavigate();
   const setSideView = useSetRecoilState(sideViewState);
   const [steps, setSteps] = useState<IStep[]>([]);
@@ -53,13 +52,12 @@ const ReadOnlyThread = ({ id }: Props) => {
   const sessionId = useRecoilValue(sessionIdState);
 
   useEffect(() => {
-    if (isSharedRoute) return;
     if (!thread) {
       setSteps([]);
       return;
     }
     setSteps(thread.steps);
-  }, [thread, isSharedRoute]);
+  }, [thread]);
 
   useEffect(() => {
     if (threadError) {
@@ -147,9 +145,9 @@ const ReadOnlyThread = ({ id }: Props) => {
 
   const onError = useCallback((error: string) => toast.error(error), [toast]);
 
-  const elements = isSharedRoute ? sharedElements : thread?.elements || [];
+  const elements = thread?.elements || [];
   const actions: IAction[] = [];
-  const messages = isSharedRoute ? sharedMessages : nestMessages(steps);
+  const messages = nestMessages(steps);
 
   const memoizedContext = useMemo(() => {
     return {

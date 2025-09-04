@@ -958,6 +958,48 @@ async def get_thread(
     return JSONResponse(content=res)
 
 
+@router.get("/project/share/{thread_id}")
+async def get_shared_thread(
+    request: Request,
+    thread_id: str,
+    current_user: UserParam,
+):
+    """Get a shared thread (read-only for everyone).
+
+    This endpoint is separate from the resume endpoint and does not require the caller
+    to be the author of the thread. It only returns the thread if its metadata
+    contains is_shared=True. Otherwise, it returns 404 to avoid leaking existence.
+    """
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    # No auth required: allow anonymous access to shared threads
+    thread = await data_layer.get_thread(thread_id)
+    print(f"1: {thread}")
+
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    print(f"2")
+    # Extract and normalize metadata (may be dict, strified JSON, or None)
+    metadata = (thread.get("metadata") if isinstance(thread, dict) else {}) or {}
+    if isinstance(metadata, str):
+        try:
+            metadata = json.loads(metadata)
+        except Exception:
+            metadata = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    if not bool(metadata.get("is_shared")):
+        # Pretend it doesn't exist if not shared
+        raise HTTPException(status_code=404, detail="Thread is not shared")
+
+    return JSONResponse(content=thread)
+
+
 @router.get("/project/thread/{thread_id}/element/{element_id}")
 async def get_thread_element(
     request: Request,
@@ -1104,20 +1146,13 @@ async def share_thread(
 
     thread_id = payload.threadId
 
-    try:
-        logger.debug(
-            "[share_thread] user=%s payload=%s",
-            getattr(current_user, "identifier", None),
-            payload.model_dump() if hasattr(payload, "model_dump") else payload,
-        )
-        await is_thread_author(current_user.identifier, thread_id)
-    except Exception as e:
-        logger.exception("[share_thread] author check failed: %s", e)
-        raise
+    await is_thread_author(current_user.identifier, thread_id)
 
     # Fetch current thread and metadata, then toggle is_shared
     thread = await data_layer.get_thread(thread_id=thread_id)
+    print(f"zzz: {thread['metadata']}")
     metadata = (thread.get("metadata") if thread else {}) or {}
+    print(f"thread metadata before update: %s", metadata)
     if isinstance(metadata, str):
         try:
             metadata = json.loads(metadata)
@@ -1130,10 +1165,8 @@ async def share_thread(
     is_shared = bool(payload.isShared)
     metadata["is_shared"] = is_shared
     if is_shared:
-        # Timestamp the moment of sharing
         metadata["shared_at"] = utc_now()
     else:
-        # Optionally remove the timestamp on un-share to avoid confusion
         metadata.pop("shared_at", None)
     try:
         await data_layer.update_thread(thread_id=thread_id, metadata=metadata)
@@ -1142,6 +1175,7 @@ async def share_thread(
             thread_id,
             metadata,
         )
+        print(f'updated metadata for thread=%s to %s', thread_id, metadata)
     except Exception as e:
         logger.exception("[share_thread] update_thread failed: %s", e)
         raise

@@ -3,7 +3,14 @@ from typing import Optional, Dict, List
 
 import chainlit as cl
 import chainlit.data as cl_data
-from chainlit.types import ThreadDict, Pagination, ThreadFilter, PaginatedResponse, PageInfo, Feedback
+from chainlit.types import (
+    ThreadDict,
+    Pagination,
+    ThreadFilter,
+    PaginatedResponse,
+    PageInfo,
+    Feedback,
+)
 from chainlit.utils import utc_now
 
 os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
@@ -19,13 +26,29 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
         return cl.PersistedUser(id=identifier, createdAt=now, identifier=identifier)
 
     async def create_user(self, user: cl.User):
-        return cl.PersistedUser(id=user.identifier, createdAt=now, identifier=user.identifier)
+        return cl.PersistedUser(
+            id=user.identifier, createdAt=now, identifier=user.identifier
+        )
 
-    async def update_thread(self, thread_id: str, name: Optional[str] = None, user_id: Optional[str] = None, metadata: Optional[Dict] = None, tags: Optional[List[str]] = None):
+    async def update_thread(
+        self,
+        thread_id: str,
+        name: Optional[str] = None,
+        user_id: Optional[str] = None,
+        metadata: Optional[Dict] = None,
+        tags: Optional[List[str]] = None,
+    ):
         user_threads = THREADS.setdefault(user_id or "", [])
         thr = next((t for t in user_threads if t["id"] == thread_id), None)
         if not thr:
-            thr = {"id": thread_id, "createdAt": utc_now(), "userId": user_id, "userIdentifier": user_id, "name": name or thread_id, "steps": []}
+            thr = {
+                "id": thread_id,
+                "createdAt": utc_now(),
+                "userId": user_id,
+                "userIdentifier": user_id,
+                "name": name or thread_id,
+                "steps": [],
+            }
             user_threads.append(thr)
         if name:
             thr["name"] = name
@@ -39,10 +62,15 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
         if tags is not None:
             thr["tags"] = tags
 
-    async def list_threads(self, pagination: Pagination, filters: ThreadFilter) -> PaginatedResponse[ThreadDict]:
+    async def list_threads(
+        self, pagination: Pagination, filters: ThreadFilter
+    ) -> PaginatedResponse[ThreadDict]:
         user_id = filters.userId or ""
         data = THREADS.get(user_id, [])
-        return PaginatedResponse(data=data, pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None))
+        return PaginatedResponse(
+            data=data,
+            pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
+        )
 
     async def get_thread(self, thread_id: str):
         for threads in THREADS.values():
@@ -73,7 +101,9 @@ def auth(username: str, password: str) -> Optional[cl.User]:
 
 
 @cl.on_shared_thread_view
-async def can_view_shared(thread: ThreadDict, viewer: Optional[cl.User], share_token: Optional[str]):
+async def can_view_shared(
+    thread: ThreadDict, viewer: Optional[cl.User], share_token: Optional[str]
+):
     md = thread.get("metadata") or {}
     if isinstance(md, dict) and md.get("is_shared") is True:
         return True
@@ -83,6 +113,7 @@ async def can_view_shared(thread: ThreadDict, viewer: Optional[cl.User], share_t
 @cl.on_chat_start
 async def start():
     await cl.Message("Hello").send()
+
 
 @cl.on_message
 async def on_message(msg: cl.Message):
