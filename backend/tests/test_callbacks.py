@@ -528,14 +528,18 @@ async def test_on_shared_thread_view_allow(
         allowed_profiles_by_user = {"viewer": {"pro", "basic"}}
 
         @on_shared_thread_view
-        async def allow_shared_view(thread, viewer: User | None, share_token: str | None):
+        async def allow_shared_view(
+            thread, viewer: User | None, share_token: str | None
+        ):
             md = thread.get("metadata") or {}
             chat_profile = (md or {}).get("chat_profile")
             if not md.get("is_shared"):
                 return False
             if not viewer:
                 return False
-            return chat_profile in allowed_profiles_by_user.get(viewer.identifier, set())
+            return chat_profile in allowed_profiles_by_user.get(
+                viewer.identifier, set()
+            )
 
         assert test_config.code.on_shared_thread_view is not None
 
@@ -565,7 +569,9 @@ async def test_on_shared_thread_view_block_and_exception(
     async with mock_chainlit_context:
         # Case 1: Explicitly return False when profile not allowed
         @on_shared_thread_view
-        async def deny_when_not_allowed(thread, viewer: User | None, share_token: str | None):
+        async def deny_when_not_allowed(
+            thread, viewer: User | None, share_token: str | None
+        ):
             md = thread.get("metadata") or {}
             return md.get("chat_profile") == "allowed"
 
@@ -586,7 +592,9 @@ async def test_on_shared_thread_view_block_and_exception(
 
         # Case 2: Raise an exception inside callback; wrapper should swallow and result should be falsy
         @on_shared_thread_view
-        async def raise_on_forbidden(thread, viewer: User | None, share_token: str | None):
+        async def raise_on_forbidden(
+            thread, viewer: User | None, share_token: str | None
+        ):
             md = thread.get("metadata") or {}
             if md.get("chat_profile") == "forbidden":
                 raise ValueError("Viewer not allowed for this profile")

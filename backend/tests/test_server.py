@@ -1024,8 +1024,10 @@ def test_project_settings_thread_sharing_flag(
 
     # Enable callback only -> still False (flag disabled)
     test_config.features.allow_thread_sharing = False
+
     def dummy_cb(*args, **kwargs):
         return True
+
     test_config.code.on_shared_thread_view = dummy_cb
     resp = test_client.get("/project/settings")
     assert resp.status_code == 200
@@ -1069,11 +1071,14 @@ def test_share_thread_endpoint_sets_flags(
 
     # Ensure data layer is initialized for both server routes and ACL checks
     import chainlit.data as data_mod
+
     data_mod._data_layer = dl
     data_mod._data_layer_initialized = True
 
     # Share
-    r = test_client.put("/project/thread/share", json={"threadId": "t1", "isShared": True})
+    r = test_client.put(
+        "/project/thread/share", json={"threadId": "t1", "isShared": True}
+    )
     assert r.status_code == 200
 
     # Validate metadata passed to update_thread includes is_shared and shared_at
@@ -1085,7 +1090,9 @@ def test_share_thread_endpoint_sets_flags(
     assert isinstance(meta.get("shared_at"), str)
 
     # Unshare
-    r = test_client.put("/project/thread/share", json={"threadId": "t1", "isShared": False})
+    r = test_client.put(
+        "/project/thread/share", json={"threadId": "t1", "isShared": False}
+    )
     assert r.status_code == 200
     _, kwargs = dl.update_thread.await_args
     meta = kwargs.get("metadata") or {}

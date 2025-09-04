@@ -383,6 +383,7 @@ async def change_settings(sid, settings: Dict[str, Any]):
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
 
+
 @sio.on("open_shared_thread")  # pyright: ignore [reportOptionalCall]
 async def open_shared_thread(sid, payload: Dict[str, Any]):
     """Allow a user to view a shared thread in read-only mode.
