@@ -28,5 +28,5 @@ jobs:
           changed-files: "true"
           args: "format --check"
       - name: Run Mypy
-        run: uv run mypy chainlit/
+        run: uv run --no-project mypy chainlit/
         working-directory: ${{ env.BACKEND_DIR }}

@@ -22,7 +22,8 @@
         "form": {
           "email": {
             "label": "E-mailadres",
-            "required": "e-mail is een verplicht veld"
+            "required": "e-mail is een verplicht veld",
+          "placeholder": "me@example.com"
           },
           "password": {
             "label": "Wachtwoord",
@@ -76,6 +77,10 @@
         "errors": {
           "failed": "Uploaden mislukt",
           "cancelled": "Upload geannuleerd van"
+        },
+        "actions": {
+          "cancelUpload": "Annuleer upload",
+          "removeAttachment": "Verwijder bijlage"
         }
       },
       "commands": {
@@ -100,7 +105,8 @@
           "edit": "Feedback bewerken",
           "dialog": {
             "title": "Voeg een opmerking toe",
-            "submit": "Feedback versturen"
+            "submit": "Feedback versturen",
+            "yourFeedback": "Je feedback..."
           },
           "status": {
             "updating": "Bijwerken",
@@ -114,7 +120,8 @@
         "show": "Toon geschiedenis"
       },
       "settings": {
-        "title": "Instellingenpaneel"
+        "title": "Instellingenpaneel",
+        "customize": "Pas hier je chatinstellingen aan"
       },
       "watermark": "LLM's kunnen fouten maken. Overweeg het controleren van belangrijke informatie."
     },
@@ -215,5 +222,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "Selecteer..."
+    }
   }
-  }
+}

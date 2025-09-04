@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "ईमेल पता",
-          "required": "ईमेल एक आवश्यक फ़ील्ड है"
+          "required": "ईमेल एक आवश्यक फ़ील्ड है",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "पासवर्ड",
@@ -76,6 +77,10 @@
       "errors": {
         "failed": "अपलोड करने में विफल",
         "cancelled": "का अपलोड रद्द किया गया"
+      },
+      "actions": {
+        "cancelUpload": "अपलोड रद्द करें",
+        "removeAttachment": "संलग्नक हटाएं"
       }
     },
     "commands": {
@@ -100,7 +105,8 @@
         "edit": "प्रतिक्रिया संपादित करें",
         "dialog": {
           "title": "टिप्पणी जोड़ें",
-          "submit": "प्रतिक्रिया जमा करें"
+          "submit": "प्रतिक्रिया जमा करें",
+          "yourFeedback": "आपकी प्रतिक्रिया..."
         },
         "status": {
           "updating": "अपडेट हो रहा है",
@@ -114,7 +120,8 @@
       "show": "इतिहास दिखाएं"
     },
     "settings": {
-      "title": "सेटिंग्स पैनल"
+      "title": "सेटिंग्स पैनल",
+      "customize": "अपने चैट सेटिंग्स को यहां अनुकूलित करें"
     },
     "watermark": "एलएलएम गलतियां कर सकते हैं। महत्वपूर्ण जानकारी की जांच करने पर विचार करें।"
   },
@@ -215,5 +222,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "चुनें..."
+    }
   }
 }

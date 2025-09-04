@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Union
+from typing import Any, Awaitable, Callable, Dict, List, Optional, Union, overload
 
 from fastapi import Request, Response
 from mcp import ClientSession
@@ -283,9 +283,19 @@ def on_chat_resume(func: Callable[[ThreadDict], Any]) -> Callable:
     return func
 
 
+@overload
 def set_chat_profiles(
     func: Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]],
-) -> Callable:
+) -> Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]: ...
+
+
+@overload
+def set_chat_profiles(
+    func: Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]],
+) -> Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]]: ...
+
+
+def set_chat_profiles(func):
     """
     Programmatic declaration of the available chat profiles (can depend on the User from the session if authentication is setup).
 
@@ -300,17 +310,27 @@ def set_chat_profiles(
     return func
 
 
+@overload
 def set_starters(
     func: Callable[[Optional["User"]], Awaitable[List["Starter"]]],
-) -> Callable:
+) -> Callable[[Optional["User"]], Awaitable[List["Starter"]]]: ...
+
+
+@overload
+def set_starters(
+    func: Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]],
+) -> Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]: ...
+
+
+def set_starters(func):
     """
     Programmatic declaration of the available starter (can depend on the User from the session if authentication is setup).
 
     Args:
-        func (Callable[[Optional["User"]], Awaitable[List["Starter"]]]): The function declaring the starters.
+        func (Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]): The function declaring the starters with optional user and language arguments.
 
     Returns:
-        Callable[[Optional["User"]], Awaitable[List["Starter"]]]: The decorated function.
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]: The decorated function.
     """
 
     config.code.set_starters = wrap_user_function(func)

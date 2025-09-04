@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "ઈમેલ એડ્રેસ",
-          "required": "ઈમેલ આવશ્યક છે"
+          "required": "ઈમેલ આવશ્યક છે",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "પાસવર્ડ",
@@ -81,6 +82,10 @@
       "errors": {
         "failed": "અપલોડ કરવામાં નિષ્ફળ",
         "cancelled": "અપલોડ રદ કર્યું"
+      },
+      "actions": {
+        "cancelUpload": "અપલોડ રદ કરો",
+        "removeAttachment": "જોડાણ દૂર કરો"
       }
     },
     "messages": {
@@ -100,7 +105,8 @@
         "edit": "પ્રતિસાદ સંપાદિત કરો",
         "dialog": {
           "title": "ટિપ્પણી ઉમેરો",
-          "submit": "પ્રતિસાદ સબમિટ કરો"
+          "submit": "પ્રતિસાદ સબમિટ કરો",
+          "yourFeedback": "તમારો પ્રતિસાદ..."
         },
         "status": {
           "updating": "અપડેટ થઈ રહ્યું છે",
@@ -114,7 +120,8 @@
       "show": "ઇતિહાસ બતાવો"
     },
     "settings": {
-      "title": "સેટિંગ્સ પેનલ"
+      "title": "સેટિંગ્સ પેનલ",
+      "customize": "તમારા ચેટ સેટિંગ્સ અહીં કસ્ટમાઇઝ કરો"
     },
     "watermark": "LLM ભૂલો કરી શકે છે. મહત્વપૂર્ણ માહિતી તપાસવાનું વિચારો."
   },
@@ -215,5 +222,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "બેંચી લો..."
+    }
   }
 }

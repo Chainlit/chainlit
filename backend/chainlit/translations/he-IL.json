@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "כתובת אימייל",
-          "required": "שדה האימייל הוא שדה חובה"
+          "required": "שדה האימייל הוא שדה חובה",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "סיסמה",
@@ -81,6 +82,10 @@
       "errors": {
         "failed": "העלאה נכשלה",
         "cancelled": "העלאה בוטלה של"
+      },
+      "actions": {
+        "cancelUpload": "ביטול העלאה",
+        "removeAttachment": "הסרת קובץ מצורף"
       }
     },
     "messages": {
@@ -100,7 +105,8 @@
         "edit": "ערוך משוב",
         "dialog": {
           "title": "הוסף תגובה",
-          "submit": "שלח משוב"
+          "submit": "שלח משוב",
+          "yourFeedback": "המשוב שלך..."
         },
         "status": {
           "updating": "מעדכן",
@@ -114,7 +120,8 @@
       "show": "הצג היסטוריה"
     },
     "settings": {
-      "title": "פאנל הגדרות"
+      "title": "פאנל הגדרות",
+      "customize": "התאם אישית את הגדרות הצ'אט שלך כאן"
     },
     "watermark": "מודלי שפה גדולים עלולים לעשות טעויות. כדאי לבדוק מידע חשוב."
   },
@@ -215,5 +222,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "בחר..."
+    }
   }
 }
