@@ -379,3 +379,72 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
+
+@sio.on("open_shared_thread")  # pyright: ignore [reportOptionalCall]
+async def open_shared_thread(sid, payload: Dict[str, Any]):
+    """Allow a user to view a shared thread in read-only mode.
+
+    Expected payload:
+      { "threadId": str, "shareToken": Optional[str] }
+
+    Behavior:
+    - If the current user is the author, defer to the normal resume mechanism (unchanged).
+    - If the current user is NOT the author, verify the thread is shareable (metadata.shared or share_token match).
+    - Do NOT load or apply the author's metadata (chat_profile, chat_settings) to the viewer session.
+    - Emit the thread to the client using emitter.resume_thread for display only.
+    """
+    session = WebsocketSession.require(sid)
+    context = init_ws_context(session)
+
+    thread_id = payload.get("threadId")
+    if not thread_id:
+        await context.emitter.send_resume_thread_error("Missing threadId.")
+        return
+
+    data_layer = get_data_layer()
+    if not data_layer:
+        await context.emitter.send_resume_thread_error("No data layer configured.")
+        return
+
+    thread = await data_layer.get_thread(thread_id=thread_id)
+    if not thread:
+        await context.emitter.send_resume_thread_error(THREAD_NOT_FOUND_MSG)
+        return
+
+    # Author check remains the same as resume flow. Authors should use the normal resume.
+    author = thread.get("userIdentifier")
+    if session.user and author == session.user.identifier:
+        # Fall back to existing resume logic without altering it.
+        resumed = await resume_thread(session)
+        if resumed:
+            await context.emitter.resume_thread(resumed)
+        else:
+            await context.emitter.send_resume_thread_error(THREAD_NOT_FOUND_MSG)
+        return
+
+    # Non-author viewer: require user-defined callback to authorize and control sharing behavior.
+    # Sharing is disabled unless the callback exists and returns True for provided inputs.
+    on_shared = getattr(config.code, "on_shared_thread_view", None)
+    if not on_shared:
+        await context.emitter.send_resume_thread_error("Sharing not enabled.")
+        return
+
+    share_token = payload.get("shareToken")
+    allowed = await on_shared(thread, session.user, share_token)
+    if not allowed:
+        await context.emitter.send_resume_thread_error("Access denied.")
+        return
+
+    # Sanitize: don't leak or apply author's session-bound metadata to the viewer.
+    metadata = thread.get("metadata") or {}
+    if isinstance(metadata, str):
+        try:
+            metadata = json.loads(metadata)
+        except Exception:
+            metadata = {}
+    md = dict(metadata) if isinstance(metadata, dict) else {}
+    md.pop("chat_profile", None)
+    md.pop("chat_settings", None)
+    safe_thread = {**thread, "metadata": md}
+    # Do NOT set session.thread_id, user_sessions, chat_profile, or chat_settings here.
+    await context.emitter.resume_thread(safe_thread)

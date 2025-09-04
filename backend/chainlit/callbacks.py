@@ -451,3 +451,14 @@ def on_feedback(func: Callable) -> Callable:
     """
     config.code.on_feedback = wrap_user_function(func)
     return func
+
+def on_shared_thread_view(
+    func: Callable[[ThreadDict, Optional[User], Optional[str]], Awaitable[bool]]
+) -> Callable[[ThreadDict, Optional[User], Optional[str]], Awaitable[bool]]:
+    """Hook to authorize viewing a shared thread.
+
+    Users must implement and return True to allow a non-author to view a thread.
+    Signature: async (thread: ThreadDict, viewer: Optional[User], share_token: Optional[str]) -> bool
+    """
+    config.code.on_shared_thread_view = wrap_user_function(func)
+    return func
