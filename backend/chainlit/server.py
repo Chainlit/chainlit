@@ -72,8 +72,10 @@ from chainlit.types import (
     Theme,
     UpdateFeedbackRequest,
     UpdateThreadRequest,
+    ShareThreadRequest,
 )
 from chainlit.user import PersistedUser, User
+from chainlit.utils import utc_now
 
 from ._utils import is_path_inside
 
@@ -841,6 +843,11 @@ async def project_settings(
             "maskUserEnv": cfg.project.mask_user_env,
             "dataPersistence": data_layer is not None,
             "threadResumable": bool(config.code.on_chat_resume),
+            # Expose whether shared threads feature is enabled (flag + app callback)
+            "threadSharing": bool(
+                getattr(cfg.features, "allow_thread_sharing", False)
+                and getattr(config.code, "on_shared_thread_view", None)
+            ),
             "markdown": markdown,
             "chatProfiles": profiles,
             "starters": starters,
@@ -1075,6 +1082,52 @@ async def rename_thread(
     await is_thread_author(current_user.identifier, thread_id)
 
     await data_layer.update_thread(thread_id, name=payload.name)
+
+    return JSONResponse(content={"success": True})
+
+
+@router.put("/project/thread/share")
+async def share_thread(
+    request: Request,
+    payload: ShareThreadRequest,
+    current_user: UserParam,
+):
+    """Share or un-share a thread (author only)."""
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    thread_id = payload.threadId
+
+    await is_thread_author(current_user.identifier, thread_id)
+
+    # Fetch current thread and metadata, then toggle is_shared
+    thread = await data_layer.get_thread(thread_id=thread_id)
+    metadata = (thread.get("metadata") if thread else {}) or {}
+    if isinstance(metadata, str):
+        try:
+            metadata = json.loads(metadata)
+        except Exception:
+            metadata = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    metadata = dict(metadata)
+    is_shared = bool(payload.isShared)
+    metadata["is_shared"] = is_shared
+    if is_shared:
+        # Timestamp the moment of sharing
+        metadata["shared_at"] = utc_now()
+    else:
+        # Optionally remove the timestamp on un-share to avoid confusion
+        metadata.pop("shared_at", None)
+    await data_layer.update_thread(thread_id=thread_id, metadata=metadata)
+
     return JSONResponse(content={"success": True})
 
 

@@ -25,6 +25,9 @@ from chainlit.user_session import user_sessions
 
 WSGIEnvironment: TypeAlias = dict[str, Any]
 
+# Generic error message reused across resume flows.
+THREAD_NOT_FOUND_MSG = "Thread not found."
+
 
 def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
     """Restore a session from the sessionId provided by the client."""
@@ -422,8 +425,12 @@ async def open_shared_thread(sid, payload: Dict[str, Any]):
             await context.emitter.send_resume_thread_error(THREAD_NOT_FOUND_MSG)
         return
 
-    # Non-author viewer: require user-defined callback to authorize and control sharing behavior.
+    # Non-author viewer: require feature flag + user-defined callback to authorize and control sharing behavior.
     # Sharing is disabled unless the callback exists and returns True for provided inputs.
+    if not getattr(config.features, "allow_thread_sharing", False):
+        await context.emitter.send_resume_thread_error("Sharing not enabled.")
+        return
+
     on_shared = getattr(config.code, "on_shared_thread_view", None)
     if not on_shared:
         await context.emitter.send_resume_thread_error("Sharing not enabled.")
@@ -445,6 +452,8 @@ async def open_shared_thread(sid, payload: Dict[str, Any]):
     md = dict(metadata) if isinstance(metadata, dict) else {}
     md.pop("chat_profile", None)
     md.pop("chat_settings", None)
+    # Mark as read-only to help the UI disable inputs
+    md["viewer_read_only"] = True
     safe_thread = {**thread, "metadata": md}
     # Do NOT set session.thread_id, user_sessions, chat_profile, or chat_settings here.
     await context.emitter.resume_thread(safe_thread)

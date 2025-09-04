@@ -1001,3 +1001,94 @@ def test_project_settings_config_overrides_language(
     assert "config_overrides" not in profile_data
     assert profile_data["name"] == "test-profile"
     assert profile_data["markdown_description"] == "Test profile"
+
+
+def test_project_settings_thread_sharing_flag(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    # Start with both disabled
+    test_config.features.allow_thread_sharing = False
+    test_config.code.on_shared_thread_view = None
+    resp = test_client.get("/project/settings")
+    assert resp.status_code == 200
+    assert resp.json().get("threadSharing") is False
+
+    # Enable flag only -> still False (callback missing)
+    test_config.features.allow_thread_sharing = True
+    test_config.code.on_shared_thread_view = None
+    resp = test_client.get("/project/settings")
+    assert resp.status_code == 200
+    assert resp.json().get("threadSharing") is False
+
+    # Enable callback only -> still False (flag disabled)
+    test_config.features.allow_thread_sharing = False
+    def dummy_cb(*args, **kwargs):
+        return True
+    test_config.code.on_shared_thread_view = dummy_cb
+    resp = test_client.get("/project/settings")
+    assert resp.status_code == 200
+    assert resp.json().get("threadSharing") is False
+
+    # Enable both -> True
+    test_config.features.allow_thread_sharing = True
+    test_config.code.on_shared_thread_view = dummy_cb
+    resp = test_client.get("/project/settings")
+    assert resp.status_code == 200
+    assert resp.json().get("threadSharing") is True
+
+
+def test_share_thread_endpoint_sets_flags(
+    test_client: TestClient,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    # Override current user to match thread author
+    from chainlit.auth import get_current_user as _get_current_user
+    from chainlit.server import app as _app
+
+    author = PersistedUser(
+        id="u1",
+        createdAt=datetime.datetime.now().isoformat(),
+        identifier="author",
+    )
+
+    _app.dependency_overrides[_get_current_user] = lambda: author
+
+    # Mock data layer
+    from unittest.mock import AsyncMock
+
+    dl = AsyncMock()
+    dl.get_thread.return_value = {
+        "id": "t1",
+        "name": "Thread 1",
+        "userIdentifier": "author",
+        "metadata": {"other": True},
+    }
+    dl.get_thread_author.return_value = "author"
+    dl.build_debug_url.return_value = ""
+
+    monkeypatch.setattr("chainlit.data.get_data_layer", lambda: dl)
+
+    # Share
+    r = test_client.put("/project/thread/share", json={"threadId": "t1", "isShared": True})
+    assert r.status_code == 200
+
+    # Validate metadata passed to update_thread includes is_shared and shared_at
+    assert dl.update_thread.await_count >= 1
+    _, kwargs = dl.update_thread.await_args
+    assert kwargs.get("thread_id") == "t1"
+    meta = kwargs.get("metadata") or {}
+    assert meta.get("is_shared") is True
+    assert isinstance(meta.get("shared_at"), str)
+
+    # Unshare
+    r = test_client.put("/project/thread/share", json={"threadId": "t1", "isShared": False})
+    assert r.status_code == 200
+    _, kwargs = dl.update_thread.await_args
+    meta = kwargs.get("metadata") or {}
+    assert meta.get("is_shared") is False
+    assert "shared_at" not in meta
+
+    # Cleanup override
+    del _app.dependency_overrides[_get_current_user]
