@@ -76,8 +76,6 @@ from .callbacks import (
     on_mcp_disconnect,
     on_message,
     on_settings_update,
-    on_socket_connect,
-    on_socket_disconnect,
     on_stop,
     on_window_message,
     password_auth_callback,
