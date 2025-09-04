@@ -195,3 +195,9 @@ ignore = [
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
+
+[dependency-groups]
+dev = [
+    "mypy>=1.17.1",
+    "ruff>=0.12.9",
+]
