@@ -69,10 +69,10 @@ from chainlit.types import (
     DisconnectMCPRequest,
     ElementRequest,
     GetThreadsRequest,
+    ShareThreadRequest,
     Theme,
     UpdateFeedbackRequest,
     UpdateThreadRequest,
-    ShareThreadRequest,
 )
 from chainlit.user import PersistedUser, User
 from chainlit.utils import utc_now

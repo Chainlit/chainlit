@@ -1044,8 +1044,7 @@ def test_share_thread_endpoint_sets_flags(
     monkeypatch: pytest.MonkeyPatch,
 ):
     # Override current user to match thread author
-    from chainlit.auth import get_current_user as _get_current_user
-    from chainlit.server import app as _app
+    from chainlit.server import app as _app, get_current_user as _get_current_user
 
     author = PersistedUser(
         id="u1",
@@ -1068,7 +1067,10 @@ def test_share_thread_endpoint_sets_flags(
     dl.get_thread_author.return_value = "author"
     dl.build_debug_url.return_value = ""
 
-    monkeypatch.setattr("chainlit.data.get_data_layer", lambda: dl)
+    # Ensure data layer is initialized for both server routes and ACL checks
+    import chainlit.data as data_mod
+    data_mod._data_layer = dl
+    data_mod._data_layer_initialized = True
 
     # Share
     r = test_client.put("/project/thread/share", json={"threadId": "t1", "isShared": True})
@@ -1090,5 +1092,7 @@ def test_share_thread_endpoint_sets_flags(
     assert meta.get("is_shared") is False
     assert "shared_at" not in meta
 
-    # Cleanup override
+    # Cleanup override and data layer
     del _app.dependency_overrides[_get_current_user]
+    data_mod._data_layer = None
+    data_mod._data_layer_initialized = False
