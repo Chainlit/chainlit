@@ -1,7 +1,7 @@
 import mimetypes
 import shutil
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Union
 from urllib.request import pathname2url
 
 from chainlit import make_async
@@ -14,17 +14,16 @@ class LocalStorageClient(BaseStorageClient):
     Class to enable local file system storage provider
     """
 
-    def __init__(self, storage_path: str, base_url: Optional[str] = None):
+    def __init__(self, storage_path: str):
         try:
             self.storage_path = Path(storage_path).resolve()
-            # For local storage, we'll use the backend's storage route
-            # base_url is kept for compatibility but not used for read URLs
-            self.base_url = base_url or ""
-            
+
             # Create storage directory if it doesn't exist
             self.storage_path.mkdir(parents=True, exist_ok=True)
 
-            logger.info(f"LocalStorageClient initialized with path: {self.storage_path}")
+            logger.info(
+                f"LocalStorageClient initialized with path: {self.storage_path}"
+            )
         except Exception as e:
             logger.warning(f"LocalStorageClient initialization error: {e}")
             raise
@@ -32,13 +31,13 @@ class LocalStorageClient(BaseStorageClient):
     def _validate_object_key(self, object_key: str) -> Path:
         """
         Validate object_key and ensure the resolved path is within storage directory.
-        
+
         Args:
             object_key: The object key to validate
-            
+
         Returns:
             Resolved Path object within storage directory
-            
+
         Raises:
             ValueError: If path traversal is detected or path is invalid
         """
@@ -47,20 +46,20 @@ class LocalStorageClient(BaseStorageClient):
             if object_key.startswith("/"):
                 logger.warning(f"Absolute path rejected: {object_key}")
                 raise ValueError("Invalid object key: absolute paths not allowed")
-            
+
             # Normalize object_key and check for traversal patterns
             normalized_key = object_key.strip()
             if ".." in normalized_key or "\\" in normalized_key:
                 logger.warning(f"Path traversal patterns detected: {object_key}")
                 raise ValueError("Invalid object key: path traversal detected")
-            
+
             # Create the file path
             file_path = self.storage_path / normalized_key
             resolved_path = file_path.resolve()
-            
+
             # Ensure the resolved path is within the storage directory
             resolved_path.relative_to(self.storage_path)
-            
+
             return resolved_path
         except ValueError as e:
             # Re-raise ValueError as is (our custom errors)
@@ -99,26 +98,28 @@ class LocalStorageClient(BaseStorageClient):
     ) -> Dict[str, Any]:
         try:
             file_path = self._validate_object_key(object_key)
-            
+
             # Create parent directories if they don't exist
             file_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             # Check if file exists and overwrite is False
             if file_path.exists() and not overwrite:
-                logger.warning(f"LocalStorageClient: File exists and overwrite=False: {object_key}")
+                logger.warning(
+                    f"LocalStorageClient: File exists and overwrite=False: {object_key}"
+                )
                 return {}
-            
+
             # Write data to file
             if isinstance(data, str):
                 file_path.write_text(data, encoding="utf-8")
             else:
                 file_path.write_bytes(data)
-            
-            # Generate URL for the uploaded file
+
+            # Generate URL for the uploaded file using backend's storage route
             relative_path = file_path.relative_to(self.storage_path)
             url_path = pathname2url(str(relative_path))
-            url = f"{self.base_url}/files/{url_path}"
-            
+            url = f"/storage/file/{url_path}"
+
             return {"object_key": object_key, "url": url}
         except ValueError as e:
             logger.warning(f"LocalStorageClient, upload_file error: {e}")
@@ -149,7 +150,9 @@ class LocalStorageClient(BaseStorageClient):
                     shutil.rmtree(file_path)
                 return True
             else:
-                logger.warning(f"LocalStorageClient: File not found for deletion: {object_key}")
+                logger.warning(
+                    f"LocalStorageClient: File not found for deletion: {object_key}"
+                )
                 return False
         except ValueError as e:
             logger.warning(f"LocalStorageClient, delete_file error: {e}")
@@ -165,14 +168,16 @@ class LocalStorageClient(BaseStorageClient):
         try:
             file_path = self._validate_object_key(object_key)
             if not file_path.exists() or not file_path.is_file():
-                logger.warning(f"LocalStorageClient: File not found for download: {object_key}")
+                logger.warning(
+                    f"LocalStorageClient: File not found for download: {object_key}"
+                )
                 return None
-            
+
             # Get MIME type
             mime_type, _ = mimetypes.guess_type(str(file_path))
             if not mime_type:
                 mime_type = "application/octet-stream"
-            
+
             # Read file content
             content = file_path.read_bytes()
             return (content, mime_type)
