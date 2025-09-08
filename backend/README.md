@@ -1,15 +1,28 @@
-<h1 align="center">Welcome to Chainlit 👋</h1>
+<h1 style="text-align: center;">Welcome to Chainlit 👋</h1>
 
-<p align="center">
-<b>Build python production-ready conversational AI applications in minutes, not weeks ⚡️</b>
-
+<p style="text-align: center;">
+  <b>Build Python production-ready conversational AI applications in minutes, not weeks ⚡️</b>
 </p>
-<p align="center">
-    <a href="https://discord.gg/k73SQ3FyUh" rel="nofollow"><img alt="Discord" src="https://dcbadge.vercel.app/api/server/ZThrUxbAYw?style=flat" style="max-width:100%;"></a>
-    <a href="https://twitter.com/chainlit_io" rel="nofollow"><img alt="Twitter" src="https://img.shields.io/twitter/url/https/twitter.com/chainlit_io.svg?style=social&label=Follow%20%40chainlit_io" style="max-width:100%;"></a>
-    <a href="https://pypistats.org/packages/chainlit" rel="nofollow"><img alt="Downloads" src="https://img.shields.io/pypi/dm/chainlit" style="max-width:100%;"></a>
-        <a href="https://github.com/chainlit/chainlit/graphs/contributors" rel="nofollow"><img alt="Contributors" src="https://img.shields.io/github/contributors/chainlit/chainlit" style="max-width:100%;"></a>
-    <a href="https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml" rel="nofollow"><img alt="CI" src="https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg" style="max-width:100%;"></a>
+
+<p style="text-align: center;">
+  <a href="https://discord.gg/k73SQ3FyUh" rel="nofollow">
+    <img alt="Discord" src="https://img.shields.io/discord/1088038867602526210" style="max-width: 100%;">
+  </a>
+  <a href="https://twitter.com/chainlit_io" rel="nofollow">
+    <img alt="Twitter" src="https://img.shields.io/twitter/url/https/twitter.com/chainlit_io.svg?style=social&label=Follow%20%40chainlit_io" style="max-width: 100%;">
+  </a>
+  <a href="https://pypistats.org/packages/chainlit" rel="nofollow">
+    <img alt="Downloads" src="https://img.shields.io/pypi/dm/chainlit" style="max-width: 100%;">
+  </a>
+  <a href="https://github.com/Chainlit/chainlit/graphs/contributors" rel="nofollow">
+    <img alt="Contributors" src="https://img.shields.io/github/contributors/Chainlit/chainlit" style="max-width: 100%;">
+  </a>
+  <a href="https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml" rel="nofollow">
+    <img alt="CI" src="https://github.com/Chainlit/chainlit/actions/workflows/ci.yaml/badge.svg" style="max-width: 100%;">
+  </a>
+  <a href="https://deepwiki.com/Chainlit/chainlit" rel="nofollow">
+    <img alt="Ask DeepWiki" src="https://deepwiki.com/badge.svg">
+  </a>
 </p>
 
 > ⚠️ **Notice:** Chainlit is now community-maintained.
