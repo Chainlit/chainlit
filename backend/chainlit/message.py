@@ -186,6 +186,9 @@ class MessageBase(ABC):
 
         assert self.id
 
+        if config.code.author_rename:
+            self.author = await config.code.author_rename(self.author)
+
         if not self.streaming:
             self.streaming = True
             step_dict = self.to_dict()
