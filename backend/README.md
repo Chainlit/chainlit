@@ -3,7 +3,6 @@
 <p style="text-align: center;">
   <b>Build Python production-ready conversational AI applications in minutes, not weeks ⚡️</b>
 </p>
-
 <p style="text-align: center;">
   <a href="https://discord.gg/k73SQ3FyUh" rel="nofollow">
     <img alt="Discord" src="https://img.shields.io/discord/1088038867602526210" style="max-width: 100%;">
