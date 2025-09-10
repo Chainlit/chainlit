@@ -213,9 +213,7 @@ def auth(username: str, password: str) -> Optional[cl.User]:
 
 
 @cl.on_shared_thread_view
-async def can_view_shared(
-    thread: ThreadDict, viewer: Optional[cl.User], share_token: Optional[str]
-):
+async def can_view_shared(thread: ThreadDict, viewer: Optional[cl.User]):
     md = thread.get("metadata") or {}
     if isinstance(md, dict) and md.get("is_shared") is True:
         return True

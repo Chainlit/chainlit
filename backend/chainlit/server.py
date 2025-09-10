@@ -970,6 +970,7 @@ async def get_shared_thread(
     to be the author of the thread. It only returns the thread if its metadata
     contains is_shared=True. Otherwise, it returns 404 to avoid leaking existence.
     """
+    print("Here", thread_id, current_user)
 
     data_layer = get_data_layer()
 
@@ -991,15 +992,20 @@ async def get_shared_thread(
     if not isinstance(metadata, dict):
         metadata = {}
 
+    print("here")
+
     if getattr(config.code, "on_shared_thread_view", None):
+        print("here3")
         try:
             user_can_view = await config.code.on_shared_thread_view(
                 thread, current_user
             )
+            print(user_can_view)
         except Exception:
             user_can_view = False
 
     is_shared = bool(metadata.get("is_shared"))
+    print(f"is_shared: {is_shared}")
 
     # Proceed only if both conditions are True.
     if not (user_can_view and is_shared):
@@ -1147,6 +1153,7 @@ async def share_thread(
     current_user: UserParam,
 ):
     """Share or un-share a thread (author only)."""
+    print(f"Put: {payload}, user: {current_user}")
 
     data_layer = get_data_layer()
 
