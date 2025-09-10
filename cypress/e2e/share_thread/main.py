@@ -1,6 +1,6 @@
 import os
 from typing import Optional, Dict, List, Any
-
+from chainlit.config import ChainlitConfigOverrides, FeaturesSettings
 import chainlit as cl
 import chainlit.data as cl_data
 from chainlit.types import (
@@ -184,6 +184,19 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
 
     async def upsert_feedback(self, feedback: Feedback) -> str:
         return ""
+
+
+@cl.set_chat_profiles
+async def chat_profile():
+    return [
+        cl.ChatProfile(
+            name="Sharable",
+            markdown_description="Profile with thread sharing enabled.",
+            config_overrides=ChainlitConfigOverrides(
+                features=FeaturesSettings(allow_thread_sharing=True)
+            ),
+        )
+    ]
 
 
 @cl.data_layer

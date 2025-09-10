@@ -31,7 +31,7 @@ function getCurrentThreadId(): Cypress.Chainable<string> {
 }
 
 describe('Thread sharing and resume behavior', () => {
-  it('author resumes own thread and sees composer (no read-only banner)', () => {
+  it('author resumes own thread and sees composer', () => {
     login('a');
     // Start a chat to create a thread
     submitMessage('hi');
@@ -41,7 +41,7 @@ describe('Thread sharing and resume behavior', () => {
     // Reload the page to trigger resume flow
     cy.reload();
 
-    // Should render Chat (composer visible), not read-only banner
+    // Should render Chat (composer visible)
     cy.get('#message-composer').should('be.visible');
   });
 
