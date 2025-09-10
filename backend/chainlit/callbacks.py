@@ -455,7 +455,7 @@ def on_feedback(func: Callable) -> Callable:
 
 def on_shared_thread_view(
     func: Callable[[ThreadDict, Optional[User]], Awaitable[bool]],
-) -> Callable[[ThreadDict, Optional[User], Optional[str]], Awaitable[bool]]:
+) -> Callable[[ThreadDict, Optional[User]], Awaitable[bool]]:
     """Hook to authorize viewing a shared thread.
 
     Users must implement and return True to allow a non-author to view a thread.
