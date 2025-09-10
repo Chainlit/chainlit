@@ -90,7 +90,7 @@ def data_layer():
 @cl.password_auth_callback
 def auth(username: str, password: str) -> Optional[cl.User]:
     if (username, password) in [("alice", "a"), ("bob", "b")]:
-        return cl.User(identifier=username)
+        return cl.PersistedUser(id=username, createdAt=now, identifier=username)
     return None
 
 

@@ -991,20 +991,13 @@ async def get_shared_thread(
     if not isinstance(metadata, dict):
         metadata = {}
 
-    user_can_view = True  # Default to True if no callback is provided
-    if config.code.on_shared_thread_view:
+    if getattr(config.code, "on_shared_thread_view", None):
         try:
             user_can_view = await config.code.on_shared_thread_view(
                 thread, current_user
             )
-        except Exception as callback_error:
-            logger.error(
-                f"Error in user-provided on_shared_thread_view callback: {callback_error}"
-            )
-            raise HTTPException(
-                status_code=403,
-                detail="You are not authorized to view this thread",
-            ) from callback_error
+        except Exception:
+            user_can_view = False
 
     is_shared = bool(metadata.get("is_shared"))
 
