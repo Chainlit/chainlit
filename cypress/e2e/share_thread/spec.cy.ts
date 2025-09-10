@@ -3,8 +3,9 @@ import { submitMessage } from '../../support/testUtils';
 const login = (user: 'a' | 'b') => {
   cy.visit('/');
   cy.location('pathname').should('eq', '/login');
-  cy.get('#email').type(user);
-  cy.get('#password').type(user + '{enter}');
+  cy.get("input[name='email']").clear().type(user);
+  cy.get("input[name='password']").clear().type(user);
+  cy.get("button[type='submit']").click();
   cy.location('pathname').should('eq', '/');
 };
 

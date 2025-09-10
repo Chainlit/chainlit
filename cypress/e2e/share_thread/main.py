@@ -26,6 +26,7 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
     for the sharing e2e tests. Only the subset of functionality exercised by the
     tests is implemented. Elements/steps are stored inside the thread dict.
     """
+
     async def get_user(self, identifier: str):
         return cl.PersistedUser(id=identifier, createdAt=now, identifier=identifier)
 

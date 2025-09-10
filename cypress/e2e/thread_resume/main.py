@@ -80,6 +80,33 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
 
     async def upsert_feedback(self, feedback: Feedback) -> str:
         return ""
+    
+    async def build_debug_url(self):
+        pass
+
+    async def create_element(self):
+        pass
+
+    async def create_step(self):
+        pass
+
+    async def delete_element(self):
+        pass
+
+    async def delete_feedback(self):
+        pass
+
+    async def delete_step(self):
+        pass
+
+    async def get_element(self):
+        pass
+
+    async def get_thread_author(self):
+        pass
+
+    async def update_step(self):
+        pass
 
 
 @cl.data_layer
