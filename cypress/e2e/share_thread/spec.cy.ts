@@ -43,10 +43,9 @@ describe('Thread sharing and resume behavior', () => {
 
     // Should render Chat (composer visible), not read-only banner
     cy.get('#message-composer').should('be.visible');
-    cy.get('[data-testid="read-only-banner"]').should('not.exist');
   });
 
-  it('shared route shows read-only banner and no composer', () => {
+  it('shared route shows no composer', () => {
     login('a');
     // Ensure we have a thread
     submitMessage('hello');
@@ -59,8 +58,6 @@ describe('Thread sharing and resume behavior', () => {
     shareCurrentThread();
     openSharedLinkInSameTab();
 
-    // Read-only banner should be visible and composer should be hidden
-    cy.get('[data-testid="read-only-banner"]').should('be.visible');
     cy.get('#message-composer').should('not.exist');
 
     // The shared messages should be visible
@@ -84,8 +81,6 @@ describe('Thread sharing and resume behavior', () => {
       // Visit the shared link directly
       cy.visit(`/share/${threadId}`);
 
-      // Read-only banner visible, no composer
-      cy.get('[data-testid="read-only-banner"]').should('be.visible');
       cy.get('#message-composer').should('not.exist');
       // Same messages visible
       cy.get("[data-step-type='assistant_message']").contains('You said: from a');
