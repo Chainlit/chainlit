@@ -22,7 +22,7 @@ jobs:
         run: |
           if [[ "${{ github.ref_name }}" != "main" && "${{ github.event_name }}" != "release" ]]; then
             if [[ "${{ inputs.use_testpypi }}" != "true" ]]; then
-              echo "❌ Error: Only build from main branch can be published to PyPI."
+              echo "❌ Error: Only build from main branch or release tag can be published to PyPI."
               echo "Please check 'Publish to TestPyPI instead of PyPI' when running from branch: ${{ github.ref_name }}"
               exit 1
             fi
