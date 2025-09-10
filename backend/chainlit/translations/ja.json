@@ -153,7 +153,16 @@
         "actions": {
           "share": {
             "title": "チャットのリンクを共有",
-            "button": "共有"
+            "button": "共有",
+            "status": {
+              "copied": "リンクをコピーしました",
+              "created": "共有リンクを作成しました！",
+              "unshared": "このスレッドの共有を無効にしました"
+            },
+            "error": {
+              "create": "共有リンクの作成に失敗しました",
+              "unshare": "スレッドの共有解除に失敗しました"
+            }
           },
           "delete": {
             "title": "削除の確認",

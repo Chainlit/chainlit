@@ -154,7 +154,16 @@
       "actions": {
         "share": {
           "title": "分享聊天链接",
-          "button": "分享"
+          "button": "分享",
+          "status": {
+            "copied": "链接已复制",
+            "created": "分享链接已创建！",
+            "unshared": "已禁用此对话的分享"
+          },
+          "error": {
+            "create": "创建分享链接失败",
+            "unshare": "取消对话分享失败"
+          }
         },
         "delete": {
           "title": "确认删除",

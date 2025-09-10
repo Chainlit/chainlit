@@ -154,7 +154,16 @@
       "actions": {
         "share": {
           "title": "Share link to chat",
-          "button": "Share"
+          "button": "Share",
+          "status": {
+            "copied": "Link copied",
+            "created": "Share link created!",
+            "unshared": "Sharing disabled for this thread"
+          },
+          "error": {
+            "create": "Failed to create share link",
+            "unshare": "Failed to unshare thread"
+          }
         },
         "delete": {
           "title": "Confirm deletion",

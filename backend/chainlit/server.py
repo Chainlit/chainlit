@@ -978,11 +978,9 @@ async def get_shared_thread(
 
     # No auth required: allow anonymous access to shared threads
     thread = await data_layer.get_thread(thread_id)
-    print(f"1: {thread}")
 
     if not thread:
         raise HTTPException(status_code=404, detail="Thread not found")
-    print("2")
     # Extract and normalize metadata (may be dict, strified JSON, or None)
     metadata = (thread.get("metadata") if isinstance(thread, dict) else {}) or {}
     if isinstance(metadata, str):
@@ -993,10 +991,31 @@ async def get_shared_thread(
     if not isinstance(metadata, dict):
         metadata = {}
 
-    if not bool(metadata.get("is_shared")):
-        # Pretend it doesn't exist if not shared
-        raise HTTPException(status_code=404, detail="Thread is not shared")
+    user_can_view = True  # Default to True if no callback is provided
+    if config.code.on_shared_thread_view:
+        try:
+            user_can_view = await config.code.on_shared_thread_view(
+                thread, current_user
+            )
+        except Exception as callback_error:
+            logger.error(
+                f"Error in user-provided on_shared_thread_view callback: {callback_error}"
+            )
+            raise HTTPException(
+                status_code=403,
+                detail="You are not authorized to view this thread",
+            ) from callback_error
 
+    is_shared = bool(metadata.get("is_shared"))
+
+    # Proceed only if both conditions are True.
+    if not (user_can_view and is_shared):
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    metadata.pop("chat_profile", None)
+    metadata.pop("chat_settings", None)
+    metadata.pop("env", None)
+    thread["metadata"] = metadata
     return JSONResponse(content=thread)
 
 
@@ -1150,9 +1169,7 @@ async def share_thread(
 
     # Fetch current thread and metadata, then toggle is_shared
     thread = await data_layer.get_thread(thread_id=thread_id)
-    print(f"zzz: {thread['metadata']}")
     metadata = (thread.get("metadata") if thread else {}) or {}
-    print("thread metadata before update: %s", metadata)
     if isinstance(metadata, str):
         try:
             metadata = json.loads(metadata)
@@ -1175,7 +1192,6 @@ async def share_thread(
             thread_id,
             metadata,
         )
-        print("updated metadata for thread=%s to %s", thread_id, metadata)
     except Exception as e:
         logger.exception("[share_thread] update_thread failed: %s", e)
         raise

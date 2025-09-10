@@ -51,7 +51,7 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
           setHasBeenCopied(true);
           setIsCopied(true);
           setTimeout(() => setIsCopied(false), 2000);
-          toast.success('Link copied');
+          toast.success(<Translator path="threadHistory.thread.actions.share.status.copied" />);
           return;
         }
         setIsCopying(true);
@@ -80,7 +80,7 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
           }
           return next;
         });
-        toast.success('Share link created!');
+        toast.success(<Translator path="threadHistory.thread.actions.share.status.created" />);
       } else {
         await navigator.clipboard.writeText(shareLink);
       }
@@ -92,7 +92,7 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
         // Show server-provided detail when available
         toast.error(err.toString());
       } else {
-        toast.error('Failed to create share link');
+        toast.error(<Translator path="threadHistory.thread.actions.share.error.create" />);
       }
     }
   };
@@ -123,14 +123,14 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
         return next;
       });
       setIsCopying(false);
-      toast.success('Sharing disabled for this thread');
+      toast.success(<Translator path="threadHistory.thread.actions.share.status.unshared" />);
       onOpenChange(false);
     } catch (err: any) {
       setIsCopying(false);
       if (err instanceof ClientError) {
         toast.error(err.toString());
       } else {
-        toast.error('Failed to unshare thread');
+        toast.error(<Translator path="threadHistory.thread.actions.share.error.unshare" />);
       }
     }
   }, [apiClient, onOpenChange, setThreadHistory, threadId]);

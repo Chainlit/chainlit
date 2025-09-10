@@ -51,7 +51,7 @@ export default function ThreadPage() {
             </div>
           )
         ) : null}
-        {config && !config.threadResumable ? (
+        {config && !config.threadResumable && !isSharedRoute ? (
           isCurrentThread ? (
             <Chat />
           ) : (

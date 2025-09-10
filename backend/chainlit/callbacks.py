@@ -459,6 +459,7 @@ def on_shared_thread_view(
     """Hook to authorize viewing a shared thread.
 
     Users must implement and return True to allow a non-author to view a thread.
+    Thread metadata contains "is_shared" boolean flag and "shared_at" timestamp for custom thread sharing.
     Signature: async (thread: ThreadDict, viewer: Optional[User], share_token: Optional[str]) -> bool
     """
     config.code.on_shared_thread_view = wrap_user_function(func)

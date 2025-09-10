@@ -153,8 +153,17 @@
         },
         "actions": {
           "share": {
-            "title": "Deellink naar chat",
-            "button": "Delen"
+            "title": "Deel link naar chat",
+            "button": "Delen",
+            "status": {
+              "copied": "Link gekopieerd",
+              "created": "Deellink gemaakt!",
+              "unshared": "Delen uitgeschakeld voor dit gesprek"
+            },
+            "error": {
+              "create": "Aanmaken van deellink mislukt",
+              "unshare": "Delen van gesprek stoppen mislukt"
+            }
           },
           "delete": {
             "title": "Verwijdering bevestigen",

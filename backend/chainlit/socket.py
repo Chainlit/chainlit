@@ -451,6 +451,7 @@ async def open_shared_thread(sid, payload: Dict[str, Any]):
     md = dict(metadata) if isinstance(metadata, dict) else {}
     md.pop("chat_profile", None)
     md.pop("chat_settings", None)
+    md.pop("env", None)
     # Mark as read-only to help the UI disable inputs
     md["viewer_read_only"] = True
     thread["metadata"] = md

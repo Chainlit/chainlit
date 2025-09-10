@@ -154,7 +154,16 @@
             "actions": {
                 "share": {
                     "title": "Partager le lien de la discussion",
-                    "button": "Partager"
+                    "button": "Partager",
+                    "status": {
+                        "copied": "Lien copié",
+                        "created": "Lien de partage créé !",
+                        "unshared": "Partage désactivé pour ce fil"
+                    },
+                    "error": {
+                        "create": "Échec de la création du lien de partage",
+                        "unshare": "Échec de la désactivation du partage du fil"
+                    }
                 },
                 "delete": {
                     "title": "Confirmer la suppression",
