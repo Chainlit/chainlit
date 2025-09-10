@@ -80,7 +80,7 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
 
     async def upsert_feedback(self, feedback: Feedback) -> str:
         return ""
-    
+
     async def build_debug_url(self):
         pass
 
