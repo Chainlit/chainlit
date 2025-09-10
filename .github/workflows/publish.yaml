@@ -29,6 +29,7 @@ jobs:
           fi
           echo "✅ Validation passed"
   ci:
+    needs: [validate]
     uses: ./.github/workflows/ci.yaml
     secrets: inherit
   build-n-publish:
