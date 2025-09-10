@@ -358,6 +358,8 @@ class CodeSettings(BaseModel):
     on_logout: Optional[Callable[["Request", "Response"], Any]] = None
     on_stop: Optional[Callable[[], Any]] = None
     on_chat_start: Optional[Callable[[], Any]] = None
+    on_socket_connect: Optional[Callable[[], Any]] = None
+    on_socket_disconnect: Optional[Callable[[], Any]] = None
     on_chat_end: Optional[Callable[[], Any]] = None
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[["Message"], Any]] = None

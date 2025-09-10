@@ -26,5 +26,5 @@ jobs:
         run: pnpm run buildUi
         timeout-minutes: 5
       - name: Run Pytest
-        run: uv run pytest --cov=chainlit/
+        run: uv run --no-project pytest --cov=chainlit/
         working-directory: ${{ env.BACKEND_DIR }}

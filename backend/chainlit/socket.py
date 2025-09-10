@@ -129,31 +129,51 @@ async def connect(sid, environ, auth):
         return sio.call(event, data, timeout=timeout, to=sid)
 
     session_id = auth.get("sessionId")
+
+    # Try to restore existing session first
     if restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
-        return True
+        session = WebsocketSession.get(sid)
+        if not session:
+            logger.error("Failed to restore existing session")
+            return False
 
-    user_env_string = auth.get("userEnv")
-    user_env = load_user_env(user_env_string)
+        # Initialize WebSocket context for restored session
+        init_ws_context(session)
+    else:
+        # Create new session
+        user_env_string = auth.get("userEnv")
+        user_env = load_user_env(user_env_string)
 
-    client_type = auth.get("clientType")
-    url_encoded_chat_profile = auth.get("chatProfile")
-    chat_profile = (
-        unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
-    )
+        client_type = auth.get("clientType")
+        url_encoded_chat_profile = auth.get("chatProfile")
+        chat_profile = (
+            unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
+        )
 
-    WebsocketSession(
-        id=session_id,
-        socket_id=sid,
-        emit=emit_fn,
-        emit_call=emit_call_fn,
-        client_type=client_type,
-        user_env=user_env,
-        user=user,
-        token=token,
-        chat_profile=chat_profile,
-        thread_id=auth.get("threadId"),
-        environ=environ,
-    )
+        session = WebsocketSession(
+            id=session_id,
+            socket_id=sid,
+            emit=emit_fn,
+            emit_call=emit_call_fn,
+            client_type=client_type,
+            user_env=user_env,
+            user=user,
+            token=token,
+            chat_profile=chat_profile,
+            thread_id=auth.get("threadId"),
+            environ=environ,
+        )
+
+        # Initialize WebSocket context with the session object
+        init_ws_context(session)
+
+    # Call on_socket_connect if defined
+    if config.code.on_socket_connect:
+        task = asyncio.create_task(
+            config.code.on_socket_connect(),
+            name="on_socket_connect",
+        )
+        session.current_task = task
 
     return True
 
@@ -207,10 +227,16 @@ async def disconnect(sid):
     if not session:
         return
 
+    # Re-initialize context after error
     init_ws_context(session)
 
-    if config.code.on_chat_end:
-        await config.code.on_chat_end()
+    # Call on_socket_disconnect if defined
+    if config.code.on_socket_disconnect:
+        try:
+            # Call the disconnect callback
+            await config.code.on_socket_disconnect()
+        except Exception as e:
+            logger.error("Error in on_socket_disconnect: %s", str(e))
 
     if session.thread_id and session.has_first_interaction:
         await persist_user_session(session.thread_id, session.to_persistable())
@@ -232,6 +258,13 @@ async def disconnect(sid):
             await clear(_sid)
 
         asyncio.ensure_future(clear_on_timeout(sid))
+
+        # Call on_chat_end if defined
+        if config.code.on_chat_end:
+            try:
+                await config.code.on_chat_end()
+            except Exception as e:
+                logger.error("Error in on_chat_end: %s", str(e))
 
 
 @sio.on("stop")  # pyright: ignore [reportOptionalCall]

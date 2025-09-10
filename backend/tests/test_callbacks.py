@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 from chainlit import config
 from chainlit.callbacks import password_auth_callback
@@ -61,8 +61,6 @@ async def test_header_auth_callback(test_config: config.ChainlitConfig):
 
 
 async def test_oauth_callback(test_config: config.ChainlitConfig):
-    from unittest.mock import patch
-
     from chainlit.callbacks import oauth_callback
     from chainlit.user import User
 
@@ -539,6 +537,56 @@ async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitCo
 
         # Check that the emit method was called
         context.session.emit.assert_called()
+
+
+async def test_on_socket_connect(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import on_socket_connect
+
+    async with mock_chainlit_context:
+        # Setup test data
+        socket_connected = False
+
+        @on_socket_connect
+        async def handle_socket_connect():
+            nonlocal socket_connected
+            socket_connected = True
+
+        # Test that the callback is properly registered
+        assert test_config.code.on_socket_connect is not None
+
+        # Call the registered callback
+        await test_config.code.on_socket_connect()
+
+        # Check that the callback was executed
+        assert socket_connected
+        # Socket connect callbacks don't emit steps, so no emit call expected
+
+
+async def test_on_socket_disconnect(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import on_socket_disconnect
+
+    async with mock_chainlit_context:
+        # Setup test data
+        socket_disconnected = False
+
+        @on_socket_disconnect
+        async def handle_socket_disconnect():
+            nonlocal socket_disconnected
+            socket_disconnected = True
+
+        # Test that the callback is properly registered
+        assert test_config.code.on_socket_disconnect is not None
+
+        # Call the registered callback
+        await test_config.code.on_socket_disconnect()
+
+        # Check that the callback was executed
+        assert socket_disconnected
+        # Socket disconnect callbacks don't emit steps, so no emit call expected
 
 
 async def test_data_layer_config(

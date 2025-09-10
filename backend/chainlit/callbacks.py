@@ -17,6 +17,36 @@ from chainlit.types import ChatProfile, Starter, ThreadDict
 from chainlit.user import User
 from chainlit.utils import wrap_user_function
 
+__all__ = [
+    "action_callback",
+    "author_rename",
+    "data_layer",
+    "header_auth_callback",
+    "oauth_callback",
+    "on_app_shutdown",
+    "on_app_startup",
+    "on_audio_chunk",
+    "on_audio_end",
+    "on_audio_start",
+    "on_chat_end",
+    "on_chat_resume",
+    "on_chat_start",
+    "on_feedback",
+    "on_logout",
+    "on_mcp_connect",
+    "on_mcp_disconnect",
+    "on_message",
+    "on_settings_update",
+    "on_socket_connect",
+    "on_socket_disconnect",
+    "on_stop",
+    "on_window_message",
+    "password_auth_callback",
+    "send_window_message",
+    "set_chat_profiles",
+    "set_starters",
+]
+
 
 def on_app_startup(func: Callable[[], Union[None, Awaitable[None]]]) -> Callable:
     """
@@ -191,6 +221,37 @@ def on_window_message(func: Callable[[str], Any]) -> Callable:
     return func
 
 
+def on_socket_connect(func: Callable) -> Callable:
+    """
+    Hook to react to the socket connection event.
+    This is called when a new WebSocket connection is established.
+
+    Args:
+        func (Callable[[], Any]): The connection hook to execute.
+
+    Returns:
+        Callable[[], Any]: The decorated hook.
+    """
+    config.code.on_socket_connect = wrap_user_function(func)
+    return func
+
+
+def on_socket_disconnect(func: Callable) -> Callable:
+    """
+    Hook to react to the socket disconnection event.
+    This is called when a WebSocket connection is closed.
+
+    Args:
+        func (Callable[[], Any]): The disconnection hook to execute.
+
+    Returns:
+        Callable[[], Any]: The decorated hook.
+    """
+    config.code.on_socket_disconnect = wrap_user_function(func)
+
+    return func
+
+
 def on_chat_start(func: Callable) -> Callable:
     """
     Hook to react to the user websocket connection event.
@@ -201,7 +262,6 @@ def on_chat_start(func: Callable) -> Callable:
     Returns:
         Callable[], Any]: The decorated hook.
     """
-
     config.code.on_chat_start = wrap_user_function(
         step(func, name="on_chat_start", type="run"), with_task=True
     )
