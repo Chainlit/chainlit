@@ -20,10 +20,12 @@ jobs:
     steps:
       - name: Validate publishing branch and destination package index
         run: |
-          if [[ "${{ github.ref_name }}" != "main" && "${{ inputs.use_testpypi }}" != "true" ]]; then
-            echo "❌ Error: Only build from main branch can be published to PyPI."
-            echo "Please check 'Publish to TestPyPI instead of PyPI' when running from branch: ${{ github.ref_name }}"
-            exit 1
+          if [[ "${{ github.ref_name }}" != "main" && "${{ github.event_name }}" != "release" ]]; then
+            if [[ "${{ inputs.use_testpypi }}" != "true" ]]; then
+              echo "❌ Error: Only build from main branch can be published to PyPI."
+              echo "Please check 'Publish to TestPyPI instead of PyPI' when running from branch: ${{ github.ref_name }}"
+              exit 1
+            fi
           fi
           echo "✅ Validation passed"
   ci:
