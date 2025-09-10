@@ -14,6 +14,18 @@ on:
 permissions: read-all
 
 jobs:
+  validate:
+    name: Validate inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate publishing branch and destination package index
+        run: |
+          if [[ "${{ github.ref_name }}" != "main" && "${{ inputs.use_testpypi }}" != "true" ]]; then
+            echo "❌ Error: Only build from main branch can be published to PyPI."
+            echo "Please check 'Publish to TestPyPI instead of PyPI' when running from branch: ${{ github.ref_name }}"
+            exit 1
+          fi
+          echo "✅ Validation passed"
   ci:
     uses: ./.github/workflows/ci.yaml
     secrets: inherit
@@ -30,8 +42,6 @@ jobs:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
         with:
