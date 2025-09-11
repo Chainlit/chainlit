@@ -147,10 +147,24 @@
       "thread": {
         "untitled": "Naamloos gesprek",
         "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
+          "rename": "Hernoemen",
+          "share": "Delen",
+          "delete": "Verwijderen"
         },
         "actions": {
+          "share": {
+            "title": "Deel link naar chat",
+            "button": "Delen",
+            "status": {
+              "copied": "Link gekopieerd",
+              "created": "Deellink gemaakt!",
+              "unshared": "Delen uitgeschakeld voor dit gesprek"
+            },
+            "error": {
+              "create": "Aanmaken van deellink mislukt",
+              "unshare": "Delen van gesprek stoppen mislukt"
+            }
+          },
           "delete": {
             "title": "Verwijdering bevestigen",
             "description": "Dit zal het gesprek en bijbehorende berichten en elementen verwijderen. Deze actie kan niet ongedaan worden gemaakt",
