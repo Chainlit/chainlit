@@ -19,11 +19,18 @@ from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import sio
 from chainlit.session import WebsocketSession
-from chainlit.types import InputAudioChunk, InputAudioChunkPayload, MessagePayload
+from chainlit.types import (
+    InputAudioChunk,
+    InputAudioChunkPayload,
+    MessagePayload,
+)
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_sessions
 
 WSGIEnvironment: TypeAlias = dict[str, Any]
+
+# Generic error message reused across resume flows.
+THREAD_NOT_FOUND_MSG = "Thread not found."
 
 
 def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):

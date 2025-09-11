@@ -177,16 +177,12 @@ export default function MessageComposer({
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
+          <VoiceButton disabled={disabled} />
           <UploadButton
             disabled={disabled}
             fileSpec={fileSpec}
             onFileUploadError={onFileUploadError}
             onFileUpload={onFileUpload}
-          />
-          <CommandButton
-            disabled={disabled}
-            selectedCommandId={selectedCommand?.id}
-            onCommandSelect={setSelectedCommand}
           />
           {chatSettingsInputs.length > 0 && (
             <Button
@@ -201,7 +197,11 @@ export default function MessageComposer({
             </Button>
           )}
           <McpButton disabled={disabled} />
-          <VoiceButton disabled={disabled} />
+          <CommandButton
+            disabled={disabled}
+            selectedCommandId={selectedCommand?.id}
+            onCommandSelect={setSelectedCommand}
+          />
           <CommandButtons
             disabled={disabled}
             selectedCommandId={selectedCommand?.id}
