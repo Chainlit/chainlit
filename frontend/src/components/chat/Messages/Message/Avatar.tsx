@@ -19,11 +19,12 @@ import {
 
 interface Props {
   author?: string;
+  avatarName?: string;
   hide?: boolean;
   isError?: boolean;
 }
 
-const MessageAvatar = ({ author, hide, isError }: Props) => {
+const MessageAvatar = ({ author, avatarName, hide, isError }: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
   const { config } = useConfig();
@@ -39,8 +40,10 @@ const MessageAvatar = ({ author, hide, isError }: Props) => {
     if (isAssistant && selectedChatProfile?.icon) {
       return selectedChatProfile.icon;
     }
-    return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
-  }, [apiClient, selectedChatProfile, config, author]);
+    // Use avatarName if provided, otherwise fall back to author name
+    const avatarIdentifier = avatarName || author || 'default';
+    return apiClient?.buildEndpoint(`/avatars/${avatarIdentifier}`);
+  }, [apiClient, selectedChatProfile, config, author, avatarName]);
 
   if (isError) {
     return (
