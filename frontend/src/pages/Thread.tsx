@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 
 import Page from 'pages/Page';
@@ -17,6 +17,7 @@ import Chat from '@/components/chat';
 
 export default function ThreadPage() {
   const { id } = useParams();
+  const location = useLocation();
   const { config } = useConfig();
 
   const setThreadHistory = useSetRecoilState(threadHistoryState);
@@ -32,13 +33,16 @@ export default function ThreadPage() {
     });
   }, [id]);
 
+  const isSharedRoute = location.pathname.startsWith('/share/');
+
   return (
     <Page>
       <>
-        {config?.threadResumable && !isCurrentThread ? (
+  {isSharedRoute ? <ReadOnlyThread id={id!} /> : null}
+        {config?.threadResumable && !isCurrentThread && !isSharedRoute ? (
           <AutoResumeThread id={id!} />
         ) : null}
-        {config?.threadResumable ? (
+        {config?.threadResumable && !isSharedRoute ? (
           isCurrentThread ? (
             <Chat />
           ) : (
@@ -47,7 +51,7 @@ export default function ThreadPage() {
             </div>
           )
         ) : null}
-        {config && !config.threadResumable ? (
+        {config && !config.threadResumable && !isSharedRoute ? (
           isCurrentThread ? (
             <Chat />
           ) : (
