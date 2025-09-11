@@ -148,9 +148,23 @@
       "untitled": "Untitled Conversation",
       "menu": {
           "rename": "Rename",
+          "share": "Share",
           "delete": "Delete"
         },
       "actions": {
+        "share": {
+          "title": "Share link to chat",
+          "button": "Share",
+          "status": {
+            "copied": "Link copied",
+            "created": "Share link created!",
+            "unshared": "Sharing disabled for this thread"
+          },
+          "error": {
+            "create": "Failed to create share link",
+            "unshare": "Failed to unshare thread"
+          }
+        },
         "delete": {
           "title": "Confirm deletion",
           "description": "This will delete the thread as well as its messages and elements. This action cannot be undone",

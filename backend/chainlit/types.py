@@ -219,6 +219,11 @@ class UpdateThreadRequest(BaseModel):
     name: str
 
 
+class ShareThreadRequest(BaseModel):
+    threadId: str
+    isShared: bool
+
+
 class DeleteThreadRequest(BaseModel):
     threadId: str
 

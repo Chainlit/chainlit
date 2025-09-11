@@ -679,7 +679,6 @@ wheels = [
 
 [[package]]
 name = "chainlit"
-version = "2.7.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
@@ -805,7 +804,7 @@ requires-dist = [
     { name = "uvicorn", specifier = ">=0.35.0" },
     { name = "watchfiles", specifier = ">=0.20.0,<1.0.0" },
 ]
-provides-extras = ["tests", "dev", "mypy", "custom-data"]
+provides-extras = ["custom-data", "dev", "mypy", "tests"]
 
 [[package]]
 name = "chardet"

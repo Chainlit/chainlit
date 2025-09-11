@@ -146,10 +146,24 @@
       "thread": {
         "untitled": "無題の会話",
         "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
+          "rename": "名前を変更",
+          "share": "共有",
+          "delete": "削除"
         },
         "actions": {
+          "share": {
+            "title": "チャットのリンクを共有",
+            "button": "共有",
+            "status": {
+              "copied": "リンクをコピーしました",
+              "created": "共有リンクを作成しました！",
+              "unshared": "このスレッドの共有を無効にしました"
+            },
+            "error": {
+              "create": "共有リンクの作成に失敗しました",
+              "unshare": "スレッドの共有解除に失敗しました"
+            }
+          },
           "delete": {
             "title": "削除の確認",
             "description": "このスレッドとそのメッセージ、要素が削除されます。この操作は取り消せません",
