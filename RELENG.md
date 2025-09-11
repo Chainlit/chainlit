@@ -16,8 +16,7 @@ This document outlines the steps for maintainers to create a new release of the 
 
 2. **Bump the package version**:
 
-   - Update `version` in `backend/chainlit/version.py`.
-   - Run `uv lock` to include new version in `uv.lock`
+   - Update `version` in `backend/chainlit/version.py`
 
 3. **Update the changelog**:
 
