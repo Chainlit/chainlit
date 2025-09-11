@@ -148,9 +148,23 @@
       "untitled": "Conversación sin título",
       "menu": {
         "rename": "Renombrar",
+        "share": "Compartir",
         "delete": "Eliminar"
       },
       "actions": {
+        "share": {
+          "title": "Compartir enlace del chat",
+          "button": "Compartir",
+          "status": {
+            "copied": "Enlace copiado",
+            "created": "¡Enlace de uso compartido creado!",
+            "unshared": "Uso compartido deshabilitado para este hilo"
+          },
+          "error": {
+            "create": "Error al crear el enlace de uso compartido",
+            "unshare": "Error al dejar de compartir el hilo"
+          }
+        },
         "delete": {
           "title": "Confirmar eliminación",
           "description": "Esto eliminará la conversación, sus mensajes y elementos. Esta acción no se puede deshacer",
