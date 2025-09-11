@@ -540,7 +540,7 @@ def load_module(target: str, force_refresh: bool = False):
         site_package_dirs = site.getsitepackages()
 
         # Clear the modules related to the app from sys.modules
-        for module_name, module in sys.modules.items():
+        for module_name, module in list(sys.modules.items()):
             if (
                 hasattr(module, "__file__")
                 and module.__file__
@@ -607,12 +607,20 @@ def reload_config():
     global config
     if config is None:
         return
+
+    # Preserve the module_name during config reload to ensure hot reload works
+    original_module_name = config.run.module_name if config.run else None
+
     new_cfg = ChainlitConfig(**load_settings())
     config.root = new_cfg.root
     config.chainlit_server = new_cfg.chainlit_server
     config.run = new_cfg.run
     config.features = new_cfg.features
     config.ui = new_cfg.ui
+
+    # Restore the preserved module_name
+    if original_module_name and config.run:
+        config.run.module_name = original_module_name
     config.project = new_cfg.project
     config.code = new_cfg.code
 
