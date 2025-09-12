@@ -4,6 +4,24 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.8.0] - 2025-09-12
+
+### Added
+- Add ability to share threads. See documentation for how to enable it.
+  - https://docs.chainlit.io/api-reference/lifecycle-hooks/on-shared-thread-view
+- Add new chat settings: multi-select, radio-group, and checkbox
+- Add optional language parameter to set_starters
+- Add neutral Spanish translation
+- Allow sending commands from custom elements
+
+### Fixed
+- Default to plaintext code blocks for unsupported languages like CSV
+- Replace hardcoded strings with translation keys
+- GCP storage provider dependency is now optional
+- CI/CD fixes
+- Fixed issues with hot-reloading in dev mode (`-w` flag)
+- Reordered message composer elements
+
 ## [2.7.2] - 2025-08-26
 
 ### Added
