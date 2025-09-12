@@ -40,7 +40,9 @@ def copy_directory(src, dst, description):
     """Copy directory with proper error handling"""
     print(f"Copying {src} to {dst}")
     try:
-        dst.mkdir(parents=True, exist_ok=True)
+        if dst.exists():
+            shutil.rmtree(dst)
+        dst.mkdir(parents=True)
         shutil.copytree(src, dst, dirs_exist_ok=True)
     except KeyboardInterrupt:
         print("\nInterrupt received during copy operation...")
