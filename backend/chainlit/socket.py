@@ -12,7 +12,7 @@ from chainlit.auth import (
     require_login,
 )
 from chainlit.chat_context import chat_context
-from chainlit.config import config
+from chainlit.config import config, ChainlitConfig
 from chainlit.context import init_ws_context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
@@ -333,6 +333,8 @@ async def audio_start(sid):
     session = WebsocketSession.require(sid)
 
     context = init_ws_context(session)
+    config: ChainlitConfig = session.get_config()
+
     if config.features.audio.enabled:
         connected = bool(await config.code.on_audio_start())
         connection_state = "on" if connected else "off"
@@ -345,6 +347,8 @@ async def audio_chunk(sid, payload: InputAudioChunkPayload):
     session = WebsocketSession.require(sid)
 
     init_ws_context(session)
+
+    config: ChainlitConfig = session.get_config()
 
     if config.features.audio.enabled:
         asyncio.create_task(config.code.on_audio_chunk(InputAudioChunk(**payload)))
@@ -362,6 +366,8 @@ async def audio_end(sid):
             session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread("audio"))
 
+        config: ChainlitConfig = session.get_config()
+        
         if config.features.audio.enabled:
             await config.code.on_audio_end()
 
