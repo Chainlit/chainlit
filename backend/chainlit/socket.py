@@ -12,7 +12,7 @@ from chainlit.auth import (
     require_login,
 )
 from chainlit.chat_context import chat_context
-from chainlit.config import config, ChainlitConfig
+from chainlit.config import ChainlitConfig, config
 from chainlit.context import init_ws_context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
@@ -367,7 +367,7 @@ async def audio_end(sid):
             asyncio.create_task(context.emitter.init_thread("audio"))
 
         config: ChainlitConfig = session.get_config()
-        
+
         if config.features.audio.enabled:
             await config.code.on_audio_end()
 
