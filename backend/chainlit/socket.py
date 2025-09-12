@@ -330,12 +330,13 @@ async def window_message(sid, data):
 @sio.on("audio_start")  # pyright: ignore [reportOptionalCall]
 async def audio_start(sid):
     """Handle audio init."""
-    session = WebsocketSession.require(sid)
+    WebsocketSession.require(sid)
+    session = WebsocketSession.get_by_id(sid)
 
     context = init_ws_context(session)
     config: ChainlitConfig = session.get_config()
 
-    if config.features.audio.enabled:
+    if config.features.audio and config.features.audio.enabled:
         connected = bool(await config.code.on_audio_start())
         connection_state = "on" if connected else "off"
         await context.emitter.update_audio_connection(connection_state)
@@ -344,20 +345,27 @@ async def audio_start(sid):
 @sio.on("audio_chunk")
 async def audio_chunk(sid, payload: InputAudioChunkPayload):
     """Handle an audio chunk sent by the user."""
-    session = WebsocketSession.require(sid)
+    WebsocketSession.require(sid)
+    session = WebsocketSession.get_by_id(sid)
 
     init_ws_context(session)
 
     config: ChainlitConfig = session.get_config()
 
-    if config.features.audio.enabled:
+    if (
+        config.features.audio
+        and config.features.audio.enabled
+        and config.code.on_audio_chunk
+    ):
         asyncio.create_task(config.code.on_audio_chunk(InputAudioChunk(**payload)))
 
 
 @sio.on("audio_end")
 async def audio_end(sid):
     """Handle the end of the audio stream."""
-    session = WebsocketSession.require(sid)
+    WebsocketSession.require(sid)
+    session = WebsocketSession.get_by_id(sid)
+
     try:
         context = init_ws_context(session)
         await context.emitter.task_start()
@@ -368,7 +376,7 @@ async def audio_end(sid):
 
         config: ChainlitConfig = session.get_config()
 
-        if config.features.audio.enabled:
+        if config.features.audio and config.features.audio.enabled:
             await config.code.on_audio_end()
 
     except asyncio.CancelledError:
