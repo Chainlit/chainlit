@@ -132,10 +132,6 @@ artifacts = [
     "chainlit/copilot/dist/**/*"
 ]
 
-[tool.hatch.build.targets.wheel.hooks.custom]
-path = "build.py"
-enable-by-default = false
-
 [tool.hatch.version]
 path = "chainlit/version.py"
 
