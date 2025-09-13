@@ -330,8 +330,7 @@ async def window_message(sid, data):
 @sio.on("audio_start")  # pyright: ignore [reportOptionalCall]
 async def audio_start(sid):
     """Handle audio init."""
-    WebsocketSession.require(sid)
-    session = WebsocketSession.get_by_id(sid)
+    session = WebsocketSession.require(sid)
 
     context = init_ws_context(session)
     config: ChainlitConfig = session.get_config()
@@ -345,8 +344,7 @@ async def audio_start(sid):
 @sio.on("audio_chunk")
 async def audio_chunk(sid, payload: InputAudioChunkPayload):
     """Handle an audio chunk sent by the user."""
-    WebsocketSession.require(sid)
-    session = WebsocketSession.get_by_id(sid)
+    session = WebsocketSession.require(sid)
 
     init_ws_context(session)
 
@@ -363,8 +361,7 @@ async def audio_chunk(sid, payload: InputAudioChunkPayload):
 @sio.on("audio_end")
 async def audio_end(sid):
     """Handle the end of the audio stream."""
-    WebsocketSession.require(sid)
-    session = WebsocketSession.get_by_id(sid)
+    session = WebsocketSession.require(sid)
 
     try:
         context = init_ws_context(session)
