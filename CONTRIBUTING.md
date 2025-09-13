@@ -79,14 +79,6 @@ cd backend
 uv sync --extra tests --extra mypy --extra dev --extra custom-data
 ```
 
-### Build Frontend
-
-The following will build the frontend distributions locally. From the root of the repo:
-
-```sh
-pnpm run buildUi
-```
-
 ## Start the Chainlit server from source
 
 Start by running `backend/hello.py` as an example.
