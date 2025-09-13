@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import time
 import uuid
 from abc import ABC
@@ -194,6 +195,43 @@ class MessageBase(ABC):
             await context.emitter.send_token(
                 id=self.id, token=token, is_sequence=is_sequence
             )
+
+    async def set_author_and_avatar(
+        self,
+        author: Optional[str] = None,
+        avatar: Optional[str] = None,
+    ):
+        """
+        Update the author and/or avatar for a message and send it to the UI.
+
+        This method allows you to change the displayed author name and avatar for a message after it has been sent. The avatar name is stored in `metadata.avatarName` and is used by the UI to select the corresponding image from the `public/avatars` folder. If a file extension is provided (e.g., "avatar.png"), it will be automatically removed (e.g., "avatar").
+
+        Notes:
+            - If the `@author_rename` decorator is used in your config, it will override any author changes made by this method.
+            - If `avatar` is not provided, the UI will use the default avatar for the author name.
+            - The avatar name should match the filename (without extension) of the image in `public/avatars`.
+
+        Args:
+            author (str, optional): The new author name to display. If None, the current author is kept. If no avatar is provided, the avatar shown will be based on the author name.
+            avatar (str, optional): The new avatar name to display. If None, the current avatar is kept.
+
+        Returns:
+            bool: True if the update was successful and the UI was notified.
+        """
+        # Update author if provided
+        if author is not None:
+            self.author = author
+
+        # Update avatar name in metadata if provided
+        if avatar is not None:
+            if self.metadata is None:
+                self.metadata = {}
+            # Remove file extension if present (e.g., "avatar.png" -> "avatar")
+            clean_avatar_name = os.path.splitext(avatar)[0]
+            self.metadata["avatarName"] = clean_avatar_name
+
+        # Use the existing update mechanism to send changes to UI
+        return await self.send()
 
 
 class Message(MessageBase):
