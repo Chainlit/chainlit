@@ -116,17 +116,20 @@ exclude = [
   "chainlit/copilot/**/**/"
 ]
 
-[tool.hatch.build.targets.wheel]
-packages = ["chainlit"]
-artifacts = [
-  "chainlit/frontend/dist/**/*",
-  "chainlit/copilot/dist/**/*"
-]
+[tool.hatch.build.hooks.custom]
+path = "build.py"
 
 [tool.hatch.build.targets.sdist]
 artifacts = [
-  "chainlit/frontend/dist/**/*",
-  "chainlit/copilot/dist/**/*"
+    "chainlit/frontend/dist/**/*",
+    "chainlit/copilot/dist/**/*"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["chainlit"]
+artifacts = [
+    "chainlit/frontend/dist/**/*",
+    "chainlit/copilot/dist/**/*"
 ]
 
 [tool.hatch.version]

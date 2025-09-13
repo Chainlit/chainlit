@@ -54,15 +54,11 @@ jobs:
         with:
           working-directory: ${{ env.BACKEND_DIR }}
 
-      - name: Build frontend and prepare assets
-        run: uv run python build.py
-        working-directory: ${{ env.BACKEND_DIR }}
-
       - name: Build Python distribution
         run: uv build
         working-directory: ${{ env.BACKEND_DIR }}
 
-      - name: List wheel contents
+      - name: Check frontend and copilot folder included
         run: |
           pip install wheel
           python -m wheel unpack dist/chainlit-*.whl -d unpacked
