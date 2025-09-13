@@ -4,7 +4,6 @@ import logging
 import os
 import random
 from dataclasses import asdict
-from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -29,6 +28,7 @@ from chainlit.types import (
     ThreadFilter,
 )
 from chainlit.user import PersistedUser, User
+from chainlit.utils import utc_now
 
 if TYPE_CHECKING:
     from mypy_boto3_dynamodb import DynamoDBClient
@@ -62,7 +62,7 @@ class DynamoDBDataLayer(BaseDataLayer):
         self._type_serializer = TypeSerializer()
 
     def _get_current_timestamp(self) -> str:
-        return datetime.now().isoformat() + "Z"
+        return utc_now()
 
     def _serialize_item(self, item: dict[str, Any]) -> dict[str, Any]:
         def convert_floats(obj):
