@@ -13,15 +13,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add optional language parameter to set_starters
 - Add neutral Spanish translation
 - Allow sending commands from custom elements
-- Take overridden config into account in audio handlers
+
+### Changed
+- Reordered message composer elements
 
 ### Fixed
 - Default to plaintext code blocks for unsupported languages like CSV
+- Sort threads by updated_at field
 - Replace hardcoded strings with translation keys
 - GCP storage provider dependency is now optional
 - CI/CD fixes
 - Fixed issues with hot-reloading in dev mode (`-w` flag)
-- Reordered message composer elements
+- Take overridden config into account in audio handlers
 
 ## [2.7.2] - 2025-08-26
 
