@@ -13,6 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add optional language parameter to set_starters
 - Add neutral Spanish translation
 - Allow sending commands from custom elements
+- Take overridden config into account in audio handlers
 
 ### Fixed
 - Default to plaintext code blocks for unsupported languages like CSV
