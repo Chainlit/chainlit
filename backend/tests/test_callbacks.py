@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, Mock
 from chainlit import config
 from chainlit.callbacks import password_auth_callback
 from chainlit.data.base import BaseDataLayer
+from chainlit.types import ThreadDict
 from chainlit.user import User
 
 
@@ -349,7 +350,6 @@ async def test_on_chat_resume(
     mock_chainlit_context, test_config: config.ChainlitConfig
 ):
     from chainlit.callbacks import on_chat_resume
-    from chainlit.types import ThreadDict
 
     async with mock_chainlit_context:
         chat_resumed = False
@@ -541,7 +541,7 @@ async def test_on_shared_thread_view_allow(
 
         assert test_config.code.on_shared_thread_view is not None
 
-        thread = {
+        thread: ThreadDict = {
             "id": "t1",
             "createdAt": "2025-09-03T00:00:00Z",
             "name": "Shared Thread",
@@ -571,7 +571,9 @@ async def test_on_shared_thread_view_block_and_exception(
             md = thread.get("metadata") or {}
             return md.get("chat_profile") == "allowed"
 
-        thread = {
+        assert test_config.code.on_shared_thread_view is not None
+
+        thread: ThreadDict = {
             "id": "t2",
             "createdAt": "2025-09-03T00:00:00Z",
             "name": "Shared Thread",
@@ -594,7 +596,9 @@ async def test_on_shared_thread_view_block_and_exception(
                 raise ValueError("Viewer not allowed for this profile")
             return True
 
-        thread_err = {
+        assert test_config.code.on_shared_thread_view is not None
+
+        thread_err: ThreadDict = {
             "id": "t3",
             "createdAt": "2025-09-03T00:00:00Z",
             "name": "Shared Thread",
