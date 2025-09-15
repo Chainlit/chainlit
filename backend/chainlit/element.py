@@ -1,5 +1,6 @@
 import json
 import mimetypes
+import os
 import uuid
 from enum import Enum
 from io import BytesIO
@@ -452,3 +453,38 @@ class CustomElement(Element):
 
     async def update(self):
         await super().send(self.for_id)
+
+
+@dataclass
+class GoogleMapsElement(CustomElement):
+    """Interactive Google Maps element for location display and marker interaction."""
+    
+    def __init__(
+        self,
+        name: str = "GoogleMaps",
+        center: Optional[Dict[str, float]] = None,
+        zoom: int = 10,
+        markers: Optional[List[Dict]] = None,
+        **kwargs
+    ):
+        if center is None:
+            center = {"lat": 40.7128, "lng": -74.0060}  # Default to NYC
+        if markers is None:
+            markers = []
+            
+        # Get API key from environment - user must specify in .env
+        api_key = os.getenv("GOOGLE_MAPS_API_KEY")
+        if not api_key:
+            raise ValueError(
+                "GOOGLE_MAPS_API_KEY environment variable is required. "
+                "Please add it to your .env file."
+            )
+            
+        props = {
+            "center": center,
+            "zoom": zoom,
+            "markers": markers,
+            "apiKey": api_key
+        }
+        
+        super().__init__(name=name, props=props, **kwargs)
