@@ -25,7 +25,8 @@ const MessageButtons = ({ message, actions, run, contentRef }: Props) => {
   const isUser = message.type === 'user_message';
   const isAsk = message.waitForAnswer;
   const hasContent = !!message.output;
-  const showCopyButton = !!run && hasContent && !isUser && !isAsk;
+  // Show copy button for every message with content, except user messages and ask messages
+  const showCopyButton = hasContent && !isUser && !isAsk;
 
   const messageActions = actions.filter((a) => a.forId === message.id);
 
