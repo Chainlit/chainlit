@@ -22,7 +22,8 @@
       "form": {
         "username": {
           "label": "Username",
-          "required": "Username is required"
+          "required": "Username is required",
+          "placeholder": "Enter your username"
         },
         "password": {
           "label": "Password",
@@ -210,5 +211,27 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "accessibility": {
+    "pagination": "Pagination navigation",
+    "previousPage": "Go to previous page",
+    "nextPage": "Go to next page",
+    "toggleSidebar": "Toggle sidebar",
+    "closeLightbox": "Close lightbox"
+  },
+  "ui": {
+    "elementPanel": {
+      "show": "Show element panel",
+      "hide": "Hide element panel"
+    },
+    "debug": {
+      "literalAI": "Debug in Literal AI"
+    },
+    "profiles": {
+      "select": "Select profile"
+    },
+    "feedback": {
+      "placeholder": "Your feedback..."
+    }
   }
 }

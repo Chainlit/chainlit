@@ -22,7 +22,8 @@
       "form": {
         "username": {
           "label": "ಬಳಕೆದಾರ ಹೆಸರು",
-          "required": "ಬಳಕೆದಾರ ಹೆಸರು ಅಗತ್ಯವಿದೆ"
+          "required": "ಬಳಕೆದಾರ ಹೆಸರು ಅಗತ್ಯವಿದೆ",
+          "placeholder": "ನಿಮ್ಮ ಬಳಕೆದಾರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ"
         },
         "password": {
           "label": "ಪಾಸ್‌ವರ್ಡ್",
@@ -195,20 +196,42 @@
     }
   },
   "alerts": {
-    "info": "Info",
-    "note": "Note",
-    "tip": "Tip",
-    "important": "Important",
-    "warning": "Warning",
-    "caution": "Caution",
-    "debug": "Debug",
-    "example": "Example",
-    "success": "Success",
-    "help": "Help",
-    "idea": "Idea",
-    "pending": "Pending",
-    "security": "Security",
-    "beta": "Beta",
-    "best-practice": "Best Practice"
+    "info": "ಮಾಹಿತಿ",
+    "note": "ಟಿಪ್ಪಣಿ",
+    "tip": "ಸಲಹೆ",
+    "important": "ಮುಖ್ಯ",
+    "warning": "ಎಚ್ಚರಿಕೆ",
+    "caution": "ಎಚ್ಚರಿಕೆ",
+    "debug": "ಡಿಬಗ್",
+    "example": "ಉದಾಹರಣೆ",
+    "success": "ಯಶಸ್ಸು",
+    "help": "ಸಹಾಯ",
+    "idea": "ಕಲ್ಪನೆ",
+    "pending": "ಬಾಕಿ",
+    "security": "ಭದ್ರತೆ",
+    "beta": "ಬೀಟಾ",
+    "best-practice": "ಉತ್ತಮ ಅಭ್ಯಾಸ"
+  },
+  "accessibility": {
+    "pagination": "ಪುಟ ನ್ಯಾವಿಗೇಷನ್",
+    "previousPage": "ಹಿಂದಿನ ಪುಟಕ್ಕೆ ಹೋಗಿ",
+    "nextPage": "ಮುಂದಿನ ಪುಟಕ್ಕೆ ಹೋಗಿ",
+    "toggleSidebar": "ಸೈಡ್‌ಬಾರ್ ಟಾಗಲ್ ಮಾಡಿ",
+    "closeLightbox": "ಲೈಟ್‌ಬಾಕ್ಸ್ ಮುಚ್ಚಿ"
+  },
+  "ui": {
+    "elementPanel": {
+      "show": "ಎಲಿಮೆಂಟ್ ಪ್ಯಾನೆಲ್ ತೋರಿಸಿ",
+      "hide": "ಎಲಿಮೆಂಟ್ ಪ್ಯಾನೆಲ್ ಮರೆಮಾಡಿ"
+    },
+    "debug": {
+      "literalAI": "Literal AI ನಲ್ಲಿ ಡಿಬಗ್ ಮಾಡಿ"
+    },
+    "profiles": {
+      "select": "ಪ್ರೊಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ"
+    },
+    "feedback": {
+      "placeholder": "ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆ..."
+    }
   }
 }

@@ -30,7 +30,10 @@ def get_data_layer():
                 # When @data_layer is configured, call it to get data layer.
                 _data_layer = config.code.data_layer()
             elif database_url := os.environ.get("DATABASE_URL"):
-                from .chainlit_data_layer import ChainlitDataLayer
+                # Choose the right data layer implementation based on the DATABASE_URL scheme.
+                # - For Postgres URLs, use the asyncpg-based ChainlitDataLayer (existing behavior).
+                # - For SQLite URLs (sqlite:/// or sqlite+aiosqlite:///), use the SQLAlchemyDataLayer.
+                from urllib.parse import urlparse
 
                 if os.environ.get("LITERAL_API_KEY"):
                     warnings.warn(
@@ -93,9 +96,27 @@ def get_data_layer():
                         storage_key=azure_storage_key,
                     )
 
-                _data_layer = ChainlitDataLayer(
-                    database_url=database_url, storage_client=storage_client
-                )
+                parsed = urlparse(database_url)
+                scheme = parsed.scheme or ""
+
+                # Allow override via CHAINLIT_DATA_LAYER to force a specific implementation
+                # Values: "sqlalchemy" or "asyncpg"
+                override = os.getenv("CHAINLIT_DATA_LAYER", "").lower()
+
+                if override == "sqlalchemy" or scheme.startswith("sqlite"):
+                    # Use the SQLAlchemy-based data layer for SQLite
+                    from .sql_alchemy import SQLAlchemyDataLayer
+
+                    _data_layer = SQLAlchemyDataLayer(
+                        conninfo=database_url, storage_provider=storage_client
+                    )
+                else:
+                    # Default to the asyncpg-based data layer for Postgres
+                    from .chainlit_data_layer import ChainlitDataLayer
+
+                    _data_layer = ChainlitDataLayer(
+                        database_url=database_url, storage_client=storage_client
+                    )
             elif api_key := os.environ.get("LITERAL_API_KEY"):
                 # When LITERAL_API_KEY is defined, use Literal AI data layer
                 from .literalai import LiteralDataLayer

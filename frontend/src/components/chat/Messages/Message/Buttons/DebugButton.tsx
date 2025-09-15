@@ -1,4 +1,4 @@
-import { BugIcon } from 'lucide-react';
+import { Bug } from 'lucide-react';
 
 import { IStep } from '@chainlit/react-client';
 
@@ -9,6 +9,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { Translator } from 'components/i18n';
 
 interface DebugButtonProps {
   debugUrl: string;
@@ -31,12 +32,14 @@ const DebugButton = ({ step, debugUrl }: DebugButtonProps) => {
         <TooltipTrigger asChild>
           <Button variant="ghost" size="icon" className="h-9 w-9 p-0" asChild>
             <a href={href} target="_blank" rel="noopener noreferrer">
-              <BugIcon />
+              <Bug />
             </a>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>Debug in Literal AI</p>
+          <p>
+            <Translator path="ui.debug.literalAI" />
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

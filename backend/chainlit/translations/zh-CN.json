@@ -22,7 +22,8 @@
       "form": {
         "username": {
           "label": "用户名",
-          "required": "用户名是必填字段"
+          "required": "用户名是必填字段",
+          "placeholder": "输入您的用户名"
         },
         "password": {
           "label": "密码",
