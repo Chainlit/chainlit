@@ -33,6 +33,40 @@ WSGIEnvironment: TypeAlias = dict[str, Any]
 THREAD_NOT_FOUND_MSG = "Thread not found."
 
 
+class MessageBatcher:
+    """Batches messages for rapid-fire scenarios to reduce latency."""
+    def __init__(self, batch_size=10, max_wait_ms=5):
+        self.batch_size = batch_size
+        self.max_wait_ms = max_wait_ms
+        self.queue = []
+        self.batch_task = None
+    
+    async def add_message(self, session, payload):
+        """Add a message to the batch queue."""
+        self.queue.append((session, payload))
+        if len(self.queue) >= self.batch_size or not self.batch_task:
+            await self.flush_batch()
+    
+    async def flush_batch(self):
+        """Process all queued messages in a batch."""
+        if self.queue:
+            batch = self.queue.copy()
+            self.queue.clear()
+            await self.process_batch(batch)
+    
+    async def process_batch(self, batch):
+        """Process a batch of messages concurrently."""
+        tasks = []
+        for session, payload in batch:
+            tasks.append(process_message(session, payload))
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
+
+
+# Global message batcher instance
+message_batcher = MessageBatcher()
+
+
 def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
     """Restore a session from the sessionId provided by the client."""
     if session := WebsocketSession.get_by_id(session_id):
@@ -262,7 +296,6 @@ async def process_message(session: WebsocketSession, payload: MessagePayload):
         message = await context.emitter.process_message(payload)
 
         if config.code.on_message:
-            await asyncio.sleep(0.001)
             await config.code.on_message(message)
     except asyncio.CancelledError:
         pass
@@ -310,7 +343,8 @@ async def message(sid, payload: MessagePayload):
     """Handle a message sent by the User."""
     session = WebsocketSession.require(sid)
 
-    task = asyncio.create_task(process_message(session, payload))
+    # Use message batching for rapid-fire scenarios to reduce latency
+    task = asyncio.create_task(message_batcher.add_message(session, payload))
     session.current_task = task
 
 
@@ -325,6 +359,12 @@ async def window_message(sid, data):
             await config.code.on_window_message(data)
         except asyncio.CancelledError:
             pass
+
+
+@sio.on("ping")  # pyright: ignore [reportOptionalCall]
+async def ping(sid, client_time):
+    """Handle ping for latency measurement."""
+    await sio.emit("pong", client_time, to=sid)
 
 
 @sio.on("audio_start")  # pyright: ignore [reportOptionalCall]

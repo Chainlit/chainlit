@@ -5,7 +5,7 @@ class StreamProcessor extends AudioWorkletProcessor {
     this.hasStarted = false;
     this.hasInterrupted = false;
     this.outputBuffers = [];
-    this.bufferLength = 128;
+    this.bufferLength = 64;
     this.write = { buffer: new Float32Array(this.bufferLength), trackId: null };
     this.writeOffset = 0;
     this.trackSampleOffsets = {};

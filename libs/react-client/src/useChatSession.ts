@@ -117,7 +117,11 @@ const useChatSession = () => {
       const socket = io(uri, {
         path,
         withCredentials: true,
-        transports,
+        transports: transports || ['websocket'], // Default to websocket-only for lower latency
+        upgrade: true,
+        timeout: 5000,               // Faster connection timeout
+        forceNew: false,             // Reuse connections
+        compress: true,              // Enable compression
         auth: {
           clientType: client.type,
           sessionId,
@@ -137,6 +141,25 @@ const useChatSession = () => {
       socket.on('connect', () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
+        
+        // Measure WebSocket RTT latency
+        const measureLatency = () => {
+          const pingStart = performance.now();
+          socket.emit('ping', pingStart);
+          socket.once('pong', (serverTime: number) => {
+            const rtt = performance.now() - pingStart;
+            console.log(`WebSocket RTT: ${rtt.toFixed(2)}ms`);
+          });
+        };
+        
+        // Measure initial latency and then every 30 seconds
+        measureLatency();
+        const latencyInterval = setInterval(measureLatency, 30000);
+        
+        // Clean up interval on disconnect
+        socket.on('disconnect', () => {
+          clearInterval(latencyInterval);
+        });
         setMcps((prev) =>
           prev.map((mcp) => {
             let promise;
@@ -215,10 +238,12 @@ const useChatSession = () => {
           await wavStreamPlayer.connect();
           await wavRecorder.record(async (data) => {
             const elapsedTime = Date.now() - startTime;
+            const audioSendTime = performance.now();
             socket.emit('audio_chunk', {
               isStart: isFirstChunk,
               mimeType,
               elapsedTime,
+              audioSendTime, // Add timestamp for latency measurement
               data: data.mono
             });
             isFirstChunk = false;
@@ -232,6 +257,12 @@ const useChatSession = () => {
       });
 
       socket.on('audio_chunk', (chunk: OutputAudioChunk) => {
+        // Measure end-to-end audio latency if timestamps are available
+        if (chunk.originalSendTime) {
+          const audioLatency = performance.now() - chunk.originalSendTime;
+          console.log(`End-to-end audio latency: ${audioLatency.toFixed(2)}ms`);
+        }
+        
         wavStreamPlayer.add16BitPCM(chunk.data, chunk.track);
         setIsAiSpeaking(true);
       });
