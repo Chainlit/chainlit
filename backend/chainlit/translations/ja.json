@@ -135,8 +135,8 @@
       "thread": {
         "untitled": "無題の会話",
         "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
+          "rename": "名前を変更",
+          "delete": "削除"
         },
         "actions": {
           "delete": {
@@ -165,9 +165,9 @@
         "chat": "チャット",
         "readme": "説明書",
         "theme": {
-          "light": "Light Theme",
-          "dark": "Dark Theme",
-          "system": "Follow System"
+          "light": "ライトテーマ",
+          "dark": "ダークテーマ",
+          "system": "システムに従う"
         }
       },
       "newChat": {

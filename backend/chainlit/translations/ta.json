@@ -22,7 +22,8 @@
       "form": {
         "username": {
           "label": "பயனர் பெயர்",
-          "required": "பயனர் பெயர் தேவை"
+          "required": "பயனர் பெயர் தேவை",
+          "placeholder": "உங்கள் பயனர் பெயரை உள்ளிடவும்"
         },
         "password": {
           "label": "கடவுச்சொல்",
@@ -195,20 +196,42 @@
     }
   },
   "alerts": {
-    "info": "Info",
-    "note": "Note",
-    "tip": "Tip",
-    "important": "Important",
-    "warning": "Warning",
-    "caution": "Caution",
-    "debug": "Debug",
-    "example": "Example",
-    "success": "Success",
-    "help": "Help",
-    "idea": "Idea",
-    "pending": "Pending",
-    "security": "Security",
-    "beta": "Beta",
-    "best-practice": "Best Practice"
+    "info": "தகவல்",
+    "note": "குறிப்பு",
+    "tip": "உதவிக்குறிப்பு",
+    "important": "முக்கியம்",
+    "warning": "எச்சரிக்கை",
+    "caution": "கவனம்",
+    "debug": "பிழைதிருத்தம்",
+    "example": "உதாரணம்",
+    "success": "வெற்றி",
+    "help": "உதவி",
+    "idea": "யோசனை",
+    "pending": "நிலுவையில்",
+    "security": "பாதுகாப்பு",
+    "beta": "பீட்டா",
+    "best-practice": "சிறந்த நடைமுறை"
+  },
+  "accessibility": {
+    "pagination": "பக்க வழிசெலுத்தல்",
+    "previousPage": "முந்தைய பக்கத்திற்கு செல்லவும்",
+    "nextPage": "அடுத்த பக்கத்திற்கு செல்லவும்",
+    "toggleSidebar": "பக்கப்பட்டையை மாற்றவும்",
+    "closeLightbox": "லைட்பாக்ஸை மூடவும்"
+  },
+  "ui": {
+    "elementPanel": {
+      "show": "உறுப்பு பேனலைக் காட்டு",
+      "hide": "உறுப்பு பேனலை மறைக்கவும்"
+    },
+    "debug": {
+      "literalAI": "Literal AI இல் பிழைதிருத்தம்"
+    },
+    "profiles": {
+      "select": "சுயவிவரத்தைத் தேர்ந்தெடுக்கவும்"
+    },
+    "feedback": {
+      "placeholder": "உங்கள் கருத்து..."
+    }
   }
 }

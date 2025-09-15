@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { Translator } from 'components/i18n';
 
 export default function ElementSidebarToggleButton() {
   const [isVisible, setIsVisible] = useRecoilState(
@@ -35,7 +36,11 @@ export default function ElementSidebarToggleButton() {
           </Button>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{isVisible ? 'Hide element panel' : 'Show element panel'}</p>
+          <p>
+            <Translator
+              path={isVisible ? 'ui.elementPanel.hide' : 'ui.elementPanel.show'}
+            />
+          </p>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

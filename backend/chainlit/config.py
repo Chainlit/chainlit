@@ -449,29 +449,31 @@ class ChainlitConfig:
         # Fallback to built-in Chainlit translations
         else:
             # Get list of available builtin translation files
-            builtin_default_translation_file_path = builtin_translation_dir / f"{default_language}.json"
+            builtin_default_translation_file_path = (
+                builtin_translation_dir / f"{default_language}.json"
+            )
             available_builtin_files = []
             if builtin_translation_dir.exists():
                 available_builtin_files = [
                     f.stem for f in builtin_translation_dir.glob("*.json")
                 ]
 
-            def find_best_builtin_match(lang: str) -> str:
+            def find_best_builtin_match(lang: str) -> Optional[str]:
                 """Find the best matching builtin translation file for a given language."""
                 # Exact match
                 if lang in available_builtin_files:
                     return lang
-                
+
                 # Parent language match (e.g., 'fr' for 'fr-FR')
                 parent = lang.split("-")[0]
                 if parent in available_builtin_files:
                     return parent
-                
+
                 # Find any variant of the parent language (e.g., 'zh-CN' for 'zh')
                 for available_lang in available_builtin_files:
                     if available_lang.startswith(f"{parent}-"):
                         return available_lang
-                
+
                 # No match found
                 return None
 
@@ -481,9 +483,7 @@ class ChainlitConfig:
                 logger.info(
                     f"Using built-in Chainlit translation '{best_match}' for requested language '{language}'."
                 )
-                translation = json.loads(
-                    builtin_file_path.read_text(encoding="utf-8")
-                )
+                translation = json.loads(builtin_file_path.read_text(encoding="utf-8"))
             elif builtin_default_translation_file_path.is_file():
                 logger.warning(
                     f"No suitable translation found for {language}. Using built-in default translation {default_language}."
@@ -516,11 +516,19 @@ def init_config(log=False):
             dst = os.path.join(config_translation_dir, file)
             if not os.path.exists(dst):
                 src = os.path.join(TRANSLATIONS_DIR, file)
-                with open(src, encoding="utf-8") as f:
-                    translation = json.load(f)
-                    with open(dst, "w", encoding="utf-8") as f:
-                        json.dump(translation, f, indent=4)
-                        logger.info(f"Created default translation file at {dst}")
+                try:
+                    with open(src, encoding="utf-8") as f:
+                        content = f.read().strip()
+                        if not content:
+                            logger.warning(f"Translation file {src} is empty, skipping")
+                            continue
+                        translation = json.loads(content)
+                        with open(dst, "w", encoding="utf-8") as f:
+                            json.dump(translation, f, indent=4)
+                            logger.info(f"Created default translation file at {dst}")
+                except (json.JSONDecodeError, OSError) as e:
+                    logger.error(f"Failed to process translation file {src}: {e}")
+                    continue
 
 
 def load_module(target: str, force_refresh: bool = False):

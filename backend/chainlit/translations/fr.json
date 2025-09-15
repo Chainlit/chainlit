@@ -1,0 +1,237 @@
+{
+  "common": {
+    "actions": {
+      "cancel": "Annuler",
+      "confirm": "Confirmer",
+      "continue": "Continuer",
+      "goBack": "Retour",
+      "reset": "Réinitialiser",
+      "submit": "Soumettre"
+    },
+    "status": {
+      "loading": "Chargement...",
+      "error": {
+        "default": "Une erreur s'est produite",
+        "serverConnection": "Impossible de joindre le serveur"
+      }
+    }
+  },
+    "auth": {
+    "login": {
+      "title": "Connectez-vous pour accéder à l'application",
+      "form": {
+        "username": {
+          "label": "Nom d'utilisateur",
+          "required": "Le nom d'utilisateur est requis",
+          "placeholder": "Entrez votre nom d'utilisateur"
+        },
+        "password": {
+          "label": "Mot de passe",
+          "required": "Le mot de passe est requis"
+        },
+        "actions": {
+          "signin": "Se connecter"
+        },
+        "alternativeText": {
+          "or": "OU"
+        }
+      },
+      "errors": {
+        "default": "Impossible de se connecter",
+        "signin": "Essayez de vous connecter avec un autre compte",
+        "oauthSignin": "Essayez de vous connecter avec un autre compte",
+        "redirectUriMismatch": "L'URI de redirection ne correspond pas à la configuration de l'application OAuth",
+        "oauthCallback": "Essayez de vous connecter avec un autre compte",
+        "oauthCreateAccount": "Essayez de vous connecter avec un autre compte",
+        "emailCreateAccount": "Essayez de vous connecter avec un autre compte",
+        "callback": "Essayez de vous connecter avec un autre compte",
+        "oauthAccountNotLinked": "Pour confirmer votre identité, connectez-vous avec le même compte que vous avez utilisé à l'origine",
+        "emailSignin": "L'e-mail n'a pas pu être envoyé",
+        "emailVerify": "Veuillez vérifier votre e-mail, un nouvel e-mail a été envoyé",
+        "credentialsSignin": "Échec de la connexion. Vérifiez que les informations fournies sont correctes",
+        "sessionRequired": "Veuillez vous connecter pour accéder à cette page"
+      }
+    },
+    "provider": {
+      "continue": "Continuer avec {{provider}}"
+    }
+  },
+  "chat": {
+    "input": {
+      "placeholder": "Tapez votre message ici...",
+      "actions": {
+        "send": "Envoyer le message",
+        "stop": "Arrêter la tâche",
+        "attachFiles": "Joindre des fichiers"
+      }
+    },
+    "speech": {
+      "start": "Commencer l'enregistrement",
+      "stop": "Arrêter l'enregistrement",
+      "connecting": "Connexion"
+    },
+    "fileUpload": {
+      "dragDrop": "Glissez et déposez les fichiers ici",
+      "browse": "Parcourir les fichiers",
+      "sizeLimit": "Limite :",
+      "errors": {
+        "failed": "Échec du téléchargement",
+        "cancelled": "Téléchargement annulé de"
+      }
+    },
+    "messages": {
+      "status": {
+        "using": "Utilisation de",
+        "used": "Utilisé"
+      },
+      "actions": {
+        "copy": {
+          "button": "Copier dans le presse-papiers",
+          "success": "Copié !"
+        }
+      },
+      "feedback": {
+        "positive": "Utile",
+        "negative": "Pas utile",
+        "edit": "Modifier les commentaires",
+        "dialog": {
+          "title": "Ajouter un commentaire",
+          "submit": "Soumettre les commentaires"
+        },
+        "status": {
+          "updating": "Mise à jour",
+          "updated": "Commentaires mis à jour"
+        }
+      }
+    },
+    "history": {
+      "title": "Dernières entrées",
+      "empty": "Si vide...",
+      "show": "Afficher l'historique"
+    },
+    "settings": {
+      "title": "Panneau des paramètres"
+    },
+    "watermark": "Construit avec"
+  },
+  "threadHistory": {
+    "sidebar": {
+      "title": "Discussions passées",
+      "filters": {
+        "search": "Rechercher",
+        "placeholder": "Rechercher des conversations..."
+      },
+      "timeframes": {
+        "today": "Aujourd'hui",
+        "yesterday": "Hier",
+        "previous7days": "7 derniers jours",
+        "previous30days": "30 derniers jours"
+      },
+      "empty": "Aucun fil trouvé",
+      "actions": {
+        "close": "Fermer la barre latérale",
+        "open": "Ouvrir la barre latérale"
+      }
+    },
+    "thread": {
+      "untitled": "Conversation sans titre",
+      "menu": {
+          "rename": "Renommer",
+          "delete": "Supprimer"
+        },
+      "actions": {
+        "delete": {
+          "title": "Confirmer la suppression",
+          "description": "Cela supprimera le fil ainsi que ses messages et éléments. Cette action ne peut pas être annulée",
+          "success": "Discussion supprimée",
+          "inProgress": "Suppression de la discussion"
+        },
+        "rename": {
+          "title": "Renommer le fil",
+          "description": "Entrez un nouveau nom pour ce fil",
+          "form": {
+            "name": {
+              "label": "Nom",
+              "placeholder": "Entrez un nouveau nom"
+            }
+          },
+          "success": "Fil renommé !",
+          "inProgress": "Renommage du fil"
+        }
+      }
+    }
+  },
+  "navigation": {
+    "header": {
+      "chat": "Discussion",
+      "readme": "Lisez-moi",
+      "theme": {
+        "light": "Thème clair",
+        "dark": "Thème sombre",
+        "system": "Suivre le système"
+      }
+    },
+    "newChat": {
+      "button": "Nouvelle discussion",
+      "dialog": {
+        "title": "Créer une nouvelle discussion",
+        "description": "Cela effacera votre historique de discussion actuel. Êtes-vous sûr de vouloir continuer ?",
+        "tooltip": "Nouvelle discussion"
+      }
+    },
+    "user": {
+      "menu": {
+        "settings": "Paramètres",
+        "settingsKey": "S",
+        "apiKeys": "Clés API",
+        "logout": "Déconnexion"
+      }
+    }
+  },
+  "apiKeys": {
+    "title": "Clés API requises",
+    "description": "Pour utiliser cette application, les clés API suivantes sont requises. Les clés sont stockées dans le stockage local de votre appareil.",
+    "success": {
+      "saved": "Enregistré avec succès"
+    }
+  },
+  "alerts": {
+    "info": "Info",
+    "note": "Note",
+    "tip": "Conseil",
+    "important": "Important",
+    "warning": "Avertissement",
+    "caution": "Attention",
+    "debug": "Débogage",
+    "example": "Exemple",
+    "success": "Succès",
+    "help": "Aide",
+    "idea": "Idée",
+    "pending": "En attente",
+    "security": "Sécurité",
+    "beta": "Bêta",
+    "best-practice": "Bonne pratique"
+  },
+  "accessibility": {
+    "pagination": "Navigation de pagination",
+    "previousPage": "Aller à la page précédente",
+    "nextPage": "Aller à la page suivante",
+    "toggleSidebar": "Basculer la barre latérale",
+    "closeLightbox": "Fermer la visionneuse"
+  },
+  "ui": {
+    "elementPanel": {
+      "show": "Afficher le panneau d'éléments",
+      "hide": "Masquer le panneau d'éléments"
+    },
+    "debug": {
+      "literalAI": "Déboguer dans Literal AI"
+    },
+    "profiles": {
+      "select": "Sélectionner un profil"
+    },
+    "feedback": {
+      "placeholder": "Vos commentaires..."
+    }
+  }
+}

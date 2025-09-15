@@ -116,3 +116,31 @@ For detailed information on how to contribute, see [here](/CONTRIBUTING.md).
 ## 📃 License
 
 Chainlit is open-source and licensed under the [Apache 2.0](LICENSE) license.
+
+## Database backend selection (Postgres vs SQLite)
+
+Chainlit supports two data layers:
+
+- Postgres (default): high-scale, uses asyncpg
+- SQLite: simple local persistence, uses SQLAlchemy + aiosqlite
+
+Select the backend via the DATABASE_URL environment variable:
+
+- Postgres example: `DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/db`
+- SQLite example: `DATABASE_URL=sqlite+aiosqlite:///./chainlit.db`
+
+Notes
+
+- When DATABASE_URL starts with `sqlite`, Chainlit will automatically use the SQLAlchemy data layer.
+- To force a specific implementation, set CHAINLIT_DATA_LAYER:
+    - `CHAINLIT_DATA_LAYER=sqlalchemy` to force SQLAlchemy (e.g., for SQLite)
+    - `CHAINLIT_DATA_LAYER=asyncpg` to force Postgres implementation
+- Cloud storage (S3/GCS/Azure) configuration is shared across both data layers via environment variables (`BUCKET_NAME`, `APP_AWS_*`, `APP_GCS_*`, `APP_AZURE_*`).
+- Schema: Chainlit does not manage database migrations. Ensure required tables exist before running. For SQLite quick starts, see tests at `backend/tests/data/test_sql_alchemy.py` for create table statements you can adapt.
+ - Schema: Chainlit does not manage database migrations. Ensure required tables exist before running. For SQLite quick starts, use `backend/chainlit/data/sqlite_schema.sql`.
+
+Quick start for SQLite (optional)
+
+1. Create the database file and schema (one-time):
+    - On macOS/Linux: `sqlite3 chainlit.db < backend/chainlit/data/sqlite_schema.sql`
+2. Run Chainlit with: `DATABASE_URL=sqlite+aiosqlite:///./chainlit.db chainlit run demo.py`

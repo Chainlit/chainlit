@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { Translator } from 'components/i18n';
 
 import { NewChatDialog } from './NewChat';
 
@@ -94,7 +95,9 @@ export default function ChatProfiles({ navigate }: Props) {
           id="chat-profiles"
           className="w-fit border-none bg-transparent text-muted-foreground font-semibold text-lg hover:bg-accent"
         >
-          <SelectValue placeholder="Select profile" />
+          <SelectValue>
+            <Translator path="ui.profiles.select" />
+          </SelectValue>
         </SelectTrigger>
         <SelectContent>
           {config.chatProfiles.map((profile) => {

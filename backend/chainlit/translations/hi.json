@@ -22,7 +22,8 @@
       "form": {
         "username": {
           "label": "उपयोगकर्ता नाम",
-          "required": "उपयोगकर्ता नाम आवश्यक है"
+          "required": "उपयोगकर्ता नाम आवश्यक है",
+          "placeholder": "अपना उपयोगकर्ता नाम दर्ज करें"
         },
         "password": {
           "label": "पासवर्ड",
@@ -195,20 +196,42 @@
     }
   },
   "alerts": {
-    "info": "Info",
-    "note": "Note",
-    "tip": "Tip",
-    "important": "Important",
-    "warning": "Warning",
-    "caution": "Caution",
-    "debug": "Debug",
-    "example": "Example",
-    "success": "Success",
-    "help": "Help",
-    "idea": "Idea",
-    "pending": "Pending",
-    "security": "Security",
-    "beta": "Beta",
-    "best-practice": "Best Practice"
+    "info": "जानकारी",
+    "note": "नोट",
+    "tip": "सुझाव",
+    "important": "महत्वपूर्ण",
+    "warning": "चेतावनी",
+    "caution": "सावधानी",
+    "debug": "डिबग",
+    "example": "उदाहरण",
+    "success": "सफलता",
+    "help": "सहायता",
+    "idea": "विचार",
+    "pending": "लंबित",
+    "security": "सुरक्षा",
+    "beta": "बीटा",
+    "best-practice": "सर्वोत्तम अभ्यास"
+  },
+  "accessibility": {
+    "pagination": "पृष्ठ नेविगेशन",
+    "previousPage": "पिछले पृष्ठ पर जाएं",
+    "nextPage": "अगले पृष्ठ पर जाएं",
+    "toggleSidebar": "साइडबार टॉगल करें",
+    "closeLightbox": "लाइटबॉक्स बंद करें"
+  },
+  "ui": {
+    "elementPanel": {
+      "show": "एलिमेंट पैनल दिखाएं",
+      "hide": "एलिमेंट पैनल छुपाएं"
+    },
+    "debug": {
+      "literalAI": "Literal AI में डिबग करें"
+    },
+    "profiles": {
+      "select": "प्रोफ़ाइल चुनें"
+    },
+    "feedback": {
+      "placeholder": "आपकी प्रतिक्रिया..."
+    }
   }
 }

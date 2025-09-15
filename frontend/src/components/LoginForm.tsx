@@ -103,12 +103,18 @@ export function LoginForm({
               <Input
                 id="username"
                 autoFocus
-                placeholder="Username"
+                placeholder={
+                  t('auth.login.form.username.placeholder') || 'Username'
+                }
                 {...register('username', {
-                  required: t('auth.login.form.username.required') || 'Username is required'
+                  required:
+                    t('auth.login.form.username.required') ||
+                    'Username is required'
                 })}
                 className={cn(
-                  touchedFields.username && errors.username && 'border-destructive'
+                  touchedFields.username &&
+                    errors.username &&
+                    'border-destructive'
                 )}
               />
               {touchedFields.username && errors.username && (
@@ -129,7 +135,9 @@ export function LoginForm({
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   {...register('password', {
-                    required: t('auth.login.form.password.required') || 'Password is required'
+                    required:
+                      t('auth.login.form.password.required') ||
+                      'Password is required'
                   })}
                   className={cn(
                     touchedFields.password &&
