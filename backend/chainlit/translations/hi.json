@@ -20,10 +20,10 @@
     "login": {
       "title": "ऐप का उपयोग करने के लिए लॉगिन करें",
       "form": {
-        "username": {
-          "label": "उपयोगकर्ता नाम",
-          "required": "उपयोगकर्ता नाम आवश्यक है",
-          "placeholder": "अपना उपयोगकर्ता नाम दर्ज करें"
+        "email": {
+          "label": "ईमेल पता",
+          "required": "ईमेल एक आवश्यक फ़ील्ड है",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "पासवर्ड",
@@ -77,7 +77,16 @@
       "errors": {
         "failed": "अपलोड करने में विफल",
         "cancelled": "का अपलोड रद्द किया गया"
+      },
+      "actions": {
+        "cancelUpload": "अपलोड रद्द करें",
+        "removeAttachment": "संलग्नक हटाएं"
       }
+    },
+    "commands": {
+      "button": "उपकरण",
+      "changeTool": "उपकरण बदलें",
+      "availableTools": "उपलब्ध उपकरण"
     },
     "messages": {
       "status": {
@@ -96,7 +105,8 @@
         "edit": "प्रतिक्रिया संपादित करें",
         "dialog": {
           "title": "टिप्पणी जोड़ें",
-          "submit": "प्रतिक्रिया जमा करें"
+          "submit": "प्रतिक्रिया जमा करें",
+          "yourFeedback": "आपकी प्रतिक्रिया..."
         },
         "status": {
           "updating": "अपडेट हो रहा है",
@@ -110,9 +120,10 @@
       "show": "इतिहास दिखाएं"
     },
     "settings": {
-      "title": "सेटिंग्स पैनल"
+      "title": "सेटिंग्स पैनल",
+      "customize": "अपने चैट सेटिंग्स को यहां अनुकूलित करें"
     },
-    "watermark": "के साथ बनाया गया"
+    "watermark": "एलएलएम गलतियां कर सकते हैं। महत्वपूर्ण जानकारी की जांच करने पर विचार करें।"
   },
   "threadHistory": {
     "sidebar": {
@@ -136,10 +147,24 @@
     "thread": {
       "untitled": "शीर्षकहीन वार्तालाप",
       "menu": {
-          "rename": "Rename",
+          "rename": "नाम बदलें",
+          "share": "साझा करें",
           "delete": "Delete"
         },
       "actions": {
+        "share": {
+          "title": "चैट का लिंक साझा करें",
+          "button": "साझा करें",
+          "status": {
+            "copied": "लिंक कॉपी किया गया",
+            "created": "शेयर लिंक बनाया गया!",
+            "unshared": "इस थ्रेड के लिए साझा करना निष्क्रिय है"
+          },
+          "error": {
+            "create": "शेयर लिंक बनाने में विफल",
+            "unshare": "थ्रेड को अनशेयर करने में विफल"
+          }
+        },
         "delete": {
           "title": "हटाने की पुष्टि करें",
           "description": "यह थ्रेड और इसके संदेशों और तत्वों को हटा देगा। यह क्रिया वापस नहीं की जा सकती",
@@ -196,42 +221,25 @@
     }
   },
   "alerts": {
-    "info": "जानकारी",
-    "note": "नोट",
-    "tip": "सुझाव",
-    "important": "महत्वपूर्ण",
-    "warning": "चेतावनी",
-    "caution": "सावधानी",
-    "debug": "डिबग",
-    "example": "उदाहरण",
-    "success": "सफलता",
-    "help": "सहायता",
-    "idea": "विचार",
-    "pending": "लंबित",
-    "security": "सुरक्षा",
-    "beta": "बीटा",
-    "best-practice": "सर्वोत्तम अभ्यास"
+    "info": "Info",
+    "note": "Note",
+    "tip": "Tip",
+    "important": "Important",
+    "warning": "Warning",
+    "caution": "Caution",
+    "debug": "Debug",
+    "example": "Example",
+    "success": "Success",
+    "help": "Help",
+    "idea": "Idea",
+    "pending": "Pending",
+    "security": "Security",
+    "beta": "Beta",
+    "best-practice": "Best Practice"
   },
-  "accessibility": {
-    "pagination": "पृष्ठ नेविगेशन",
-    "previousPage": "पिछले पृष्ठ पर जाएं",
-    "nextPage": "अगले पृष्ठ पर जाएं",
-    "toggleSidebar": "साइडबार टॉगल करें",
-    "closeLightbox": "लाइटबॉक्स बंद करें"
-  },
-  "ui": {
-    "elementPanel": {
-      "show": "एलिमेंट पैनल दिखाएं",
-      "hide": "एलिमेंट पैनल छुपाएं"
-    },
-    "debug": {
-      "literalAI": "Literal AI में डिबग करें"
-    },
-    "profiles": {
-      "select": "प्रोफ़ाइल चुनें"
-    },
-    "feedback": {
-      "placeholder": "आपकी प्रतिक्रिया..."
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "चुनें..."
     }
   }
 }

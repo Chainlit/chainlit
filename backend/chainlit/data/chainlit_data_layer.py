@@ -26,7 +26,14 @@ from chainlit.types import (
 )
 from chainlit.user import PersistedUser, User
 
+# Import for runtime usage (isinstance checks)
+try:
+    from chainlit.data.storage_clients.gcs import GCSStorageClient
+except ImportError:
+    GCSStorageClient = None  # type: ignore[assignment,misc]
+
 if TYPE_CHECKING:
+    from chainlit.data.storage_clients.gcs import GCSStorageClient
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
@@ -199,11 +206,20 @@ class ChainlitDataLayer(BaseDataLayer):
             path = f"files/{element.id}"
 
         if content is not None:
+            content_disposition = (
+                f'attachment; filename="{element.name}"'
+                if not (
+                    GCSStorageClient is not None
+                    and isinstance(self.storage_client, GCSStorageClient)
+                )
+                else None
+            )
             await self.storage_client.upload_file(
                 object_key=path,
                 data=content,
                 mime=element.mime or "application/octet-stream",
                 overwrite=True,
+                content_disposition=content_disposition,
             )
 
         query = """
@@ -450,11 +466,11 @@ class ChainlitDataLayer(BaseDataLayer):
             param_count += 1
 
         if pagination.cursor:
-            query += f' AND t."createdAt" < (SELECT "createdAt" FROM "Thread" WHERE id = ${param_count})'
+            query += f' AND t."updatedAt" < (SELECT "updatedAt" FROM "Thread" WHERE id = ${param_count})'
             params["cursor"] = pagination.cursor
             param_count += 1
 
-        query += f' ORDER BY t."createdAt" DESC LIMIT ${param_count}'
+        query += f' ORDER BY t."updatedAt" DESC LIMIT ${param_count}'
         params["limit"] = pagination.first + 1
 
         results = await self.execute_query(query, params)
@@ -468,7 +484,7 @@ class ChainlitDataLayer(BaseDataLayer):
         for thread in threads:
             thread_dict = ThreadDict(
                 id=str(thread["id"]),
-                createdAt=thread["createdAt"].isoformat(),
+                createdAt=thread["updatedAt"].isoformat(),
                 name=thread["name"],
                 userId=str(thread["userId"]) if thread["userId"] else None,
                 userIdentifier=thread["user_identifier"],
@@ -567,6 +583,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "userId": user_id,
             "tags": tags,
             "metadata": json.dumps(metadata or {}),
+            "updatedAt": datetime.now(),
         }
 
         # Remove None values

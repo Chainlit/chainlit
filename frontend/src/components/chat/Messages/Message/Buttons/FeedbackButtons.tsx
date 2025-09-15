@@ -9,7 +9,8 @@ import {
   useChatSession
 } from '@chainlit/react-client';
 
-import Translator, { useTranslation } from '@/components/i18n/Translator';
+import { useTranslation } from '@/components/i18n/Translator';
+import Translator from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -31,10 +32,10 @@ interface FeedbackButtonsProps {
 }
 
 export function FeedbackButtons({ message }: FeedbackButtonsProps) {
-  const { t } = useTranslation();
   const { onFeedbackUpdated, onFeedbackDeleted, showFeedbackButtons } =
     useContext(MessageContext);
 
+  const { t } = useTranslation();
   const [feedback, setFeedback] = useState<number | undefined>(
     message.feedback?.value
   );
@@ -178,7 +179,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
           <Textarea
             value={commentInput}
             onChange={(e) => setCommentInput(e.target.value || undefined)}
-            placeholder={t('ui.feedback.placeholder') || 'Your feedback...'}
+            placeholder={t('chat.messages.feedback.dialog.yourFeedback')}
             className="min-h-[100px]"
           />
 

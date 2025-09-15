@@ -23,7 +23,15 @@ from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
 
 InputWidgetType = Literal[
-    "switch", "slider", "select", "textinput", "tags", "numberinput"
+    "switch",
+    "slider",
+    "select",
+    "textinput",
+    "tags",
+    "numberinput",
+    "multiselect",
+    "checkbox",
+    "radio",
 ]
 ToastType = Literal["info", "success", "warning", "error"]
 
@@ -46,9 +54,9 @@ class Pagination(BaseModel):
 
 
 class ThreadFilter(BaseModel):
-    feedback: Optional[Literal[0, 1]] = None
-    userId: Optional[str] = None
-    search: Optional[str] = None
+    feedback: Literal[0, 1] | None = None
+    userId: str | None = None
+    search: str | None = None
 
 
 @dataclass
@@ -211,6 +219,11 @@ class UpdateThreadRequest(BaseModel):
     name: str
 
 
+class ShareThreadRequest(BaseModel):
+    threadId: str
+    isShared: bool
+
+
 class DeleteThreadRequest(BaseModel):
     threadId: str
 
@@ -241,9 +254,22 @@ class ConnectSseMCPRequest(BaseModel):
     clientType: Literal["sse"]
     name: str
     url: str
+    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    headers: Optional[Dict[str, str]] = None
 
 
-ConnectMCPRequest = Union[ConnectStdioMCPRequest, ConnectSseMCPRequest]
+class ConnectStreamableHttpMCPRequest(BaseModel):
+    sessionId: str
+    clientType: Literal["streamable-http"]
+    name: str
+    url: str
+    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    headers: Dict[str, str] | None = None
+
+
+ConnectMCPRequest = Union[
+    ConnectStdioMCPRequest, ConnectSseMCPRequest, ConnectStreamableHttpMCPRequest
+]
 
 
 class DisconnectMCPRequest(BaseModel):
@@ -280,6 +306,7 @@ class ChatProfile(DataClassJsonMixin):
     icon: Optional[str] = None
     default: bool = False
     starters: Optional[List[Starter]] = None
+    config_overrides: Any = None
 
 
 FeedbackStrategy = Literal["BINARY"]
@@ -316,3 +343,4 @@ class Feedback:
 
 class UpdateFeedbackRequest(BaseModel):
     feedback: Feedback
+    sessionId: str

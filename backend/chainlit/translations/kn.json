@@ -5,8 +5,8 @@
       "confirm": "ದೃಢೀಕರಿಸಿ",
       "continue": "ಮುಂದುವರಿಸಿ",
       "goBack": "ಹಿಂದೆ ಹೋಗಿ",
-      "reset": "ಮರುಹೊಂದಿಸಿ",
-      "submit": "ಸಲ್ಲಿಸಿ"
+  "reset": "ಮರುಹೊಂದಿಸಿ",
+  "submit": "ಸಲ್ಲಿಸಿ"
     },
     "status": {
       "loading": "ಲೋಡ್ ಆಗುತ್ತಿದೆ...",
@@ -20,10 +20,10 @@
     "login": {
       "title": "ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಪ್ರವೇಶಿಸಲು ಲಾಗಿನ್ ಮಾಡಿ",
       "form": {
-        "username": {
-          "label": "ಬಳಕೆದಾರ ಹೆಸರು",
-          "required": "ಬಳಕೆದಾರ ಹೆಸರು ಅಗತ್ಯವಿದೆ",
-          "placeholder": "ನಿಮ್ಮ ಬಳಕೆದಾರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ"
+        "email": {
+          "label": "ಇಮೇಲ್ ವಿಳಾಸ",
+          "required": "ಇಮೇಲ್ ಅಗತ್ಯವಿರುವ ಕ್ಷೇತ್ರ",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "ಪಾಸ್‌ವರ್ಡ್",
@@ -65,6 +65,11 @@
         "attachFiles": "ಫೈಲ್‌ಗಳನ್ನು ಲಗತ್ತಿಸಿ"
       }
     },
+    "commands": {
+      "button": "ಉಪಕರಣಗಳು",
+      "changeTool": "ಉಪಕರಣವನ್ನು ಬದಲಿಸಿ",
+      "availableTools": "ಲಭ್ಯವಿರುವ ಉಪಕರಣಗಳು"
+    },
     "speech": {
       "start": "ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ",
       "stop": "ರೆಕಾರ್ಡಿಂಗ್ ನಿಲ್ಲಿಸಿ",
@@ -77,6 +82,10 @@
       "errors": {
         "failed": "ಅಪ್‌ಲೋಡ್ ವಿಫಲವಾಗಿದೆ",
         "cancelled": "ಅಪ್‌ಲೋಡ್ ರದ್ದುಗೊಳಿಸಲಾಗಿದೆ"
+      },
+      "actions": {
+        "cancelUpload": "ಅಪ್‌ಲೋಡ್ ರದ್ದುಗೊಳಿಸಿ",
+        "removeAttachment": "ಅಟ್ಯಾಚ್‌ಮೆಂಟ್ ಅನ್ನು ತೆಗೆದುಹಾಕಿ"
       }
     },
     "messages": {
@@ -96,7 +105,8 @@
         "edit": "ಪ್ರತಿಕ್ರಿಯೆ ಸಂಪಾದಿಸಿ",
         "dialog": {
           "title": "ಕಾಮೆಂಟ್ ಸೇರಿಸಿ",
-          "submit": "ಪ್ರತಿಕ್ರಿಯೆ ಸಲ್ಲಿಸಿ"
+          "submit": "ಪ್ರತಿಕ್ರಿಯೆ ಸಲ್ಲಿಸಿ",
+          "yourFeedback": "ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆ..."
         },
         "status": {
           "updating": "ನವೀಕರಿಸಲಾಗುತ್ತಿದೆ",
@@ -110,9 +120,10 @@
       "show": "ಇತಿಹಾಸ ತೋರಿಸಿ"
     },
     "settings": {
-      "title": "ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಪ್ಯಾನೆಲ್"
+      "title": "ಸೆಟ್ಟಿಂಗ್‌ಗಳ ಪ್ಯಾನೆಲ್",
+      "customize": "ಈಗ ನಿಮ್ಮ ಚಾಟ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಕಸ್ಟಮೈಸ್ ಮಾಡಿ"
     },
-    "watermark": "ಇದರೊಂದಿಗೆ ನಿರ್ಮಿಸಲಾಗಿದೆ"
+    "watermark": "LLM ಗಳು ತಪ್ಪುಗಳನ್ನು ಮಾಡಬಹುದು. ಪ್ರಮುಖ ಮಾಹಿತಿಯನ್ನು ಪರಿಶೀಲಿಸುವುದನ್ನು ಪರಿಗಣಿಸಿ."
   },
   "threadHistory": {
     "sidebar": {
@@ -136,10 +147,24 @@
     "thread": {
       "untitled": "ಶೀರ್ಷಿಕೆರಹಿತ ಸಂಭಾಷಣೆ",
       "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
+          "rename": "ಮರುಹೆಸರಿಸಿ",
+          "share": "ಹಂಚಿಕೊಳ್ಳಿ",
+          "delete": "ಅಳಿಸಿ"
         },
       "actions": {
+        "share": {
+            "title": "ಚಾಟ್‌ಗೆ ಲಿಂಕ್ ಹಂಚಿಕೊಳ್ಳಿ",
+            "button": "ಹಂಚಿಕೊಳ್ಳಿ",
+            "status": {
+              "copied": "ಲಿಂಕ್ ಪ್ರತಿಲಿಪಿ ಮಾಡಲಾಗಿದೆ",
+              "created": "ಹಂಚಿಕೆಯ ಲಿಂಕ್ ರಚಿಸಲಾಗಿದೆ!",
+              "unshared": "ಈ ಸಂಭಾಷಣೆಗೆ ಹಂಚಿಕೆ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"
+            },
+            "error": {
+              "create": "ಹಂಚಿಕೆಯ ಲಿಂಕ್ ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ",
+              "unshare": "ಸಂಭಾಷಣೆ ಹಂಚಿಕೆಯನ್ನು ರದ್ದು ಮಾಡಲು ವಿಫಲವಾಗಿದೆ"
+            }
+        },
         "delete": {
           "title": "ಅಳಿಸುವಿಕೆಯನ್ನು ದೃಢೀಕರಿಸಿ",
           "description": "ಇದು ಸಂಭಾಷಣೆಯನ್ನು ಹಾಗೂ ಅದರ ಸಂದೇಶಗಳು ಮತ್ತು ಅಂಶಗಳನ್ನು ಅಳಿಸುತ್ತದೆ. ಈ ಕ್ರಿಯೆಯನ್ನು ರದ್ದುಗೊಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ",
@@ -196,42 +221,25 @@
     }
   },
   "alerts": {
-    "info": "ಮಾಹಿತಿ",
-    "note": "ಟಿಪ್ಪಣಿ",
-    "tip": "ಸಲಹೆ",
-    "important": "ಮುಖ್ಯ",
-    "warning": "ಎಚ್ಚರಿಕೆ",
-    "caution": "ಎಚ್ಚರಿಕೆ",
-    "debug": "ಡಿಬಗ್",
-    "example": "ಉದಾಹರಣೆ",
-    "success": "ಯಶಸ್ಸು",
-    "help": "ಸಹಾಯ",
-    "idea": "ಕಲ್ಪನೆ",
-    "pending": "ಬಾಕಿ",
-    "security": "ಭದ್ರತೆ",
-    "beta": "ಬೀಟಾ",
-    "best-practice": "ಉತ್ತಮ ಅಭ್ಯಾಸ"
+    "info": "Info",
+    "note": "Note",
+    "tip": "Tip",
+    "important": "Important",
+    "warning": "Warning",
+    "caution": "Caution",
+    "debug": "Debug",
+    "example": "Example",
+    "success": "Success",
+    "help": "Help",
+    "idea": "Idea",
+    "pending": "Pending",
+    "security": "Security",
+    "beta": "Beta",
+    "best-practice": "Best Practice"
   },
-  "accessibility": {
-    "pagination": "ಪುಟ ನ್ಯಾವಿಗೇಷನ್",
-    "previousPage": "ಹಿಂದಿನ ಪುಟಕ್ಕೆ ಹೋಗಿ",
-    "nextPage": "ಮುಂದಿನ ಪುಟಕ್ಕೆ ಹೋಗಿ",
-    "toggleSidebar": "ಸೈಡ್‌ಬಾರ್ ಟಾಗಲ್ ಮಾಡಿ",
-    "closeLightbox": "ಲೈಟ್‌ಬಾಕ್ಸ್ ಮುಚ್ಚಿ"
-  },
-  "ui": {
-    "elementPanel": {
-      "show": "ಎಲಿಮೆಂಟ್ ಪ್ಯಾನೆಲ್ ತೋರಿಸಿ",
-      "hide": "ಎಲಿಮೆಂಟ್ ಪ್ಯಾನೆಲ್ ಮರೆಮಾಡಿ"
-    },
-    "debug": {
-      "literalAI": "Literal AI ನಲ್ಲಿ ಡಿಬಗ್ ಮಾಡಿ"
-    },
-    "profiles": {
-      "select": "ಪ್ರೊಫೈಲ್ ಆಯ್ಕೆಮಾಡಿ"
-    },
-    "feedback": {
-      "placeholder": "ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆ..."
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "ಚುನಾಯಿಸಿ..."
     }
   }
 }

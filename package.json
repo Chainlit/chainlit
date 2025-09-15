@@ -5,11 +5,12 @@
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
-    "cypress": "12.9.0",
+    "cypress": "^14.5.3",
+    "cypress-plugin-steps": "1.2.1",
     "dotenv": "^16.3.1",
     "eslint": "^8.57.1",
     "husky": "^9.1.6",
-    "kill-port": "^2.0.1",
+    "fkill": "^9.0.0",
     "lint-staged": "^13.3.0",
     "prettier": "^2.8.8",
     "shell-exec": "^1.1.2",
@@ -18,19 +19,19 @@
   },
   "scripts": {
     "preinstall": "npx only-allow pnpm",
-    "test": "pnpm exec ts-node ./cypress/support/e2e.ts",
+    "test": "cypress run",
+    "test:interactive": "cypress open",
     "test:ui": "cd frontend && pnpm test",
     "prepare": "husky",
     "lint": "pnpm run lintUi && pnpm run lintPython",
     "lintUi": "pnpm run --parallel lint",
     "formatUi": "pnpm run --parallel format",
-    "lintPython": "cd backend && poetry run dmypy run -- chainlit/ tests/",
+    "lintPython": "cd backend && uv run dmypy run -- chainlit/ tests/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
     "buildUi": "cd libs/react-client && pnpm run build && cd ../copilot && pnpm run build && cd ../../frontend && pnpm run build"
   },
   "pnpm": {
     "overrides": {
-      "@cypress/request@<=2.88.12": ">=3.0.0",
       "braces@<3.0.3": ">=3.0.3",
       "micromatch@<4.0.8": ">=4.0.8"
     }

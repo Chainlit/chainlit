@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext } from 'react';
+import { memo, useContext, useRef } from 'react';
 
 import {
   type IAction,
@@ -41,6 +41,7 @@ const Message = memo(
   }: Props) => {
     const { allowHtml, cot, latex, onError } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
+    const contentRef = useRef<HTMLDivElement>(null);
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
     // Only keep tool calls if Chain of Thought is tool_call
@@ -115,17 +116,23 @@ const Message = memo(
                         />
                       ) : null}
                       <MessageContent
+                        ref={contentRef}
                         elements={elements}
                         message={message}
                         allowHtml={allowHtml}
                         latex={latex}
                       />
-                      <MessageButtons message={message} actions={actions} />
+                      <MessageButtons
+                        message={message}
+                        actions={actions}
+                        contentRef={contentRef}
+                      />
                     </Step>
                   ) : (
                     // Display an assistant message
                     <div className="flex flex-col items-start min-w-[150px] flex-grow gap-2">
                       <MessageContent
+                        ref={contentRef}
                         elements={elements}
                         message={message}
                         allowHtml={allowHtml}
@@ -144,6 +151,7 @@ const Message = memo(
                         run={
                           scorableRun && isScorable ? scorableRun : undefined
                         }
+                        contentRef={contentRef}
                       />
                     </div>
                   )}

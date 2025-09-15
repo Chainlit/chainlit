@@ -1,5 +1,4 @@
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,7 +12,7 @@ import {
 
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
-import InputWidgetsBar from '@/components/InputWidgetsBar';
+import { useTranslation } from 'components/i18n/Translator';
 
 import { chatSettingsOpenState } from '@/state/project';
 import {
@@ -59,21 +58,24 @@ export default function MessageComposer({
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
-  const onPaste = useCallback((event: ClipboardEvent) => {
-    if (event.clipboardData && event.clipboardData.items) {
-      const items = Array.from(event.clipboardData.items);
+  const onPaste = useCallback(
+    (event: ClipboardEvent) => {
+      if (event.clipboardData && event.clipboardData.items) {
+        const items = Array.from(event.clipboardData.items);
 
-      // If no text data, check for files (e.g., images)
-      items.forEach((item) => {
-        if (item.kind === 'file') {
-          const file = item.getAsFile();
-          if (file) {
-            onFileUpload([file]);
+        // If no text data, check for files (e.g., images)
+        items.forEach((item) => {
+          if (item.kind === 'file') {
+            const file = item.getAsFile();
+            if (file) {
+              onFileUpload([file]);
+            }
           }
-        }
-      });
-    }
-  }, []);
+        });
+      }
+    },
+    [onFileUpload]
+  );
 
   const onSubmit = useCallback(
     async (
@@ -101,7 +103,7 @@ export default function MessageComposer({
       }
       sendMessage(message, fileReferences);
     },
-    [user, sendMessage]
+    [user, sendMessage, autoScrollRef]
   );
 
   const onReply = useCallback(
@@ -121,32 +123,35 @@ export default function MessageComposer({
         autoScrollRef.current = true;
       }
     },
-    [user, replyMessage]
+    [user, replyMessage, autoScrollRef]
   );
 
   const submit = useCallback(() => {
     if (
       disabled ||
-      (value === '' && attachments.length === 0 && !selectedCommand)
+      (value.trim() === '' && attachments.length === 0 && !selectedCommand)
     ) {
       return;
     }
+
     if (askUser) {
       onReply(value);
     } else {
       onSubmit(value, attachments, selectedCommand?.id);
     }
+
     setAttachments([]);
+    setValue(''); // Clear the value state
     inputRef.current?.reset();
   }, [
     value,
     disabled,
-    setValue,
     askUser,
     attachments,
     selectedCommand,
     setAttachments,
-    onSubmit
+    onSubmit,
+    onReply
   ]);
 
   return (
@@ -172,22 +177,19 @@ export default function MessageComposer({
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
+          <VoiceButton disabled={disabled} />
           <UploadButton
             disabled={disabled}
             fileSpec={fileSpec}
             onFileUploadError={onFileUploadError}
             onFileUpload={onFileUpload}
           />
-          <CommandButton
-            disabled={disabled}
-            onCommandSelect={setSelectedCommand}
-          />
           {chatSettingsInputs.length > 0 && (
             <Button
               id="chat-settings-open-modal"
               disabled={disabled}
               onClick={() => setChatSettingsOpen(true)}
-              className="hover:bg-muted"
+              className="hover:bg-muted rounded-full"
               variant="ghost"
               size="icon"
             >
@@ -195,20 +197,24 @@ export default function MessageComposer({
             </Button>
           )}
           <McpButton disabled={disabled} />
-          <VoiceButton disabled={disabled} />
+          <CommandButton
+            disabled={disabled}
+            selectedCommandId={selectedCommand?.id}
+            onCommandSelect={setSelectedCommand}
+          />
           <CommandButtons
             disabled={disabled}
             selectedCommandId={selectedCommand?.id}
             onCommandSelect={setSelectedCommand}
           />
         </div>
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <InputWidgetsBar />
-        </div>
         <div className="flex items-center gap-1">
           <SubmitButton
             onSubmit={submit}
-            disabled={disabled || (!value.trim() && !selectedCommand)}
+            disabled={
+              disabled ||
+              (!value.trim() && !selectedCommand && attachments.length === 0)
+            }
           />
         </div>
       </div>

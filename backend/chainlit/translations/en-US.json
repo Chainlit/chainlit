@@ -20,10 +20,10 @@
     "login": {
       "title": "Login to access the app",
       "form": {
-        "username": {
-          "label": "Username",
-          "required": "Username is required",
-          "placeholder": "Enter your username"
+        "email": {
+          "label": "Email address",
+          "required": "email is a required field",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "Password",
@@ -65,6 +65,11 @@
         "attachFiles": "Attach files"
       }
     },
+    "commands": {
+      "button": "Tools",
+      "changeTool": "Change Tool",
+      "availableTools": "Available Tools"
+    },
     "speech": {
       "start": "Start recording",
       "stop": "Stop recording",
@@ -77,6 +82,10 @@
       "errors": {
         "failed": "Failed to upload",
         "cancelled": "Cancelled upload of"
+      },
+      "actions": {
+        "cancelUpload": "Cancel upload",
+        "removeAttachment": "Remove attachment"
       }
     },
     "messages": {
@@ -96,7 +105,8 @@
         "edit": "Edit feedback",
         "dialog": {
           "title": "Add a comment",
-          "submit": "Submit feedback"
+          "submit": "Submit feedback",
+          "yourFeedback": "Your feedback..."
         },
         "status": {
           "updating": "Updating",
@@ -110,9 +120,10 @@
       "show": "Show history"
     },
     "settings": {
-      "title": "Settings panel"
+      "title": "Settings panel",
+      "customize": "Customize your chat settings here"
     },
-    "watermark": "Built with"
+    "watermark": "LLMs can make mistakes. Check important info."
   },
   "threadHistory": {
     "sidebar": {
@@ -137,9 +148,23 @@
       "untitled": "Untitled Conversation",
       "menu": {
           "rename": "Rename",
+          "share": "Share",
           "delete": "Delete"
         },
       "actions": {
+        "share": {
+          "title": "Share link to chat",
+          "button": "Share",
+          "status": {
+            "copied": "Link copied",
+            "created": "Share link created!",
+            "unshared": "Sharing disabled for this thread"
+          },
+          "error": {
+            "create": "Failed to create share link",
+            "unshare": "Failed to unshare thread"
+          }
+        },
         "delete": {
           "title": "Confirm deletion",
           "description": "This will delete the thread as well as its messages and elements. This action cannot be undone",
@@ -212,26 +237,9 @@
     "beta": "Beta",
     "best-practice": "Best Practice"
   },
-  "accessibility": {
-    "pagination": "Pagination navigation",
-    "previousPage": "Go to previous page",
-    "nextPage": "Go to next page",
-    "toggleSidebar": "Toggle sidebar",
-    "closeLightbox": "Close lightbox"
-  },
-  "ui": {
-    "elementPanel": {
-      "show": "Show element panel",
-      "hide": "Hide element panel"
-    },
-    "debug": {
-      "literalAI": "Debug in Literal AI"
-    },
-    "profiles": {
-      "select": "Select profile"
-    },
-    "feedback": {
-      "placeholder": "Your feedback..."
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "Select..."
     }
   }
 }

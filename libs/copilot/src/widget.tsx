@@ -9,10 +9,15 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@chainlit/app/src/components/ui/popover';
+import { useConfig } from '@chainlit/react-client';
 
 import Header from './components/Header';
 
 import ChatWrapper from './chat';
+import {
+  clearChainlitCopilotThreadId,
+  getChainlitCopilotThreadId
+} from './state';
 import { IWidgetConfig } from './types';
 
 interface Props {
@@ -21,14 +26,21 @@ interface Props {
 }
 
 const Widget = ({ config, error }: Props) => {
-  const [expanded, setExpanded] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
+  const [expanded, setExpanded] = useState(config?.expanded || false);
+  const [isOpen, setIsOpen] = useState(config?.opened || false);
+  const projectConfig = useConfig();
 
   useEffect(() => {
     window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
+    window.getChainlitCopilotThreadId = getChainlitCopilotThreadId;
+    window.clearChainlitCopilotThreadId = clearChainlitCopilotThreadId;
 
     return () => {
       window.toggleChainlitCopilot = () => console.error('Widget not mounted.');
+      window.getChainlitCopilotThreadId = () => null;
+
+      window.clearChainlitCopilotThreadId = () =>
+        console.error('Widget not mounted.');
     };
   }, []);
 
@@ -95,12 +107,16 @@ const Widget = ({ config, error }: Props) => {
             : 'copilot-container-collapsed'
         )}
       >
-        <div id="chainlit-copilot" className="flex flex-col h-full w-full">
+        <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
           {error ? (
             <Alert variant="error">{error}</Alert>
           ) : (
             <>
-              <Header expanded={expanded} setExpanded={setExpanded} />
+              <Header
+                expanded={expanded}
+                setExpanded={setExpanded}
+                projectConfig={projectConfig}
+              />
               <div className="flex flex-grow overflow-y-auto">
                 <ChatWrapper />
               </div>

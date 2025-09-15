@@ -17,21 +17,27 @@ jobs:
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
         with:
-          pnpm-skip-install: true
+          pnpm-install-args: "--frozen-lockfile"
       - name: Install Cypress
         uses: cypress-io/github-action@v6
         with:
           runTests: false
-      - uses: ./.github/actions/poetry-python-install
-        name: Install Python, poetry and Python & pnpm (poetry does it automatically) dependencies
+      - uses: ./.github/actions/uv-python-install
+        name: Install Python, uv and Python & pnpm (uv does it automatically) dependencies
         with:
-          poetry-working-directory: ${{ env.BACKEND_DIR }}
-          poetry-install-args: --with tests
+          working-directory: ${{ env.BACKEND_DIR }}
+          extra-dependencies: --extra tests
+      - name: Build UI components
+        run: pnpm run buildUi
+        timeout-minutes: 5
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        uses: nick-fields/retry@v3
+        run: pnpm test
+        shell: bash
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        if: always() && hashFiles('cypress/screenshots/**') != ''
         with:
-          timeout_minutes: 20
-          max_attempts: 3
-          command: pnpm test
+          name: cypress-screenshots-${{ matrix.os }}
+          path: cypress/screenshots

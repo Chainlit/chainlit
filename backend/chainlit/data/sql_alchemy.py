@@ -4,7 +4,6 @@ import uuid
 from dataclasses import asdict
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
-from urllib.parse import urlparse
 
 import aiofiles
 import aiohttp
@@ -39,9 +38,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     def __init__(
         self,
         conninfo: str,
-        connect_args: Optional[
-            Dict[str, Any]
-        ] = {},  # for additional connection arguments such as the schema to use for a postgres connection
+        connect_args: Optional[dict[str, Any]] = None,
         ssl_require: bool = False,
         storage_provider: Optional[BaseStorageClient] = None,
         user_thread_limit: Optional[int] = 1000,
@@ -50,11 +47,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self._conninfo = conninfo
         self.user_thread_limit = user_thread_limit
         self.show_logger = show_logger
-
-        # Detect database dialect from connection string
-        parsed = urlparse(conninfo)
-        self._is_sqlite = parsed.scheme.startswith("sqlite")
-
         if connect_args is None:
             connect_args = {}
         if ssl_require:
@@ -81,60 +73,6 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
     async def build_debug_url(self) -> str:
         return ""
-
-    def _build_upsert_query(
-        self, table_name: str, columns: List[str], id_column: str = "id"
-    ) -> str:
-        """
-        Build a dialect-specific UPSERT query.
-
-        Args:
-            table_name: Name of the table
-            columns: List of column names to insert/update
-            id_column: The primary key column name for conflict resolution
-
-        Returns:
-            SQL query string with placeholders for parameters
-        """
-        quoted_columns = [f'"{col}"' for col in columns]
-        placeholders = [f":{col}" for col in columns]
-
-        if self._is_sqlite:
-            # SQLite UPSERT syntax
-            update_sets = [
-                f'"{col}" = excluded."{col}"' for col in columns if col != id_column
-            ]
-            if update_sets:
-                return f"""
-                    INSERT INTO {table_name} ({", ".join(quoted_columns)})
-                    VALUES ({", ".join(placeholders)})
-                    ON CONFLICT ("{id_column}") DO UPDATE
-                    SET {", ".join(update_sets)}
-                """
-            else:
-                return f"""
-                    INSERT INTO {table_name} ({", ".join(quoted_columns)})
-                    VALUES ({", ".join(placeholders)})
-                    ON CONFLICT ("{id_column}") DO NOTHING
-                """
-        else:
-            # PostgreSQL UPSERT syntax
-            update_sets = [
-                f'"{col}" = EXCLUDED."{col}"' for col in columns if col != id_column
-            ]
-            if update_sets:
-                return f"""
-                    INSERT INTO {table_name} ({", ".join(quoted_columns)})
-                    VALUES ({", ".join(placeholders)})
-                    ON CONFLICT ("{id_column}") DO UPDATE
-                    SET {", ".join(update_sets)}
-                """
-            else:
-                return f"""
-                    INSERT INTO {table_name} ({", ".join(quoted_columns)})
-                    VALUES ({", ".join(placeholders)})
-                    ON CONFLICT ("{id_column}") DO NOTHING
-                """
 
     ###### SQL Helpers ######
     async def execute_sql(
@@ -292,27 +230,54 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if user_id:
             user_identifier = await self._get_user_identifer_by_id(user_id)
 
+        if metadata is not None:
+            existing = await self.execute_sql(
+                query='SELECT "metadata" FROM threads WHERE "id" = :id',
+                parameters={"id": thread_id},
+            )
+            base = {}
+            if isinstance(existing, list) and existing:
+                raw = existing[0].get("metadata") or {}
+                if isinstance(raw, str):
+                    try:
+                        base = json.loads(raw)
+                    except json.JSONDecodeError:
+                        base = {}
+                elif isinstance(raw, dict):
+                    base = raw
+            incoming = {k: v for k, v in metadata.items() if v is not None}
+            metadata = {**base, **incoming}
+
+        name_value = name
+        if name_value is None and metadata:
+            name_value = metadata.get("name")
+        created_at_value = (
+            await self.get_current_timestamp() if metadata is None else None
+        )
+
         data = {
             "id": thread_id,
-            "createdAt": (
-                await self.get_current_timestamp() if metadata is None else None
-            ),
-            "name": (
-                name
-                if name is not None
-                else (metadata.get("name") if metadata and "name" in metadata else None)
-            ),
+            "createdAt": created_at_value,
+            "name": name_value,
             "userId": user_id,
             "userIdentifier": user_identifier,
-            "tags": json.dumps(tags) if tags else None,
+            "tags": tags,
             "metadata": json.dumps(metadata) if metadata else None,
         }
         parameters = {
             key: value for key, value in data.items() if value is not None
         }  # Remove keys with None values
-
-        columns = list(parameters.keys())
-        query = self._build_upsert_query("threads", columns, "id")
+        columns = ", ".join(f'"{key}"' for key in parameters.keys())
+        values = ", ".join(f":{key}" for key in parameters.keys())
+        updates = ", ".join(
+            f'"{key}" = EXCLUDED."{key}"' for key in parameters.keys() if key != "id"
+        )
+        query = f"""
+            INSERT INTO threads ({columns})
+            VALUES ({values})
+            ON CONFLICT ("id") DO UPDATE
+            SET {updates};
+        """
         await self.execute_sql(query=query, parameters=parameters)
 
     async def delete_thread(self, thread_id: str):
@@ -418,9 +383,17 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         }
         parameters["metadata"] = json.dumps(step_dict.get("metadata", {}))
         parameters["generation"] = json.dumps(step_dict.get("generation", {}))
-
-        columns = list(parameters.keys())
-        query = self._build_upsert_query("steps", columns, "id")
+        columns = ", ".join(f'"{key}"' for key in parameters.keys())
+        values = ", ".join(f":{key}" for key in parameters.keys())
+        updates = ", ".join(
+            f'"{key}" = :{key}' for key in parameters.keys() if key != "id"
+        )
+        query = f"""
+            INSERT INTO steps ({columns})
+            VALUES ({values})
+            ON CONFLICT (id) DO UPDATE
+            SET {updates};
+        """
         await self.execute_sql(query=query, parameters=parameters)
 
     @queue_until_user_message()
@@ -452,8 +425,17 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             key: value for key, value in feedback_dict.items() if value is not None
         }
 
-        columns = list(parameters.keys())
-        query = self._build_upsert_query("feedbacks", columns, "id")
+        columns = ", ".join(f'"{key}"' for key in parameters.keys())
+        values = ", ".join(f":{key}" for key in parameters.keys())
+        updates = ", ".join(
+            f'"{key}" = :{key}' for key in parameters.keys() if key != "id"
+        )
+        query = f"""
+            INSERT INTO feedbacks ({columns})
+            VALUES ({values})
+            ON CONFLICT (id) DO UPDATE
+            SET {updates};
+        """
         await self.execute_sql(query=query, parameters=parameters)
         return feedback.id
 
@@ -558,8 +540,14 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if "props" in element_dict_cleaned:
             element_dict_cleaned["props"] = json.dumps(element_dict_cleaned["props"])
 
-        columns = list(element_dict_cleaned.keys())
-        query = self._build_upsert_query("elements", columns, "id")
+        columns = ", ".join(f'"{column}"' for column in element_dict_cleaned.keys())
+        placeholders = ", ".join(f":{column}" for column in element_dict_cleaned.keys())
+        updates = ", ".join(
+            f'"{column}" = :{column}'
+            for column in element_dict_cleaned.keys()
+            if column != "id"
+        )
+        query = f"INSERT INTO elements ({columns}) VALUES ({placeholders}) ON CONFLICT (id) DO UPDATE SET {updates};"
         await self.execute_sql(query=query, parameters=element_dict_cleaned)
 
     @queue_until_user_message()
@@ -591,16 +579,26 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             logger.info("SQLAlchemy: get_all_user_threads")
         user_threads_query = """
             SELECT
-                "id" AS thread_id,
-                "createdAt" AS thread_createdat,
-                "name" AS thread_name,
-                "userId" AS user_id,
-                "userIdentifier" AS user_identifier,
-                "tags" AS thread_tags,
-                "metadata" AS thread_metadata
-            FROM threads
-            WHERE "userId" = :user_id OR "id" = :thread_id
-            ORDER BY "createdAt" DESC
+                t."id" AS thread_id,
+                t."createdAt" AS thread_createdat,
+                t."name" AS thread_name,
+                t."userId" AS user_id,
+                t."userIdentifier" AS user_identifier,
+                t."tags" AS thread_tags,
+                t."metadata" AS thread_metadata,
+                MAX(s."createdAt") AS updatedAt
+            FROM threads t
+            LEFT JOIN steps s ON t."id" = s."threadId"
+            WHERE t."userId" = :user_id OR t."id" = :thread_id
+            GROUP BY
+                t."id",
+                t."createdAt",
+                t."name",
+                t."userId",
+                t."userIdentifier",
+                t."tags",
+                t."metadata"
+            ORDER BY updatedAt DESC NULLS LAST
             LIMIT :limit
         """
         user_threads = await self.execute_sql(
@@ -684,12 +682,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     name=thread["thread_name"],
                     userId=thread["user_id"],
                     userIdentifier=thread["user_identifier"],
-                    tags=json.loads(thread["thread_tags"])
-                    if thread["thread_tags"]
-                    else [],
-                    metadata=json.loads(thread["thread_metadata"])
-                    if thread["thread_metadata"]
-                    else {},
+                    tags=thread["thread_tags"],
+                    metadata=thread["thread_metadata"],
                     steps=[],
                     elements=[],
                 )
@@ -715,12 +709,12 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         streaming=step_feedback.get("step_streaming", False),
                         waitForAnswer=step_feedback.get("step_waitforanswer"),
                         isError=step_feedback.get("step_iserror"),
-                        metadata=json.loads(
+                        metadata=(
                             step_feedback["step_metadata"]
                             if step_feedback.get("step_metadata") is not None
-                            else "{}"
+                            else {}
                         ),
-                        tags=json.loads(step_feedback.get("step_tags") or "[]"),
+                        tags=step_feedback.get("step_tags"),
                         input=(
                             step_feedback.get("step_input", "")
                             if step_feedback.get("step_showinput")
@@ -731,9 +725,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         createdAt=step_feedback.get("step_createdat"),
                         start=step_feedback.get("step_start"),
                         end=step_feedback.get("step_end"),
-                        generation=json.loads(
-                            step_feedback.get("step_generation") or "{}"
-                        ),
+                        generation=step_feedback.get("step_generation"),
                         showInput=step_feedback.get("step_showinput"),
                         language=step_feedback.get("step_language"),
                         feedback=feedback,
@@ -759,7 +751,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         autoPlay=element.get("element_autoPlay"),
                         playerConfig=element.get("element_playerconfig"),
                         page=element.get("element_page"),
-                        props=json.loads(element.get("props", "{}")),
+                        props=element.get("props", "{}"),
                         forId=element.get("element_forid"),
                         mime=element.get("element_mime"),
                     )

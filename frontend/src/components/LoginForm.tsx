@@ -16,7 +16,7 @@ interface Props {
   providers: string[];
   callbackUrl: string;
   onPasswordSignIn?: (
-    username: string,
+    email: string,
     password: string,
     callbackUrl: string
   ) => Promise<any>;
@@ -24,7 +24,7 @@ interface Props {
 }
 
 interface FormValues {
-  username: string;
+  email: string;
   password: string;
 }
 
@@ -47,7 +47,7 @@ export function LoginForm({
     formState: { errors, touchedFields }
   } = useForm<FormValues>({
     defaultValues: {
-      username: '',
+      email: '',
       password: ''
     }
   });
@@ -61,7 +61,7 @@ export function LoginForm({
 
     setLoading(true);
     try {
-      await onPasswordSignIn(data.username, data.password, callbackUrl);
+      await onPasswordSignIn(data.email, data.password, callbackUrl);
     } catch (err) {
       if (err instanceof Error) {
         setErrorState(err.message);
@@ -97,29 +97,24 @@ export function LoginForm({
         {onPasswordSignIn && (
           <>
             <div className="grid gap-2">
-              <Label htmlFor="username">
-                <Translator path="auth.login.form.username.label" />
+              <Label htmlFor="email">
+                <Translator path="auth.login.form.email.label" />
               </Label>
               <Input
-                id="username"
+                id="email"
+                disabled={loading}
                 autoFocus
-                placeholder={
-                  t('auth.login.form.username.placeholder') || 'Username'
-                }
-                {...register('username', {
-                  required:
-                    t('auth.login.form.username.required') ||
-                    'Username is required'
+                placeholder={t('auth.login.form.email.placeholder')}
+                {...register('email', {
+                  required: t('auth.login.form.email.required')
                 })}
                 className={cn(
-                  touchedFields.username &&
-                    errors.username &&
-                    'border-destructive'
+                  touchedFields.email && errors.email && 'border-destructive'
                 )}
               />
-              {touchedFields.username && errors.username && (
+              {touchedFields.email && errors.email && (
                 <p className="text-sm text-destructive">
-                  {errors.username.message}
+                  {errors.email.message}
                 </p>
               )}
             </div>
@@ -133,11 +128,10 @@ export function LoginForm({
               <div className="relative">
                 <Input
                   id="password"
+                  disabled={loading}
                   type={showPassword ? 'text' : 'password'}
                   {...register('password', {
-                    required:
-                      t('auth.login.form.password.required') ||
-                      'Password is required'
+                    required: t('auth.login.form.password.required')
                   })}
                   className={cn(
                     touchedFields.password &&

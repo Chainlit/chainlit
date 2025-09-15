@@ -32,7 +32,6 @@ export interface IChainlitConfig {
   ui: {
     name: string;
     description?: string;
-    font_family?: string;
     default_theme?: 'light' | 'dark';
     layout?: 'default' | 'wide';
     default_sidebar_state?: 'open' | 'closed';
@@ -72,6 +71,9 @@ export interface IChainlitConfig {
       sse?: {
         enabled?: boolean;
       };
+      streamable_http?: {
+        enabled?: boolean;
+      };
       stdio?: {
         enabled?: boolean;
       };
@@ -79,8 +81,10 @@ export interface IChainlitConfig {
   };
   debugUrl?: string;
   userEnv: string[];
+  maskUserEnv?: boolean;
   dataPersistence: boolean;
   threadResumable: boolean;
+  threadSharing?: boolean;
   chatProfiles: ChatProfile[];
   starters?: IStarter[];
   translation: object;

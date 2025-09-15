@@ -20,10 +20,10 @@
     "login": {
       "title": "பயன்பாட்டை அணுக உள்நுழையவும்",
       "form": {
-        "username": {
-          "label": "பயனர் பெயர்",
-          "required": "பயனர் பெயர் தேவை",
-          "placeholder": "உங்கள் பயனர் பெயரை உள்ளிடவும்"
+        "email": {
+          "label": "மின்னஞ்சல் முகவரி",
+          "required": "மின்னஞ்சல் தேவையான புலம்",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "கடவுச்சொல்",
@@ -65,6 +65,11 @@
         "attachFiles": "கோப்புகளை இணை"
       }
     },
+    "commands": {
+      "button": "கருவிகள்",
+      "changeTool": "கருவியை மாற்றவும்",
+      "availableTools": "கிடைக்கும் கருவிகள்"
+    },
     "speech": {
       "start": "பதிவு தொடங்கு",
       "stop": "பதிவை நிறுத்து",
@@ -77,6 +82,10 @@
       "errors": {
         "failed": "பதிவேற்றம் தோல்வியடைந்தது",
         "cancelled": "பதிவேற்றம் ரத்து செய்யப்பட்டது"
+      },
+      "actions": {
+        "cancelUpload": "ரத்து செய்",
+        "removeAttachment": "இணைப்பை அகற்று"
       }
     },
     "messages": {
@@ -96,7 +105,8 @@
         "edit": "கருத்தை திருத்து",
         "dialog": {
           "title": "கருத்தைச் சேர்",
-          "submit": "கருத்தை சமர்ப்பி"
+          "submit": "கருத்தை சமர்ப்பி",
+          "yourFeedback": "உங்கள் கருத்து..."
         },
         "status": {
           "updating": "புதுப்பிக்கிறது",
@@ -110,9 +120,10 @@
       "show": "வரலாற்றைக் காட்டு"
     },
     "settings": {
-      "title": "அமைப்புகள் பலகம்"
+      "title": "அமைப்புகள் பலகம்",
+      "customize": "உங்கள் உரையாடல் அமைப்புகளை இங்கே தனிப்பயனாக்கவும்"
     },
-    "watermark": "உடன் உருவாக்கப்பட்டது"
+    "watermark": "LLM கள் தவறுகள் செய்யலாம். முக்கியமான தகவல்களைச் சரிபார்ப்பதைக் கருத்தில் கொள்ளுங்கள்."
   },
   "threadHistory": {
     "sidebar": {
@@ -136,10 +147,24 @@
     "thread": {
       "untitled": "தலைப்பிடாத உரையாடல்",
       "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
-        },
+        "rename": "பெயர் மாற்று",
+        "share": "பகிர்",
+        "delete": "அழி"
+      },
       "actions": {
+        "share": {
+          "title": "உரையாடல் இணைப்பை பகிரவும்",
+          "button": "பகிர்",
+          "status": {
+            "copied": "இணைப்பு நகலெடுக்கப்பட்டது",
+            "created": "பகிர்வு இணைப்பு உருவாக்கப்பட்டது!",
+            "unshared": "இந்த உரையாடலுக்கு பகிர்வு முடக்கப்பட்டது"
+          },
+          "error": {
+            "create": "பகிர்வு இணைப்பை உருவாக்க முடியவில்லை",
+            "unshare": "உரையாடல் பகிர்வை நிறுத்த முடியவில்லை"
+          }
+        },
         "delete": {
           "title": "நீக்குவதை உறுதிப்படுத்து",
           "description": "இது உரையாடல் மற்றும் அதன் செய்திகள், உறுப்புகளை நீக்கும். இந்த செயலை மீட்டெடுக்க முடியாது",
@@ -196,42 +221,25 @@
     }
   },
   "alerts": {
-    "info": "தகவல்",
-    "note": "குறிப்பு",
-    "tip": "உதவிக்குறிப்பு",
-    "important": "முக்கியம்",
-    "warning": "எச்சரிக்கை",
-    "caution": "கவனம்",
-    "debug": "பிழைதிருத்தம்",
-    "example": "உதாரணம்",
-    "success": "வெற்றி",
-    "help": "உதவி",
-    "idea": "யோசனை",
-    "pending": "நிலுவையில்",
-    "security": "பாதுகாப்பு",
-    "beta": "பீட்டா",
-    "best-practice": "சிறந்த நடைமுறை"
+    "info": "Info",
+    "note": "Note",
+    "tip": "Tip",
+    "important": "Important",
+    "warning": "Warning",
+    "caution": "Caution",
+    "debug": "Debug",
+    "example": "Example",
+    "success": "Success",
+    "help": "Help",
+    "idea": "Idea",
+    "pending": "Pending",
+    "security": "Security",
+    "beta": "Beta",
+    "best-practice": "Best Practice"
   },
-  "accessibility": {
-    "pagination": "பக்க வழிசெலுத்தல்",
-    "previousPage": "முந்தைய பக்கத்திற்கு செல்லவும்",
-    "nextPage": "அடுத்த பக்கத்திற்கு செல்லவும்",
-    "toggleSidebar": "பக்கப்பட்டையை மாற்றவும்",
-    "closeLightbox": "லைட்பாக்ஸை மூடவும்"
-  },
-  "ui": {
-    "elementPanel": {
-      "show": "உறுப்பு பேனலைக் காட்டு",
-      "hide": "உறுப்பு பேனலை மறைக்கவும்"
-    },
-    "debug": {
-      "literalAI": "Literal AI இல் பிழைதிருத்தம்"
-    },
-    "profiles": {
-      "select": "சுயவிவரத்தைத் தேர்ந்தெடுக்கவும்"
-    },
-    "feedback": {
-      "placeholder": "உங்கள் கருத்து..."
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "தேர்ந்தெடுக்கவும்..."
     }
   }
 }

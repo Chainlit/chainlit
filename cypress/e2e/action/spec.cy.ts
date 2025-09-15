@@ -1,10 +1,4 @@
-import { runTestServer } from '../../support/testUtils';
-
 describe('Action', () => {
-  before(() => {
-    runTestServer();
-  });
-
   it('should correctly execute and display actions', () => {
     // Click on "first action"
     cy.get('#first-action').should('exist');

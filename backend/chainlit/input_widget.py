@@ -181,3 +181,113 @@ class Tags(InputWidget):
             "tooltip": self.tooltip,
             "description": self.description,
         }
+
+
+@dataclass
+class MultiSelect(InputWidget):
+    """Useful to create a multi-select input."""
+
+    type: InputWidgetType = "multiselect"
+    initial: List[str] = Field(default_factory=list)
+    values: List[str] = Field(default_factory=list)
+    items: Dict[str, str] = Field(default_factory=dict)
+
+    def __post_init__(
+        self,
+    ) -> None:
+        super().__post_init__()
+
+        if not self.values and not self.items:
+            raise ValueError("Must provide values or items to create a MultiSelect")
+
+        if self.values and self.items:
+            raise ValueError(
+                "You can only provide either values or items to create a MultiSelect"
+            )
+
+        if self.values:
+            self.items = {value: value for value in self.values}
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "id": self.id,
+            "label": self.label,
+            "initial": self.initial,
+            "items": [
+                {"label": id, "value": value} for id, value in self.items.items()
+            ],
+            "tooltip": self.tooltip,
+            "description": self.description,
+        }
+
+
+@dataclass
+class Checkbox(InputWidget):
+    """Useful to create a checkbox input."""
+
+    type: InputWidgetType = "checkbox"
+    initial: bool = False
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "id": self.id,
+            "label": self.label,
+            "initial": self.initial,
+            "tooltip": self.tooltip,
+            "description": self.description,
+        }
+
+
+@dataclass
+class RadioGroup(InputWidget):
+    """Useful to create a radio button input."""
+
+    type: InputWidgetType = "radio"
+    initial: Optional[str] = None
+    initial_index: Optional[int] = None
+    initial_value: Optional[str] = None
+    values: List[str] = Field(default_factory=list)
+    items: Dict[str, str] = Field(default_factory=dict)
+
+    def __post_init__(
+        self,
+    ) -> None:
+        super().__post_init__()
+
+        if not self.values and not self.items:
+            raise ValueError("Must provide values or items to create a RadioButton")
+
+        if self.values and self.items:
+            raise ValueError(
+                "You can only provide either values or items to create a RadioButton"
+            )
+
+        if not self.values and self.initial_index is not None:
+            raise ValueError(
+                "Initial_index can only be used in combination with values to create a RadioButton"
+            )
+
+        if self.items:
+            self.initial = self.initial_value
+        elif self.values:
+            self.items = {value: value for value in self.values}
+            self.initial = (
+                self.values[self.initial_index]
+                if self.initial_index is not None
+                else self.initial_value
+            )
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "type": self.type,
+            "id": self.id,
+            "label": self.label,
+            "initial": self.initial,
+            "items": [
+                {"label": id, "value": value} for id, value in self.items.items()
+            ],
+            "tooltip": self.tooltip,
+            "description": self.description,
+        }

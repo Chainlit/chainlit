@@ -22,7 +22,46 @@ const onError = (error: ClientError) => {
   toast.error(error.toString());
 };
 
-export const apiClient = new ChainlitAPI(
+class ExtendedChainlitAPI extends ChainlitAPI {
+  async shareThread(
+    threadId: string,
+    isShared: boolean
+  ): Promise<{ success: boolean }> {
+    const res = await this.put(`/project/thread/share`, {
+      threadId,
+      isShared
+    });
+    return res.json();
+  }
+
+  connectStreamableHttpMCP(
+    sessionId: string,
+    name: string,
+    url: string,
+    headers?: Record<string, string>
+  ) {
+    // Assumes the backend expects { clientType, name, url }
+    return fetch(`${this.httpEndpoint}mcp`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(sessionId ? { 'x-session-id': sessionId } : {})
+      },
+      body: JSON.stringify({
+        clientType: 'streamable-http',
+        name,
+        url,
+        sessionId,
+        ...(headers ? { headers } : {})
+      })
+    }).then(async (res) => {
+      const data = await res.json();
+      return { success: res.ok, mcp: data.mcp, error: data.detail };
+    });
+  }
+}
+
+export const apiClient = new ExtendedChainlitAPI(
   httpEndpoint,
   'webapp',
   {}, // Optional - additionalQueryParams property.

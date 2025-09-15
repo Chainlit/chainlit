@@ -1,32 +1,43 @@
-import { useEffect } from 'react';
-import { useRecoilState } from 'recoil';
+import { useEffect, useRef } from 'react';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { useApi, useAuth } from './api';
-import { configState, languageState } from './state';
+import { configState, chatProfileState } from './state';
 import { IChainlitConfig } from './types';
 
 const useConfig = () => {
   const [config, setConfig] = useRecoilState(configState);
-  const [language, setLanguage] = useRecoilState(languageState);
   const { isAuthenticated } = useAuth();
+  const chatProfile = useRecoilValue(chatProfileState);
+  const language = navigator.language || 'en-US';
+  const prevChatProfileRef = useRef(chatProfile);
+
+  // Build the API URL with optional chat profile parameter
+  const apiUrl = isAuthenticated 
+    ? `/project/settings?language=${language}${chatProfile ? `&chat_profile=${encodeURIComponent(chatProfile)}` : ''}`
+    : null;
+
+  // Always fetch if we don't have config and we're authenticated
+  const shouldFetch = isAuthenticated && !config;
 
   const { data, error, isLoading } = useApi<IChainlitConfig>(
-    !config && isAuthenticated ? `/project/settings?language=${language}` : null
+    shouldFetch ? apiUrl : null
   );
 
   useEffect(() => {
     if (!data) return;
-    console.log('Config loaded for language:', language);
     setConfig(data);
   }, [data, setConfig]);
 
+  // Clear config when chat profile changes to force re-fetch
   useEffect(() => {
-    if (error) {
-      console.error('Error loading config for language:', language, error);
+    if (prevChatProfileRef.current !== chatProfile) {
+      setConfig(undefined);
+      prevChatProfileRef.current = chatProfile;
     }
-  }, [error, language]);
+  }, [chatProfile, setConfig]);
 
-  return { config, error, isLoading, language, setLanguage };
+  return { config, error, isLoading, language };
 };
 
 export { useConfig };

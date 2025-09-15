@@ -1,3 +1,4 @@
+import { MessageContext } from 'contexts/MessageContext';
 import {
   memo,
   useCallback,
@@ -19,8 +20,6 @@ import {
   useAuth,
   useChatInteract
 } from '@chainlit/react-client';
-
-import { MessageContext } from 'contexts/MessageContext';
 
 import Alert from '@/components/Alert';
 
@@ -67,7 +66,7 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
   );
 
   const sendUserMessage = useCallback(
-    (message: string) => {
+    (message: string, command?: string) => {
       return sendMessage({
         threadId: '',
         id: uuidv4(),
@@ -75,7 +74,8 @@ const CustomElement = memo(function ({ element }: { element: ICustomElement }) {
         type: 'user_message',
         output: message,
         createdAt: new Date().toISOString(),
-        metadata: { location: window.location.href }
+        metadata: { location: window.location.href },
+        command
       });
     },
     [sendMessage, user]
