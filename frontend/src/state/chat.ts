@@ -23,3 +23,8 @@ export const persistentCommandState = atom<ICommand | undefined>({
   key: 'PersistentCommand',
   default: undefined
 });
+
+export const chatModeState = atom<string>({
+  key: 'chatModeState', // уникальный ключ
+  default: 'Pioneer' // значение по умолчанию
+});

@@ -1,7 +1,9 @@
 // frontend/src/components/header/ModeSelector.tsx
 // ChevronDown - иконка стрелочки вниз, чтобы показать, что это выпадающий список
 import { ChevronDown } from 'lucide-react';
-import { memo, useState } from 'react';
+// 2. Импортируем наш новый атом
+import { memo } from 'react';
+import { useRecoilState } from 'recoil';
 
 // Импортируем useState для хранения состояния
 import { Button } from '@/components/ui/button';
@@ -12,17 +14,19 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
+// 1. Импортируем useRecoilState
+import { chatModeState } from '@/state/chat';
+
 const ModeSelector = memo(() => {
   // 1. Используем React.useState для хранения и обновления выбранного режима.
   //    По умолчанию ставим 'Pioneer', как и требовалось.
-  const [selectedMode, setSelectedMode] = useState('Pioneer');
+  const [selectedMode, setSelectedMode] = useRecoilState(chatModeState);
 
   const modes = ['Pioneer', 'ChatGPT', 'HR', 'FD'];
 
   // 2. Эта функция теперь будет обновлять состояние
   const handleSelect = (mode: string) => {
     setSelectedMode(mode);
-    console.log(`Выбран режим: ${mode}`);
   };
 
   return (

@@ -1,5 +1,5 @@
 import { MutableRefObject, useCallback, useRef, useState } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -18,6 +18,7 @@ import { chatSettingsOpenState } from '@/state/project';
 import {
   IAttachment,
   attachmentsState,
+  chatModeState,
   persistentCommandState
 } from 'state/chat';
 
@@ -58,12 +59,13 @@ export default function MessageComposer({
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
+  const selectedMode = useRecoilValue(chatModeState);
+
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
       if (event.clipboardData && event.clipboardData.items) {
         const items = Array.from(event.clipboardData.items);
 
-        // If no text data, check for files (e.g., images)
         items.forEach((item) => {
           if (item.kind === 'file') {
             const file = item.getAsFile();
@@ -91,7 +93,10 @@ export default function MessageComposer({
         type: 'user_message',
         output: msg,
         createdAt: new Date().toISOString(),
-        metadata: { location: window.location.href }
+        metadata: {
+          location: window.location.href,
+          mode: selectedMode // <--- ИСПРАВЛЕНО (1): Добавлен режим в onSubmit
+        }
       };
 
       const fileReferences = attachments
@@ -103,7 +108,7 @@ export default function MessageComposer({
       }
       sendMessage(message, fileReferences);
     },
-    [user, sendMessage, autoScrollRef]
+    [user, sendMessage, autoScrollRef, selectedMode] // <--- ИСПРАВЛЕНО (2): Добавлен selectedMode в зависимости
   );
 
   const onReply = useCallback(
@@ -115,7 +120,10 @@ export default function MessageComposer({
         type: 'user_message',
         output: msg,
         createdAt: new Date().toISOString(),
-        metadata: { location: window.location.href }
+        metadata: {
+          location: window.location.href,
+          mode: selectedMode // <--- ИСПРАВЛЕНО (3): Режим перенесен в metadata
+        }
       };
 
       replyMessage(message);
@@ -123,7 +131,7 @@ export default function MessageComposer({
         autoScrollRef.current = true;
       }
     },
-    [user, replyMessage, autoScrollRef]
+    [user, replyMessage, autoScrollRef, selectedMode] // <--- ИСПРАВЛЕНО (4): sendMessage заменен на replyMessage
   );
 
   const submit = useCallback(() => {
@@ -141,7 +149,7 @@ export default function MessageComposer({
     }
 
     setAttachments([]);
-    setValue(''); // Clear the value state
+    setValue('');
     inputRef.current?.reset();
   }, [
     value,
