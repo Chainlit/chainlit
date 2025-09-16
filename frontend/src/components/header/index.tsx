@@ -9,6 +9,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 
 import ApiKeys from './ApiKeys';
 import ChatProfiles from './ChatProfiles';
+import ModeSelector from './ModeSelector';
 import NewChatButton from './NewChat';
 import ReadmeButton from './Readme';
 import ShareButton from './Share';
@@ -34,7 +35,10 @@ const Header = memo(() => {
       className="p-3 flex h-[60px] items-center justify-between gap-2 relative"
       id="header"
     >
-      <div className="flex items-center">
+      {/* ЛЕВАЯ ЧАСТЬ */}
+      <div className="flex items-center gap-2">
+        {' '}
+        {/* Добавлен gap-2 для отступов */}
         {historyEnabled ? !sidebarOpen ? <SidebarTrigger /> : null : null}
         {historyEnabled ? (
           !sidebarOpen ? (
@@ -43,10 +47,12 @@ const Header = memo(() => {
         ) : (
           <NewChatButton navigate={navigate} />
         )}
-
+        {/* 2. Вставляем наш селектор режима сюда, в левую часть */}
+        <ModeSelector />
         <ChatProfiles navigate={navigate} />
       </div>
 
+      {/* Центральная часть остается без изменений */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         {audioConnection === 'on' ? (
           <AudioPresence
@@ -60,6 +66,7 @@ const Header = memo(() => {
       </div>
 
       <div />
+      {/* ПРАВАЯ ЧАСТЬ */}
       <div className="flex items-center gap-1">
         <ShareButton />
         <ReadmeButton />
@@ -74,6 +81,8 @@ const Header = memo(() => {
               url={link.url}
             />
           ))}
+
+        {/* 3. Удаляем селектор из правой части */}
         <ThemeToggle />
         <UserNav />
       </div>
