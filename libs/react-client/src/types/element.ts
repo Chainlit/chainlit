@@ -8,7 +8,8 @@ export type IElement =
   | IFileElement
   | IPlotlyElement
   | IDataframeElement
-  | ICustomElement;
+  | ICustomElement
+  | IGoogleMapsElement;
 
 export type IMessageElement =
   | IImageElement
@@ -19,7 +20,8 @@ export type IMessageElement =
   | IFileElement
   | IPlotlyElement
   | IDataframeElement
-  | ICustomElement;
+  | ICustomElement
+  | IGoogleMapsElement;
 
 export type ElementType = IElement['type'];
 export type IElementSize = 'small' | 'medium' | 'large';
@@ -78,4 +80,8 @@ export type IDataframeElement = TMessageElement<'dataframe'>;
 
 export interface ICustomElement extends TMessageElement<'custom'> {
   props: Record<string, unknown>;
+}
+
+export interface IGoogleMapsElement extends TMessageElement<'googlemaps'> {
+  size?: IElementSize;
 }

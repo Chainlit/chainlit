@@ -28,6 +28,7 @@ mime_types = {
     "text": "text/plain",
     "tasklist": "application/json",
     "plotly": "application/json",
+    "googlemaps": "application/json",
 }
 
 ElementType = Literal[
@@ -41,6 +42,7 @@ ElementType = Literal[
     "plotly",
     "dataframe",
     "custom",
+    "googlemaps",
 ]
 ElementDisplay = Literal["inline", "side", "page"]
 ElementSize = Literal["small", "medium", "large"]
@@ -181,6 +183,10 @@ class Element:
 
         elif type == "custom":
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
+        
+        elif type == "googlemaps":
+            return GoogleMaps(size=e_dict.get("size", "large"), **common_params)  # type: ignore[arg-type]
+        
         else:
             # Default to File for any other type
             return File(**common_params)  # type: ignore[arg-type]
@@ -452,3 +458,24 @@ class CustomElement(Element):
 
     async def update(self):
         await super().send(self.for_id)
+
+
+@dataclass
+class GoogleMaps(Element):
+    """Useful to send a Google Maps element to the UI."""
+
+    type: ClassVar[ElementType] = "googlemaps"
+    size: ElementSize = "large"
+    center: Dict = Field(default_factory=lambda: {"lat": 0, "lng": 0})
+    zoom: int = 10
+    markers: List[Dict] = Field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        map_config = {
+            "center": self.center,
+            "zoom": self.zoom,
+            "markers": self.markers
+        }
+        self.content = json.dumps(map_config)
+        self.mime = "application/json"
+        super().__post_init__()

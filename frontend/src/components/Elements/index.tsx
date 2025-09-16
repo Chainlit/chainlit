@@ -3,6 +3,7 @@ import type { IMessageElement } from '@chainlit/react-client';
 import { AudioElement } from './Audio';
 import CustomElement from './CustomElement';
 import { FileElement } from './File';
+import { GoogleMapsElement } from './GoogleMaps';
 import { ImageElement } from './Image';
 import { LazyDataframe } from './LazyDataframe';
 import { PDFElement } from './PDF';
@@ -34,6 +35,8 @@ const Element = ({ element }: ElementProps): JSX.Element | null => {
       return <LazyDataframe element={element} />;
     case 'custom':
       return <CustomElement element={element} />;
+    case 'googlemaps':
+      return <GoogleMapsElement element={element} />;
     default:
       return null;
   }
