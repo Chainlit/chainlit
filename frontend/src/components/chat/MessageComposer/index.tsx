@@ -30,6 +30,7 @@ import McpButton from './Mcp';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
+import WebSearchButton from './WebSearchButton';
 
 interface Props {
   fileSpec: FileSpec;
@@ -46,6 +47,7 @@ export default function MessageComposer({
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
   const [value, setValue] = useState('');
+  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState(false);
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
@@ -150,6 +152,7 @@ export default function MessageComposer({
 
     setAttachments([]);
     setValue('');
+    setIsWebSearchEnabled(false);
     inputRef.current?.reset();
   }, [
     value,
@@ -157,6 +160,7 @@ export default function MessageComposer({
     askUser,
     attachments,
     selectedCommand,
+    isWebSearchEnabled,
     setAttachments,
     onSubmit,
     onReply
@@ -191,6 +195,11 @@ export default function MessageComposer({
             fileSpec={fileSpec}
             onFileUploadError={onFileUploadError}
             onFileUpload={onFileUpload}
+          />
+          <WebSearchButton
+            disabled={disabled}
+            value={isWebSearchEnabled}
+            onChange={setIsWebSearchEnabled}
           />
           {chatSettingsInputs.length > 0 && (
             <Button
