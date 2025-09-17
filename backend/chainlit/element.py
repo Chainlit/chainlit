@@ -28,6 +28,7 @@ mime_types = {
     "text": "text/plain",
     "tasklist": "application/json",
     "plotly": "application/json",
+    "map": "application/json",
 }
 
 ElementType = Literal[
@@ -40,6 +41,7 @@ ElementType = Literal[
     "file",
     "plotly",
     "dataframe",
+    "map",
     "custom",
 ]
 ElementDisplay = Literal["inline", "side", "page"]
@@ -181,6 +183,8 @@ class Element:
 
         elif type == "custom":
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
+        elif type == "map":
+            return Map(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
         else:
             # Default to File for any other type
             return File(**common_params)  # type: ignore[arg-type]
@@ -451,4 +455,57 @@ class CustomElement(Element):
         self.updatable = True
 
     async def update(self):
+        await super().send(self.for_id)
+
+
+@dataclass
+class Map(Element):
+    """Useful to send a Google Maps element to the UI."""
+
+    type: ClassVar[ElementType] = "map"
+    mime: str = "application/json"
+    api_key: Optional[str] = None
+    center: Optional[Dict[str, float]] = None  # {"lat": float, "lng": float}
+    zoom: int = 10
+    markers: List[Dict[str, Union[str, float]]] = Field(default_factory=list)
+    height: str = "400px"
+    width: str = "100%"
+
+    def __post_init__(self) -> None:
+        # Set default center if not provided
+        if not self.center:
+            self.center = {"lat": 37.7749, "lng": -122.4194}  # San Francisco
+
+        # Create the content as JSON
+        map_data = {
+            "apiKey": self.api_key,
+            "center": self.center,
+            "zoom": self.zoom,
+            "markers": self.markers,
+            "height": self.height,
+            "width": self.width,
+        }
+
+        self.content = json.dumps(map_data)
+        super().__post_init__()
+        self.updatable = True
+
+    async def add_marker(
+        self,
+        lat: float,
+        lng: float,
+        title: Optional[str] = None,
+        description: Optional[str] = None
+    ):
+        """Add a marker to the map."""
+        marker = {"lat": lat, "lng": lng}
+        if title:
+            marker["title"] = title
+        if description:
+            marker["description"] = description
+        self.markers.append(marker)
+
+    async def update(self):
+        """Update the map content and send to UI."""
+        await self.__post_init__()
         await super().send(self.for_id)

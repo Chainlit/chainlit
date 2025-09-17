@@ -8,6 +8,7 @@ export type IElement =
   | IFileElement
   | IPlotlyElement
   | IDataframeElement
+  | IMapElement
   | ICustomElement;
 
 export type IMessageElement =
@@ -19,6 +20,7 @@ export type IMessageElement =
   | IFileElement
   | IPlotlyElement
   | IDataframeElement
+  | IMapElement
   | ICustomElement;
 
 export type ElementType = IElement['type'];
@@ -75,6 +77,23 @@ export type IPlotlyElement = TMessageElement<'plotly'>;
 export type ITasklistElement = TElement<'tasklist'>;
 
 export type IDataframeElement = TMessageElement<'dataframe'>;
+
+export interface IMapElement extends TMessageElement<'map'> {
+  apiKey?: string;
+  center?: {
+    lat: number;
+    lng: number;
+  };
+  zoom?: number;
+  markers?: Array<{
+    lat: number;
+    lng: number;
+    title?: string;
+    description?: string;
+  }>;
+  height?: string;
+  width?: string;
+}
 
 export interface ICustomElement extends TMessageElement<'custom'> {
   props: Record<string, unknown>;
