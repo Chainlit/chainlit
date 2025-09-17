@@ -73,12 +73,17 @@ export default function MessageComposer({
     // Если выбранный режим - не 'Pioneer', выключаем веб-поиск
     if (selectedMode !== 'Pioneer') {
       setIsWebSearchEnabled(false);
+      setAttachments([]);
     }
-  }, [selectedMode]);
+  }, [selectedMode, setAttachments]);
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
-      if (event.clipboardData && event.clipboardData.items) {
+      if (
+        selectedMode === 'Pioneer' &&
+        event.clipboardData &&
+        event.clipboardData.items
+      ) {
         const items = Array.from(event.clipboardData.items);
 
         items.forEach((item) => {
@@ -205,12 +210,14 @@ export default function MessageComposer({
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
           <VoiceButton disabled={disabled} />
-          <UploadButton
-            disabled={disabled}
-            fileSpec={fileSpec}
-            onFileUploadError={onFileUploadError}
-            onFileUpload={onFileUpload}
-          />
+          {selectedMode === 'Pioneer' && (
+            <UploadButton
+              disabled={disabled}
+              fileSpec={fileSpec}
+              onFileUploadError={onFileUploadError}
+              onFileUpload={onFileUpload}
+            />
+          )}
           {selectedMode === 'Pioneer' && (
             <WebSearchButton
               disabled={disabled}
