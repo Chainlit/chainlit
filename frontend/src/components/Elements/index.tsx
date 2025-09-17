@@ -5,6 +5,7 @@ import CustomElement from './CustomElement';
 import { FileElement } from './File';
 import { ImageElement } from './Image';
 import { LazyDataframe } from './LazyDataframe';
+import { MapElement } from './Map';
 import { PDFElement } from './PDF';
 import { PlotlyElement } from './Plotly';
 import { TextElement } from './Text';
@@ -32,6 +33,8 @@ const Element = ({ element }: ElementProps): JSX.Element | null => {
       return <PlotlyElement element={element} />;
     case 'dataframe':
       return <LazyDataframe element={element} />;
+    case 'map':
+      return <MapElement element={element} />;
     case 'custom':
       return <CustomElement element={element} />;
     default:
