@@ -9,13 +9,11 @@ import { toast } from 'sonner';
 import {
   ChainlitContext,
   ClientError,
-  ThreadHistory,
-  // sessionIdState,
+  ThreadHistory, // sessionIdState,
   threadHistoryState,
   useChatInteract,
   useChatMessages,
-  useChatSession,
-  useConfig
+  useChatSession
 } from '@chainlit/react-client';
 
 import Alert from '@/components/Alert';
@@ -31,7 +29,14 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -50,7 +55,7 @@ import {
 } from '@/components/ui/tooltip';
 
 import { Translator } from '../i18n';
-import ShareDialog from '@/components/share/ShareDialog';
+// import ShareDialog from '@/components/share/ShareDialog';
 import ThreadOptions from './ThreadOptions';
 
 interface ThreadListProps {
@@ -76,22 +81,7 @@ export function ThreadList({
   const [threadNewName, setThreadNewName] = useState<string>();
   const setThreadHistory = useSetRecoilState(threadHistoryState);
   const apiClient = useContext(ChainlitContext);
-  const { config } = useConfig();
-  const dataPersistence = config?.dataPersistence;
-  const threadSharingReady = Boolean((config as any)?.threadSharing);
   // sessionId not needed here
-
-  // Share thread state
-  const [threadIdToShare, setThreadIdToShare] = useState<string | undefined>();
-  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  // Share dialog state is centralized in ShareDialog; we only track which thread to share
-
-  const handleShareThread = (threadId: string) => {
-    if (!threadSharingReady) return;
-    setThreadIdToShare(threadId);
-    setIsShareDialogOpen(true);
-  // ShareDialog handles its own internal state; we just open it
-  };
 
   const sortedTimeGroupKeys = useMemo(() => {
     if (!threadHistory?.timeGroupedThreads) return [];
@@ -294,16 +284,6 @@ export function ThreadList({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      <ShareDialog
-        open={isShareDialogOpen}
-        onOpenChange={(open) => {
-          setIsShareDialogOpen(open);
-          if (!open) {
-            setThreadIdToShare(undefined);
-          }
-        }}
-        threadId={threadIdToShare || null}
-      />
       <TooltipProvider delayDuration={300}>
         {sortedTimeGroupKeys.map((group) => {
           const items = threadHistory!.timeGroupedThreads![group];
@@ -346,11 +326,6 @@ export function ThreadList({
                                     setThreadIdToRename(thread.id);
                                     setThreadNewName(thread.name);
                                   }}
-                                  onShare={
-                                    dataPersistence
-                                      ? () => handleShareThread(thread.id)
-                                      : undefined
-                                  }
                                   className={cn(
                                     'absolute z-20 bottom-0 top-0 right-0 bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
                                     isSelected &&
