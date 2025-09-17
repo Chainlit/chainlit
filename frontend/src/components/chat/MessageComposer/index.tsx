@@ -110,7 +110,8 @@ export default function MessageComposer({
         createdAt: new Date().toISOString(),
         metadata: {
           location: window.location.href,
-          mode: selectedMode // <--- ИСПРАВЛЕНО (1): Добавлен режим в onSubmit
+          mode: selectedMode,
+          web: isWebSearchEnabled
         }
       };
 
@@ -123,7 +124,7 @@ export default function MessageComposer({
       }
       sendMessage(message, fileReferences);
     },
-    [user, sendMessage, autoScrollRef, selectedMode] // <--- ИСПРАВЛЕНО (2): Добавлен selectedMode в зависимости
+    [user, sendMessage, autoScrollRef, selectedMode, isWebSearchEnabled]
   );
 
   const onReply = useCallback(
@@ -137,7 +138,8 @@ export default function MessageComposer({
         createdAt: new Date().toISOString(),
         metadata: {
           location: window.location.href,
-          mode: selectedMode // <--- ИСПРАВЛЕНО (3): Режим перенесен в metadata
+          mode: selectedMode,
+          web: isWebSearchEnabled
         }
       };
 
@@ -146,7 +148,7 @@ export default function MessageComposer({
         autoScrollRef.current = true;
       }
     },
-    [user, replyMessage, autoScrollRef, selectedMode] // <--- ИСПРАВЛЕНО (4): sendMessage заменен на replyMessage
+    [user, sendMessage, autoScrollRef, selectedMode, isWebSearchEnabled]
   );
 
   const submit = useCallback(() => {
