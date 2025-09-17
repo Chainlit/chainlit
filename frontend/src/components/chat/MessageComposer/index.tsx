@@ -1,4 +1,10 @@
-import { MutableRefObject, useCallback, useRef, useState } from 'react';
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -62,6 +68,13 @@ export default function MessageComposer({
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
   const selectedMode = useRecoilValue(chatModeState);
+
+  useEffect(() => {
+    // Если выбранный режим - не 'Pioneer', выключаем веб-поиск
+    if (selectedMode !== 'Pioneer') {
+      setIsWebSearchEnabled(false);
+    }
+  }, [selectedMode]);
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -196,11 +209,13 @@ export default function MessageComposer({
             onFileUploadError={onFileUploadError}
             onFileUpload={onFileUpload}
           />
-          <WebSearchButton
-            disabled={disabled}
-            value={isWebSearchEnabled}
-            onChange={setIsWebSearchEnabled}
-          />
+          {selectedMode === 'Pioneer' && (
+            <WebSearchButton
+              disabled={disabled}
+              value={isWebSearchEnabled}
+              onChange={setIsWebSearchEnabled}
+            />
+          )}
           {chatSettingsInputs.length > 0 && (
             <Button
               id="chat-settings-open-modal"
