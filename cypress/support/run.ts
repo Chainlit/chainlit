@@ -15,7 +15,7 @@ export const runChainlit = async (
     const testDir = spec ? dirname(spec.absolute) : CHAILIT_DIR;
     const entryPointFileName = spec
       ? spec.name.startsWith('async')
-        ? 'main_sync.py'
+        ? 'main_async.py'
         : spec.name.startsWith('sync')
         ? 'main_sync.py'
         : 'main.py'
@@ -29,7 +29,7 @@ export const runChainlit = async (
       );
     }
 
-    const command = 'poetry';
+    const command = 'uv';
 
     const args = [
       '--project',

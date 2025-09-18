@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "Email address",
-          "required": "email is a required field"
+          "required": "email is a required field",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "Password",
@@ -64,6 +65,11 @@
         "attachFiles": "Attach files"
       }
     },
+    "commands": {
+      "button": "Tools",
+      "changeTool": "Change Tool",
+      "availableTools": "Available Tools"
+    },
     "speech": {
       "start": "Start recording",
       "stop": "Stop recording",
@@ -76,6 +82,10 @@
       "errors": {
         "failed": "Failed to upload",
         "cancelled": "Cancelled upload of"
+      },
+      "actions": {
+        "cancelUpload": "Cancel upload",
+        "removeAttachment": "Remove attachment"
       }
     },
     "messages": {
@@ -95,7 +105,8 @@
         "edit": "Edit feedback",
         "dialog": {
           "title": "Add a comment",
-          "submit": "Submit feedback"
+          "submit": "Submit feedback",
+          "yourFeedback": "Your feedback..."
         },
         "status": {
           "updating": "Updating",
@@ -109,7 +120,8 @@
       "show": "Show history"
     },
     "settings": {
-      "title": "Settings panel"
+      "title": "Settings panel",
+      "customize": "Customize your chat settings here"
     },
     "watermark": "LLMs can make mistakes. Check important info."
   },
@@ -136,9 +148,23 @@
       "untitled": "Untitled Conversation",
       "menu": {
           "rename": "Rename",
+          "share": "Share",
           "delete": "Delete"
         },
       "actions": {
+        "share": {
+          "title": "Share link to chat",
+          "button": "Share",
+          "status": {
+            "copied": "Link copied",
+            "created": "Share link created!",
+            "unshared": "Sharing disabled for this thread"
+          },
+          "error": {
+            "create": "Failed to create share link",
+            "unshare": "Failed to unshare thread"
+          }
+        },
         "delete": {
           "title": "Confirm deletion",
           "description": "This will delete the thread as well as its messages and elements. This action cannot be undone",
@@ -210,5 +236,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "Select..."
+    }
   }
 }

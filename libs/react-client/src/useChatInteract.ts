@@ -159,8 +159,8 @@ const useChatInteract = () => {
   }, [session?.socket]);
 
   const uploadFile = useCallback(
-    (file: File, onProgress: (progress: number) => void) => {
-      return client.uploadFile(file, onProgress, sessionId);
+    (file: File, onProgress: (progress: number) => void, parentId?: string) => {
+      return client.uploadFile(file, onProgress, sessionId, parentId);
     },
     [sessionId]
   );

@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "כתובת אימייל",
-          "required": "שדה האימייל הוא שדה חובה"
+          "required": "שדה האימייל הוא שדה חובה",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "סיסמה",
@@ -69,6 +70,11 @@
       "stop": "עצור הקלטה",
       "connecting": "מתחבר"
     },
+    "commands": {
+      "button": "כלים",
+      "changeTool": "שנה כלי",
+      "availableTools": "כלים זמינים"
+    },
     "fileUpload": {
       "dragDrop": "גרור ושחרר קבצים כאן",
       "browse": "עיין בקבצים",
@@ -76,6 +82,10 @@
       "errors": {
         "failed": "העלאה נכשלה",
         "cancelled": "העלאה בוטלה של"
+      },
+      "actions": {
+        "cancelUpload": "ביטול העלאה",
+        "removeAttachment": "הסרת קובץ מצורף"
       }
     },
     "messages": {
@@ -95,7 +105,8 @@
         "edit": "ערוך משוב",
         "dialog": {
           "title": "הוסף תגובה",
-          "submit": "שלח משוב"
+          "submit": "שלח משוב",
+          "yourFeedback": "המשוב שלך..."
         },
         "status": {
           "updating": "מעדכן",
@@ -109,7 +120,8 @@
       "show": "הצג היסטוריה"
     },
     "settings": {
-      "title": "פאנל הגדרות"
+      "title": "פאנל הגדרות",
+      "customize": "התאם אישית את הגדרות הצ'אט שלך כאן"
     },
     "watermark": "מודלי שפה גדולים עלולים לעשות טעויות. כדאי לבדוק מידע חשוב."
   },
@@ -135,10 +147,24 @@
     "thread": {
       "untitled": "שיחה ללא כותרת",
       "menu": {
-          "rename": "Rename",
+          "rename": "שינוי שם",
+          "share": "שיתוף",
           "delete": "Delete"
         },
       "actions": {
+        "share": {
+          "title": "שיתוף קישור לשיחה",
+          "button": "שיתוף",
+          "status": {
+            "copied": "הקישור הועתק",
+            "created": "קישור השיתוף נוצר!",
+            "unshared": "השיתוף בוטל עבור שיחה זו"
+          },
+          "error": {
+            "create": "יצירת קישור השיתוף נכשלה",
+            "unshare": "ביטול השיתוף של השיחה נכשל"
+          }
+        },
         "delete": {
           "title": "אשר מחיקה",
           "description": "פעולה זו תמחק את השיחה וכן את ההודעות והאלמנטים שלה. לא ניתן לבטל פעולה זו",
@@ -210,5 +236,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "בחר..."
+    }
   }
 }

@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 
+import { useTranslation } from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
 import {
   Tooltip,
@@ -71,6 +72,7 @@ const CircularProgressButton = ({
   );
 };
 const Attachments = () => {
+  const { t } = useTranslation();
   const attachments = useRecoilValue(attachmentsState);
 
   if (attachments.length === 0) return null;
@@ -93,7 +95,9 @@ const Attachments = () => {
                   </CircularProgressButton>
                 </div>
               </TooltipTrigger>
-              <TooltipContent>Cancel upload</TooltipContent>
+              <TooltipContent>
+                {t('chat.fileUpload.actions.cancelUpload')}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         ) : null;
@@ -113,7 +117,9 @@ const Attachments = () => {
                     </Button>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent>Remove attachment</TooltipContent>
+                <TooltipContent>
+                  {t('chat.fileUpload.actions.removeAttachment')}
+                </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           ) : null;

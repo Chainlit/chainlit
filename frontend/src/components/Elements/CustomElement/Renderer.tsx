@@ -27,8 +27,8 @@ const createMockAPIs = () => {
       return { success: true };
     },
 
-    sendUserMessage: (message: string): void => {
-      console.log('sendUserMessage called with:', message);
+    sendUserMessage: (message: string, command?: string): void => {
+      console.log('sendUserMessage called with:', message, command);
     }
   };
 };

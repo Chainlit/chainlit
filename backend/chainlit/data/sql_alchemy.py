@@ -230,16 +230,35 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if user_id:
             user_identifier = await self._get_user_identifer_by_id(user_id)
 
+        if metadata is not None:
+            existing = await self.execute_sql(
+                query='SELECT "metadata" FROM threads WHERE "id" = :id',
+                parameters={"id": thread_id},
+            )
+            base = {}
+            if isinstance(existing, list) and existing:
+                raw = existing[0].get("metadata") or {}
+                if isinstance(raw, str):
+                    try:
+                        base = json.loads(raw)
+                    except json.JSONDecodeError:
+                        base = {}
+                elif isinstance(raw, dict):
+                    base = raw
+            incoming = {k: v for k, v in metadata.items() if v is not None}
+            metadata = {**base, **incoming}
+
+        name_value = name
+        if name_value is None and metadata:
+            name_value = metadata.get("name")
+        created_at_value = (
+            await self.get_current_timestamp() if metadata is None else None
+        )
+
         data = {
             "id": thread_id,
-            "createdAt": (
-                await self.get_current_timestamp() if metadata is None else None
-            ),
-            "name": (
-                name
-                if name is not None
-                else (metadata.get("name") if metadata and "name" in metadata else None)
-            ),
+            "createdAt": created_at_value,
+            "name": name_value,
             "userId": user_id,
             "userIdentifier": user_identifier,
             "tags": tags,
@@ -560,16 +579,26 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             logger.info("SQLAlchemy: get_all_user_threads")
         user_threads_query = """
             SELECT
-                "id" AS thread_id,
-                "createdAt" AS thread_createdat,
-                "name" AS thread_name,
-                "userId" AS user_id,
-                "userIdentifier" AS user_identifier,
-                "tags" AS thread_tags,
-                "metadata" AS thread_metadata
-            FROM threads
-            WHERE "userId" = :user_id OR "id" = :thread_id
-            ORDER BY "createdAt" DESC
+                t."id" AS thread_id,
+                t."createdAt" AS thread_createdat,
+                t."name" AS thread_name,
+                t."userId" AS user_id,
+                t."userIdentifier" AS user_identifier,
+                t."tags" AS thread_tags,
+                t."metadata" AS thread_metadata,
+                MAX(s."createdAt") AS updatedAt
+            FROM threads t
+            LEFT JOIN steps s ON t."id" = s."threadId"
+            WHERE t."userId" = :user_id OR t."id" = :thread_id
+            GROUP BY
+                t."id",
+                t."createdAt",
+                t."name",
+                t."userId",
+                t."userIdentifier",
+                t."tags",
+                t."metadata"
+            ORDER BY updatedAt DESC NULLS LAST
             LIMIT :limit
         """
         user_threads = await self.execute_sql(

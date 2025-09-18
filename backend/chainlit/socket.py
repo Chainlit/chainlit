@@ -12,18 +12,25 @@ from chainlit.auth import (
     require_login,
 )
 from chainlit.chat_context import chat_context
-from chainlit.config import config
+from chainlit.config import ChainlitConfig, config
 from chainlit.context import init_ws_context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import sio
 from chainlit.session import WebsocketSession
-from chainlit.types import InputAudioChunk, InputAudioChunkPayload, MessagePayload
+from chainlit.types import (
+    InputAudioChunk,
+    InputAudioChunkPayload,
+    MessagePayload,
+)
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_sessions
 
 WSGIEnvironment: TypeAlias = dict[str, Any]
+
+# Generic error message reused across resume flows.
+THREAD_NOT_FOUND_MSG = "Thread not found."
 
 
 def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
@@ -66,19 +73,19 @@ async def resume_thread(session: WebsocketSession):
 
 
 def load_user_env(user_env):
+    if user_env:
+        user_env_dict = json.loads(user_env)
     # Check user env
     if config.project.user_env:
-        # Check if requested user environment variables are provided
-        if user_env:
-            user_env = json.loads(user_env)
-            for key in config.project.user_env:
-                if key not in user_env:
-                    raise ConnectionRefusedError(
-                        "Missing user environment variable: " + key
-                    )
-        else:
+        if not user_env_dict:
             raise ConnectionRefusedError("Missing user environment variables")
-    return user_env
+        # Check if requested user environment variables are provided
+        for key in config.project.user_env:
+            if key not in user_env_dict:
+                raise ConnectionRefusedError(
+                    "Missing user environment variable: " + key
+                )
+    return user_env_dict
 
 
 def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
@@ -326,7 +333,9 @@ async def audio_start(sid):
     session = WebsocketSession.require(sid)
 
     context = init_ws_context(session)
-    if config.code.on_audio_start:
+    config: ChainlitConfig = session.get_config()
+
+    if config.features.audio and config.features.audio.enabled:
         connected = bool(await config.code.on_audio_start())
         connection_state = "on" if connected else "off"
         await context.emitter.update_audio_connection(connection_state)
@@ -339,7 +348,13 @@ async def audio_chunk(sid, payload: InputAudioChunkPayload):
 
     init_ws_context(session)
 
-    if config.code.on_audio_chunk:
+    config: ChainlitConfig = session.get_config()
+
+    if (
+        config.features.audio
+        and config.features.audio.enabled
+        and config.code.on_audio_chunk
+    ):
         asyncio.create_task(config.code.on_audio_chunk(InputAudioChunk(**payload)))
 
 
@@ -347,6 +362,7 @@ async def audio_chunk(sid, payload: InputAudioChunkPayload):
 async def audio_end(sid):
     """Handle the end of the audio stream."""
     session = WebsocketSession.require(sid)
+
     try:
         context = init_ws_context(session)
         await context.emitter.task_start()
@@ -355,7 +371,9 @@ async def audio_end(sid):
             session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread("audio"))
 
-        if config.code.on_audio_end:
+        config: ChainlitConfig = session.get_config()
+
+        if config.features.audio and config.features.audio.enabled:
             await config.code.on_audio_end()
 
     except asyncio.CancelledError:

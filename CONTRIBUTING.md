@@ -15,6 +15,7 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
     - [Requirements](#requirements)
     - [Set up the repo](#set-up-the-repo)
     - [Install dependencies](#install-dependencies)
+    - [Build Frontend](#build-frontend)
   - [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
   - [Start the UI from source](#start-the-ui-from-source)
   - [Run the tests](#run-the-tests)
@@ -27,7 +28,7 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
 ### Requirements
 
 1. Python >= `3.10`
-2. Poetry ([See how to install](https://python-poetry.org/docs/#installation))
+2. uv ([See how to install](https://docs.astral.sh/uv/getting-started/installation/))
 3. NodeJS >= `24` ([See how to install](https://nodejs.org/en/download))
 4. Pnpm ([See how to install](https://pnpm.io/installation))
 
@@ -75,7 +76,7 @@ The following command will install Python dependencies, Node (pnpm) dependencies
 
 ```sh
 cd backend
-poetry install --with tests --with mypy --with dev --with custom-data
+uv sync --extra tests --extra mypy --extra dev --extra custom-data
 ```
 
 ## Start the Chainlit server from source
@@ -84,8 +85,7 @@ Start by running `backend/hello.py` as an example.
 
 ```sh
 cd backend
-poetry env activate
-chainlit run chainlit/hello.py
+uv run chainlit run chainlit/hello.py
 ```
 
 You should now be able to access the Chainlit app you just launched on `http://127.0.0.1:8000`.
@@ -100,10 +100,10 @@ Then, start the UI.
 
 ```sh
 cd frontend
-pnpm run dev --port 5174 --host
+pnpm run dev
 ```
 
-If you visit `http://localhost:5174/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
+If you visit `http://localhost:5173/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
 
 ## Run the tests
 
@@ -113,7 +113,7 @@ This will run the backend's unit tests.
 
 ```sh
 cd backend
-poetry run pytest --cov=chainlit
+uv run pytest --cov=chainlit
 ```
 
 ### E2E tests
@@ -142,7 +142,7 @@ pnpm test:interactive // runs `cypress open`
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
 
-Make sure to run `poetry install` again whenever you've updated the frontend!
+Make sure to run `uv sync` again whenever you've updated the frontend!
 
 ### Headed/debugging
 

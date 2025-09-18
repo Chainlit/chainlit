@@ -22,7 +22,8 @@
         "form": {
           "email": {
             "label": "メールアドレス",
-            "required": "メールアドレスは必須項目です"
+            "required": "メールアドレスは必須項目です",
+            "placeholder": "me@example.com"
           },
           "password": {
             "label": "パスワード",
@@ -69,13 +70,21 @@
         "stop": "録音停止",
         "connecting": "接続中"
       },
+      "commands": {
+        "button": "ツール",
+        "changeTool": "ツールを変更",
+        "availableTools": "利用可能なツール"
+      },
       "fileUpload": {
         "dragDrop": "ここにファイルをドラッグ＆ドロップ",
-        "browse": "ファイルを参照",
         "sizeLimit": "制限：",
         "errors": {
           "failed": "アップロードに失敗しました",
           "cancelled": "アップロードをキャンセルしました："
+        },
+        "actions": {
+          "cancelUpload": "アップロードをキャンセル",
+          "removeAttachment": "添付ファイルを削除"
         }
       },
       "messages": {
@@ -95,7 +104,8 @@
           "edit": "フィードバックを編集",
           "dialog": {
             "title": "コメントを追加",
-            "submit": "フィードバックを送信"
+            "submit": "フィードバックを送信",
+            "yourFeedback": "あなたのフィードバック..."
           },
           "status": {
             "updating": "更新中",
@@ -109,7 +119,8 @@
         "show": "履歴を表示"
       },
       "settings": {
-        "title": "設定パネル"
+        "title": "設定パネル",
+        "customize": "ここでチャット設定をカスタマイズします"
       },
       "watermark": "大規模言語モデルは間違いを犯す可能性があります。重要な情報については確認を検討してください。"
     },
@@ -135,10 +146,24 @@
       "thread": {
         "untitled": "無題の会話",
         "menu": {
-          "rename": "Rename",
-          "delete": "Delete"
+          "rename": "名前を変更",
+          "share": "共有",
+          "delete": "削除"
         },
         "actions": {
+          "share": {
+            "title": "チャットのリンクを共有",
+            "button": "共有",
+            "status": {
+              "copied": "リンクをコピーしました",
+              "created": "共有リンクを作成しました！",
+              "unshared": "このスレッドの共有を無効にしました"
+            },
+            "error": {
+              "create": "共有リンクの作成に失敗しました",
+              "unshare": "スレッドの共有解除に失敗しました"
+            }
+          },
           "delete": {
             "title": "削除の確認",
             "description": "このスレッドとそのメッセージ、要素が削除されます。この操作は取り消せません",
@@ -210,5 +235,10 @@
     "security": "Security",
     "beta": "Beta",
     "best-practice": "Best Practice"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "選択..."
+    }
   }
-  }
+}

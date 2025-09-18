@@ -83,7 +83,7 @@ export default function ChatSettingsModal() {
             <Translator path="chat.settings.title" />
           </DialogTitle>
           <DialogDescription className="sr-only">
-            Customize your chat settings here
+            <Translator path="chat.settings.customize" />
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col flex-grow overflow-y-auto gap-6 p-1">
