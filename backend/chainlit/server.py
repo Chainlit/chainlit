@@ -1694,6 +1694,20 @@ async def get_storage_file(
                     detail="Access denied: file belongs to different user"
                 )
     
+    # Try to extract element_id and get the original filename from database
+    element_id = None
+    element_name = None
+
+    # Extract element_id from object_key patterns
+    if len(parts) >= 4 and parts[0] == "threads" and parts[2] == "files":
+        # Pattern: threads/{thread_id}/files/{element_id}
+        element_id = parts[3]
+        # Query database for element details
+        if thread_id and element_id:
+            element = await data_layer.get_element(thread_id, element_id)
+            if element:
+                element_name = element.get("name")
+
     # Only serve files if storage client implements download_file
     file_data = await data_layer.storage_client.download_file(object_key)
     if file_data is None:
@@ -1701,14 +1715,17 @@ async def get_storage_file(
             status_code=404,
             detail="File not found or storage client does not support direct downloads",
         )
-    
+
     content, mime_type = file_data
-    
+
+    # Use the original filename if available, otherwise fall back to the UUID
+    filename = element_name if element_name else Path(object_key).name
+
     from fastapi.responses import Response
     return Response(
         content=content,
         media_type=mime_type,
-        headers={"Content-Disposition": f"inline; filename={Path(object_key).name}"}
+        headers={"Content-Disposition": f"inline; filename={filename}"}
     )
 
 
