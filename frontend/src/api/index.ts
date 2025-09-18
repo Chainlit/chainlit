@@ -23,6 +23,17 @@ const onError = (error: ClientError) => {
 };
 
 class ExtendedChainlitAPI extends ChainlitAPI {
+  async shareThread(
+    threadId: string,
+    isShared: boolean
+  ): Promise<{ success: boolean }> {
+    const res = await this.put(`/project/thread/share`, {
+      threadId,
+      isShared
+    });
+    return res.json();
+  }
+
   connectStreamableHttpMCP(
     sessionId: string,
     name: string,

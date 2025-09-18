@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, Mock
 from chainlit import config
 from chainlit.callbacks import password_auth_callback
 from chainlit.data.base import BaseDataLayer
+from chainlit.types import ThreadDict
 from chainlit.user import User
 
 
@@ -349,7 +350,6 @@ async def test_on_chat_resume(
     mock_chainlit_context, test_config: config.ChainlitConfig
 ):
     from chainlit.callbacks import on_chat_resume
-    from chainlit.types import ThreadDict
 
     async with mock_chainlit_context:
         chat_resumed = False
@@ -517,6 +517,102 @@ async def test_set_starters_language(
         assert result[0].message == "Message de test"
 
 
+async def test_on_shared_thread_view_allow(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import on_shared_thread_view
+    from chainlit.user import User
+
+    async with mock_chainlit_context:
+        # Simulate a viewer with access to certain chat profiles
+        allowed_profiles_by_user = {"viewer": {"pro", "basic"}}
+
+        @on_shared_thread_view
+        async def allow_shared_view(thread, viewer: User | None):
+            md = thread.get("metadata") or {}
+            chat_profile = (md or {}).get("chat_profile")
+            if not md.get("is_shared"):
+                return False
+            if not viewer:
+                return False
+            return chat_profile in allowed_profiles_by_user.get(
+                viewer.identifier, set()
+            )
+
+        assert test_config.code.on_shared_thread_view is not None
+
+        thread: ThreadDict = {
+            "id": "t1",
+            "createdAt": "2025-09-03T00:00:00Z",
+            "name": "Shared Thread",
+            "userId": "author_id",
+            "userIdentifier": "author",
+            "tags": [],
+            "metadata": {"is_shared": True, "chat_profile": "pro"},
+            "steps": [],
+            "elements": [],
+        }
+        viewer = User(identifier="viewer")
+
+        res = await test_config.code.on_shared_thread_view(thread, viewer)
+        assert res is True
+
+
+async def test_on_shared_thread_view_block_and_exception(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import on_shared_thread_view
+    from chainlit.user import User
+
+    async with mock_chainlit_context:
+        # Case 1: Explicitly return False when profile not allowed
+        @on_shared_thread_view
+        async def deny_when_not_allowed(thread, viewer: User | None):
+            md = thread.get("metadata") or {}
+            return md.get("chat_profile") == "allowed"
+
+        assert test_config.code.on_shared_thread_view is not None
+
+        thread: ThreadDict = {
+            "id": "t2",
+            "createdAt": "2025-09-03T00:00:00Z",
+            "name": "Shared Thread",
+            "userId": "author_id",
+            "userIdentifier": "author",
+            "tags": [],
+            "metadata": {"is_shared": True, "chat_profile": "restricted"},
+            "steps": [],
+            "elements": [],
+        }
+        viewer = User(identifier="viewer")
+        res = await test_config.code.on_shared_thread_view(thread, viewer)
+        assert not res
+
+        # Case 2: Raise an exception inside callback; wrapper should swallow and result should be falsy
+        @on_shared_thread_view
+        async def raise_on_forbidden(thread, viewer: User | None):
+            md = thread.get("metadata") or {}
+            if md.get("chat_profile") == "forbidden":
+                raise ValueError("Viewer not allowed for this profile")
+            return True
+
+        assert test_config.code.on_shared_thread_view is not None
+
+        thread_err: ThreadDict = {
+            "id": "t3",
+            "createdAt": "2025-09-03T00:00:00Z",
+            "name": "Shared Thread",
+            "userId": "author_id",
+            "userIdentifier": "author",
+            "tags": [],
+            "metadata": {"is_shared": True, "chat_profile": "forbidden"},
+            "steps": [],
+            "elements": [],
+        }
+        res2 = await test_config.code.on_shared_thread_view(thread_err, viewer)
+        assert not res2
+
+
 async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_chat_end
 
@@ -541,7 +637,7 @@ async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitCo
         context.session.emit.assert_called()
 
 
-async def test_data_layer_config(
+def test_data_layer_config(
     mock_data_layer: AsyncMock,
     test_config: config.ChainlitConfig,
     mock_get_data_layer: Mock,
