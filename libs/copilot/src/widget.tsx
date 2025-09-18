@@ -1,6 +1,7 @@
 import { cn } from '@/lib/utils';
 import { MessageCircle, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
 
 import Alert from '@chainlit/app/src/components/Alert';
 import { Button } from '@chainlit/app/src/components/ui/button';
@@ -9,6 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@chainlit/app/src/components/ui/popover';
+import { chatMetadataState } from '@chainlit/react-client';
 
 import Header from './components/Header';
 
@@ -27,12 +29,14 @@ interface Props {
 const Widget = ({ config, error }: Props) => {
   const [expanded, setExpanded] = useState(config?.expanded || false);
   const [isOpen, setIsOpen] = useState(false);
+  const setChatMetadata = useSetRecoilState(chatMetadataState);
 
   useEffect(() => {
     window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
     window.getChainlitCopilotThreadId = getChainlitCopilotThreadId;
     window.clearChainlitCopilotThreadId = clearChainlitCopilotThreadId;
-
+    // @ts-expect-error is not a valid prop
+    window.setChainlitMetadata = setChatMetadata;
     return () => {
       window.toggleChainlitCopilot = () => console.error('Widget not mounted.');
       window.getChainlitCopilotThreadId = () => null;
@@ -40,7 +44,7 @@ const Widget = ({ config, error }: Props) => {
       window.clearChainlitCopilotThreadId = () =>
         console.error('Widget not mounted.');
     };
-  }, []);
+  }, [setChatMetadata]);
 
   const customClassName = config?.button?.className || '';
 

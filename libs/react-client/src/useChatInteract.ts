@@ -3,6 +3,7 @@ import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
   actionState,
   askUserState,
+  chatMetadataState,
   chatSettingsInputsState,
   chatSettingsValueState,
   currentThreadIdState,
@@ -30,6 +31,7 @@ const useChatInteract = () => {
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
   const sessionId = useRecoilValue(sessionIdState);
+  const chatMetadata = useRecoilValue(chatMetadataState);
 
   const resetChatSettings = useResetRecoilState(chatSettingsInputsState);
   const resetSessionId = useResetRecoilState(sessionIdState);
@@ -65,7 +67,7 @@ const useChatInteract = () => {
 
   const sendMessage = useCallback(
     (
-      message: PartialBy<IStep, 'createdAt' | 'id'>,
+      message: PartialBy<IStep, 'createdAt' | 'id' | 'metadata'>,
       fileReferences: IFileRef[] = []
     ) => {
       if (!message.id) {
@@ -74,7 +76,12 @@ const useChatInteract = () => {
       if (!message.createdAt) {
         message.createdAt = new Date().toISOString();
       }
+      message.metadata = { ...(message.metadata || {}), ...chatMetadata };
       setMessages((oldMessages) => addMessage(oldMessages, message as IStep));
+      console.log(
+        'useChatInteract: Sending message metadata',
+        message.metadata
+      );
 
       session?.socket.emit('client_message', { message, fileReferences });
     },
