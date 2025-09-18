@@ -1,5 +1,5 @@
 import { MessageContext } from '@/contexts/MessageContext';
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -20,6 +20,27 @@ import {
 
 import { Messages } from '@/components/chat/Messages';
 import { useTranslation } from 'components/i18n/Translator';
+
+const generateMockMessages = (count: number): IStep[] => {
+  const messages: IStep[] = [];
+  for (let i = 0; i < count; i++) {
+    messages.push({
+      id: `mock_message_${i}_${Math.random()}`, // Уникальный ID обязателен
+      name: i % 2 === 0 ? 'User' : 'Assistant', // Чередуем автора
+      type: i % 2 === 0 ? 'user_message' : 'assistant_message',
+      output: `Это тестовое сообщение номер ${
+        i + 1
+      }. Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
+      createdAt: new Date().toISOString(),
+      // Остальные поля можно оставить пустыми для простого теста
+      indent: 0,
+      isError: false,
+      showInput: false,
+      waitForAnswer: false
+    });
+  }
+  return messages;
+};
 
 interface Props {
   navigate?: (to: string) => void;
@@ -115,6 +136,15 @@ const MessagesContainer = ({ navigate }: Props) => {
   const onError = useCallback((error: string) => toast.error(error), [toast]);
 
   const enableFeedback = !!config?.dataPersistence;
+
+  useEffect(() => {
+    console.log('TEST: Generating and setting 5000 mock messages...');
+    const mockMessages = generateMockMessages(50); // <-- Укажите нужное количество
+    setMessages(mockMessages);
+
+    // ВАЖНО: Пустой массив зависимостей [] означает, что этот код
+    // выполнится только один раз при монтировании компонента.
+  }, []);
 
   // Memoize the context object since it's created on each render.
   // This prevents unnecessary re-renders of children components when no props have changed.
