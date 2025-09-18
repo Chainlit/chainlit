@@ -57,9 +57,13 @@ def get_data_layer():
                 azure_storage_key = os.getenv("APP_AZURE_STORAGE_ACCESS_KEY")
                 is_using_azure = bool(azure_storage_account and azure_storage_key)
 
+                # Local Storage
+                local_storage_path = os.getenv("APP_LOCAL_STORAGE_PATH")
+                is_using_local = bool(local_storage_path)
+
                 storage_client = None
 
-                if sum([is_using_s3, is_using_gcs, is_using_azure]) > 1:
+                if sum([is_using_s3, is_using_gcs, is_using_azure, is_using_local]) > 1:
                     warnings.warn(
                         "Multiple storage configurations detected. Please use only one."
                     )
@@ -91,6 +95,12 @@ def get_data_layer():
                         container_name=bucket_name,
                         storage_account=azure_storage_account,
                         storage_key=azure_storage_key,
+                    )
+                elif is_using_local:
+                    from chainlit.data.storage_clients.local import LocalStorageClient
+
+                    storage_client = LocalStorageClient(
+                        storage_path=local_storage_path,
                     )
 
                 _data_layer = ChainlitDataLayer(
