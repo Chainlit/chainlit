@@ -9,8 +9,7 @@ import { toast } from 'sonner';
 import {
   ChainlitContext,
   ClientError,
-  ThreadHistory,
-  // sessionIdState,
+  ThreadHistory, // sessionIdState,
   threadHistoryState,
   useChatInteract,
   useChatMessages,
@@ -20,6 +19,7 @@ import {
 
 import Alert from '@/components/Alert';
 import { Loader } from '@/components/Loader';
+import ShareDialog from '@/components/share/ShareDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +31,14 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -50,7 +57,6 @@ import {
 } from '@/components/ui/tooltip';
 
 import { Translator } from '../i18n';
-import ShareDialog from '@/components/share/ShareDialog';
 import ThreadOptions from './ThreadOptions';
 
 interface ThreadListProps {
@@ -90,7 +96,7 @@ export function ThreadList({
     if (!threadSharingReady) return;
     setThreadIdToShare(threadId);
     setIsShareDialogOpen(true);
-  // ShareDialog handles its own internal state; we just open it
+    // ShareDialog handles its own internal state; we just open it
   };
 
   const sortedTimeGroupKeys = useMemo(() => {

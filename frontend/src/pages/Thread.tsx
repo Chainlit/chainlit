@@ -38,7 +38,7 @@ export default function ThreadPage() {
   return (
     <Page>
       <>
-  {isSharedRoute ? <ReadOnlyThread id={id!} /> : null}
+        {isSharedRoute ? <ReadOnlyThread id={id!} /> : null}
         {config?.threadResumable && !isCurrentThread && !isSharedRoute ? (
           <AutoResumeThread id={id!} />
         ) : null}

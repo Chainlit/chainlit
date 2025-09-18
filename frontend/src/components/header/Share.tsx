@@ -1,17 +1,19 @@
 import { hasMessage } from '@/lib/utils';
 import { Share2 } from 'lucide-react';
 import { useState } from 'react';
+
 import { useChatMessages, useConfig } from '@chainlit/react-client';
 
-import { Button } from '@/components/ui/button';
-import { Translator } from '../i18n';
 import ShareDialog from '@/components/share/ShareDialog';
+import { Button } from '@/components/ui/button';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+
+import { Translator } from '../i18n';
 
 export default function ShareButton() {
   const { messages, threadId } = useChatMessages();
@@ -21,7 +23,12 @@ export default function ShareButton() {
   const threadSharingReady = Boolean((config as any)?.threadSharing);
 
   // Only show the button if messages, persistence is on, and feature is ready
-  if (!hasMessage(messages) || !dataPersistence || !threadId || !threadSharingReady)
+  if (
+    !hasMessage(messages) ||
+    !dataPersistence ||
+    !threadId ||
+    !threadSharingReady
+  )
     return null;
 
   return (
