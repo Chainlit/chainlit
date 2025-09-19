@@ -1,0 +1,245 @@
+{
+    "common": {
+        "actions": {
+            "cancel": "취소",
+            "confirm": "확인",
+            "continue": "계속",
+            "goBack": "뒤로 가기",
+            "reset": "초기화",
+            "submit": "제출"
+        },
+        "status": {
+            "loading": "로딩 중...",
+            "error": {
+                "default": "오류가 발생했습니다",
+                "serverConnection": "서버에 연결할 수 없습니다"
+            }
+        }
+    },
+    "auth": {
+        "login": {
+            "title": "앱에 접근하려면 로그인하세요",
+            "form": {
+                "email": {
+                    "label": "이메일 주소",
+                    "required": "이메일은 필수 입력 항목입니다",
+                    "placeholder": "me@example.com"
+                },
+                "password": {
+                    "label": "비밀번호",
+                    "required": "비밀번호는 필수 입력 항목입니다"
+                },
+                "actions": {
+                    "signin": "로그인"
+                },
+                "alternativeText": {
+                    "or": "또는"
+                }
+            },
+            "errors": {
+                "default": "로그인할 수 없습니다",
+                "signin": "다른 계정으로 로그인해보세요",
+                "oauthSignin": "다른 계정으로 로그인해보세요",
+                "redirectUriMismatch": "리다이렉트 URI가 OAuth 앱 설정과 일치하지 않습니다",
+                "oauthCallback": "다른 계정으로 로그인해보세요",
+                "oauthCreateAccount": "다른 계정으로 로그인해보세요",
+                "emailCreateAccount": "다른 계정으로 로그인해보세요",
+                "callback": "다른 계정으로 로그인해보세요",
+                "oauthAccountNotLinked": "신원을 확인하려면 원래 사용했던 계정으로 로그인하세요",
+                "emailSignin": "이메일을 보낼 수 없습니다",
+                "emailVerify": "이메일을 확인해주세요. 새로운 이메일이 발송되었습니다",
+                "credentialsSignin": "로그인 실패. 제공한 정보가 올바른지 확인하세요",
+                "sessionRequired": "이 페이지에 접근하려면 로그인해주세요"
+            }
+        },
+        "provider": {
+            "continue": "{{provider}}로 계속하기"
+        }
+    },
+    "chat": {
+        "input": {
+            "placeholder": "여기에 메시지를 입력하세요...",
+            "actions": {
+                "send": "메시지 보내기",
+                "stop": "작업 중지",
+                "attachFiles": "파일 첨부"
+            }
+        },
+        "commands": {
+            "button": "도구",
+            "changeTool": "도구 변경",
+            "availableTools": "사용 가능한 도구"
+        },
+        "speech": {
+            "start": "녹음 시작",
+            "stop": "녹음 중지",
+            "connecting": "연결 중"
+        },
+        "fileUpload": {
+            "dragDrop": "여기에 파일을 드래그 앤 드롭하세요",
+            "browse": "파일 찾아보기",
+            "sizeLimit": "제한:",
+            "errors": {
+                "failed": "업로드 실패",
+                "cancelled": "업로드 취소:"
+            },
+            "actions": {
+                "cancelUpload": "업로드 취소",
+                "removeAttachment": "첨부 파일 제거"
+            }
+        },
+        "messages": {
+            "status": {
+                "using": "사용 중",
+                "used": "사용됨"
+            },
+            "actions": {
+                "copy": {
+                    "button": "클립보드로 복사",
+                    "success": "복사되었습니다!"
+                }
+            },
+            "feedback": {
+                "positive": "도움이 되었음",
+                "negative": "도움이 되지 않음",
+                "edit": "피드백 수정",
+                "dialog": {
+                    "title": "댓글 추가",
+                    "submit": "피드백 제출",
+                    "yourFeedback": "귀하의 피드백..."
+                },
+                "status": {
+                    "updating": "업데이트 중",
+                    "updated": "피드백이 업데이트되었습니다"
+                }
+            }
+        },
+        "history": {
+            "title": "최근 입력",
+            "empty": "비어 있습니다...",
+            "show": "기록 표시"
+        },
+        "settings": {
+            "title": "설정 패널",
+            "customize": "여기에서 채팅 설정을 사용자 지정하세요"
+        },
+        "watermark": "LLM은 실수할 수 있습니다. 중요한 정보는 확인하세요."
+    },
+    "threadHistory": {
+        "sidebar": {
+            "title": "이전 채팅",
+            "filters": {
+                "search": "검색",
+                "placeholder": "대화 검색..."
+            },
+            "timeframes": {
+                "today": "오늘",
+                "yesterday": "어제",
+                "previous7days": "지난 7일",
+                "previous30days": "지난 30일"
+            },
+            "empty": "스레드를 찾을 수 없습니다",
+            "actions": {
+                "close": "사이드바 닫기",
+                "open": "사이드바 열기"
+            }
+        },
+        "thread": {
+            "untitled": "제목 없는 대화",
+            "menu": {
+                "rename": "이름 변경",
+                "share": "공유",
+                "delete": "삭제"
+            },
+            "actions": {
+                "share": {
+                    "title": "채팅 링크 공유",
+                    "button": "공유",
+                    "status": {
+                        "copied": "링크 복사됨",
+                        "created": "공유 링크가 생성되었습니다!",
+                        "unshared": "이 스레드의 공유가 비활성화되었습니다"
+                    },
+                    "error": {
+                        "create": "공유 링크 생성 실패",
+                        "unshare": "스레드 공유 해제 실패"
+                    }
+                },
+                "delete": {
+                    "title": "삭제 확인",
+                    "description": "이렇게 하면 스레드와 그 메시지 및 요소가 삭제됩니다. 이 작업은 취소할 수 없습니다",
+                    "success": "채팅이 삭제되었습니다",
+                    "inProgress": "채팅 삭제 중"
+                },
+                "rename": {
+                    "title": "스레드 이름 변경",
+                    "description": "이 스레드의 새 이름을 입력하세요",
+                    "form": {
+                        "name": {
+                            "label": "이름",
+                            "placeholder": "새 이름 입력"
+                        }
+                    },
+                    "success": "스레드 이름이 변경되었습니다!",
+                    "inProgress": "스레드 이름 변경 중"
+                }
+            }
+        }
+    },
+    "navigation": {
+        "header": {
+            "chat": "채팅",
+            "readme": "읽어보기",
+            "theme": {
+                "light": "밝은 테마",
+                "dark": "어두운 테마",
+                "system": "시스템 따라가기"
+            }
+        },
+        "newChat": {
+            "button": "새 채팅",
+            "dialog": {
+                "title": "새 채팅 만들기",
+                "description": "이렇게 하면 현재 채팅 기록이 지워집니다. 계속하시겠습니까?",
+                "tooltip": "새 채팅"
+            }
+        },
+        "user": {
+            "menu": {
+                "settings": "설정",
+                "settingsKey": "S",
+                "apiKeys": "API 키",
+                "logout": "로그아웃"
+            }
+        }
+    },
+    "apiKeys": {
+        "title": "필요한 API 키",
+        "description": "이 앱을 사용하려면 다음 API 키가 필요합니다. 키는 기기의 로컬 저장소에 저장됩니다.",
+        "success": {
+            "saved": "성공적으로 저장되었습니다"
+        }
+    },
+    "alerts": {
+        "info": "정보",
+        "note": "참고",
+        "tip": "팁",
+        "important": "중요",
+        "warning": "경고",
+        "caution": "주의",
+        "debug": "디버그",
+        "example": "예시",
+        "success": "성공",
+        "help": "도움말",
+        "idea": "아이디어",
+        "pending": "대기 중",
+        "security": "보안",
+        "beta": "베타",
+        "best-practice": "모범 사례"
+    },
+    "components": {
+        "MultiSelectInput": {
+            "placeholder": "선택..."
+        }
+    }
+}
