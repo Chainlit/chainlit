@@ -1,5 +1,6 @@
 import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -47,6 +48,13 @@ interface Props {
 }
 
 const MessagesContainer = ({ navigate }: Props) => {
+  const location = useLocation();
+
+  const threadId = useMemo(() => {
+    const match = location.pathname.match(/\/thread\/([a-fA-F0-9-]+)/);
+    return match ? match[1] : undefined;
+  }, [location.pathname]);
+
   const apiClient = useContext(ChainlitContext);
   const { config } = useConfig();
   const { elements, askUser, loading, actions } = useChatData();
@@ -138,13 +146,11 @@ const MessagesContainer = ({ navigate }: Props) => {
   const enableFeedback = !!config?.dataPersistence;
 
   useEffect(() => {
-    console.log('TEST: Generating and setting 5000 mock messages...');
-    const mockMessages = generateMockMessages(50); // <-- Укажите нужное количество
-    setMessages(mockMessages);
-
-    // ВАЖНО: Пустой массив зависимостей [] означает, что этот код
-    // выполнится только один раз при монтировании компонента.
-  }, []);
+    if (threadId) {
+      const mockMessages = generateMockMessages(50);
+      setMessages(mockMessages);
+    }
+  }, [threadId]);
 
   // Memoize the context object since it's created on each render.
   // This prevents unnecessary re-renders of children components when no props have changed.
