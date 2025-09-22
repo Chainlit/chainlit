@@ -147,10 +147,17 @@ const MessagesContainer = ({ navigate }: Props) => {
 
   useEffect(() => {
     if (threadId) {
-      const mockMessages = generateMockMessages(50);
-      setMessages(mockMessages);
+      setMessages((prevMessages) => {
+        const historyMessages = generateMockMessages(50);
+
+        if (prevMessages.length > 2) {
+          return prevMessages;
+        }
+
+        return [...historyMessages, ...prevMessages];
+      });
     }
-  }, [threadId]);
+  }, [threadId, setMessages]);
 
   // Memoize the context object since it's created on each render.
   // This prevents unnecessary re-renders of children components when no props have changed.
