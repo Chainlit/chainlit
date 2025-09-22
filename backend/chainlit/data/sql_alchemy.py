@@ -737,7 +737,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             for element in elements:
                 thread_id = element["element_threadid"]
                 if thread_id is not None:
-                    if (self.storage_provider is not None) and ("element_objectkey" in element):
+                    if (self.storage_provider is not None) and (
+                        "element_objectkey" in element
+                    ):
                         element_url = await self.storage_provider.get_read_url(
                             object_key=element["element_objectkey"],
                         )
