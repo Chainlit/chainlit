@@ -26,3 +26,11 @@ class BaseStorageClient(ABC):
     @abstractmethod
     async def get_read_url(self, object_key: str) -> str:
         pass
+
+    async def download_file(self, object_key: str) -> tuple[bytes, str] | None:
+        """
+        Optional method to download file content directly, to allow files downloads to be proxied by ChainLit backend itself
+
+        Returns (file_content, mime_type) if implemented, None otherwise.
+        """
+        return None
