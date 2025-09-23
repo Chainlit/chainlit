@@ -148,7 +148,19 @@ const MessagesContainer = ({ navigate }: Props) => {
   useEffect(() => {
     if (threadId) {
       setMessages((prevMessages) => {
-        const historyMessages = generateMockMessages(50);
+        const historyMessages = generateMockMessages(8);
+
+        historyMessages.splice(4, 0, {
+          id: `announcement_${Math.random()}`,
+          name: 'System', // Автор - система
+          type: 'tsql', // НАШ НОВЫЙ ТИП
+          output: 'Технические работы на сервере запланированы на 23:00.', // Текст объявления
+          createdAt: new Date().toISOString(),
+          indent: 0,
+          isError: false,
+          showInput: false,
+          waitForAnswer: false
+        });
 
         if (prevMessages.length > 2) {
           return prevMessages;

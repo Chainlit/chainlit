@@ -16,6 +16,7 @@ import { AskFileButton } from './AskFileButton';
 import { MessageButtons } from './Buttons';
 import { MessageContent } from './Content';
 import Step from './Step';
+import { TSQLMessage } from './TSQLMessage';
 import UserMessage from './UserMessage';
 
 interface Props {
@@ -41,6 +42,7 @@ const Message = memo(
     const { allowHtml, cot, latex, onError } = useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
     const contentRef = useRef<HTMLDivElement>(null);
+    const isTSQLMessage = message.type === 'tsql';
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
     // Only keep tool calls if Chain of Thought is tool_call
@@ -50,6 +52,10 @@ const Message = memo(
     const hiddenSkip = isStep && cot === 'hidden';
 
     const skip = toolCallSkip || hiddenSkip;
+
+    if (isTSQLMessage) {
+      return <TSQLMessage message={message} />;
+    }
 
     if (skip) {
       if (!message.steps) {
