@@ -191,6 +191,8 @@ alert_style = "classic"
 # login_page_image_filter = "brightness-50 grayscale"
 # login_page_image_dark_filter = "contrast-200 blur-sm"
 
+# Specify a custom meta URL (used for meta tags like og:url)
+# custom_meta_url = "https://github.com/Chainlit/chainlit"
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
@@ -335,6 +337,8 @@ class UISettings(BaseModel):
     login_page_image_filter: Optional[str] = None
     login_page_image_dark_filter: Optional[str] = None
 
+    # Optional custom meta tag for URL preview
+    custom_meta_url: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
     # Optional logo file url
