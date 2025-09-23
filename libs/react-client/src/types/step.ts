@@ -24,7 +24,8 @@ export interface IStep {
   showInput?: boolean | string;
   waitForAnswer?: boolean;
   input?: string;
-  output: string;
+  output: any;
+  sql?: string;
   createdAt: number | string;
   start?: number | string;
   end?: number | string;

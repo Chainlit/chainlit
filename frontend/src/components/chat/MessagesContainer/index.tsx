@@ -151,11 +151,23 @@ const MessagesContainer = ({ navigate }: Props) => {
         const historyMessages = generateMockMessages(8);
 
         historyMessages.splice(4, 0, {
-          id: `announcement_${Math.random()}`,
-          name: 'System', // Автор - система
+          id: `data_table_${Math.random()}`,
+          name: 'Database Assistant',
           type: 'tsql', // НАШ НОВЫЙ ТИП
-          output: 'Технические работы на сервере запланированы на 23:00.', // Текст объявления
           createdAt: new Date().toISOString(),
+          // Поле output теперь содержит объект для таблицы
+          output: {
+            headers: ['ID', 'Имя пользователя', 'Роль', 'Дата регистрации'],
+            rows: [
+              [101, 'alice', 'Admin', '2023-01-15'],
+              [102, 'bob', 'User', '2023-02-20'],
+              [103, 'charlie', 'User', '2023-03-11']
+            ]
+          },
+          // Наше новое опциональное поле с SQL-запросом
+          sql: "SELECT id, username, role, registration_date FROM users WHERE role = 'Admin' OR role = 'User' ORDER BY registration_date DESC LIMIT 3;",
+
+          // Стандартные поля
           indent: 0,
           isError: false,
           showInput: false,
