@@ -44,15 +44,29 @@ export const TSQLMessage = ({ message }: Props) => {
       >
         <style>{`
           .data-table {
+            border-collapse: separate; 
+            border-spacing: 0; 
+
             width: 100%;
-            border-collapse: collapse;
             font-size: 0.9em;
+            
+            border: 1px solid #ddd;
+            border-radius: 4px;
           }
           .data-table th, .data-table td {
-            border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
-            white-space: nowrap; /* Важно, чтобы текст в ячейках не переносился */
+            white-space: nowrap;
+            border-bottom: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+          }
+          .data-table th:last-child,
+          .data-table td:last-child {
+            border-right: none;
+          }
+
+          .data-table tr:last-child td {
+            border-bottom: none;
           }
           .data-table th {
             background-color: #f2f2f2;
@@ -77,6 +91,15 @@ export const TSQLMessage = ({ message }: Props) => {
           }
           .dark .sql-details summary {
             color: #aaa;
+          }
+          .dark .data-table {
+            border-color: #555;
+          }
+          .dark .data-table th, .dark .data-table td {
+            border-color: #555;
+          }
+          .dark .data-table th {
+            background-color: #333;
           }
           .sql-details pre {
             background-color: #f9f9f9;
