@@ -374,7 +374,7 @@ def get_html_template(root_path):
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
 
-    default_url = "https://github.com/Chainlit/chainlit"
+    default_url = config.ui.custom_meta_url or "https://github.com/Chainlit/chainlit"
     default_meta_image_url = (
         "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
     )
@@ -1001,8 +1001,8 @@ async def get_shared_thread(
 
     is_shared = bool(metadata.get("is_shared"))
 
-    # Proceed only if both conditions are True.
-    if not (user_can_view and is_shared):
+    # Proceed only raise an error if both conditions are False.
+    if (not user_can_view) and (not is_shared):
         raise HTTPException(status_code=404, detail="Thread not found")
 
     metadata.pop("chat_profile", None)
