@@ -683,7 +683,7 @@ const MessagesContainer = ({ navigate }: Props) => {
             ]
           },
           // Наше новое опциональное поле с SQL-запросом
-          sql: "SELECT id, username, role, registration_date FROM users WHERE role = 'Admin' OR role = 'User' ORDER BY registration_date DESC LIMIT 3;",
+          sql: 'SELECT id, username, role, registration_date FROM users ',
 
           // Стандартные поля
           indent: 0,

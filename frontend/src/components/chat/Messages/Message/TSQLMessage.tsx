@@ -18,9 +18,24 @@ const isTableData = (
 };
 
 export const TSQLMessage = ({ message }: Props) => {
-  const { output, sql } = message;
+  const { output, sql: directSql, metadata } = message;
 
-  if (!isTableData(output)) {
+  let tableData;
+  try {
+    tableData = typeof output === 'string' ? JSON.parse(output) : output;
+  } catch (error) {
+    console.error('Ошибка парсинга JSON для таблицы:', error);
+    // В случае ошибки парсинга, прерываем выполнение, чтобы не словить ошибку ниже
+    return (
+      <div style={{ color: 'red' }}>
+        Ошибка: не удалось обработать данные для таблицы.
+      </div>
+    );
+  }
+
+  const finalSql = directSql || (metadata?.sql as string | undefined);
+
+  if (!isTableData(tableData)) {
     // Если структура данных неверна, показываем ошибку, чтобы было легче отлаживать
     return (
       <div style={{ color: 'red' }}>
@@ -116,13 +131,15 @@ export const TSQLMessage = ({ message }: Props) => {
         <table className="data-table">
           <thead>
             <tr>
-              {output.headers.map((header, index) => (
+              {/* Используем tableData */}
+              {tableData.headers.map((header, index) => (
                 <th key={index}>{header}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {output.rows.map((row, rowIndex) => (
+            {/* Используем tableData */}
+            {tableData.rows.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {row.map((cell, cellIndex) => (
                   <td key={cellIndex}>{cell}</td>
@@ -131,13 +148,13 @@ export const TSQLMessage = ({ message }: Props) => {
             ))}
           </tbody>
         </table>
-      </div>{' '}
-      {/* Конец новой обертки */}
-      {sql && (
+      </div>
+
+      {finalSql && (
         <details className="sql-details">
           <summary>Показать SQL-запрос</summary>
           <pre>
-            <code>{sql}</code>
+            <code>{finalSql}</code>
           </pre>
         </details>
       )}
