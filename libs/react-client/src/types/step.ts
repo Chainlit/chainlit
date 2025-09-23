@@ -10,7 +10,8 @@ type StepType =
   | 'embedding'
   | 'retrieval'
   | 'rerank'
-  | 'undefined';
+  | 'undefined'
+  | 'tsql';
 
 export interface IStep {
   id: string;
