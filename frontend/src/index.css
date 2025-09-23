@@ -152,3 +152,29 @@ code {
     scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
   }
 }
+
+
+.dark {
+  /* Для Firefox */
+  scrollbar-color: #555 #2d2d2d;
+  scrollbar-width: thin;
+}
+
+.dark ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background-color: #555;
+  border-radius: 4px;
+  border: 2px solid #2d2d2d;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background-color: #777;
+}
