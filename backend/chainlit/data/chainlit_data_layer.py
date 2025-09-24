@@ -577,40 +577,40 @@ class ChainlitDataLayer(BaseDataLayer):
             else (metadata.get("name") if metadata and "name" in metadata else None)
         )
 
-        data = {
-            "id": thread_id,
-            "name": thread_name,
-            "userId": user_id,
-            "tags": tags,
-            "metadata": json.dumps(metadata or {}),
-            "updatedAt": datetime.now(),
-        }
+        now = datetime.now()
 
-        # Remove None values
-        data = {k: v for k, v in data.items() if v is not None}
+        # Convert metadata to JSONB if provided
+        metadata_jsonb = json.dumps(metadata) if metadata is not None else None
 
-        # Build the query dynamically based on available fields
-        columns = [f'"{k}"' for k in data.keys()]
-        placeholders = [f"${i + 1}" for i in range(len(data))]
-        values = list(data.values())
-
-        update_sets = [f'"{k}" = EXCLUDED."{k}"' for k in data.keys() if k != "id"]
-
-        if update_sets:
-            query = f"""
-                INSERT INTO "Thread" ({", ".join(columns)})
-                VALUES ({", ".join(placeholders)})
-                ON CONFLICT (id) DO UPDATE
-                SET {", ".join(update_sets)};
+        # Build atomic UPSERT with PostgreSQL-native JSON merging
+        if metadata_jsonb is not None:
+            # When metadata is provided, use PostgreSQL's || operator for atomic merging
+            query = """
+                INSERT INTO "Thread" (id, name, "userId", metadata, "updatedAt", "createdAt")
+                VALUES ($1, $2, $3, $4, $5, $5)
+                ON CONFLICT (id) DO UPDATE SET
+                    name = COALESCE(EXCLUDED.name, "Thread".name),
+                    "userId" = COALESCE(EXCLUDED."userId", "Thread"."userId"),
+                    metadata = COALESCE("Thread".metadata::jsonb, '{}'::jsonb) || EXCLUDED.metadata::jsonb,
+                    "updatedAt" = EXCLUDED."updatedAt"
             """
+            params = [thread_id, thread_name, user_id, metadata_jsonb, now]
         else:
-            query = f"""
-                INSERT INTO "Thread" ({", ".join(columns)})
-                VALUES ({", ".join(placeholders)})
-                ON CONFLICT (id) DO NOTHING
+            # When metadata is None, ensure metadata gets default empty JSON
+            query = """
+                INSERT INTO "Thread" (id, name, "userId", metadata, "updatedAt", "createdAt")
+                VALUES ($1, $2, $3, '{}'::jsonb, $4, $4)
+                ON CONFLICT (id) DO UPDATE SET
+                    name = COALESCE(EXCLUDED.name, "Thread".name),
+                    "userId" = COALESCE(EXCLUDED."userId", "Thread"."userId"),
+                    "updatedAt" = EXCLUDED."updatedAt"
             """
+            params = [thread_id, thread_name, user_id, now]
 
-        await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
+        # Create params dict with numbered keys for execute_query
+        numbered_params = {str(i + 1): value for i, value in enumerate(params)}
+
+        await self.execute_query(query, numbered_params)
 
     def _extract_feedback_dict_from_step_row(self, row: Dict) -> Optional[FeedbackDict]:
         if row["feedback_id"] is not None:
