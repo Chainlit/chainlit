@@ -4,6 +4,19 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.8.1] - 2025-09-24
+
+### Added
+- Add German and Korean translations
+- Add support for custom_meta_url in config.toml
+
+### Changed
+- `cl.on_thread_share_view` will allow shared thread viewing if it returns `True` to enable custom/admin viewing.
+
+### Fixed
+- Removed redundant message sending in Slack when images are present.
+- Generate signed url when loading elements using SQLAlchemy data layer.
+
 ## [2.8.0] - 2025-09-12
 
 ### Added
