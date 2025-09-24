@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { useApi, useAuth } from './api';
-import { configState, chatProfileState } from './state';
+import { chatProfileState, configState } from './state';
 import { IChainlitConfig } from './types';
 
 const useConfig = () => {
@@ -13,8 +13,10 @@ const useConfig = () => {
   const prevChatProfileRef = useRef(chatProfile);
 
   // Build the API URL with optional chat profile parameter
-  const apiUrl = isAuthenticated 
-    ? `/project/settings?language=${language}${chatProfile ? `&chat_profile=${encodeURIComponent(chatProfile)}` : ''}`
+  const apiUrl = isAuthenticated
+    ? `/project/settings?language=${language}${
+        chatProfile ? `&chat_profile=${encodeURIComponent(chatProfile)}` : ''
+      }`
     : null;
 
   // Always fetch if we don't have config and we're authenticated
