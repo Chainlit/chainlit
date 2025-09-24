@@ -246,3 +246,8 @@ export const mcpState = atom<IMcp[]>({
   default: [],
   effects: [localStorageEffect<IMcp[]>('mcp_storage_key')]
 });
+
+export const chatMetadataState = atom<Record<string, any>>({
+  key: 'CopilotChatMetadata',
+  default: {}
+});
