@@ -1636,6 +1636,98 @@ async def get_file(
         raise HTTPException(status_code=404, detail="File not found")
 
 
+@router.get("/storage/file/{object_key:path}")
+async def get_storage_file(
+    object_key: str,
+    current_user: UserParam,
+):
+    """Get a file from the storage client if it supports direct downloads."""
+    from chainlit.data import get_data_layer
+
+    data_layer = get_data_layer()
+    if not data_layer or not data_layer.storage_client:
+        raise HTTPException(
+            status_code=404,
+            detail="Storage not configured",
+        )
+
+    # Validate user authentication
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    # Extract thread_id from object_key to validate thread ownership
+    # Object key patterns:
+    # 1. threads/{thread_id}/files/{element.id} (chainlit_data_layer)
+    # 2. {user_id}/{thread_id}/{element.id} (dynamodb)
+    # 3. {user_id}/{element.id}[/{element.name}] (sql_alchemy)
+    thread_id = None
+
+    # Try to extract thread_id from different patterns
+    parts = object_key.split("/")
+    if len(parts) >= 3:
+        if parts[0] == "threads":
+            # Pattern: threads/{thread_id}/files/{element.id}
+            thread_id = parts[1]
+        elif len(parts) == 3:
+            # Pattern: {user_id}/{thread_id}/{element.id} (dynamodb)
+            # We need to verify this is actually a thread_id by checking if it exists
+            potential_thread_id = parts[1]
+            try:
+                # Check if this looks like a thread by validating thread author
+                await is_thread_author(current_user.identifier, potential_thread_id)
+                thread_id = potential_thread_id
+            except HTTPException:
+                # Not a valid thread or user doesn't have access
+                pass
+
+    # If we found a thread_id, validate thread ownership
+    if thread_id:
+        await is_thread_author(current_user.identifier, thread_id)
+    else:
+        # For files without thread association (pattern 3), we should still
+        # validate that the user_id in the path matches the current user
+        if len(parts) >= 2:
+            user_id_in_path = parts[0]
+            if user_id_in_path != current_user.identifier:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Access denied: file belongs to different user",
+                )
+
+    # Try to extract element_id and get the original filename from database
+    element_id = None
+    element_name = None
+
+    # Extract element_id from object_key patterns
+    if len(parts) >= 4 and parts[0] == "threads" and parts[2] == "files":
+        # Pattern: threads/{thread_id}/files/{element_id}
+        element_id = parts[3]
+        # Query database for element details
+        if thread_id and element_id:
+            element = await data_layer.get_element(thread_id, element_id)
+            if element:
+                element_name = element.get("name")
+
+    # Only serve files if storage client implements download_file
+    file_data = await data_layer.storage_client.download_file(object_key)
+    if file_data is None:
+        raise HTTPException(
+            status_code=404,
+            detail="File not found or storage client does not support direct downloads",
+        )
+
+    content, mime_type = file_data
+
+    # Use the original filename if available, otherwise fall back to the UUID
+    filename = element_name if element_name else Path(object_key).name
+
+    return Response(
+        content=content,
+        media_type=mime_type,
+        headers={"Content-Disposition": f"inline; filename={filename}"},
+    )
+
+
 @router.get("/favicon")
 async def get_favicon():
     """Get the favicon for the UI."""
