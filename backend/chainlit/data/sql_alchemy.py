@@ -738,12 +738,21 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 thread_id = element["element_threadid"]
                 if thread_id is not None:
                     element_url: str | None = None
-                    if (self.storage_provider is not None) and (
-                        "element_objectkey" in element
+                    object_key_val = element.get("element_objectkey")
+                    if (
+                        self.storage_provider is not None
+                        and isinstance(object_key_val, str)
+                        and object_key_val.strip()
                     ):
-                        element_url = await self.storage_provider.get_read_url(
-                            object_key=element["element_objectkey"],
-                        )
+                        try:
+                            element_url = await self.storage_provider.get_read_url(
+                                object_key=object_key_val,
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                f"Failed to get read URL for object_key '{object_key_val}': {e}. Falling back to stored URL."
+                            )
+                            element_url = element.get("element_url")
                     else:
                         element_url = element.get("element_url")
                     element_dict = ElementDict(
