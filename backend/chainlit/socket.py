@@ -174,7 +174,11 @@ async def connection_successful(sid):
     await context.emitter.clear("clear_call_fn")
 
     if context.session.restored:
-        return
+        if config.code.on_chat_start and not context.session.has_first_interaction:
+            task = asyncio.create_task(config.code.on_chat_start())
+            context.session.current_task = task
+        else:
+            return
 
     if context.session.thread_id_to_resume and config.code.on_chat_resume:
         thread = await resume_thread(context.session)
