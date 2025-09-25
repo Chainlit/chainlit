@@ -141,7 +141,7 @@ const MessagesContainer = ({ navigate }: Props) => {
         const data = await res.json();
         const historyMessages: IStep[] = data.messages || [];
 
-        if (!ignore) {
+        if (!ignore && historyMessages.length > 0) {
           setMessages(historyMessages);
         }
       } catch (err) {
