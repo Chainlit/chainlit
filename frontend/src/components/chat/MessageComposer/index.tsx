@@ -25,7 +25,8 @@ import {
   IAttachment,
   attachmentsState,
   chatModeState,
-  persistentCommandState
+  persistentCommandState,
+  webSearchState
 } from 'state/chat';
 
 import { Attachments } from './Attachments';
@@ -53,7 +54,8 @@ export default function MessageComposer({
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
   const [value, setValue] = useState('');
-  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState(false);
+  const [isWebSearchEnabled, setIsWebSearchEnabled] =
+    useRecoilState(webSearchState);
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
@@ -221,7 +223,7 @@ export default function MessageComposer({
           {selectedMode === 'Pioneer' && (
             <WebSearchButton
               disabled={disabled}
-              value={isWebSearchEnabled}
+              value={isWebSearchEnabled} // <-- Передаем текущее значение из атома
               onChange={setIsWebSearchEnabled}
             />
           )}
