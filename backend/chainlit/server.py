@@ -175,6 +175,9 @@ async def lifespan(app: FastAPI):
             if slack_task:
                 slack_task.cancel()
                 await slack_task
+
+            if data_layer := get_data_layer():
+                await data_layer.close()
         except asyncio.exceptions.CancelledError:
             pass
 
