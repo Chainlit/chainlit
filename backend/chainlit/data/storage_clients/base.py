@@ -26,3 +26,7 @@ class BaseStorageClient(ABC):
     @abstractmethod
     async def get_read_url(self, object_key: str) -> str:
         pass
+
+    @abstractmethod
+    async def close(self) -> None:
+        pass

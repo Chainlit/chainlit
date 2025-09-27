@@ -105,3 +105,7 @@ class BaseDataLayer(ABC):
     @abstractmethod
     async def build_debug_url(self) -> str:
         pass
+
+    @abstractmethod
+    async def close(self) -> None:
+        pass

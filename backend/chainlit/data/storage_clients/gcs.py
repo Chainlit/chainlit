@@ -99,3 +99,6 @@ class GCSStorageClient(BaseStorageClient):
 
     async def delete_file(self, object_key: str) -> bool:
         return await make_async(self.sync_delete_file)(object_key)
+
+    async def close(self) -> None:
+        self.client.close()

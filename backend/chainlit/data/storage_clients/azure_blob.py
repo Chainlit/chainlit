@@ -92,3 +92,7 @@ class AzureBlobStorageClient(BaseStorageClient):
         except Exception as e:
             logger.warning(f"AzureBlobStorageClient, delete_file error: {e}")
             return False
+
+    async def close(self) -> None:
+        await self.container_client.close()
+        await self.service_client.close()

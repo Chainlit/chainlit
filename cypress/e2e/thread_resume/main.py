@@ -108,6 +108,9 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
     async def update_step(self):
         pass
 
+    async def close(self) -> None:
+        pass
+
 
 @cl.data_layer
 def data_layer():

@@ -614,3 +614,8 @@ class DynamoDBDataLayer(BaseDataLayer):
 
     async def build_debug_url(self) -> str:
         return ""
+
+    async def close(self) -> None:
+        if self.storage_provider:
+            await self.storage_provider.close()
+        self.client.close()
