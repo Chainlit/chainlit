@@ -15,15 +15,24 @@ export interface ButtonLinkProps {
   displayName?: string;
   iconUrl?: string;
   url: string;
+  target?: string;
 }
 
 export default function ButtonLink({
   name,
   displayName,
   iconUrl,
-  url
+  url,
+  target
 }: ButtonLinkProps) {
   const apiClient = useContext(ChainlitContext);
+
+  // Smart target detection: if target is not specified, auto-detect based on URL
+  const getTarget = () => {
+    if (target !== undefined) return target;
+    // Auto-detect: external URLs open in new tab, internal URLs in same tab
+    return url.startsWith('http://') || url.startsWith('https://') ? '_blank' : '_self';
+  };
   return (
     <TooltipProvider>
       <Tooltip>
@@ -35,7 +44,7 @@ export default function ButtonLink({
           >
             <a
               href={url}
-              target="_blank"
+              target={getTarget()}
               className="inline-flex items-center gap-1"
             >
               <img

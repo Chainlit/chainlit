@@ -214,6 +214,7 @@ default_avatar_file_url = ""
 #     display_name = "Report Issue"
 #     icon_url = "https://avatars.githubusercontent.com/u/128686189?s=200&v=4"
 #     url = "https://github.com/Chainlit/chainlit/issues"
+#     target = "_blank"  # Optional: "_blank", "_self", "_parent", "_top". Auto-detects if not specified.
 
 [meta]
 generated_by = "{__version__}"
@@ -314,6 +315,7 @@ class HeaderLink(BaseModel):
     icon_url: str
     url: str
     display_name: Optional[str] = None
+    target: Optional[str] = None
 
 
 class UISettings(BaseModel):
