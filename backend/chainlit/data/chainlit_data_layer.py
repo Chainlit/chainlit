@@ -23,6 +23,12 @@ from chainlit.types import (
 )
 from chainlit.user import PersistedUser, User
 
+# Import for runtime usage (isinstance checks)
+try:
+    from chainlit.data.storage_clients.gcs import GCSStorageClient
+except ImportError:
+    GCSStorageClient = None  # type: ignore[assignment,misc]
+
 if TYPE_CHECKING:
     from chainlit.data.storage_clients.gcs import GCSStorageClient
     from chainlit.element import Element, ElementDict
@@ -193,7 +199,10 @@ class ChainlitDataLayer(BaseDataLayer):
         if content is not None:
             content_disposition = (
                 f'attachment; filename="{element.name}"'
-                if not isinstance(self.storage_client, GCSStorageClient)
+                if not (
+                    GCSStorageClient is not None
+                    and isinstance(self.storage_client, GCSStorageClient)
+                )
                 else None
             )
             await self.storage_client.upload_file(
@@ -466,7 +475,7 @@ class ChainlitDataLayer(BaseDataLayer):
         for thread in threads:
             thread_dict = ThreadDict(
                 id=str(thread["id"]),
-                createdAt=thread["createdAt"].isoformat(),
+                createdAt=thread["updatedAt"].isoformat(),
                 name=thread["name"],
                 userId=str(thread["userId"]) if thread["userId"] else None,
                 userIdentifier=thread["user_identifier"],

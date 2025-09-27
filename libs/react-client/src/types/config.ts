@@ -84,6 +84,7 @@ export interface IChainlitConfig {
   maskUserEnv?: boolean;
   dataPersistence: boolean;
   threadResumable: boolean;
+  threadSharing?: boolean;
   chatProfiles: ChatProfile[];
   starters?: IStarter[];
   translation: object;

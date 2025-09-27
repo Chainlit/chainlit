@@ -318,8 +318,6 @@ async def process_slack_message(
         author=user.metadata.get("real_name"),
     )
 
-    await msg.send()
-
     if on_message := config.code.on_message:
         await on_message(msg)
 

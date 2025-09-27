@@ -22,7 +22,8 @@
       "form": {
         "email": {
           "label": "电子邮箱",
-          "required": "邮箱是必填项"
+          "required": "邮箱是必填项",
+          "placeholder": "me@example.com"
         },
         "password": {
           "label": "密码",
@@ -76,6 +77,10 @@
       "errors": {
         "failed": "上传失败",
         "cancelled": "已取消上传"
+      },
+      "actions": {
+        "cancelUpload": "取消上传",
+        "removeAttachment": "移除附件"
       }
     },
     "commands": {
@@ -100,7 +105,8 @@
         "edit": "编辑反馈",
         "dialog": {
           "title": "添加评论",
-          "submit": "提交反馈"
+          "submit": "提交反馈",
+          "yourFeedback": "您的反馈..."
         },
         "status": {
           "updating": "更新中",
@@ -114,7 +120,8 @@
       "show": "显示历史"
     },
     "settings": {
-      "title": "设置面板"
+      "title": "设置面板",
+      "customize": "在此自定义您的聊天设置"
     },
     "watermark": "大语言模型可能会犯错。请核实重要信息。"
   },
@@ -141,9 +148,23 @@
       "untitled": "未命名对话",
       "menu": {
           "rename": "重命名",
+          "share": "分享",
           "delete": "删除"
         },
       "actions": {
+        "share": {
+          "title": "分享聊天链接",
+          "button": "分享",
+          "status": {
+            "copied": "链接已复制",
+            "created": "分享链接已创建！",
+            "unshared": "已禁用此对话的分享"
+          },
+          "error": {
+            "create": "创建分享链接失败",
+            "unshare": "取消对话分享失败"
+          }
+        },
         "delete": {
           "title": "确认删除",
           "description": "这将删除该对话及其所有消息和元素。此操作无法撤销",
@@ -215,6 +236,11 @@
     "security": "安全",
     "beta": "测试",
     "best-practice": "最佳实践"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "选择..."
+    }
   }
 }
 

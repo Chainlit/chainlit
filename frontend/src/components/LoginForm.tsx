@@ -104,7 +104,7 @@ export function LoginForm({
                 id="email"
                 disabled={loading}
                 autoFocus
-                placeholder="me@example.com"
+                placeholder={t('auth.login.form.email.placeholder')}
                 {...register('email', {
                   required: t('auth.login.form.email.required')
                 })}

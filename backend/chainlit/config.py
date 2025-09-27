@@ -105,6 +105,9 @@ auto_tag_thread = true
 # Allow users to edit their own messages
 edit_message = true
 
+# Allow users to share threads (backend + UI). Requires an app-defined on_shared_thread_view callback.
+allow_thread_sharing = false
+
 [features.slack]
 # Add emoji reaction when message is received (requires reactions:write OAuth scope)
 reaction_on_message_received = false
@@ -188,6 +191,8 @@ alert_style = "classic"
 # login_page_image_filter = "brightness-50 grayscale"
 # login_page_image_dark_filter = "contrast-200 blur-sm"
 
+# Specify a custom meta URL (used for meta tags like og:url)
+# custom_meta_url = "https://github.com/Chainlit/chainlit"
 
 # Specify a custom meta image url.
 # custom_meta_image_url = "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
@@ -301,6 +306,7 @@ class FeaturesSettings(BaseModel):
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
     edit_message: bool = True
+    allow_thread_sharing: bool = False
 
 
 class HeaderLink(BaseModel):
@@ -331,6 +337,8 @@ class UISettings(BaseModel):
     login_page_image_filter: Optional[str] = None
     login_page_image_dark_filter: Optional[str] = None
 
+    # Optional custom meta tag for URL preview
+    custom_meta_url: Optional[str] = None
     # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
     # Optional logo file url
@@ -369,11 +377,14 @@ class CodeSettings(BaseModel):
     on_mcp_disconnect: Optional[Callable] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[
-        Callable[[Optional["User"]], Awaitable[List["ChatProfile"]]]
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]]
     ] = None
-    set_starters: Optional[Callable[[Optional["User"]], Awaitable[List["Starter"]]]] = (
-        None
-    )
+    set_starters: Optional[
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]
+    ] = None
+    on_shared_thread_view: Optional[
+        Callable[["ThreadDict", Optional["User"]], Awaitable[bool]]
+    ] = None
     # Auth callbacks
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]
@@ -533,7 +544,7 @@ def load_module(target: str, force_refresh: bool = False):
         site_package_dirs = site.getsitepackages()
 
         # Clear the modules related to the app from sys.modules
-        for module_name, module in sys.modules.items():
+        for module_name, module in list(sys.modules.items()):
             if (
                 hasattr(module, "__file__")
                 and module.__file__
@@ -600,12 +611,20 @@ def reload_config():
     global config
     if config is None:
         return
+
+    # Preserve the module_name during config reload to ensure hot reload works
+    original_module_name = config.run.module_name if config.run else None
+
     new_cfg = ChainlitConfig(**load_settings())
     config.root = new_cfg.root
     config.chainlit_server = new_cfg.chainlit_server
     config.run = new_cfg.run
     config.features = new_cfg.features
     config.ui = new_cfg.ui
+
+    # Restore the preserved module_name
+    if original_module_name and config.run:
+        config.run.module_name = original_module_name
     config.project = new_cfg.project
     config.code = new_cfg.code
 

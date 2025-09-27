@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, Mock
 from chainlit import config
 from chainlit.callbacks import password_auth_callback
 from chainlit.data.base import BaseDataLayer
+from chainlit.types import ThreadDict
 from chainlit.user import User
 
 
@@ -349,7 +350,6 @@ async def test_on_chat_resume(
     mock_chainlit_context, test_config: config.ChainlitConfig
 ):
     from chainlit.callbacks import on_chat_resume
-    from chainlit.types import ThreadDict
 
     async with mock_chainlit_context:
         chat_resumed = False
@@ -391,7 +391,7 @@ async def test_set_chat_profiles(
     async with mock_chainlit_context:
 
         @set_chat_profiles
-        async def get_chat_profiles(user):
+        async def get_chat_profiles(user, language):
             return [
                 ChatProfile(name="Test Profile", markdown_description="A test profile")
             ]
@@ -400,7 +400,7 @@ async def test_set_chat_profiles(
         assert test_config.code.set_chat_profiles is not None
 
         # Call the registered callback
-        result = await test_config.code.set_chat_profiles(None)
+        result = await test_config.code.set_chat_profiles(None, None)
 
         # Check the result
         assert result is not None
@@ -409,6 +409,42 @@ async def test_set_chat_profiles(
         assert isinstance(result[0], ChatProfile)
         assert result[0].name == "Test Profile"
         assert result[0].markdown_description == "A test profile"
+
+
+async def test_set_chat_profiles_language(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import set_chat_profiles
+    from chainlit.types import ChatProfile
+
+    async with mock_chainlit_context:
+
+        @set_chat_profiles
+        async def get_chat_profiles(user, language):
+            if language == "fr-CA":
+                return [
+                    ChatProfile(
+                        name="Profil de test", markdown_description="Un profil de test"
+                    )
+                ]
+
+            return [
+                ChatProfile(name="Test Profile", markdown_description="A test profile")
+            ]
+
+        # Test that the callback is properly registered
+        assert test_config.code.set_chat_profiles is not None
+
+        # Call the registered callback
+        result = await test_config.code.set_chat_profiles(None, "fr-CA")
+
+        # Check the result
+        assert result is not None
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], ChatProfile)
+        assert result[0].name == "Profil de test"
+        assert result[0].markdown_description == "Un profil de test"
 
 
 async def test_set_starters(mock_chainlit_context, test_config: config.ChainlitConfig):
@@ -430,7 +466,7 @@ async def test_set_starters(mock_chainlit_context, test_config: config.ChainlitC
         assert test_config.code.set_starters is not None
 
         # Call the registered callback
-        result = await test_config.code.set_starters(None)
+        result = await test_config.code.set_starters(None, None)
 
         # Check the result
         assert result is not None
@@ -439,6 +475,142 @@ async def test_set_starters(mock_chainlit_context, test_config: config.ChainlitC
         assert isinstance(result[0], Starter)
         assert result[0].label == "Test Label"
         assert result[0].message == "Test Message"
+
+
+async def test_set_starters_language(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import set_starters
+    from chainlit.types import Starter
+
+    async with mock_chainlit_context:
+
+        @set_starters
+        async def get_starters(user, language):
+            if language == "fr-CA":
+                return [
+                    Starter(
+                        label="Étiquette de test",
+                        message="Message de test",
+                    )
+                ]
+
+            return [
+                Starter(
+                    label="Test Label",
+                    message="Test Message",
+                )
+            ]
+
+        # Test that the callback is properly registered
+        assert test_config.code.set_starters is not None
+
+        # Call the registered callback
+        result = await test_config.code.set_starters(None, "fr-CA")
+
+        # Check the result
+        assert result is not None
+        assert isinstance(result, list)
+        assert len(result) == 1
+        assert isinstance(result[0], Starter)
+        assert result[0].label == "Étiquette de test"
+        assert result[0].message == "Message de test"
+
+
+async def test_on_shared_thread_view_allow(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import on_shared_thread_view
+    from chainlit.user import User
+
+    async with mock_chainlit_context:
+        # Simulate a viewer with access to certain chat profiles
+        allowed_profiles_by_user = {"viewer": {"pro", "basic"}}
+
+        @on_shared_thread_view
+        async def allow_shared_view(thread, viewer: User | None):
+            md = thread.get("metadata") or {}
+            chat_profile = (md or {}).get("chat_profile")
+            if not md.get("is_shared"):
+                return False
+            if not viewer:
+                return False
+            return chat_profile in allowed_profiles_by_user.get(
+                viewer.identifier, set()
+            )
+
+        assert test_config.code.on_shared_thread_view is not None
+
+        thread: ThreadDict = {
+            "id": "t1",
+            "createdAt": "2025-09-03T00:00:00Z",
+            "name": "Shared Thread",
+            "userId": "author_id",
+            "userIdentifier": "author",
+            "tags": [],
+            "metadata": {"is_shared": True, "chat_profile": "pro"},
+            "steps": [],
+            "elements": [],
+        }
+        viewer = User(identifier="viewer")
+
+        res = await test_config.code.on_shared_thread_view(thread, viewer)
+        assert res is True
+
+
+async def test_on_shared_thread_view_block_and_exception(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import on_shared_thread_view
+    from chainlit.user import User
+
+    async with mock_chainlit_context:
+        # Case 1: Explicitly return False when profile not allowed
+        @on_shared_thread_view
+        async def deny_when_not_allowed(thread, viewer: User | None):
+            md = thread.get("metadata") or {}
+            return md.get("chat_profile") == "allowed"
+
+        assert test_config.code.on_shared_thread_view is not None
+
+        thread: ThreadDict = {
+            "id": "t2",
+            "createdAt": "2025-09-03T00:00:00Z",
+            "name": "Shared Thread",
+            "userId": "author_id",
+            "userIdentifier": "author",
+            "tags": [],
+            "metadata": {"is_shared": True, "chat_profile": "restricted"},
+            "steps": [],
+            "elements": [],
+        }
+        viewer = User(identifier="viewer")
+        res = await test_config.code.on_shared_thread_view(thread, viewer)
+        assert not res
+
+        # Case 2: Raise an exception inside callback; wrapper should swallow and result should be falsy
+        @on_shared_thread_view
+        async def raise_on_forbidden(thread, viewer: User | None):
+            md = thread.get("metadata") or {}
+            if md.get("chat_profile") == "forbidden":
+                raise ValueError("Viewer not allowed for this profile")
+            return True
+
+        assert test_config.code.on_shared_thread_view is not None
+
+        thread_err: ThreadDict = {
+            "id": "t3",
+            "createdAt": "2025-09-03T00:00:00Z",
+            "name": "Shared Thread",
+            "userId": "author_id",
+            "userIdentifier": "author",
+            "tags": [],
+            "metadata": {"is_shared": True, "chat_profile": "forbidden"},
+            "steps": [],
+            "elements": [],
+        }
+        res2 = await test_config.code.on_shared_thread_view(thread_err, viewer)
+        assert not res2
 
 
 async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitConfig):
@@ -465,7 +637,7 @@ async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitCo
         context.session.emit.assert_called()
 
 
-async def test_data_layer_config(
+def test_data_layer_config(
     mock_data_layer: AsyncMock,
     test_config: config.ChainlitConfig,
     mock_get_data_layer: Mock,
@@ -540,7 +712,7 @@ async def test_set_chat_profiles_with_config_overrides(
     async with mock_chainlit_context:
 
         @set_chat_profiles
-        async def get_chat_profiles(user):
+        async def get_chat_profiles(user, language):
             return [
                 ChatProfile(
                     name="Basic Profile",
@@ -567,7 +739,7 @@ async def test_set_chat_profiles_with_config_overrides(
         assert test_config.code.set_chat_profiles is not None
 
         # Call the registered callback
-        result = await test_config.code.set_chat_profiles(None)
+        result = await test_config.code.set_chat_profiles(None, None)
 
         # Check the result
         assert result is not None
