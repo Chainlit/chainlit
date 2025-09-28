@@ -1,7 +1,6 @@
 import { cn, hasMessage } from '@/lib/utils';
 import {
   MutableRefObject,
-  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -44,8 +43,8 @@ export default function WelcomeScreen(props: Props) {
   const { chatProfile } = useChatSession();
   const { messages } = useChatMessages();
   const [isVisible, setIsVisible] = useState(false);
-
   const [promptSections, setPromptSections] = useState<PromptSection[]>([]);
+
   const mode = useRecoilValue(chatModeState);
   const web = useRecoilValue(webSearchState);
 
@@ -78,10 +77,6 @@ export default function WelcomeScreen(props: Props) {
 
   useEffect(() => {
     setIsVisible(true);
-  }, []);
-
-  const handlePromptClick = useCallback((prompt: string) => {
-    console.log(prompt);
   }, []);
 
   useMemo(() => {
@@ -139,7 +134,6 @@ export default function WelcomeScreen(props: Props) {
             key={section.header}
             header={section.header}
             questions={section.questions}
-            onPromptClick={handlePromptClick}
           />
         ))}
       </div>

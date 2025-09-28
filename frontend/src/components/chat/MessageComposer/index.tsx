@@ -44,16 +44,38 @@ interface Props {
   onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
   autoScrollRef: MutableRefObject<boolean>;
+  value?: string;
+  onValueChange?: (value: string) => void;
 }
 
 export default function MessageComposer({
   fileSpec,
   onFileUpload,
   onFileUploadError,
-  autoScrollRef
+  autoScrollRef,
+  value: controlledValue,
+  onValueChange
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
-  const [value, setValue] = useState('');
+
+  const [internalValue, setInternalValue] = useState('');
+
+  const isControlled = controlledValue !== undefined;
+  const value = isControlled ? controlledValue : internalValue;
+
+  const handleValueChange = useCallback(
+    (newValue: string) => {
+      if (onValueChange) {
+        // Если компонент управляемый, вызываем функцию родителя
+        onValueChange(newValue);
+      } else {
+        // Иначе - обновляем свое внутреннее состояние
+        setInternalValue(newValue);
+      }
+    },
+    [onValueChange]
+  );
+
   const [isWebSearchEnabled, setIsWebSearchEnabled] =
     useRecoilState(webSearchState);
   const [selectedCommand, setSelectedCommand] = useRecoilState(
@@ -173,7 +195,7 @@ export default function MessageComposer({
     }
 
     setAttachments([]);
-    setValue('');
+    handleValueChange('');
     setIsWebSearchEnabled(false);
     inputRef.current?.reset();
   }, [
@@ -204,7 +226,7 @@ export default function MessageComposer({
         autoFocus
         selectedCommand={selectedCommand}
         setSelectedCommand={setSelectedCommand}
-        onChange={setValue}
+        onChange={handleValueChange}
         onPaste={onPaste}
         onEnter={submit}
         placeholder={t('chat.input.placeholder')}

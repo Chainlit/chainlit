@@ -1,4 +1,6 @@
 import { cn } from '@/lib/utils';
+import { setPrompt } from '@/redux/slices/promptSlice';
+import { RootState } from '@/redux/store';
 import {
   forwardRef,
   useEffect,
@@ -6,6 +8,7 @@ import {
   useRef,
   useState
 } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import { Textarea } from '@/components/ui/textarea';
 
@@ -31,6 +34,8 @@ const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, Props>(
   ) => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [isComposing, setIsComposing] = useState(false);
+    const input = useSelector((state: RootState) => state.prompt.input);
+    const dispatch = useDispatch();
 
     useImperativeHandle(ref, () => textareaRef.current!, []);
 
@@ -72,11 +77,15 @@ const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, Props>(
       }
     };
 
+    const onChange = (value: string) => {
+      dispatch(setPrompt(value));
+    };
+
     return (
       <Textarea
-        // Мы по-прежнему используем наш внутренний ref
-        ref={textareaRef}
         {...props}
+        value={input}
+        onChange={(e) => onChange(e.currentTarget.value)}
         onKeyDown={handleKeyDown}
         onCompositionStart={() => setIsComposing(true)}
         onCompositionEnd={() => setIsComposing(false)}

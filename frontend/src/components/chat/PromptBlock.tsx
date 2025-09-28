@@ -1,12 +1,17 @@
 // src/components/chat/PromptBlock.tsx
+import { setPrompt } from '@/redux/slices/promptSlice';
+import { useDispatch } from 'react-redux';
 
 interface PromptBlockProps {
   header: string;
   questions: string[];
-  onPromptClick: (prompt: string) => void;
 }
 
-function PromptBlock({ header, questions, onPromptClick }: PromptBlockProps) {
+function PromptBlock({ header, questions }: PromptBlockProps) {
+  const dispatch = useDispatch();
+  const onPromptClick = (prompt: string) => {
+    dispatch(setPrompt(prompt));
+  };
   return (
     <div className="prompt-block w-full px-4 mb-4">
       <h4 className="font-medium mb-3">{header}</h4>
