@@ -1,10 +1,7 @@
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import { setPrompt } from '@/redux/slices/promptSlice';
+import { RootState } from '@/redux/store';
+import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -57,11 +54,11 @@ export default function MessageComposer({
   onValueChange
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
-
-  const [internalValue, setInternalValue] = useState('');
+  const dispatch = useDispatch();
+  const input = useSelector((state: RootState) => state.prompt.input);
 
   const isControlled = controlledValue !== undefined;
-  const value = isControlled ? controlledValue : internalValue;
+  const value = isControlled ? controlledValue : input;
 
   const handleValueChange = useCallback(
     (newValue: string) => {
@@ -70,7 +67,7 @@ export default function MessageComposer({
         onValueChange(newValue);
       } else {
         // Иначе - обновляем свое внутреннее состояние
-        setInternalValue(newValue);
+        dispatch(setPrompt(newValue));
       }
     },
     [onValueChange]
