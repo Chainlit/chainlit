@@ -1,6 +1,8 @@
 import { useCallback, useContext } from 'react';
 import { useRecoilValue } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
+import Icon from '@/components/Icon';
+import { cn } from '@/lib/utils';
 
 import {
   ChainlitContext,
@@ -53,14 +55,9 @@ export default function Starter({ starter }: StarterProps) {
     >
       <div className="flex gap-2">
         {starter.icon ? (
-          <img
-            className="h-5 w-5 rounded-md"
-            src={
-              starter.icon?.startsWith('/public')
-                ? apiClient.buildEndpoint(starter.icon)
-                : starter.icon
-            }
-            alt={starter.label}
+          <Icon
+            name={starter.icon}
+            className={cn("!h-5 !w-5 rounded-md")}
           />
         ) : null}
         <p className="text-sm text-muted-foreground truncate">
