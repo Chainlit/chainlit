@@ -1,10 +1,7 @@
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import { setPrompt } from '@/redux/slices/promptSlice';
+import { RootState } from '@/redux/store';
+import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,7 +22,8 @@ import {
   IAttachment,
   attachmentsState,
   chatModeState,
-  persistentCommandState
+  persistentCommandState,
+  webSearchState
 } from 'state/chat';
 
 import { Attachments } from './Attachments';
@@ -43,17 +41,40 @@ interface Props {
   onFileUpload: (payload: File[]) => void;
   onFileUploadError: (error: string) => void;
   autoScrollRef: MutableRefObject<boolean>;
+  value?: string;
+  onValueChange?: (value: string) => void;
 }
 
 export default function MessageComposer({
   fileSpec,
   onFileUpload,
   onFileUploadError,
-  autoScrollRef
+  autoScrollRef,
+  value: controlledValue,
+  onValueChange
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
-  const [value, setValue] = useState('');
-  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState(false);
+  const dispatch = useDispatch();
+  const input = useSelector((state: RootState) => state.prompt.input);
+
+  const isControlled = controlledValue !== undefined;
+  const value = isControlled ? controlledValue : input;
+
+  const handleValueChange = useCallback(
+    (newValue: string) => {
+      if (onValueChange) {
+        // Если компонент управляемый, вызываем функцию родителя
+        onValueChange(newValue);
+      } else {
+        // Иначе - обновляем свое внутреннее состояние
+        dispatch(setPrompt(newValue));
+      }
+    },
+    [onValueChange]
+  );
+
+  const [isWebSearchEnabled, setIsWebSearchEnabled] =
+    useRecoilState(webSearchState);
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
@@ -171,7 +192,7 @@ export default function MessageComposer({
     }
 
     setAttachments([]);
-    setValue('');
+    handleValueChange('');
     setIsWebSearchEnabled(false);
     inputRef.current?.reset();
   }, [
@@ -202,7 +223,7 @@ export default function MessageComposer({
         autoFocus
         selectedCommand={selectedCommand}
         setSelectedCommand={setSelectedCommand}
-        onChange={setValue}
+        onChange={handleValueChange}
         onPaste={onPaste}
         onEnter={submit}
         placeholder={t('chat.input.placeholder')}
@@ -221,7 +242,7 @@ export default function MessageComposer({
           {selectedMode === 'Pioneer' && (
             <WebSearchButton
               disabled={disabled}
-              value={isWebSearchEnabled}
+              value={isWebSearchEnabled} // <-- Передаем текущее значение из атома
               onChange={setIsWebSearchEnabled}
             />
           )}

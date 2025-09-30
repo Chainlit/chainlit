@@ -1,5 +1,6 @@
 import { MessageContext } from '@/contexts/MessageContext';
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -26,6 +27,13 @@ interface Props {
 }
 
 const MessagesContainer = ({ navigate }: Props) => {
+  const location = useLocation();
+
+  const threadId = useMemo(() => {
+    const match = location.pathname.match(/\/thread\/([a-fA-F0-9-]+)/);
+    return match ? match[1] : undefined;
+  }, [location.pathname]);
+
   const apiClient = useContext(ChainlitContext);
   const { config } = useConfig();
   const { elements, askUser, loading, actions } = useChatData();
@@ -115,6 +123,41 @@ const MessagesContainer = ({ navigate }: Props) => {
   const onError = useCallback((error: string) => toast.error(error), [toast]);
 
   const enableFeedback = !!config?.dataPersistence;
+
+  useEffect(() => {
+    let ignore = false;
+
+    const fetchHistory = async () => {
+      if (!threadId) {
+        return;
+      }
+
+      try {
+        const res = await apiClient.post(
+          `/project/thread/${threadId}/history`,
+          {}
+        );
+
+        const data = await res.json();
+        const historyMessages: IStep[] = data.messages || [];
+
+        if (!ignore && historyMessages.length > 0) {
+          setMessages(historyMessages);
+        }
+      } catch (err) {
+        if (!ignore) {
+          const message = err instanceof Error ? err.message : String(err);
+          onError(`Ошибка загрузки истории: ${message}`);
+        }
+      }
+    };
+
+    fetchHistory();
+
+    return () => {
+      ignore = true;
+    };
+  }, [threadId, setMessages]);
 
   // Memoize the context object since it's created on each render.
   // This prevents unnecessary re-renders of children components when no props have changed.

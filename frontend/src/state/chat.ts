@@ -28,3 +28,8 @@ export const chatModeState = atom<string>({
   key: 'chatModeState', // уникальный ключ
   default: 'Pioneer' // значение по умолчанию
 });
+
+export const webSearchState = atom<boolean>({
+  key: 'webSearchState',
+  default: false // По умолчанию поиск в вебе выключен
+});

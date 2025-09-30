@@ -10,7 +10,8 @@ type StepType =
   | 'embedding'
   | 'retrieval'
   | 'rerank'
-  | 'undefined';
+  | 'undefined'
+  | 'tsql';
 
 export interface IStep {
   id: string;
@@ -23,7 +24,8 @@ export interface IStep {
   showInput?: boolean | string;
   waitForAnswer?: boolean;
   input?: string;
-  output: string;
+  output: any;
+  sql?: string;
   createdAt: number | string;
   start?: number | string;
   end?: number | string;

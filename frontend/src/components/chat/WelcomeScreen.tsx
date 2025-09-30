@@ -6,6 +6,7 @@ import {
   useMemo,
   useState
 } from 'react';
+import { useRecoilValue } from 'recoil';
 
 import {
   ChainlitContext,
@@ -15,11 +16,19 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
-import { Logo } from '@/components/Logo';
+// import { Logo } from '@/components/Logo';
 import { Markdown } from '@/components/Markdown';
 
+import { chatModeState, webSearchState } from '@/state/chat';
+
 import MessageComposer from './MessageComposer';
+import PromptBlock from './PromptBlock';
 import Starters from './Starters';
+
+interface PromptSection {
+  header: string;
+  questions: string[];
+}
 
 interface Props {
   fileSpec: FileSpec;
@@ -34,6 +43,10 @@ export default function WelcomeScreen(props: Props) {
   const { chatProfile } = useChatSession();
   const { messages } = useChatMessages();
   const [isVisible, setIsVisible] = useState(false);
+  const [promptSections, setPromptSections] = useState<PromptSection[]>([]);
+
+  const mode = useRecoilValue(chatModeState);
+  const web = useRecoilValue(webSearchState);
 
   const chatProfiles = config?.chatProfiles;
 
@@ -44,7 +57,29 @@ export default function WelcomeScreen(props: Props) {
     setIsVisible(true);
   }, []);
 
-  const logo = useMemo(() => {
+  useEffect(() => {
+    const fetchPrompts = async () => {
+      try {
+        const response = await apiClient.post('/get_examples', {
+          mode,
+          web
+        });
+        const data = await response.json();
+        setPromptSections(data);
+      } catch (error) {
+        console.error('Failed to fetch prompts:', error);
+        setPromptSections([]);
+      }
+    };
+
+    fetchPrompts();
+  }, [mode, web, apiClient]);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
+  useMemo(() => {
     if (chatProfile && chatProfiles) {
       const currentChatProfile = chatProfiles.find(
         (cp) => cp.name === chatProfile
@@ -70,11 +105,12 @@ export default function WelcomeScreen(props: Props) {
       }
     }
 
-    return <Logo className="w-[200px] mb-2" />;
+    //return <Logo className="w-[200px] mb-2" />;
   }, [chatProfiles, chatProfile]);
 
   if (hasMessage(messages)) return null;
 
+  // {logo} - потом вставить
   return (
     <div
       id="welcome-screen"
@@ -83,9 +119,24 @@ export default function WelcomeScreen(props: Props) {
         isVisible && 'opacity-100'
       )}
     >
-      {logo}
+      <div className="prompt-block hidden md:block mb-10"></div>
+      <div className="prompt-block hidden md:block mb-10"></div>
+      <div className="prompt-block hidden md:block mb-10"></div>
+      <div className="prompt-block hidden md:block mb-10"></div>
+      <div className="prompt-block hidden md:block mb-10"></div>
+      <div className="prompt-block hidden md:block mb-10"></div>
       <MessageComposer {...props} />
       <Starters />
+
+      <div className="mt-4 flex w-full flex-col items-center gap-4">
+        {promptSections.map((section) => (
+          <PromptBlock
+            key={section.header}
+            header={section.header}
+            questions={section.questions}
+          />
+        ))}
+      </div>
     </div>
   );
 }
