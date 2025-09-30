@@ -776,3 +776,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     thread_dicts[thread_id]["elements"].append(element_dict)  # type: ignore
 
         return list(thread_dicts.values())
+
+    async def close(self) -> None:
+        if self.storage_provider:
+            await self.storage_provider.close()
+        await self.engine.dispose()
