@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 
 import promptSlice from './slices/promptSlice';
+import uploadBtnSlice from './slices/uploadBtnSlice';
 
 export const store = configureStore({
   reducer: {
-    prompt: promptSlice
+    prompt: promptSlice,
+    upload: uploadBtnSlice
   }
 });
 

@@ -1,4 +1,6 @@
+import { setUploadBtnState } from '@/redux/slices/uploadBtnSlice';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
@@ -70,6 +72,8 @@ const Chat = () => {
 
   const { t } = useTranslation();
   const layoutMaxWidth = useLayoutMaxWidth();
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (callFn) {
@@ -175,7 +179,13 @@ const Chat = () => {
 
   useEffect(() => {
     const currentPage = new URL(window.location.href);
-    console.log(currentPage.href);
+
+    if (currentPage.href.includes('thread')) {
+      dispatch(setUploadBtnState(false));
+    } else {
+      dispatch(setUploadBtnState(true));
+    }
+
     if (
       user &&
       config?.dataPersistence &&

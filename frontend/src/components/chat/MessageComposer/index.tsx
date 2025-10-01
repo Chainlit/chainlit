@@ -56,6 +56,7 @@ export default function MessageComposer({
   const inputRef = useRef<InputMethods>(null);
   const dispatch = useDispatch();
   const input = useSelector((state: RootState) => state.prompt.input);
+  const upload = useSelector((state: RootState) => state.upload.uploadBtnState);
 
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : input;
@@ -231,7 +232,7 @@ export default function MessageComposer({
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
           <VoiceButton disabled={disabled} />
-          {selectedMode === 'Pioneer' && (
+          {selectedMode === 'Pioneer' && upload && (
             <UploadButton
               disabled={disabled}
               fileSpec={fileSpec}
