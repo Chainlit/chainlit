@@ -15,7 +15,7 @@ export interface ButtonLinkProps {
   displayName?: string;
   iconUrl?: string;
   url: string;
-  target?: string;
+  target?: '_blank' | '_self' | '_parent' | '_top';
 }
 
 export default function ButtonLink({
