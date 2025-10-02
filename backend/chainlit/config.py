@@ -315,7 +315,7 @@ class HeaderLink(BaseModel):
     icon_url: str
     url: str
     display_name: Optional[str] = None
-    target: Optional[str] = None
+    target: Optional[Literal["_blank", "_self", "_parent", "_top"]] = None
 
 
 class UISettings(BaseModel):

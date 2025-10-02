@@ -39,6 +39,7 @@ export default function ButtonLink({
             <a
               href={url}
               target={target ?? '_blank'}
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1"
             >
               <img
