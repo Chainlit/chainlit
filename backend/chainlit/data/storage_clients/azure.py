@@ -82,3 +82,7 @@ class AzureStorageClient(BaseStorageClient):
         except Exception as e:
             logger.warning(f"AzureStorageClient, upload_file error: {e}")
             return {}
+
+    async def close(self) -> None:
+        self.container_client.close()
+        self.data_lake_client.close()
