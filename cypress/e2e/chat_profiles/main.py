@@ -9,12 +9,12 @@ starters = [
     cl.Starter(
         label="Say hi",
         message="Start a conversation with a greeting",
-        icon="https://picsum.photos/300",
+        icon="a-arrow-down",
     ),
     cl.Starter(
         label="Ask for help",
         message="Ask for help with something",
-        icon="https://picsum.photos/350",
+        icon="a-arrow-down",
     ),
 ]
 

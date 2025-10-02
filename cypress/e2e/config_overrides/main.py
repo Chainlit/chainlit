@@ -15,12 +15,12 @@ starters = [
     cl.Starter(
         label="Default Chat",
         message="Start a conversation with default settings",
-        icon="https://picsum.photos/300",
+        icon="a-arrow-down",
     ),
     cl.Starter(
         label="MCP Test",
         message="Test MCP functionality",
-        icon="https://picsum.photos/350",
+        icon="a-arrow-down",
     ),
 ]
 
