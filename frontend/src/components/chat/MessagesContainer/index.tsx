@@ -54,6 +54,9 @@ const MessagesContainer = ({ navigate }: Props) => {
 
   const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
+      // change id message on parent message id
+      feedback.forId = messages[0].id;
+
       toast.promise(apiClient.setFeedback(feedback, sessionId), {
         loading: t('chat.messages.feedback.status.updating'),
         success: (res) => {
