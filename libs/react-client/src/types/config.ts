@@ -52,6 +52,7 @@ export interface IChainlitConfig {
       display_name: string;
       icon_url: string;
       url: string;
+      target?: '_blank' | '_self' | '_parent' | '_top';
     }[];
   };
   features: {
