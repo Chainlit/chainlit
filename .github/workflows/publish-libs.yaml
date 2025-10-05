@@ -6,7 +6,7 @@ on:
       dry_run:
         description: 'Dry run (test publishing)'
         required: false
-        default: true
+        default: false
         type: boolean
   push:
     branches: ["feat/publish-libs-workflow"]
@@ -54,6 +54,6 @@ jobs:
         run: |
           for lib in libs/*/; do
             cd "$lib"
-            pnpm publish ${{ inputs.dry_run && '--dry-run' || '' }}
+            pnpm publish ${{ inputs.dry_run && '--dry-run' || '--dry-run' }}
             cd -
           done
