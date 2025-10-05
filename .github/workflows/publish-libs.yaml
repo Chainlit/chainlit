@@ -6,8 +6,10 @@ on:
       dry_run:
         description: 'Dry run (test publishing)'
         required: false
-        default: false
+        default: true
         type: boolean
+  push:
+    branches: ["feat/publish-libs-workflow"]
   release:
     types: [published]
 
