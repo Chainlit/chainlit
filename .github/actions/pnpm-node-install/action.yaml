@@ -10,9 +10,6 @@ inputs:
     description: Skip install.
     required: false
     default: 'false'
-  pnpm-install-args:
-    description: Extra arguments for pnpm install, e.g. --no-frozen-lockfile.
-    default: '--frozen-lockfile'
 
 runs:
   using: composite
@@ -28,7 +25,7 @@ runs:
         cache: 'pnpm'
         cache-dependency-path: '**/pnpm-lock.yaml'
     - name: Install JS dependencies
-      run: pnpm install ${{ inputs.pnpm-install-args }}
+      run: pnpm install
       shell: bash
       # Skip install if pnpm-skip-install is true
       if: ${{ inputs.pnpm-skip-install != 'true' }}

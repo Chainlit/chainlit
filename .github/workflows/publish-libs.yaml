@@ -1,0 +1,57 @@
+name: Publish libs
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run (test publishing)'
+        required: false
+        default: false
+        type: boolean
+  release:
+    types: [published]
+
+permissions: read-all
+
+jobs:
+  validate:
+    name: Validate inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate publishing branch and destination package index
+        run: |
+          if [[ "${{ github.ref_name }}" != "main" && "${{ github.event_name }}" != "release" ]]; then
+            if [[ "${{ inputs.dry_run }}" != "true" ]]; then
+              echo "❌ Error: Only build from main branch or release tag can be published to npm registry."
+              echo "Please check 'Dry run (test publishing)' when running from branch: ${{ github.ref_name }}"
+              exit 1
+            fi
+          fi
+          echo "✅ Validation passed"
+#   ci:
+#     needs: [validate]
+#     uses: ./.github/workflows/ci.yaml
+#     secrets: inherit
+  build-n-publish:
+    name: Upload libs release to npm registry
+    runs-on: ubuntu-latest
+    needs: [validate]
+    #needs: [ci]
+    permissions:
+      contents: read
+      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
+
+      - name: Build libs
+        run: pnpm build:libs
+
+      - name: Publish packages to npm
+        run: |
+          for lib in libs/*/; do
+            cd "$lib"
+            pnpm publish ${{ inputs.dry_run && '--dry-run' || '' }}
+            cd -
+          done
