@@ -338,9 +338,9 @@ class ChainlitDataLayer(BaseDataLayer):
         query = """
         INSERT INTO "Step" (
             id, "threadId", "parentId", input, metadata, name, output,
-            type, "startTime", "endTime", "showInput", "isError"
+            type, "startTime", "endTime", "showInput", "isError", icon
         ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13
         )
         ON CONFLICT (id) DO UPDATE SET
             "parentId" = COALESCE(EXCLUDED."parentId", "Step"."parentId"),
@@ -359,7 +359,8 @@ class ChainlitDataLayer(BaseDataLayer):
             "endTime" = COALESCE(EXCLUDED."endTime", "Step"."endTime"),
             "startTime" = LEAST(EXCLUDED."startTime", "Step"."startTime"),
             "showInput" = COALESCE(EXCLUDED."showInput", "Step"."showInput"),
-            "isError" = COALESCE(EXCLUDED."isError", "Step"."isError")
+            "isError" = COALESCE(EXCLUDED."isError", "Step"."isError"),
+            icon = COALESCE(EXCLUDED.icon, "Step".icon)
         """
 
         timestamp = await self.get_current_timestamp()
@@ -380,6 +381,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "end_time": timestamp,
             "show_input": str(step_dict.get("showInput", "json")),
             "is_error": step_dict.get("isError", False),
+            "icon": step_dict.get("icon"),
         }
         await self.execute_query(query, params)
 

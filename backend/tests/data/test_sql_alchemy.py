@@ -75,6 +75,7 @@ async def data_layer(mock_storage_client: BaseStorageClient, tmp_path: Path):
                     "generation" JSONB,
                     "showInput" TEXT,
                     "language" TEXT,
+                    "icon" TEXT,
                     "indent" INT
                 );
         """
