@@ -1,7 +1,6 @@
 {
   "name": "@chainlit/copilot",
   "private": true,
-  "version": "2.4.1",
   "type": "module",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
