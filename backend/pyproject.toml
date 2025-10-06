@@ -87,7 +87,7 @@ tests = [
     "moto>=5.0.14,<6.0.0",
 ]
 dev = [
-    "ruff>=0.9.0,<1.0.0",
+    "ruff>=0.13.3,<1.0.0",
 ]
 mypy = [
     "mypy>=1.13,<2.0.0",
@@ -164,7 +164,7 @@ testpaths = ["tests"]
 asyncio_mode = "auto"
 
 [tool.ruff]
-target-version = "py39"
+target-version = "py310"
 
 [tool.ruff.lint]
 select = [

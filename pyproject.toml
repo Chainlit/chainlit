@@ -1,0 +1,12 @@
+[dependency-groups]
+backend = ["chainlit"]
+
+[tool.uv]
+default-groups = ["backend"]
+package = false
+
+[tool.uv.sources]
+chainlit = { workspace = true }
+
+[tool.uv.workspace]
+members = ["backend"]

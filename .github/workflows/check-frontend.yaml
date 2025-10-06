@@ -1,0 +1,19 @@
+name: Lint frontend & libs
+
+on: [workflow_call]
+
+permissions: read-all
+
+jobs:
+  check-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
+      - name: Lint frontend & libs
+        run: pnpm lint
+      - name: Check frontend & libs formatting
+        run: pnpm format
+      - name: Typecheck frontend & libs
+        run: pnpm type-check
