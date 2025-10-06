@@ -6,10 +6,6 @@ inputs:
     description: Node.js version
     required: true
     default: '24.3.0' # Switch to 'lts' as soon as Node 24 reaches LTS status.
-  pnpm-skip-install:
-    description: Skip install.
-    required: false
-    default: 'false'
 
 runs:
   using: composite
@@ -17,15 +13,10 @@ runs:
     - uses: pnpm/action-setup@v4
       name: Install pnpm
       with:
-        run_install: false
+        run_install: true
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
         cache: 'pnpm'
         cache-dependency-path: '**/pnpm-lock.yaml'
-    - name: Install JS dependencies
-      run: pnpm install
-      shell: bash
-      # Skip install if pnpm-skip-install is true
-      if: ${{ inputs.pnpm-skip-install != 'true' }}
