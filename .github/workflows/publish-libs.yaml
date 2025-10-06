@@ -50,9 +50,4 @@ jobs:
         run: pnpm build:libs
 
       - name: Publish packages to npm
-        run: |
-          for lib in libs/*/; do
-            cd "$lib"
-            pnpm publish ${{ inputs.dry_run && '--dry-run' || '--dry-run' }}
-            cd -
-          done
+        run: pnpm publish --recursive ${{ inputs.dry_run && '--dry-run --no-git-checks' || '--dry-run --no-git-checks' }}
