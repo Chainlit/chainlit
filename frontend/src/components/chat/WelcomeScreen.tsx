@@ -128,7 +128,7 @@ export default function WelcomeScreen(props: Props) {
       <MessageComposer {...props} />
       <Starters />
 
-      <div className="mt-4 flex w-full flex-col items-center gap-4">
+      <div className="mt-4 flex w-full flex-col items-center gap-4 hidden md:block">
         {promptSections.map((section) => (
           <PromptBlock
             key={section.header}
