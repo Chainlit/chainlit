@@ -16,8 +16,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
-        with:
-          pnpm-install-args: "--frozen-lockfile"
       - name: Install Cypress
         uses: cypress-io/github-action@v6
         with:
