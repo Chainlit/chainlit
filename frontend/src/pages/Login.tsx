@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 
 import { LoginForm } from '@/components/LoginForm';
 import { Logo } from '@/components/Logo';
-import { useTheme } from '@/components/ThemeProvider';
 
 import { useQuery } from 'hooks/query';
 
@@ -19,8 +18,6 @@ export default function Login() {
   const [error, setError] = useState('');
   const apiClient = useContext(ChainlitContext);
   const navigate = useNavigate();
-  const { variant } = useTheme();
-  const isDarkMode = variant === 'dark';
 
   const handleCookieAuth = (json: any): void => {
     if (json?.success != true) throw LoginError;
@@ -82,7 +79,7 @@ export default function Login() {
   }, [config, user]);
 
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
+    <div className="grid min-h-svh">
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
           <Logo className="w-[150px]" />
@@ -103,23 +100,6 @@ export default function Login() {
           </div>
         </div>
       </div>
-      {!config?.headerAuth ? (
-        <div className="relative hidden bg-muted lg:block overflow-hidden">
-          <img
-            src={
-              config?.ui?.login_page_image ||
-              apiClient.buildEndpoint('/favicon')
-            }
-            alt="Image"
-            className={`absolute inset-0 h-full w-full object-cover ${
-              isDarkMode
-                ? config?.ui?.login_page_image_dark_filter ||
-                  'brightness-[0.2] grayscale'
-                : config?.ui?.login_page_image_filter || ''
-            }`}
-          />
-        </div>
-      ) : null}
     </div>
   );
 }
