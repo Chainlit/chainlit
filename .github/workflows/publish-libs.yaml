@@ -48,4 +48,7 @@ jobs:
         run: pnpm build:libs
 
       - name: Publish packages to npm
-        run: pnpm publish --recursive ${{ inputs.dry_run && '--dry-run --no-git-checks' || '' }} # --no-git-checks allows testing from non-main branches
+        # --no-git-checks allows testing from non-main branches and publishing from release tags
+        run: pnpm publish --recursive --no-git-checks ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_REACT_CLIENT }}
