@@ -367,6 +367,7 @@ class LiteralDataLayer(BaseDataLayer):
             waitForAnswer=step_dict.get("waitForAnswer"),
             language=step_dict.get("language"),
             showInput=step_dict.get("showInput"),
+            icon=step_dict.get("icon"),
         )
 
         step: LiteralStepDict = {
