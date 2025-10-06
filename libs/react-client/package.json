@@ -7,8 +7,7 @@
     "dev": "tsup src/index.ts --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
     "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 && tsc --noemit",
     "format": "prettier '**/*.{ts,tsx}' --write",
-    "test": "echo no tests yet",
-    "prepublishOnly": "pnpm run build"
+    "test": "echo no tests yet"
   },
   "repository": {
     "type": "git",

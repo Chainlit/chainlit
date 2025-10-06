@@ -8,8 +8,6 @@ on:
         required: false
         default: false
         type: boolean
-  push:
-    branches: ["feat/publish-libs-workflow"]
   release:
     types: [published]
 
@@ -30,14 +28,14 @@ jobs:
             fi
           fi
           echo "✅ Validation passed"
-#   ci:
-#     needs: [validate]
-#     uses: ./.github/workflows/ci.yaml
-#     secrets: inherit
+  ci:
+    needs: [validate]
+    uses: ./.github/workflows/ci.yaml
+    secrets: inherit
   build-n-publish:
     name: Upload libs release to npm registry
     runs-on: ubuntu-latest
-    #needs: [ci]
+    needs: [ci]
     permissions:
       contents: read
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
@@ -50,4 +48,4 @@ jobs:
         run: pnpm build:libs
 
       - name: Publish packages to npm
-        run: pnpm publish --recursive ${{ inputs.dry_run && '--dry-run --no-git-checks' || '--dry-run --no-git-checks' }}
+        run: pnpm publish --recursive ${{ inputs.dry_run && '--dry-run --no-git-checks' || '' }} # --no-git-checks allows testing from non-main branches
