@@ -32,7 +32,7 @@ def pnpm_install(project_root: pathlib.Path, pnpm_path: str):
 
 
 def pnpm_buildui(project_root: pathlib.Path, pnpm_path: str):
-    run_subprocess([pnpm_path, "buildUi"], project_root)
+    run_subprocess([pnpm_path, "build"], project_root)
 
 
 def copy_directory(src: pathlib.Path, dst: pathlib.Path, description: str):

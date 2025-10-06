@@ -3,10 +3,12 @@
   "description": "Websocket client to connect to your chainlit app.",
   "version": "0.3.0",
   "scripts": {
-    "build": "tsup src/index.ts --tsconfig tsconfig.build.json --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
+    "preinstall": "npx only-allow pnpm",
     "dev": "tsup src/index.ts --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
-    "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 && tsc --noemit",
-    "format": "prettier '**/*.{ts,tsx}' --write",
+    "build": "tsup src/index.ts --tsconfig tsconfig.build.json --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
+    "lint": "eslint ./src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+    "format": "prettier '**/*.{ts,tsx}'",
+    "type-check": "tsc --noemit",
     "test": "echo no tests yet"
   },
   "repository": {
