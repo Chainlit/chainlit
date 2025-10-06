@@ -1,9 +1,9 @@
-import { useCallback, useContext } from 'react';
+import { cn } from '@/lib/utils';
+import { useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
-  ChainlitContext,
   IStarter,
   IStep,
   useAuth,
@@ -11,6 +11,7 @@ import {
   useChatInteract
 } from '@chainlit/react-client';
 
+import Icon from '@/components/Icon';
 import { Button } from '@/components/ui/button';
 
 import { persistentCommandState } from '@/state/chat';
@@ -20,7 +21,6 @@ interface StarterProps {
 }
 
 export default function Starter({ starter }: StarterProps) {
-  const apiClient = useContext(ChainlitContext);
   const selectedCommand = useRecoilValue(persistentCommandState);
   const { sendMessage } = useChatInteract();
   const { loading, connected } = useChatData();
@@ -53,14 +53,9 @@ export default function Starter({ starter }: StarterProps) {
     >
       <div className="flex gap-2">
         {starter.icon ? (
-          <img
-            className="h-5 w-5 rounded-md"
-            src={
-              starter.icon?.startsWith('/public')
-                ? apiClient.buildEndpoint(starter.icon)
-                : starter.icon
-            }
-            alt={starter.label}
+          <Icon
+            name={starter.icon}
+            className={cn('!h-5 !w-5 text-muted-foreground rounded-md')}
           />
         ) : null}
         <p className="text-sm text-muted-foreground truncate">
