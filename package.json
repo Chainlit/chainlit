@@ -29,7 +29,7 @@
     "lintPython": "cd backend && uv run dmypy run -- chainlit/ tests/",
     "formatPython": "black `git ls-files | grep '.py$'` && isort --profile=black .",
     "build:libs": "cd libs/react-client && pnpm run build && cd ../copilot && pnpm run build",
-    "buildUi": "pnpm build:libs && cd ../../frontend && pnpm run build"
+    "buildUi": "pnpm build:libs && cd frontend && pnpm run build"
   },
   "pnpm": {
     "overrides": {
