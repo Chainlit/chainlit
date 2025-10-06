@@ -22,3 +22,4 @@ runs:
         cache-dependency-path: '**/pnpm-lock.yaml'
     - name: Install JS dependencies
       run: pnpm install
+      shell: bash
