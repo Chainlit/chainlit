@@ -37,7 +37,6 @@ jobs:
   build-n-publish:
     name: Upload libs release to npm registry
     runs-on: ubuntu-latest
-    needs: [validate]
     #needs: [ci]
     permissions:
       contents: read
