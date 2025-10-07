@@ -8,6 +8,12 @@ interface Props extends Omit<React.ComponentProps<'textarea'>, 'onPaste'> {
   placeholder?: string;
   onPaste?: (event: ClipboardEvent) => void;
   onEnter?: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
+  onCompositionStart?: (
+    event: React.CompositionEvent<HTMLTextAreaElement>
+  ) => void;
+  onCompositionEnd?: (
+    event: React.CompositionEvent<HTMLTextAreaElement>
+  ) => void;
 }
 
 const AutoResizeTextarea = ({
@@ -17,6 +23,8 @@ const AutoResizeTextarea = ({
   placeholder,
   className,
   onKeyDown,
+  onCompositionStart,
+  onCompositionEnd,
   ...props
 }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -60,13 +68,31 @@ const AutoResizeTextarea = ({
     }
   };
 
+  const handleCompositionStart = (
+    event: React.CompositionEvent<HTMLTextAreaElement>
+  ) => {
+    setIsComposing(true);
+    if (onCompositionStart) {
+      onCompositionStart(event);
+    }
+  };
+
+  const handleCompositionEnd = (
+    event: React.CompositionEvent<HTMLTextAreaElement>
+  ) => {
+    setIsComposing(false);
+    if (onCompositionEnd) {
+      onCompositionEnd(event);
+    }
+  };
+
   return (
     <Textarea
       ref={textareaRef as any}
       {...props}
       onKeyDown={handleKeyDown}
-      onCompositionStart={() => setIsComposing(true)}
-      onCompositionEnd={() => setIsComposing(false)}
+      onCompositionStart={handleCompositionStart}
+      onCompositionEnd={handleCompositionEnd}
       className={cn(
         'p-0 min-h-[40px] h-[40px] rounded-none resize-none border-none overflow-y-auto shadow-none focus:ring-0 focus:ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0',
         className
