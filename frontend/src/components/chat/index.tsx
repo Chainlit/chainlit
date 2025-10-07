@@ -257,6 +257,16 @@ const Chat = () => {
             onFileUploadError={onFileUploadError}
             autoScrollRef={autoScrollRef}
           />
+          <p className="mt-4 text-xs text-muted-foreground text-center">
+            <a
+              id="tech-support-link"
+              href="mailto:ai@pioneer.ru?subject=Запрос%20в%20службу%20поддержки%20Pioneer%20AI&amp;body=Опишите%20вашу%20проблему%20или%20пожелание."
+              target="_blank"
+            >
+              Связаться с техподдержкой
+            </a>
+            <br></br>© 2025 Pioneer Digital{' '}
+          </p>
         </div>
       </ErrorBoundary>
     </div>
