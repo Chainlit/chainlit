@@ -1,5 +1,5 @@
 import { MessageContext } from '@/contexts/MessageContext';
-import { MessageCircle, ThumbsDown, ThumbsUp } from 'lucide-react';
+import { ThumbsDown, ThumbsUp } from 'lucide-react';
 import { useCallback, useContext, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
@@ -39,9 +39,6 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
   const [feedback, setFeedback] = useState<number | undefined>(
     message.feedback?.value
   );
-  const [comment, setComment] = useState<string | undefined>(
-    message.feedback?.comment
-  );
   const [showDialog, setShowDialog] = useState<number>();
   const [commentInput, setCommentInput] = useState<string>();
   const firstInteraction = useRecoilValue(firstUserInteraction);
@@ -59,7 +56,6 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
             message,
             () => {
               setFeedback(undefined);
-              setComment(undefined);
             },
             message.feedback.id
           );
@@ -69,7 +65,6 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
           message,
           () => {
             setFeedback(newFeedback);
-            setComment(newComment);
           },
           {
             ...(message.feedback || {}),
@@ -141,27 +136,6 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
             <Translator path="chat.messages.feedback.negative" />
           </TooltipContent>
         </Tooltip>
-
-        {comment && (
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={isDisabled}
-                onClick={() => {
-                  setShowDialog(feedback);
-                  setCommentInput(comment);
-                }}
-              >
-                <MessageCircle />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <Translator path="chat.messages.feedback.edit" />
-            </TooltipContent>
-          </Tooltip>
-        )}
       </TooltipProvider>
 
       <Dialog

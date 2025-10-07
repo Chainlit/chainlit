@@ -59,13 +59,12 @@ const MessagesContainer = ({ navigate }: Props) => {
 
       toast.promise(apiClient.setFeedback(feedback, sessionId), {
         loading: t('chat.messages.feedback.status.updating'),
-        success: (res) => {
+        success: () => {
           setMessages((prev) =>
             updateMessageById(prev, message.id, {
               ...message,
               feedback: {
-                ...feedback,
-                id: res.feedbackId
+                ...feedback
               }
             })
           );
