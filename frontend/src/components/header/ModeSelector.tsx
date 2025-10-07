@@ -1,10 +1,14 @@
 // frontend/src/components/header/ModeSelector.tsx
 // ChevronDown - иконка стрелочки вниз, чтобы показать, что это выпадающий список
+import { setHasAgreed } from '@/redux/slices/chatGptAgreementSlice';
+import { RootState } from '@/redux/store';
 import { ChevronDown } from 'lucide-react';
 // 2. Импортируем наш новый атом
-import { memo } from 'react';
+import { memo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { useRecoilState } from 'recoil';
 
+import { ChatGptAgreementDialog } from '@/components/ChatGptAgreementDialog';
 // Импортируем useState для хранения состояния
 import { Button } from '@/components/ui/button';
 import {
@@ -14,41 +18,61 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
-// 1. Импортируем useRecoilState
 import { chatModeState } from '@/state/chat';
 
 const ModeSelector = memo(() => {
-  // 1. Используем React.useState для хранения и обновления выбранного режима.
-  //    По умолчанию ставим 'Pioneer', как и требовалось.
   const [selectedMode, setSelectedMode] = useRecoilState(chatModeState);
 
+  // 3. Получаем состояние и dispatch из Redux
+  const dispatch = useDispatch();
+  const hasAgreedToGptTerms = useSelector(
+    (state: RootState) => state.chatGptAgreement.hasAgreed
+  );
+
+  const [isAgreementDialogOpen, setAgreementDialogOpen] = useState(false);
   const modes = ['Pioneer', 'ChatGPT', 'HR', 'FD'];
 
-  // 2. Эта функция теперь будет обновлять состояние
   const handleSelect = (mode: string) => {
-    setSelectedMode(mode);
+    // Если пользователь выбрал ChatGPT и еще не соглашался с условиями
+    if (mode === 'ChatGPT' && !hasAgreedToGptTerms) {
+      setAgreementDialogOpen(true); // Открываем диалоговое окно
+    } else {
+      setSelectedMode(mode); // Иначе просто меняем режим
+    }
+  };
+
+  const handleConfirmAgreement = () => {
+    dispatch(setHasAgreed()); // Отправляем экшен, что пользователь согласился
+    setSelectedMode('ChatGPT'); // Устанавливаем режим ChatGPT
+    setAgreementDialogOpen(false); // Закрываем диалоговое окно
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        {/* 3. Кнопка теперь отображает текст из состояния (selectedMode) */}
-        {/*    Она больше не является просто иконкой */}
-        <Button variant="outline" className="flex items-center gap-2">
-          {selectedMode}
-          <ChevronDown className="h-4 w-4" />
-        </Button>
-      </DropdownMenuTrigger>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" className="flex items-center gap-2">
+            {selectedMode}
+            <ChevronDown className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="start">
-        {/* 4. Генерируем пункты меню из массива 'modes' */}
-        {modes.map((mode) => (
-          <DropdownMenuItem key={mode} onClick={() => handleSelect(mode)}>
-            {mode}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <DropdownMenuContent align="start">
+          {modes.map((mode) => (
+            <DropdownMenuItem key={mode} onClick={() => handleSelect(mode)}>
+              {mode}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* 7. Добавляем наш компонент диалогового окна в рендер */}
+      <ChatGptAgreementDialog
+        open={isAgreementDialogOpen}
+        onOpenChange={setAgreementDialogOpen}
+        onConfirm={handleConfirmAgreement}
+      />
+    </>
   );
 });
 
