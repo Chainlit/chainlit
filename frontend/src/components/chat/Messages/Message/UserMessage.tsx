@@ -20,10 +20,16 @@ export default function UserMessage({
   const [isEditing] = useState(false);
 
   const inlineElements = useMemo(() => {
-    return elements.filter(
-      (el) => el.forId === message.id && el.display === 'inline'
-    );
-  }, [message.id, elements]);
+    if (message.elements && message.elements.length > 0) {
+      return message.elements.filter((el) => el.display === 'inline');
+    }
+    if (elements) {
+      return elements.filter(
+        (el) => el.forId === message.id && el.display === 'inline'
+      );
+    }
+    return [];
+  }, [message.id, message.elements, elements]);
 
   return (
     <div className="flex flex-col w-full gap-1">

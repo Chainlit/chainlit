@@ -22,7 +22,7 @@ const Attachment: React.FC<AttachmentProps> = ({ name, mime, children }) => {
   } else {
     extension = mime
       ? ((mime.split('/').pop() || 'txt') as DefaultExtensionType)
-      : ('txt' as DefaultExtensionType);
+      : ('file' as DefaultExtensionType);
   }
 
   return (
