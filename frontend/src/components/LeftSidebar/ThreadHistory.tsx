@@ -6,6 +6,7 @@ import { useRecoilState } from 'recoil';
 import {
   ChainlitContext,
   threadHistoryState,
+  useChatData,
   useChatMessages
 } from '@chainlit/react-client';
 
@@ -24,6 +25,7 @@ export function ThreadHistory() {
   const navigate = useNavigate();
   const scrollRef = useRef<HTMLDivElement>(null);
   const apiClient = useContext(ChainlitContext);
+  const { loading } = useChatData();
   const { firstInteraction, messages, threadId } = useChatMessages();
   const [threadHistory, setThreadHistory] = useRecoilState(threadHistoryState);
   const [error, setError] = useState<string>();
@@ -37,6 +39,12 @@ export function ThreadHistory() {
       scrollRef.current.scrollTop = _scrollTop;
     }
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      fetchThreads();
+    }
+  }, [loading]);
 
   // Handle first interaction
   useEffect(() => {
