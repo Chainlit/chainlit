@@ -1,3 +1,4 @@
+import { IMessageElement } from './element';
 import { IFeedback } from './feedback';
 
 type StepType =
@@ -38,4 +39,5 @@ export interface IStep {
   metadata?: Record<string, any>;
   //legacy
   indent?: number;
+  elements?: IMessageElement[];
 }
