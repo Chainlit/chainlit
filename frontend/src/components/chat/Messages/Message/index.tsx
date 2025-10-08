@@ -17,6 +17,7 @@ import { MessageButtons } from './Buttons';
 import { MessageContent } from './Content';
 import Step from './Step';
 import { TSQLMessage } from './TSQLMessage';
+import { TableWithoutSQL } from './TableWithoutSQL';
 import UserMessage from './UserMessage';
 
 interface Props {
@@ -43,6 +44,7 @@ const Message = memo(
     const layoutMaxWidth = useLayoutMaxWidth();
     const contentRef = useRef<HTMLDivElement>(null);
     const isTSQLMessage = message.type === 'tsql';
+    const isTTable = message.type === 'table';
     const isUserMessage = message.type === 'user_message';
     const isStep = !message.type.includes('message');
     // Only keep tool calls if Chain of Thought is tool_call
@@ -55,6 +57,10 @@ const Message = memo(
 
     if (isTSQLMessage) {
       return <TSQLMessage message={message} />;
+    }
+
+    if (isTTable) {
+      return <TableWithoutSQL message={message} />;
     }
 
     if (skip) {

@@ -11,7 +11,8 @@ type StepType =
   | 'retrieval'
   | 'rerank'
   | 'undefined'
-  | 'tsql';
+  | 'tsql'
+  | 'table';
 
 export interface IStep {
   id: string;
