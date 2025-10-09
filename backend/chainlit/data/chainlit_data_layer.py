@@ -189,7 +189,7 @@ class ChainlitDataLayer(BaseDataLayer):
             elif not element.url:
                 raise ValueError("Element url, path or content must be provided")
 
-            if content is not None and not isinstance(content, str):
+            if content is not None:
                 if element.thread_id:
                     path = f"threads/{element.thread_id}/files/{element.id}"
                 else:
@@ -213,11 +213,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
         else:
             # Log warning only if element has file content that needs uploading
-            if (
-                element.path
-                or element.url
-                or (element.content and isinstance(element.content, bytes))
-            ):
+            if element.path or element.url or element.content:
                 logger.warning(
                     "Data Layer: No storage client configured. "
                     "File will not be uploaded."
