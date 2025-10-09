@@ -56,7 +56,7 @@ const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, Props>(
       textarea.style.height = '40px';
       const newHeight = Math.min(textarea.scrollHeight, maxHeight);
       textarea.style.height = `${newHeight}px`;
-    }, [props.value, maxHeight]);
+    }, [input, maxHeight]);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
       // Call the parent's onKeyDown first (this is Input's handler)
@@ -83,6 +83,7 @@ const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, Props>(
 
     return (
       <Textarea
+        ref={textareaRef}
         {...props}
         value={input}
         onChange={(e) => onChange(e.currentTarget.value)}
