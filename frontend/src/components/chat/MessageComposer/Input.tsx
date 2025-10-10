@@ -8,7 +8,7 @@ import React, {
 } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { ICommand, commandsState } from '@chainlit/react-client';
+import { ICommand, commandsState, useChatData } from '@chainlit/react-client';
 
 import AutoResizeTextarea from '@/components/AutoResizeTextarea';
 import Icon from '@/components/Icon';
@@ -28,6 +28,8 @@ interface Props {
   placeholder?: string;
   selectedCommand?: ICommand;
   setSelectedCommand: (command: ICommand | undefined) => void;
+  selectedSetting?: any;
+  setSelectedSetting: (setting: any | undefined) => void;
   onChange: (value: string) => void;
   onPaste?: (event: any) => void;
   onEnter?: () => void;
@@ -46,6 +48,7 @@ const Input = forwardRef<InputMethods, Props>(
       autoFocus,
       selectedCommand,
       setSelectedCommand,
+      setSelectedSetting,
       onChange,
       onEnter,
       onPaste
@@ -53,9 +56,16 @@ const Input = forwardRef<InputMethods, Props>(
     ref
   ) => {
     const commands = useRecoilValue(commandsState);
+    const { chatSettingsInputs } = useChatData();
     const [isComposing, setIsComposing] = useState(false);
     const [showCommands, setShowCommands] = useState(false);
+    const [showSettings, setShowSettings] = useState(false);
+    const [showSettingValues, setShowSettingValues] = useState(false);
     const [commandInput, setCommandInput] = useState('');
+    const [settingInput, setSettingInput] = useState('');
+    const [settingValueInput, setSettingValueInput] = useState('');
+    const [tempSelectedSetting, setTempSelectedSetting] =
+      useState<any>(undefined);
     const [value, setValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -69,11 +79,45 @@ const Input = forwardRef<InputMethods, Props>(
         return indexA - indexB;
       });
 
+    const normalizedSettingInput = settingInput.toLowerCase().slice(1);
+
+    const filteredSettings = chatSettingsInputs
+      .filter((setting: any) =>
+        setting.id.toLowerCase().includes(normalizedSettingInput)
+      )
+      .sort((a: any, b: any) => {
+        const indexA = a.id.toLowerCase().indexOf(normalizedSettingInput);
+        const indexB = b.id.toLowerCase().indexOf(normalizedSettingInput);
+        return indexA - indexB;
+      });
+
+    const normalizedSettingValueInput = settingValueInput
+      .toLowerCase()
+      .slice(1);
+
+    const filteredSettingValues = tempSelectedSetting?.items
+      ? tempSelectedSetting.items
+          .filter(
+            (item: any) =>
+              item.label.toLowerCase().includes(normalizedSettingValueInput) ||
+              item.value.toLowerCase().includes(normalizedSettingValueInput)
+          )
+          .sort((a: any, b: any) => {
+            const indexA = a.label
+              .toLowerCase()
+              .indexOf(normalizedSettingValueInput);
+            const indexB = b.label
+              .toLowerCase()
+              .indexOf(normalizedSettingValueInput);
+            return indexA - indexB;
+          })
+      : [];
+
     const {
-      selectedIndex,
-      handleMouseMove,
-      handleMouseLeave,
-      handleKeyDown: navigationKeyDown
+      selectedIndex: commandSelectedIndex,
+      handleMouseMove: commandHandleMouseMove,
+      handleMouseLeave: commandHandleMouseLeave,
+      handleKeyDown: commandNavigationKeyDown
     } = useCommandNavigation({
       items: filteredCommands,
       isOpen: showCommands,
@@ -86,13 +130,54 @@ const Input = forwardRef<InputMethods, Props>(
       }
     });
 
+    const {
+      selectedIndex: settingSelectedIndex,
+      handleMouseMove: settingHandleMouseMove,
+      handleMouseLeave: settingHandleMouseLeave,
+      handleKeyDown: settingNavigationKeyDown
+    } = useCommandNavigation({
+      items: filteredSettings,
+      isOpen: showSettings,
+      onSelect: (setting) => {
+        handleSettingSelect(setting);
+      },
+      onClose: () => {
+        setShowSettings(false);
+        setSettingInput('');
+      }
+    });
+
+    const {
+      selectedIndex: settingValueSelectedIndex,
+      handleMouseMove: settingValueHandleMouseMove,
+      handleMouseLeave: settingValueHandleMouseLeave,
+      handleKeyDown: settingValueNavigationKeyDown
+    } = useCommandNavigation({
+      items: filteredSettingValues,
+      isOpen: showSettingValues,
+      onSelect: (valueItem) => {
+        handleSettingValueSelect(valueItem);
+      },
+      onClose: () => {
+        setShowSettingValues(false);
+        setSettingValueInput('');
+        setTempSelectedSetting(undefined);
+      }
+    });
+
     const reset = () => {
       setValue('');
       if (!selectedCommand?.persistent) {
         setSelectedCommand(undefined);
       }
+      setSelectedSetting(undefined);
+      setTempSelectedSetting(undefined);
       setCommandInput('');
+      setSettingInput('');
+      setSettingValueInput('');
       setShowCommands(false);
+      setShowSettings(false);
+      setShowSettingValues(false);
       onChange('');
     };
 
@@ -113,12 +198,54 @@ const Input = forwardRef<InputMethods, Props>(
 
       // Command detection for dropdown
       const words = newValue.split(' ');
-      if (words.length === 1 && words[0].startsWith('/')) {
+      const firstWord = words[0];
+
+      if (words.length === 1 && firstWord.startsWith('/')) {
         setShowCommands(true);
-        setCommandInput(words[0]);
+        setShowSettings(false);
+        setShowSettingValues(false);
+        setCommandInput(firstWord);
+        setSettingInput('');
+        setSettingValueInput('');
+      } else if (words.length === 1 && firstWord.startsWith('@')) {
+        // Check if it's @setting/value pattern
+        const parts = firstWord.split('/');
+
+        if (parts.length === 1) {
+          // Just @setting - show settings dropdown
+          setShowSettings(true);
+          setShowCommands(false);
+          setShowSettingValues(false);
+          setSettingInput(firstWord);
+          setCommandInput('');
+          setSettingValueInput('');
+          setTempSelectedSetting(undefined);
+        } else if (parts.length === 2) {
+          // @setting/value - show values dropdown
+          const settingPart = parts[0]; 
+          const valuePart = parts[1];
+          const setting = chatSettingsInputs.find(
+            (s: any) =>
+              s.id.toLowerCase() === settingPart.slice(1).toLowerCase()
+          );
+
+          if (setting && setting.items && setting.items.length > 0) {
+            setTempSelectedSetting(setting);
+            setShowSettingValues(true);
+            setShowSettings(false);
+            setShowCommands(false);
+            setSettingInput('');
+            setCommandInput('');
+            setSettingValueInput('/' + valuePart);
+          }
+        }
       } else {
         setShowCommands(false);
+        setShowSettings(false);
+        setShowSettingValues(false);
         setCommandInput('');
+        setSettingInput('');
+        setSettingValueInput('');
       }
     };
 
@@ -139,23 +266,104 @@ const Input = forwardRef<InputMethods, Props>(
       }, 0);
     };
 
+    const handleSettingSelect = (setting: any) => {
+      setShowSettings(false);
+
+      // Check if setting has values/items to select from
+      if (setting.items && setting.items.length > 0) {
+        // Setting has values - show value selection by adding /
+        setTempSelectedSetting(setting);
+        const newValue = `@${setting.id}/`;
+        setValue(newValue);
+        onChange(newValue);
+        setSettingInput('');
+        setSettingValueInput('/');
+        setShowSettingValues(true);
+
+        // Focus back on textarea
+        setTimeout(() => {
+          textareaRef.current?.focus();
+        }, 0);
+      } else {
+        // Setting has no values - use default/initial value
+        setSelectedSetting({
+          ...setting,
+          selectedValue: setting.initial
+        });
+
+        // Remove the setting text from the input
+        const newValue = value.replace(settingInput, '').trimStart();
+        setValue(newValue);
+        onChange(newValue);
+
+        setSettingInput('');
+
+        // Focus back on textarea
+        setTimeout(() => {
+          textareaRef.current?.focus();
+        }, 0);
+      }
+    };
+
+    const handleSettingValueSelect = (valueItem: any) => {
+      if (!tempSelectedSetting) return;
+
+      setShowSettingValues(false);
+      setSelectedSetting({
+        ...tempSelectedSetting,
+        selectedValue: valueItem.value,
+        selectedLabel: valueItem.label
+      });
+
+      // Remove the @setting/value text from the input
+      const newValue = value.replace(/@[^/]+\/[^\s]*/, '').trimStart();
+      setValue(newValue);
+      onChange(newValue);
+
+      setSettingValueInput('');
+      setTempSelectedSetting(undefined);
+
+      // Focus back on textarea
+      setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 0);
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
       // Handle command selection - check this FIRST before other key handling
       if (showCommands && filteredCommands.length > 0) {
-        navigationKeyDown(e);
+        commandNavigationKeyDown(e);
         // If the navigation handled the key, don't process further
         if (e.defaultPrevented) {
           return;
         }
       }
 
-      // Handle regular enter only if command menu is not showing
+      // Handle setting selection
+      if (showSettings && filteredSettings.length > 0) {
+        settingNavigationKeyDown(e);
+        if (e.defaultPrevented) {
+          return;
+        }
+      }
+
+      // Handle setting value selection
+      if (showSettingValues && filteredSettingValues.length > 0) {
+        settingValueNavigationKeyDown(e);
+        if (e.defaultPrevented) {
+          return;
+        }
+      }
+
+      // Handle regular enter only if no menu is showing
       if (
         e.key === 'Enter' &&
         !e.shiftKey &&
         onEnter &&
         !isComposing &&
-        !showCommands
+        !showCommands &&
+        !showSettings &&
+        !showSettingValues
       ) {
         e.preventDefault();
         onEnter();
@@ -185,7 +393,7 @@ const Input = forwardRef<InputMethods, Props>(
         {showCommands && filteredCommands.length > 0 && (
           <div
             className="absolute z-50 left-0 bottom-full mb-3 animate-slide-up"
-            onMouseLeave={handleMouseLeave}
+            onMouseLeave={commandHandleMouseLeave}
           >
             <Command className="rounded-lg border shadow-md bg-background">
               <CommandListScrollable maxItems={5} className="custom-scrollbar">
@@ -194,8 +402,8 @@ const Input = forwardRef<InputMethods, Props>(
                     <CommandItemAnimated
                       key={command.id}
                       index={index}
-                      isSelected={index === selectedIndex}
-                      onMouseMove={() => handleMouseMove(index)}
+                      isSelected={index === commandSelectedIndex}
+                      onMouseMove={() => commandHandleMouseMove(index)}
                       onSelect={() => handleCommandSelect(command)}
                       className="command-item space-x-2"
                     >
@@ -203,7 +411,7 @@ const Input = forwardRef<InputMethods, Props>(
                         name={command.icon}
                         className={cn(
                           '!size-5 text-muted-foreground transition-transform duration-150',
-                          index === selectedIndex && 'scale-110'
+                          index === commandSelectedIndex && 'scale-110'
                         )}
                       />
                       <div className="flex-1">
@@ -211,6 +419,99 @@ const Input = forwardRef<InputMethods, Props>(
                         <div className="text-sm text-muted-foreground">
                           {command.description}
                         </div>
+                      </div>
+                    </CommandItemAnimated>
+                  ))}
+                </CommandGroup>
+              </CommandListScrollable>
+            </Command>
+          </div>
+        )}
+
+        {showSettings && filteredSettings.length > 0 && (
+          <div
+            className="absolute z-50 left-0 bottom-full mb-3 animate-slide-up"
+            onMouseLeave={settingHandleMouseLeave}
+          >
+            <Command className="rounded-lg border shadow-md bg-background">
+              <CommandListScrollable maxItems={5} className="custom-scrollbar">
+                <CommandGroup className="p-2">
+                  {filteredSettings.map((setting: any, index: number) => (
+                    <CommandItemAnimated
+                      key={setting.id}
+                      index={index}
+                      isSelected={index === settingSelectedIndex}
+                      onMouseMove={() => settingHandleMouseMove(index)}
+                      onSelect={() => handleSettingSelect(setting)}
+                      className="command-item space-x-2"
+                    >
+                      <Icon
+                        name="settings"
+                        className={cn(
+                          '!size-5 text-muted-foreground transition-transform duration-150',
+                          index === settingSelectedIndex && 'scale-110'
+                        )}
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium">
+                          {setting.label || setting.id}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {setting.description ||
+                            setting.tooltip ||
+                            'Chat setting'}
+                          {setting.items && setting.items.length > 0 && (
+                            <span className="ml-1 text-xs">
+                              ({setting.items.length} values)
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </CommandItemAnimated>
+                  ))}
+                </CommandGroup>
+              </CommandListScrollable>
+            </Command>
+          </div>
+        )}
+
+        {showSettingValues && filteredSettingValues.length > 0 && (
+          <div
+            className="absolute z-50 left-0 bottom-full mb-3 animate-slide-up"
+            onMouseLeave={settingValueHandleMouseLeave}
+          >
+            <Command className="rounded-lg border shadow-md bg-background">
+              <CommandListScrollable maxItems={5} className="custom-scrollbar">
+                <CommandGroup className="p-2">
+                  <div className="text-xs text-muted-foreground px-2 py-1 mb-1">
+                    Select value for:{' '}
+                    <span className="font-medium">
+                      {tempSelectedSetting?.label || tempSelectedSetting?.id}
+                    </span>
+                  </div>
+                  {filteredSettingValues.map((item: any, index: number) => (
+                    <CommandItemAnimated
+                      key={item.value}
+                      index={index}
+                      isSelected={index === settingValueSelectedIndex}
+                      onMouseMove={() => settingValueHandleMouseMove(index)}
+                      onSelect={() => handleSettingValueSelect(item)}
+                      className="command-item space-x-2"
+                    >
+                      <Icon
+                        name="chevron-right"
+                        className={cn(
+                          '!size-4 text-muted-foreground transition-transform duration-150',
+                          index === settingValueSelectedIndex && 'scale-110'
+                        )}
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium">{item.label}</div>
+                        {item.label !== item.value && (
+                          <div className="text-xs text-muted-foreground">
+                            {item.value}
+                          </div>
+                        )}
                       </div>
                     </CommandItemAnimated>
                   ))}
