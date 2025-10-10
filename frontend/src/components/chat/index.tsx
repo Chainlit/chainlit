@@ -1,4 +1,7 @@
-import { setUploadBtnState } from '@/redux/slices/uploadBtnSlice';
+import {
+  setUploadBtnState,
+  setUploadBtnWebSearchState
+} from '@/redux/slices/uploadBtnSlice';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -185,6 +188,8 @@ const Chat = () => {
     } else {
       dispatch(setUploadBtnState(true));
     }
+
+    dispatch(setUploadBtnWebSearchState(true));
 
     if (
       user &&

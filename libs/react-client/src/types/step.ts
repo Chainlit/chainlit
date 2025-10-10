@@ -1,3 +1,4 @@
+import { IMessageElement } from './element';
 import { IFeedback } from './feedback';
 
 type StepType =
@@ -11,7 +12,8 @@ type StepType =
   | 'retrieval'
   | 'rerank'
   | 'undefined'
-  | 'tsql';
+  | 'tsql'
+  | 'table';
 
 export interface IStep {
   id: string;
@@ -37,4 +39,5 @@ export interface IStep {
   metadata?: Record<string, any>;
   //legacy
   indent?: number;
+  elements?: IMessageElement[];
 }
