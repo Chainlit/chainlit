@@ -57,6 +57,9 @@ export default function MessageComposer({
   const dispatch = useDispatch();
   const input = useSelector((state: RootState) => state.prompt.input);
   const upload = useSelector((state: RootState) => state.upload.uploadBtnState);
+  const uploadWebSearch = useSelector(
+    (state: RootState) => state.upload.uploadBtnWebSearchState
+  );
 
   const isControlled = controlledValue !== undefined;
   const value = isControlled ? controlledValue : input;
@@ -240,7 +243,7 @@ export default function MessageComposer({
               onFileUpload={onFileUpload}
             />
           )}
-          {selectedMode === 'Pioneer' && (
+          {selectedMode === 'Pioneer' && uploadWebSearch && (
             <WebSearchButton
               disabled={disabled}
               value={isWebSearchEnabled} // <-- Передаем текущее значение из атома

@@ -1,6 +1,8 @@
 import { cn } from '@/lib/utils';
+import { setUploadBtnWebSearchState } from '@/redux/slices/uploadBtnSlice';
 import { MessageContext } from 'contexts/MessageContext';
 import { useContext, useMemo, useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { IMessageElement, IStep } from '@chainlit/react-client';
 
@@ -18,11 +20,16 @@ export default function UserMessage({
 }: React.PropsWithChildren<Props>) {
   const { editable } = useContext(MessageContext);
   const [isEditing] = useState(false);
+  const dispatch = useDispatch();
 
   const inlineElements = useMemo(() => {
     if (message.elements && message.elements.length > 0) {
+      dispatch(setUploadBtnWebSearchState(false));
       return message.elements.filter((el) => el.display === 'inline');
+    } else {
+      dispatch(setUploadBtnWebSearchState(true));
     }
+
     if (elements) {
       return elements.filter(
         (el) => el.forId === message.id && el.display === 'inline'

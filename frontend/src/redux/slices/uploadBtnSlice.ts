@@ -2,10 +2,12 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export interface uploadBtn {
   uploadBtnState: boolean;
+  uploadBtnWebSearchState: boolean;
 }
 
 const initialState: uploadBtn = {
-  uploadBtnState: true
+  uploadBtnState: true,
+  uploadBtnWebSearchState: true
 };
 
 export const uploadBtnSlice = createSlice({
@@ -14,9 +16,13 @@ export const uploadBtnSlice = createSlice({
   reducers: {
     setUploadBtnState: (state, action) => {
       state.uploadBtnState = action.payload;
+    },
+    setUploadBtnWebSearchState: (state, action) => {
+      state.uploadBtnWebSearchState = action.payload;
     }
   }
 });
 
-export const { setUploadBtnState } = uploadBtnSlice.actions;
+export const { setUploadBtnState, setUploadBtnWebSearchState } =
+  uploadBtnSlice.actions;
 export default uploadBtnSlice.reducer;
