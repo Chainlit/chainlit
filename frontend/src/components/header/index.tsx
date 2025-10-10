@@ -9,6 +9,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 
 import ApiKeys from './ApiKeys';
 import ChatProfiles from './ChatProfiles';
+import { HelpButton } from './HelpButton';
 import ModeSelector from './ModeSelector';
 import NewChatButton from './NewChat';
 import ReadmeButton from './Readme';
@@ -83,6 +84,7 @@ const Header = memo(() => {
           ))}
 
         {/* 3. Удаляем селектор из правой части */}
+        <HelpButton />
         <ThemeToggle />
         <UserNav />
       </div>
