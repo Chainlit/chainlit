@@ -49,12 +49,13 @@ export default function MessageComposer({
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
+  const [selectedSetting, setSelectedSetting] = useState<any>(undefined);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
 
   const { user } = useAuth();
-  const { sendMessage, replyMessage } = useChatInteract();
+  const { sendMessage, replyMessage, updateChatSettings } = useChatInteract();
   const { askUser, chatSettingsInputs, disabled: _disabled } = useChatData();
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
@@ -84,8 +85,20 @@ export default function MessageComposer({
     async (
       msg: string,
       attachments?: IAttachment[],
-      selectedCommand?: string
+      selectedCommand?: string,
+      selectedSetting?: any
     ) => {
+      // Apply chat setting if selected
+      if (selectedSetting) {
+        const settingValue = {
+          [selectedSetting.id]:
+            selectedSetting.selectedValue !== undefined
+              ? selectedSetting.selectedValue
+              : selectedSetting.initial
+        };
+        updateChatSettings(settingValue);
+      }
+
       const message: IStep = {
         threadId: '',
         command: selectedCommand,
@@ -106,7 +119,7 @@ export default function MessageComposer({
       }
       sendMessage(message, fileReferences);
     },
-    [user, sendMessage, autoScrollRef]
+    [user, sendMessage, autoScrollRef, updateChatSettings]
   );
 
   const onReply = useCallback(
@@ -132,7 +145,10 @@ export default function MessageComposer({
   const submit = useCallback(() => {
     if (
       disabled ||
-      (value.trim() === '' && attachments.length === 0 && !selectedCommand)
+      (value.trim() === '' &&
+        attachments.length === 0 &&
+        !selectedCommand &&
+        !selectedSetting)
     ) {
       return;
     }
@@ -140,10 +156,11 @@ export default function MessageComposer({
     if (askUser) {
       onReply(value);
     } else {
-      onSubmit(value, attachments, selectedCommand?.id);
+      onSubmit(value, attachments, selectedCommand?.id, selectedSetting);
     }
 
     setAttachments([]);
+    setSelectedSetting(undefined);
     setValue(''); // Clear the value state
     inputRef.current?.reset();
   }, [
@@ -152,6 +169,7 @@ export default function MessageComposer({
     askUser,
     attachments,
     selectedCommand,
+    selectedSetting,
     setAttachments,
     onSubmit,
     onReply
@@ -167,12 +185,35 @@ export default function MessageComposer({
           <Attachments />
         </div>
       ) : null}
+      {selectedSetting && (
+        <div className="mb-2 flex items-center gap-2">
+          <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full flex items-center gap-1">
+            <span>
+              @{selectedSetting.label || selectedSetting.id}
+              {selectedSetting.selectedValue !== undefined &&
+                selectedSetting.selectedLabel && (
+                  <span className="text-blue-600 dark:text-blue-400">
+                    /{selectedSetting.selectedLabel}
+                  </span>
+                )}
+            </span>
+            <button
+              onClick={() => setSelectedSetting(undefined)}
+              className="hover:bg-blue-500/20 rounded-full p-0.5"
+            >
+              ×
+            </button>
+          </span>
+        </div>
+      )}
       <Input
         ref={inputRef}
         id="chat-input"
         autoFocus={!isMobile}
         selectedCommand={selectedCommand}
         setSelectedCommand={setSelectedCommand}
+        selectedSetting={selectedSetting}
+        setSelectedSetting={setSelectedSetting}
         onChange={setValue}
         onPaste={onPaste}
         onEnter={submit}
@@ -216,7 +257,10 @@ export default function MessageComposer({
             onSubmit={submit}
             disabled={
               disabled ||
-              (!value.trim() && !selectedCommand && attachments.length === 0)
+              (!value.trim() &&
+                !selectedCommand &&
+                !selectedSetting &&
+                attachments.length === 0)
             }
           />
         </div>
