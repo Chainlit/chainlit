@@ -82,9 +82,13 @@ const Input = forwardRef<InputMethods, Props>(
     const normalizedSettingInput = settingInput.toLowerCase().slice(1);
 
     const filteredSettings = chatSettingsInputs
-      .filter((setting: any) =>
-        setting.id.toLowerCase().includes(normalizedSettingInput)
-      )
+      .filter((setting: any) => {
+        // Only show settings that have items/values (like Select)
+        const hasValues = setting.items && setting.items.length > 0;
+        const matchesSearch = setting.id.toLowerCase().includes(normalizedSettingInput);
+        
+        return hasValues && matchesSearch;
+      })
       .sort((a: any, b: any) => {
         const indexA = a.id.toLowerCase().indexOf(normalizedSettingInput);
         const indexB = b.id.toLowerCase().indexOf(normalizedSettingInput);
