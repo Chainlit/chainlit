@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 import SidebarTrigger from '@/components/header/SidebarTrigger';
-import { Sidebar, SidebarHeader, SidebarRail } from '@/components/ui/sidebar';
+import { Sidebar, SidebarHeader } from '@/components/ui/sidebar';
 
 import NewChatButton from '../header/NewChat';
 import { DeleteChatButton } from './DeleteChatsButton';
@@ -25,7 +25,6 @@ export default function LeftSidebar({
         </div>
       </SidebarHeader>
       <ThreadHistory />
-      <SidebarRail />
     </Sidebar>
   );
 }
