@@ -219,6 +219,11 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async deleteChats(): Promise<{ success: boolean }> {
+    const res = await this.delete(`/chats`, {});
+    return res.json();
+  }
+
   async listThreads(
     pagination: IPagination,
     filter: IThreadFilters
@@ -376,7 +381,10 @@ export class ChainlitAPI extends APIBase {
   getOAuthEndpoint(provider: string) {
     return this.buildEndpoint(`/auth/oauth/${provider}`);
   }
-  async shareThread(threadId: string, isShared: boolean): Promise<{ success: boolean }> {
+  async shareThread(
+    threadId: string,
+    isShared: boolean
+  ): Promise<{ success: boolean }> {
     const res = await this.put(`/project/thread/share`, {
       threadId,
       isShared
