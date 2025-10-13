@@ -21,6 +21,11 @@ const isTableData = (output: any): output is TableData => {
   );
 };
 
+const isTessaLink = (value: any): value is string => {
+  const tessaPrefix = 'tessa://tessaclient.tessa/?Action=OpenCard&ID=';
+  return typeof value === 'string' && value.startsWith(tessaPrefix);
+};
+
 export const TableWithoutSQL = ({ message }: Props) => {
   let tableData: TableData | undefined;
 
@@ -115,7 +120,15 @@ export const TableWithoutSQL = ({ message }: Props) => {
             {tableData.output.rows.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {row.map((cell, cellIndex) => (
-                  <td key={cellIndex}>{cell}</td>
+                  <td key={cellIndex}>
+                    {isTessaLink(cell) ? (
+                      <a href={cell} target="_blank" rel="noopener noreferrer">
+                        {cell}
+                      </a>
+                    ) : (
+                      cell
+                    )}
+                  </td>
                 ))}
               </tr>
             ))}
