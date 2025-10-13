@@ -3,7 +3,8 @@ import { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import { ChainlitContext, useChatMessages } from '@chainlit/react-client';
+import { ChainlitContext } from '@chainlit/react-client';
+import { useChatInteract } from '@chainlit/react-client';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -70,7 +71,7 @@ export function DeleteChatButton() {
 
   const navigate = useNavigate();
   const apiClient = useContext(ChainlitContext); // Получаем API клиент
-  const { threadId } = useChatMessages(); // Получаем ID текущего чата
+  const { clear } = useChatInteract();
 
   const handleClose = () => {
     // Не даем закрыть окно во время процесса удаления
@@ -79,30 +80,18 @@ export function DeleteChatButton() {
   };
 
   const handleConfirm = async () => {
-    if (!threadId) {
-      toast.error('Не удалось определить ID текущего чата.');
-      return;
-    }
-
     setIsDeleting(true);
 
     try {
-      // 4. Выполняем асинхронный POST-запрос (или DELETE, что логичнее для удаления)
-      // В библиотеке chainlit, скорее всего, есть специальный метод
-      await apiClient.deleteThread(threadId);
+      await apiClient.deleteChats();
 
       toast.success('Чат успешно удален.');
-
-      // 5. После успешного запроса переходим в корень
       navigate('/');
-
-      // Закрываем окно уже после перехода, чтобы не было "прыжка" UI
+      clear();
       setOpen(false);
-    } catch (error) {
-      console.error('Failed to delete thread:', error);
+    } catch {
       toast.error('Произошла ошибка при удалении чата.');
     } finally {
-      // Вне зависимости от результата, сбрасываем состояние загрузки
       setIsDeleting(false);
     }
   };
