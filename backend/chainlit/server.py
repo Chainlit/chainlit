@@ -69,11 +69,13 @@ from chainlit.types import (
     DisconnectMCPRequest,
     ElementRequest,
     GetThreadsRequest,
+    ShareThreadRequest,
     Theme,
     UpdateFeedbackRequest,
     UpdateThreadRequest,
 )
 from chainlit.user import PersistedUser, User
+from chainlit.utils import utc_now
 
 from ._utils import is_path_inside
 
@@ -175,6 +177,9 @@ async def lifespan(app: FastAPI):
             if slack_task:
                 slack_task.cancel()
                 await slack_task
+
+            if data_layer := get_data_layer():
+                await data_layer.close()
         except asyncio.exceptions.CancelledError:
             pass
 
@@ -372,7 +377,7 @@ def get_html_template(root_path):
     JS_PLACEHOLDER = "<!-- JS INJECTION PLACEHOLDER -->"
     CSS_PLACEHOLDER = "<!-- CSS INJECTION PLACEHOLDER -->"
 
-    default_url = "https://github.com/Chainlit/chainlit"
+    default_url = config.ui.custom_meta_url or "https://github.com/Chainlit/chainlit"
     default_meta_image_url = (
         "https://chainlit-cloud.s3.eu-west-3.amazonaws.com/logo/chainlit_banner.png"
     )
@@ -841,6 +846,11 @@ async def project_settings(
             "maskUserEnv": cfg.project.mask_user_env,
             "dataPersistence": data_layer is not None,
             "threadResumable": bool(config.code.on_chat_resume),
+            # Expose whether shared threads feature is enabled (flag + app callback)
+            "threadSharing": bool(
+                getattr(cfg.features, "allow_thread_sharing", False)
+                and getattr(config.code, "on_shared_thread_view", None)
+            ),
             "markdown": markdown,
             "chatProfiles": profiles,
             "starters": starters,
@@ -949,6 +959,60 @@ async def get_thread(
 
     res = await data_layer.get_thread(thread_id)
     return JSONResponse(content=res)
+
+
+@router.get("/project/share/{thread_id}")
+async def get_shared_thread(
+    request: Request,
+    thread_id: str,
+    current_user: UserParam,
+):
+    """Get a shared thread (read-only for everyone).
+
+    This endpoint is separate from the resume endpoint and does not require the caller
+    to be the author of the thread. It only returns the thread if its metadata
+    contains is_shared=True. Otherwise, it returns 404 to avoid leaking existence.
+    """
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    # No auth required: allow anonymous access to shared threads
+    thread = await data_layer.get_thread(thread_id)
+
+    if not thread:
+        raise HTTPException(status_code=404, detail="Thread not found")
+    # Extract and normalize metadata (may be dict, strified JSON, or None)
+    metadata = (thread.get("metadata") if isinstance(thread, dict) else {}) or {}
+    if isinstance(metadata, str):
+        try:
+            metadata = json.loads(metadata)
+        except Exception:
+            metadata = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    if getattr(config.code, "on_shared_thread_view", None):
+        try:
+            user_can_view = await config.code.on_shared_thread_view(
+                thread, current_user
+            )
+        except Exception:
+            user_can_view = False
+
+    is_shared = bool(metadata.get("is_shared"))
+
+    # Proceed only raise an error if both conditions are False.
+    if (not user_can_view) and (not is_shared):
+        raise HTTPException(status_code=404, detail="Thread not found")
+
+    metadata.pop("chat_profile", None)
+    metadata.pop("chat_settings", None)
+    metadata.pop("env", None)
+    thread["metadata"] = metadata
+    return JSONResponse(content=thread)
 
 
 @router.get("/project/thread/{thread_id}/element/{element_id}")
@@ -1075,6 +1139,59 @@ async def rename_thread(
     await is_thread_author(current_user.identifier, thread_id)
 
     await data_layer.update_thread(thread_id, name=payload.name)
+
+    return JSONResponse(content={"success": True})
+
+
+@router.put("/project/thread/share")
+async def share_thread(
+    request: Request,
+    payload: ShareThreadRequest,
+    current_user: UserParam,
+):
+    """Share or un-share a thread (author only)."""
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    thread_id = payload.threadId
+
+    await is_thread_author(current_user.identifier, thread_id)
+
+    # Fetch current thread and metadata, then toggle is_shared
+    thread = await data_layer.get_thread(thread_id=thread_id)
+    metadata = (thread.get("metadata") if thread else {}) or {}
+    if isinstance(metadata, str):
+        try:
+            metadata = json.loads(metadata)
+        except Exception:
+            metadata = {}
+    if not isinstance(metadata, dict):
+        metadata = {}
+
+    metadata = dict(metadata)
+    is_shared = bool(payload.isShared)
+    metadata["is_shared"] = is_shared
+    if is_shared:
+        metadata["shared_at"] = utc_now()
+    else:
+        metadata.pop("shared_at", None)
+    try:
+        await data_layer.update_thread(thread_id=thread_id, metadata=metadata)
+        logger.debug(
+            "[share_thread] updated metadata for thread=%s to %s",
+            thread_id,
+            metadata,
+        )
+    except Exception as e:
+        logger.exception("[share_thread] update_thread failed: %s", e)
+        raise
+
     return JSONResponse(content={"success": True})
 
 

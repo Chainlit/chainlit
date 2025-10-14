@@ -6,13 +6,6 @@ inputs:
     description: Node.js version
     required: true
     default: '24.3.0' # Switch to 'lts' as soon as Node 24 reaches LTS status.
-  pnpm-skip-install:
-    description: Skip install.
-    required: false
-    default: 'false'
-  pnpm-install-args:
-    description: Extra arguments for pnpm install, e.g. --no-frozen-lockfile.
-    default: '--frozen-lockfile'
 
 runs:
   using: composite
@@ -25,10 +18,9 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
+        registry-url: 'https://registry.npmjs.org'
         cache: 'pnpm'
         cache-dependency-path: '**/pnpm-lock.yaml'
     - name: Install JS dependencies
-      run: pnpm install ${{ inputs.pnpm-install-args }}
+      run: pnpm install
       shell: bash
-      # Skip install if pnpm-skip-install is true
-      if: ${{ inputs.pnpm-skip-install != 'true' }}

@@ -4,6 +4,60 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.8.3] - 2025-10-06
+
+### Added
+- Support for the `target` attribute in header links, which can be configured through the configuration options
+
+### Changed
+- `@chainlit/react-client` automatic publishing
+
+## [2.8.2] - 2025-10-01
+
+### Changed
+- Remove autofocus in mobile message composer
+- Improve error handling in sqlalchemy data layer `get_read_url()`
+
+### Fixed
+- Fix voice hotkey (P) triggering when typing in chat input
+- Properly finalize data layers
+- Fix `on_chat_start` not always firing
+
+## [2.8.1] - 2025-09-24
+
+### Added
+- Add German and Korean translations
+- Add support for custom_meta_url in config.toml
+
+### Changed
+- `cl.on_thread_share_view` will allow shared thread viewing if it returns `True` to enable custom/admin viewing.
+
+### Fixed
+- Removed redundant message sending in Slack when images are present.
+- Generate signed url when loading elements using SQLAlchemy data layer.
+
+## [2.8.0] - 2025-09-12
+
+### Added
+- Add ability to share threads. See documentation for how to enable it.
+  - https://docs.chainlit.io/api-reference/lifecycle-hooks/on-shared-thread-view
+- Add new chat settings: multi-select, radio-group, and checkbox
+- Add optional language parameter to set_starters
+- Add neutral Spanish translation
+- Allow sending commands from custom elements
+
+### Changed
+- Reordered message composer elements
+
+### Fixed
+- Default to plaintext code blocks for unsupported languages like CSV
+- Sort threads by updated_at field
+- Replace hardcoded strings with translation keys
+- GCP storage provider dependency is now optional
+- CI/CD fixes
+- Fixed issues with hot-reloading in dev mode (`-w` flag)
+- Take overridden config into account in audio handlers
+
 ## [2.7.2] - 2025-08-26
 
 ### Added

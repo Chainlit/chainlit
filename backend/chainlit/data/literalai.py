@@ -515,3 +515,6 @@ class LiteralDataLayer(BaseDataLayer):
             metadata=metadata,
             tags=tags,
         )
+
+    async def close(self):
+        self.client.flush_and_stop()

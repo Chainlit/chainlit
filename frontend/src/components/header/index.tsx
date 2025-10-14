@@ -11,6 +11,7 @@ import ApiKeys from './ApiKeys';
 import ChatProfiles from './ChatProfiles';
 import NewChatButton from './NewChat';
 import ReadmeButton from './Readme';
+import ShareButton from './Share';
 import SidebarTrigger from './SidebarTrigger';
 import { ThemeToggle } from './ThemeToggle';
 import UserNav from './UserNav';
@@ -60,6 +61,7 @@ const Header = memo(() => {
 
       <div />
       <div className="flex items-center gap-1">
+        <ShareButton />
         <ReadmeButton />
         <ApiKeys />
         {links &&
@@ -70,6 +72,7 @@ const Header = memo(() => {
               displayName={link.display_name}
               iconUrl={link.icon_url}
               url={link.url}
+              target={link.target}
             />
           ))}
         <ThemeToggle />

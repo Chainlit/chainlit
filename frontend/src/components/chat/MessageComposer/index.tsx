@@ -13,6 +13,7 @@ import {
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'components/i18n/Translator';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import { chatSettingsOpenState } from '@/state/project';
 import {
@@ -57,6 +58,8 @@ export default function MessageComposer({
   const { askUser, chatSettingsInputs, disabled: _disabled } = useChatData();
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
+
+  const isMobile = useIsMobile();
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -167,7 +170,7 @@ export default function MessageComposer({
       <Input
         ref={inputRef}
         id="chat-input"
-        autoFocus
+        autoFocus={!isMobile}
         selectedCommand={selectedCommand}
         setSelectedCommand={setSelectedCommand}
         onChange={setValue}
@@ -177,16 +180,12 @@ export default function MessageComposer({
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
+          <VoiceButton disabled={disabled} />
           <UploadButton
             disabled={disabled}
             fileSpec={fileSpec}
             onFileUploadError={onFileUploadError}
             onFileUpload={onFileUpload}
-          />
-          <CommandButton
-            disabled={disabled}
-            selectedCommandId={selectedCommand?.id}
-            onCommandSelect={setSelectedCommand}
           />
           {chatSettingsInputs.length > 0 && (
             <Button
@@ -201,7 +200,11 @@ export default function MessageComposer({
             </Button>
           )}
           <McpButton disabled={disabled} />
-          <VoiceButton disabled={disabled} />
+          <CommandButton
+            disabled={disabled}
+            selectedCommandId={selectedCommand?.id}
+            onCommandSelect={setSelectedCommand}
+          />
           <CommandButtons
             disabled={disabled}
             selectedCommandId={selectedCommand?.id}

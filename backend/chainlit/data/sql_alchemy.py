@@ -230,16 +230,35 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if user_id:
             user_identifier = await self._get_user_identifer_by_id(user_id)
 
+        if metadata is not None:
+            existing = await self.execute_sql(
+                query='SELECT "metadata" FROM threads WHERE "id" = :id',
+                parameters={"id": thread_id},
+            )
+            base = {}
+            if isinstance(existing, list) and existing:
+                raw = existing[0].get("metadata") or {}
+                if isinstance(raw, str):
+                    try:
+                        base = json.loads(raw)
+                    except json.JSONDecodeError:
+                        base = {}
+                elif isinstance(raw, dict):
+                    base = raw
+            incoming = {k: v for k, v in metadata.items() if v is not None}
+            metadata = {**base, **incoming}
+
+        name_value = name
+        if name_value is None and metadata:
+            name_value = metadata.get("name")
+        created_at_value = (
+            await self.get_current_timestamp() if metadata is None else None
+        )
+
         data = {
             "id": thread_id,
-            "createdAt": (
-                await self.get_current_timestamp() if metadata is None else None
-            ),
-            "name": (
-                name
-                if name is not None
-                else (metadata.get("name") if metadata and "name" in metadata else None)
-            ),
+            "createdAt": created_at_value,
+            "name": name_value,
             "userId": user_id,
             "userIdentifier": user_identifier,
             "tags": tags,
@@ -718,12 +737,30 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             for element in elements:
                 thread_id = element["element_threadid"]
                 if thread_id is not None:
+                    element_url: str | None = None
+                    object_key_val = element.get("element_objectkey")
+                    if (
+                        self.storage_provider is not None
+                        and isinstance(object_key_val, str)
+                        and object_key_val.strip()
+                    ):
+                        try:
+                            element_url = await self.storage_provider.get_read_url(
+                                object_key=object_key_val,
+                            )
+                        except Exception as e:
+                            logger.warning(
+                                f"Failed to get read URL for object_key '{object_key_val}': {e}. Falling back to stored URL."
+                            )
+                            element_url = element.get("element_url")
+                    else:
+                        element_url = element.get("element_url")
                     element_dict = ElementDict(
                         id=element["element_id"],
                         threadId=thread_id,
                         type=element["element_type"],
                         chainlitKey=element.get("element_chainlitkey"),
-                        url=element.get("element_url"),
+                        url=element_url,
                         objectKey=element.get("element_objectkey"),
                         name=element["element_name"],
                         display=element["element_display"],
@@ -739,3 +776,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     thread_dicts[thread_id]["elements"].append(element_dict)  # type: ignore
 
         return list(thread_dicts.values())
+
+    async def close(self) -> None:
+        if self.storage_provider:
+            await self.storage_provider.close()
+        await self.engine.dispose()

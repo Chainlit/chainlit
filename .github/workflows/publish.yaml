@@ -2,56 +2,79 @@ name: Publish
 
 on:
   workflow_dispatch:
+    inputs:
+      use_testpypi:
+        description: 'Publish to TestPyPI instead of PyPI'
+        required: false
+        default: false
+        type: boolean
   release:
     types: [published]
 
 permissions: read-all
 
 jobs:
+  validate:
+    name: Validate inputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate publishing branch and destination package index
+        run: |
+          if [[ "${{ github.ref_name }}" != "main" && "${{ github.event_name }}" != "release" ]]; then
+            if [[ "${{ inputs.use_testpypi }}" != "true" ]]; then
+              echo "❌ Error: Only build from main branch or release tag can be published to PyPI."
+              echo "Please check 'Publish to TestPyPI instead of PyPI' when running from branch: ${{ github.ref_name }}"
+              exit 1
+            fi
+          fi
+          echo "✅ Validation passed"
   ci:
+    needs: [validate]
     uses: ./.github/workflows/ci.yaml
     secrets: inherit
   build-n-publish:
-    name: Upload release to PyPI
+    name: Upload release to PyPI/TestPyPI
     runs-on: ubuntu-latest
     needs: [ci]
     env:
-      name: pypi
-      url: https://pypi.org/p/chainlit
+      name: ${{ inputs.use_testpypi && 'testpypi' || 'pypi' }}
+      url: ${{ inputs.use_testpypi && 'https://test.pypi.org/project/chainlit' || 'https://pypi.org/project/chainlit' }}
       BACKEND_DIR: ./backend
     permissions:
       contents: read
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: main
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
-        with:
-          pnpm-install-args: --no-frozen-lockfile
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python dependencies
         with:
           working-directory: ${{ env.BACKEND_DIR }}
 
-      - name: Build frontend and prepare assets
-        run: uv run python build.py
-        working-directory: ${{ env.BACKEND_DIR }}
-
       - name: Build Python distribution
         run: uv build
         working-directory: ${{ env.BACKEND_DIR }}
 
-      - name: List wheel contents
+      - name: Check frontend and copilot folder included
         run: |
           pip install wheel
           python -m wheel unpack dist/chainlit-*.whl -d unpacked
           ls unpacked/chainlit-*/chainlit/frontend/dist
           ls unpacked/chainlit-*/chainlit/copilot/dist
         working-directory: ${{ env.BACKEND_DIR }}
-
+      
+      - name: Publish package distributions to TestPyPI
+        if: inputs.use_testpypi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: backend/dist
+          repository-url: https://test.pypi.org/legacy/
+          password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+          verbose: true
+      
       - name: Publish package distributions to PyPI
+        if: ${{ !inputs.use_testpypi }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: backend/dist

@@ -148,9 +148,23 @@
             "untitled": "Conversation sans titre",
             "menu": {
                 "rename": "Renommer",
+                "share": "Partager",
                 "delete": "Supprimer"
             },
             "actions": {
+                "share": {
+                    "title": "Partager le lien de la discussion",
+                    "button": "Partager",
+                    "status": {
+                        "copied": "Lien copié",
+                        "created": "Lien de partage créé !",
+                        "unshared": "Partage désactivé pour ce fil"
+                    },
+                    "error": {
+                        "create": "Échec de la création du lien de partage",
+                        "unshare": "Échec de la désactivation du partage du fil"
+                    }
+                },
                 "delete": {
                     "title": "Confirmer la suppression",
                     "description": "Cela supprimera le fil de discussion ainsi que ses messages et éléments. Cette action ne peut pas être annulée",
