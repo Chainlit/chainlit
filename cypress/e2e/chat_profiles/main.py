@@ -9,7 +9,7 @@ starters = [
     cl.Starter(
         label="Say hi",
         message="Start a conversation with a greeting",
-        icon="a-arrow-down",
+        icon="https://picsum.photos/350",
     ),
     cl.Starter(
         label="Ask for help",

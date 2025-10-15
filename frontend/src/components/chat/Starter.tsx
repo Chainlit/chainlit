@@ -1,4 +1,3 @@
-import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
 import { useRecoilValue } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,7 +10,7 @@ import {
   useChatInteract
 } from '@chainlit/react-client';
 
-import Icon from '@/components/Icon';
+import { useRenderIcon } from '@/components/Icon';
 import { Button } from '@/components/ui/button';
 
 import { persistentCommandState } from '@/state/chat';
@@ -25,6 +24,7 @@ export default function Starter({ starter }: StarterProps) {
   const { sendMessage } = useChatInteract();
   const { loading, connected } = useChatData();
   const { user } = useAuth();
+  const renderIcon = useRenderIcon();
 
   const disabled = loading || !connected;
 
@@ -52,12 +52,7 @@ export default function Starter({ starter }: StarterProps) {
       onClick={onSubmit}
     >
       <div className="flex gap-2">
-        {starter.icon ? (
-          <Icon
-            name={starter.icon}
-            className={cn('!h-5 !w-5 text-muted-foreground rounded-md')}
-          />
-        ) : null}
+        {renderIcon(starter.icon, starter.label, '!h-5 !w-5 rounded-md')}
         <p className="text-sm text-muted-foreground truncate">
           {starter.label}
         </p>
