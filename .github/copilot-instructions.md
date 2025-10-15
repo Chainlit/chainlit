@@ -52,7 +52,7 @@ Always reference these instructions first and fallback to search or bash command
    # Timeout: Use 60 seconds
    
    # E2E tests require Cypress download - may not work in restricted environments
-   # If available: pnpm test (takes variable time depending on tests)
+   # If available: pnpm test:e2e (takes variable time depending on tests)
    ```
 
 4. **Run Development Servers**:
