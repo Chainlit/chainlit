@@ -123,7 +123,7 @@
             "title": "Panneau des paramètres",
             "customize": "Personnalisez vos paramètres de chat ici"
         },
-        "watermark": "Construit avec"
+        "watermark": "Les modèles de langage peuvent faire des erreurs. Vérifiez les informations importantes."
     },
     "threadHistory": {
         "sidebar": {
