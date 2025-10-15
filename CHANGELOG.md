@@ -4,6 +4,25 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.8.3] - 2025-10-06
+
+### Added
+- Support for the `target` attribute in header links, which can be configured through the configuration options
+
+### Changed
+- `@chainlit/react-client` automatic publishing
+
+## [2.8.2] - 2025-10-01
+
+### Changed
+- Remove autofocus in mobile message composer
+- Improve error handling in sqlalchemy data layer `get_read_url()`
+
+### Fixed
+- Fix voice hotkey (P) triggering when typing in chat input
+- Properly finalize data layers
+- Fix `on_chat_start` not always firing
+
 ## [2.8.1] - 2025-09-24
 
 ### Added
