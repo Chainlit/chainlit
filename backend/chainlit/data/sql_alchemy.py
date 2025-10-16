@@ -261,7 +261,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             "name": name_value,
             "userId": user_id,
             "userIdentifier": user_identifier,
-            "tags": tags,
+            "tags": (json.dumps(tags) if self._conninfo.startswith("sqlite") else tags)
+            if tags
+            else None,
             "metadata": json.dumps(metadata) if metadata else None,
         }
         parameters = {
