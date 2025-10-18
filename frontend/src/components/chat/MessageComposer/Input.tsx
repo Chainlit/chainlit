@@ -85,8 +85,10 @@ const Input = forwardRef<InputMethods, Props>(
       .filter((setting: any) => {
         // Only show settings that have items/values (like Select)
         const hasValues = setting.items && setting.items.length > 0;
-        const matchesSearch = setting.id.toLowerCase().includes(normalizedSettingInput);
-        
+        const matchesSearch = setting.id
+          .toLowerCase()
+          .includes(normalizedSettingInput);
+
         return hasValues && matchesSearch;
       })
       .sort((a: any, b: any) => {
@@ -216,17 +218,34 @@ const Input = forwardRef<InputMethods, Props>(
         const parts = firstWord.split('/');
 
         if (parts.length === 1) {
-          // Just @setting - show settings dropdown
-          setShowSettings(true);
-          setShowCommands(false);
-          setShowSettingValues(false);
-          setSettingInput(firstWord);
-          setCommandInput('');
-          setSettingValueInput('');
-          setTempSelectedSetting(undefined);
+          // Just @setting - check how many settings have values
+          const settingsWithValues = chatSettingsInputs.filter(
+            (setting: any) => setting.items && setting.items.length > 0
+          );
+
+          if (settingsWithValues.length === 1) {
+            // Only one setting with values - skip to showing values directly
+            const singleSetting = settingsWithValues[0];
+            setTempSelectedSetting(singleSetting);
+            setShowSettingValues(true);
+            setShowSettings(false);
+            setShowCommands(false);
+            setSettingInput('');
+            setCommandInput('');
+            setSettingValueInput(firstWord);
+          } else {
+            // Multiple settings - show settings dropdown
+            setShowSettings(true);
+            setShowCommands(false);
+            setShowSettingValues(false);
+            setSettingInput(firstWord);
+            setCommandInput('');
+            setSettingValueInput('');
+            setTempSelectedSetting(undefined);
+          }
         } else if (parts.length === 2) {
           // @setting/value - show values dropdown
-          const settingPart = parts[0]; 
+          const settingPart = parts[0];
           const valuePart = parts[1];
           const setting = chatSettingsInputs.find(
             (s: any) =>
@@ -319,10 +338,8 @@ const Input = forwardRef<InputMethods, Props>(
         selectedLabel: valueItem.label
       });
 
-      // Remove the @setting/value text from the input
-      const newValue = value.replace(/@[^/]+\/[^\s]*/, '').trimStart();
-      setValue(newValue);
-      onChange(newValue);
+      setValue('');
+      onChange('');
 
       setSettingValueInput('');
       setTempSelectedSetting(undefined);
