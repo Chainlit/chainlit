@@ -47,7 +47,9 @@ class OAuthProvider:
 class GithubOAuthProvider(OAuthProvider):
     id = "github"
     env = ["OAUTH_GITHUB_CLIENT_ID", "OAUTH_GITHUB_CLIENT_SECRET"]
-    authorize_url = "https://github.com/login/oauth/authorize"
+    authorize_url = os.environ.get("OAUTH_GITHUB_AUTH_URL", "https://github.com/login/oauth/authorize")
+    token_url = os.environ.get("OAUTH_GITHUB_TOKEN_URL", "https://github.com/login/oauth/access_token")
+    user_info_url = os.environ.get("OAUTH_GITHUB_USER_INFO_URL", "https://api.github.com/user")
 
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_GITHUB_CLIENT_ID")
@@ -67,7 +69,7 @@ class GithubOAuthProvider(OAuthProvider):
         }
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                "https://github.com/login/oauth/access_token",
+                self.token_url,
                 data=payload,
             )
             response.raise_for_status()
@@ -82,14 +84,14 @@ class GithubOAuthProvider(OAuthProvider):
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
             user_response = await client.get(
-                "https://api.github.com/user",
+                self.user_info_url,
                 headers={"Authorization": f"token {token}"},
             )
             user_response.raise_for_status()
             github_user = user_response.json()
 
             emails_response = await client.get(
-                "https://api.github.com/user/emails",
+                urllib.parse.urljoin(self.user_info_url + "/", "emails"),
                 headers={"Authorization": f"token {token}"},
             )
             emails_response.raise_for_status()
