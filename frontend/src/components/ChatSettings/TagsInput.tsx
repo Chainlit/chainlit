@@ -64,7 +64,7 @@ export const TagsInput = ({
               {tag}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => removeTag(tag)}
+                onClick={() => !disabled && removeTag(tag)}
               />
             </Badge>
           ))}
