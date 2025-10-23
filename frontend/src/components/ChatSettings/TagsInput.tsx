@@ -17,6 +17,7 @@ export type TagsInputProps = {
 
 export const TagsInput = ({
   description,
+  disabled,
   hasError,
   id,
   label,
@@ -72,6 +73,7 @@ export const TagsInput = ({
           {...rest}
           id={id}
           name={id}
+          disabled={disabled}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
