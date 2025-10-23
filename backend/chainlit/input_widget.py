@@ -14,6 +14,7 @@ class InputWidget:
     initial: Any = None
     tooltip: Optional[str] = None
     description: Optional[str] = None
+    disabled: Optional[bool] = False
 
     def __post_init__(
         self,
@@ -41,6 +42,7 @@ class Switch(InputWidget):
             "initial": self.initial,
             "tooltip": self.tooltip,
             "description": self.description,
+            "disabled": self.disabled,
         }
 
 
@@ -65,6 +67,7 @@ class Slider(InputWidget):
             "step": self.step,
             "tooltip": self.tooltip,
             "description": self.description,
+            "disabled": self.disabled,
         }
 
 
@@ -118,6 +121,7 @@ class Select(InputWidget):
             ],
             "tooltip": self.tooltip,
             "description": self.description,
+            "disabled": self.disabled,
         }
 
 
@@ -140,6 +144,7 @@ class TextInput(InputWidget):
             "tooltip": self.tooltip,
             "description": self.description,
             "multiline": self.multiline,
+            "disabled": self.disabled,
         }
 
 
@@ -160,6 +165,7 @@ class NumberInput(InputWidget):
             "placeholder": self.placeholder,
             "tooltip": self.tooltip,
             "description": self.description,
+            "disabled": self.disabled,
         }
 
 
@@ -179,6 +185,7 @@ class Tags(InputWidget):
             "initial": self.initial,
             "tooltip": self.tooltip,
             "description": self.description,
+            "disabled": self.disabled,
         }
 
 
@@ -218,6 +225,7 @@ class MultiSelect(InputWidget):
             ],
             "tooltip": self.tooltip,
             "description": self.description,
+            "disabled": self.disabled,
         }
 
 
@@ -236,6 +244,7 @@ class Checkbox(InputWidget):
             "initial": self.initial,
             "tooltip": self.tooltip,
             "description": self.description,
+            "disabled": self.disabled,
         }
 
 
@@ -289,4 +298,5 @@ class RadioGroup(InputWidget):
             ],
             "tooltip": self.tooltip,
             "description": self.description,
+            "disabled": self.disabled,
         }
