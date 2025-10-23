@@ -47,9 +47,15 @@ class OAuthProvider:
 class GithubOAuthProvider(OAuthProvider):
     id = "github"
     env = ["OAUTH_GITHUB_CLIENT_ID", "OAUTH_GITHUB_CLIENT_SECRET"]
-    authorize_url = os.environ.get("OAUTH_GITHUB_AUTH_URL", "https://github.com/login/oauth/authorize")
-    token_url = os.environ.get("OAUTH_GITHUB_TOKEN_URL", "https://github.com/login/oauth/access_token")
-    user_info_url = os.environ.get("OAUTH_GITHUB_USER_INFO_URL", "https://api.github.com/user")
+    authorize_url = os.environ.get(
+        "OAUTH_GITHUB_AUTH_URL", "https://github.com/login/oauth/authorize"
+    )
+    token_url = os.environ.get(
+        "OAUTH_GITHUB_TOKEN_URL", "https://github.com/login/oauth/access_token"
+    )
+    user_info_url = os.environ.get(
+        "OAUTH_GITHUB_USER_INFO_URL", "https://api.github.com/user"
+    )
 
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_GITHUB_CLIENT_ID")
