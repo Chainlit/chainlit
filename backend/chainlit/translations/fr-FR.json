@@ -123,7 +123,7 @@
             "title": "Panneau des paramètres",
             "customize": "Personnalisez vos paramètres de chat ici"
         },
-        "watermark": "Construit avec"
+        "watermark": "Les LLMs peuvent se tromper. Vérifiez les réponses."
     },
     "threadHistory": {
         "sidebar": {

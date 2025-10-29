@@ -1672,7 +1672,13 @@ async def get_logo(theme: Optional[Theme] = Query(Theme.light)):
             break
 
     if not logo_path:
-        raise HTTPException(status_code=404, detail="Missing default logo")
+        logo_path = os.path.join(
+            os.path.dirname(__file__),
+            "frontend",
+            "dist",
+            f"logo_{theme_value}.svg",
+        )
+        logger.info("Missing custom logo. Falling back to default logo.")
 
     media_type, _ = mimetypes.guess_type(logo_path)
 

@@ -336,7 +336,7 @@ async def audio_start(sid):
     session = WebsocketSession.require(sid)
 
     context = init_ws_context(session)
-    config: ChainlitConfig = session.get_config()
+    config: ChainlitConfig = session.get_config()  # type: ignore
 
     if config.features.audio and config.features.audio.enabled:
         connected = bool(await config.code.on_audio_start())
@@ -374,7 +374,7 @@ async def audio_end(sid):
             session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread("audio"))
 
-        config: ChainlitConfig = session.get_config()
+        config: ChainlitConfig = session.get_config()  # type: ignore
 
         if config.features.audio and config.features.audio.enabled:
             await config.code.on_audio_end()
