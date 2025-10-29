@@ -28,20 +28,14 @@ export const Task = ({ index, task }: TaskProps) => {
     if (task.forId) {
       const element = document.getElementById(`step-${task.forId}`);
       if (element) {
-        // Save original background
-        // Add highlight class
-        element.classList.add('task-highlight');
-
-        // Scroll to element
+        element.classList.add('bg-card');
         element.scrollIntoView({
           behavior: 'smooth',
           block: 'start',
           inline: 'start'
         });
-
-        // Remove highlight class after animation
         setTimeout(() => {
-          element.classList.remove('task-highlight');
+          element.classList.remove('bg-card');
         }, 600); // 2 blinks at 0.3s each
       }
     }
