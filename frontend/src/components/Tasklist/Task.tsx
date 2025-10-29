@@ -26,17 +26,21 @@ export const Task = ({ index, task }: TaskProps) => {
 
   const handleClick = () => {
     if (task.forId) {
-      const element = document.getElementById(`step-${task.forId}`);
-      if (element) {
-        element.classList.add('bg-card');
-        element.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-          inline: 'start'
-        });
-        setTimeout(() => {
-          element.classList.remove('bg-card');
-        }, 600); // 2 blinks at 0.3s each
+      const parent = document.getElementById(`step-${task.forId}`);
+      if (parent) {
+        // Find the child div below the main step container
+        const child = parent.querySelector('div');
+        if (child) {
+          child.classList.add('bg-card');
+          parent.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start',
+            inline: 'start'
+          });
+          setTimeout(() => {
+            child.classList.remove('bg-card');
+          }, 600); // 2 blinks at 0.3s each
+        }
       }
     }
   };
