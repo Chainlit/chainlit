@@ -2,7 +2,7 @@ import json
 import ssl
 import uuid
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import aiofiles
@@ -103,7 +103,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 return None
 
     async def get_current_timestamp(self) -> str:
-        return datetime.now().isoformat() + "Z"
+        return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
     def clean_result(self, obj):
         """Recursively change UUID -> str and serialize dictionaries"""
