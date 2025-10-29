@@ -24,12 +24,36 @@ export const Task = ({ index, task }: TaskProps) => {
     failed: 'text-muted-foreground'
   };
 
+  const handleClick = () => {
+    if (task.forId) {
+      const element = document.getElementById(`step-${task.forId}`);
+      if (element) {
+        // Save original background
+        // Add highlight class
+        element.classList.add('task-highlight');
+
+        // Scroll to element
+        element.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+          inline: 'start'
+        });
+
+        // Remove highlight class after animation
+        setTimeout(() => {
+          element.classList.remove('task-highlight');
+        }, 600); // 2 blinks at 0.3s each
+      }
+    }
+  };
+
   return (
     <div className={`task task-status-${task.status}`}>
       <div
         className={`w-full flex font-medium py-2 text-sm leading-snug ${
           statusStyles[task.status]
-        }`}
+        } ${task.forId ? 'cursor-pointer' : 'cursor-default'}`}
+        onClick={handleClick}
       >
         <span className="flex-none w-8 pr-2">{index}</span>
         <TaskStatusIcon status={task.status} />
