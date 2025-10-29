@@ -4,6 +4,23 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.8.4] - 2025-10-29
+
+### Added
+- Add support for GitHub Enterprise OAuth provider
+- Explicit disable on input widgets
+
+
+### Fixed
+- Tasklist tasks are now properly reconnected to their steps/messages
+- ci: fix pnpm publish checks
+- fix: missing / in url with base path when connecting Streamable HTTP MCP
+- fix - persist custom_elements to data layer without cloud storage
+- fix: propagate IME composition events in AutoResizeTextarea
+- fix: confirm when enter
+- Fix(translation): correct French translation of chat watermark 
+- fix(ui): add fallback logo if custom logo is missing
+
 ## [2.8.3] - 2025-10-06
 
 ### Added
