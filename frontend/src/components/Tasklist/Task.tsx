@@ -31,14 +31,14 @@ export const Task = ({ index, task }: TaskProps) => {
         // Find the child div below the main step container
         const child = parent.querySelector('div');
         if (child) {
-          child.classList.add('bg-card');
+          child.classList.add('bg-card', 'rounded');
           parent.scrollIntoView({
             behavior: 'smooth',
             block: 'start',
             inline: 'start'
           });
           setTimeout(() => {
-            child.classList.remove('bg-card');
+            child.classList.remove('bg-card', 'rounded');
           }, 600); // 2 blinks at 0.3s each
         }
       }
