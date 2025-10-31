@@ -9,6 +9,7 @@ export interface ChatProfile {
   default: boolean;
   icon?: string;
   name: string;
+  display_name?: string;
   markdown_description: string;
   starters?: IStarter[];
 }
