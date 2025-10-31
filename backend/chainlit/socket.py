@@ -182,6 +182,8 @@ async def connection_successful(sid):
     if context.session.thread_id_to_resume and config.code.on_chat_resume:
         thread = await resume_thread(context.session)
         if thread:
+            await context.emitter.resume_thread(thread)
+
             context.session.has_first_interaction = True
             await context.emitter.emit(
                 "first_interaction",
@@ -193,7 +195,6 @@ async def connection_successful(sid):
                 if "message" in step["type"]:
                     chat_context.add(Message.from_dict(step))
 
-            await context.emitter.resume_thread(thread)
             return
         else:
             await context.emitter.send_resume_thread_error("Thread not found.")
