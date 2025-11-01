@@ -100,7 +100,6 @@ const Input = forwardRef<InputMethods, Props>(
     useImperativeHandle(ref, () => ({
       reset,
       setValueExtern: (v: string) => {
-        console.log(v);
         setValue(v);
         onChange(v);
       }
