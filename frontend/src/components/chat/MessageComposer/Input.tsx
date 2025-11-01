@@ -35,6 +35,7 @@ interface Props {
 
 export interface InputMethods {
   reset: () => void;
+  setValueExtern: (v: string) => void;
 }
 
 const Input = forwardRef<InputMethods, Props>(

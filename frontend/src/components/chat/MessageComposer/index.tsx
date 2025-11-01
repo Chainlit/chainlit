@@ -172,9 +172,9 @@ export default function MessageComposer({
     const q = queryValue;
     if (q && inputRef.current) {
       if (q.length > 1000) {
-        inputRef.current.setValueExtern(q.slice(0, 1000));
+        inputRef.current?.setValueExtern(q.slice(0, 1000));
       } else {
-        inputRef.current.setValueExtern(q);
+        inputRef.current?.setValueExtern(q);
       }
     }
   }, [queryValue]);
