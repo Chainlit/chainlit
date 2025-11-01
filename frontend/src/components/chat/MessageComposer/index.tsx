@@ -179,7 +179,7 @@ export default function MessageComposer({
         inputRef.current?.setValueExtern(prompt);
       }
     }
-  }, [promptValue, inputRef.current]);
+  }, []);
 
   return (
     <div
