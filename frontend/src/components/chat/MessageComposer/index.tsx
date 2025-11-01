@@ -169,15 +169,17 @@ export default function MessageComposer({
   ]);
 
   useEffect(() => {
+    if (!inputRef.current) return;
+
     const prompt = promptValue;
-    if (prompt && inputRef.current) {
+    if (prompt) {
       if (prompt.length > 1000) {
         inputRef.current?.setValueExtern(prompt.slice(0, 1000));
       } else {
         inputRef.current?.setValueExtern(prompt);
       }
     }
-  }, [promptValue]);
+  }, [promptValue, inputRef.current]);
 
   return (
     <div
