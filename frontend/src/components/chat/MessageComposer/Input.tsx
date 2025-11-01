@@ -97,7 +97,12 @@ const Input = forwardRef<InputMethods, Props>(
     };
 
     useImperativeHandle(ref, () => ({
-      reset
+      reset,
+      setValueExtern: (v: string) => {
+        console.log(v);
+        setValue(v);
+        onChange(v);
+      }
     }));
 
     useEffect(() => {
