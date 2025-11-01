@@ -1,4 +1,10 @@
-import { MutableRefObject, useCallback, useRef, useState } from 'react';
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -13,6 +19,8 @@ import {
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'components/i18n/Translator';
+
+import { useQuery } from '@/hooks/query';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { chatSettingsOpenState } from '@/state/project';
@@ -60,6 +68,9 @@ export default function MessageComposer({
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
   const isMobile = useIsMobile();
+
+  const query = useQuery();
+  const queryValue = query.get('query') || '';
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -156,6 +167,17 @@ export default function MessageComposer({
     onSubmit,
     onReply
   ]);
+
+  useEffect(() => {
+    const q = queryValue;
+    if (q && inputRef.current) {
+      if (q.length > 1000) {
+        inputRef.current.setValueExtern(q.slice(0, 1000));
+      } else {
+        inputRef.current.setValueExtern(q);
+      }
+    }
+  }, [queryValue]);
 
   return (
     <div
