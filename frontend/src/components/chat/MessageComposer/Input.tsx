@@ -35,7 +35,7 @@ interface Props {
 
 export interface InputMethods {
   reset: () => void;
-  setValueExtern: (v: string) => void;
+  setValueExtern: (value: string) => void;
 }
 
 const Input = forwardRef<InputMethods, Props>(
@@ -99,9 +99,9 @@ const Input = forwardRef<InputMethods, Props>(
 
     useImperativeHandle(ref, () => ({
       reset,
-      setValueExtern: (v: string) => {
-        setValue(v);
-        onChange(v);
+      setValueExtern: (value: string) => {
+        setValue(value);
+        onChange(value);
       }
     }));
 

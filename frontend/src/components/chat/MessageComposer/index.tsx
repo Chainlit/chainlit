@@ -70,7 +70,7 @@ export default function MessageComposer({
   const isMobile = useIsMobile();
 
   const query = useQuery();
-  const queryValue = query.get('query') || '';
+  const promptValue = query.get('prompt') || '';
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -169,15 +169,15 @@ export default function MessageComposer({
   ]);
 
   useEffect(() => {
-    const q = queryValue;
-    if (q && inputRef.current) {
-      if (q.length > 1000) {
-        inputRef.current?.setValueExtern(q.slice(0, 1000));
+    const prompt = promptValue;
+    if (prompt && inputRef.current) {
+      if (prompt.length > 1000) {
+        inputRef.current?.setValueExtern(prompt.slice(0, 1000));
       } else {
-        inputRef.current?.setValueExtern(q);
+        inputRef.current?.setValueExtern(prompt);
       }
     }
-  }, [queryValue]);
+  }, [promptValue]);
 
   return (
     <div
