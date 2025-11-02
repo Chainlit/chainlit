@@ -193,8 +193,6 @@ describe('Copilot', () => {
         cy.get('#chainlit-copilot-button', opts).click();
         cy.get('#chainlit-copilot-chat', opts).should('exist');
 
-        cy.get('#chat-input', { timeout: 30000, ...opts }).should('exist');
-
         cy.step('Check input placeholder');
         cy.get('#chat-input', opts).should(
           'have.attr',

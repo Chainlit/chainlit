@@ -69,8 +69,15 @@ export default function MessageComposer({
 
   const isMobile = useIsMobile();
 
-  const query = useQuery();
-  const promptValue = query.get('prompt') || '';
+  let promptValue = '';
+  try {
+    const query = useQuery();
+    promptValue = query.get('prompt') || '';
+  } catch {
+    console.warn('Could not parse query parameters');
+  }
+
+  const [promptUsed, setPromptUsed] = useState(false);
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -169,17 +176,18 @@ export default function MessageComposer({
   ]);
 
   useEffect(() => {
-    if (!inputRef.current) return;
-
-    const prompt = promptValue;
-    if (prompt) {
-      if (prompt.length > 1000) {
-        inputRef.current?.setValueExtern(prompt.slice(0, 1000));
-      } else {
-        inputRef.current?.setValueExtern(prompt);
+    if (inputRef.current && promptValue && !promptUsed) {
+      const prompt = promptValue;
+      if (prompt) {
+        if (prompt.length > 1000) {
+          inputRef.current?.setValueExtern(prompt.slice(0, 1000));
+        } else {
+          inputRef.current?.setValueExtern(prompt);
+        }
+        setPromptUsed(true);
       }
     }
-  }, []);
+  }, [promptValue, promptUsed]);
 
   return (
     <div
