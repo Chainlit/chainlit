@@ -304,6 +304,7 @@ class ChatProfile(DataClassJsonMixin):
     name: str
     markdown_description: str
     icon: Optional[str] = None
+    display_name: Optional[str] = None
     default: bool = False
     starters: Optional[List[Starter]] = None
     config_overrides: Any = None
