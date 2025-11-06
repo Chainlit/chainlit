@@ -1,3 +1,5 @@
+import { Markdown } from '@/components/Markdown';
+
 import { TaskStatusIcon } from './TaskStatusIcon';
 
 export interface ITask {
@@ -14,9 +16,11 @@ export interface ITaskList {
 interface TaskProps {
   index: number;
   task: ITask;
+  allowHtml?: boolean;
+  latex?: boolean;
 }
 
-export const Task = ({ index, task }: TaskProps) => {
+export const Task = ({ index, task, allowHtml, latex }: TaskProps) => {
   const statusStyles = {
     ready: '',
     running: 'font-semibold',
@@ -55,7 +59,15 @@ export const Task = ({ index, task }: TaskProps) => {
       >
         <span className="flex-none w-8 pr-2">{index}</span>
         <TaskStatusIcon status={task.status} />
-        <span className="pl-2">{task.title}</span>
+        <div className="pl-2 flex-1 min-w-0">
+          <Markdown
+            allowHtml={allowHtml}
+            latex={latex}
+            className="max-w-none prose-sm lg:prose-lg text-left break-words"
+          >
+            {task.title}
+          </Markdown>
+        </div>
       </div>
     </div>
   );

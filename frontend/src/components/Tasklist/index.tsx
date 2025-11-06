@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import useSWR from 'swr';
 
-import { useChatData } from '@chainlit/react-client';
+import { useChatData, useConfig } from '@chainlit/react-client';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -32,6 +32,10 @@ interface TaskListProps {
 const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
   const { tasklists } = useChatData();
   const tasklist = tasklists[tasklists.length - 1];
+  const { config } = useConfig();
+
+  const allowHtml = config?.features?.unsafe_allow_html;
+  const latex = config?.features?.latex;
 
   const { error, data, isLoading } = useSWR<ITaskList>(tasklist?.url, fetcher, {
     keepPreviousData: true
@@ -71,7 +75,12 @@ const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
           <Header status={content.status} />
           {highlightedTask && (
             <CardContent>
-              <Task index={highlightedTaskIndex + 1} task={highlightedTask} />
+              <Task
+                index={highlightedTaskIndex + 1}
+                task={highlightedTask}
+                allowHtml={allowHtml}
+                latex={latex}
+              />
             </CardContent>
           )}
         </Card>
@@ -85,7 +94,13 @@ const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
         <Header status={content?.status} />
         <CardContent className="flex flex-col gap-2">
           {tasks?.map((task, index) => (
-            <Task key={index} index={index + 1} task={task} />
+            <Task
+              key={index}
+              index={index + 1}
+              task={task}
+              allowHtml={allowHtml}
+              latex={latex}
+            />
           ))}
         </CardContent>
       </Card>
