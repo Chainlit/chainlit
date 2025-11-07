@@ -32,7 +32,7 @@ WSGIEnvironment: TypeAlias = dict[str, Any]
 
 class WebSocketSessionAuth(TypedDict):
     sessionId: str
-    userEnv: str
+    userEnv: str | None
     clientType: ClientType
     chatProfile: str | None
     threadId: str | None
