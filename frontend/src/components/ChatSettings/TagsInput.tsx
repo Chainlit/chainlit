@@ -17,6 +17,7 @@ export type TagsInputProps = {
 
 export const TagsInput = ({
   description,
+  disabled,
   hasError,
   id,
   label,
@@ -63,7 +64,7 @@ export const TagsInput = ({
               {tag}
               <X
                 className="h-3 w-3 cursor-pointer"
-                onClick={() => removeTag(tag)}
+                onClick={() => !disabled && removeTag(tag)}
               />
             </Badge>
           ))}
@@ -72,6 +73,7 @@ export const TagsInput = ({
           {...rest}
           id={id}
           name={id}
+          disabled={disabled}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
