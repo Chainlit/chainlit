@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import useSWR from 'swr';
 
-import { useChatData } from '@chainlit/react-client';
+import { useChatData, useConfig } from '@chainlit/react-client';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -17,7 +17,7 @@ const fetcher = (url: string) =>
 
 const Header = ({ status }: HeaderProps) => {
   return (
-    <CardHeader className="flex flex-row items-center justify-between">
+    <CardHeader className="flex flex-row items-center justify-between gap-2 p-3">
       <div className="font-semibold">Tasks</div>
       <Badge variant="secondary">{status || '?'}</Badge>
     </CardHeader>
@@ -32,6 +32,10 @@ interface TaskListProps {
 const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
   const { tasklists } = useChatData();
   const tasklist = tasklists[tasklists.length - 1];
+  const { config } = useConfig();
+
+  const allowHtml = config?.features?.unsafe_allow_html;
+  const latex = config?.features?.latex;
 
   const { error, data, isLoading } = useSWR<ITaskList>(tasklist?.url, fetcher, {
     keepPreviousData: true
@@ -70,8 +74,13 @@ const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
         <Card>
           <Header status={content.status} />
           {highlightedTask && (
-            <CardContent>
-              <Task index={highlightedTaskIndex + 1} task={highlightedTask} />
+            <CardContent className="p-2.5">
+              <Task
+                index={highlightedTaskIndex + 1}
+                task={highlightedTask}
+                allowHtml={allowHtml}
+                latex={latex}
+              />
             </CardContent>
           )}
         </Card>
@@ -80,12 +89,18 @@ const TaskList = ({ isMobile, isCopilot }: TaskListProps) => {
   }
 
   return (
-    <aside className="hidden tasklist max-w-96 flex-grow md:block overflow-y-auto mr-4 mb-4">
+    <aside className="hidden tasklist max-w-[21rem] flex-grow md:block overflow-y-auto mr-3 mb-3">
       <Card className="overflow-y-auto h-full">
         <Header status={content?.status} />
-        <CardContent className="flex flex-col gap-2">
+        <CardContent className="flex flex-col gap-1 p-2.5">
           {tasks?.map((task, index) => (
-            <Task key={index} index={index + 1} task={task} />
+            <Task
+              key={index}
+              index={index + 1}
+              task={task}
+              allowHtml={allowHtml}
+              latex={latex}
+            />
           ))}
         </CardContent>
       </Card>
