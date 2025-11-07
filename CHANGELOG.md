@@ -10,13 +10,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add better support for Multi-Agent implementations
   - Nested steps are now step.input -> child step -> step.output
   - Improved formatting and styling of Tasklist
-- Add display_name to ChatProfile
-- Add slack reaction event callback
-- Add raw response from OAuth providers
-
-### Changed
-- Remove FastAPI version restrictions
-
 
 ## [2.8.4] - 2025-10-29
 
