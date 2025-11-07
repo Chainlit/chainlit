@@ -32,6 +32,6 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
     - name: Install Python dependencies
-      run: uv sync --no-install-project --no-editable ${{ inputs.extra-dependencies }}
+      run: uv sync --no-install-workspace ${{ inputs.extra-dependencies }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}
