@@ -10,3 +10,9 @@ async def main():
         await Message(
             content=f"Your name is: {res['output']}.\nChainlit installation is working!\nYou can now start building your own chainlit apps!",
         ).send()
+
+
+if __name__ == "__main__":
+    from chainlit.cli import run_chainlit
+
+    run_chainlit(__file__)
