@@ -20,7 +20,7 @@ jobs:
         name: Install Python, uv and Python dependencies
         with:
           python-version: ${{ matrix.python-version }}
-          extra-dependencies: --extra tests --extra mypy --extra custom-data
+          uv-args: --extra tests --extra custom-data
       - name: Run backend tests
         run: uv run --no-project pytest --cov=chainlit/
       - name: Run frontend tests

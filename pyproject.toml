@@ -1,6 +1,9 @@
 [dependency-groups]
 backend = ["chainlit"]
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
 [tool.uv]
 default-groups = ["backend"]
 package = false

@@ -24,7 +24,7 @@ jobs:
         name: Install Python, uv and Python & pnpm (uv does it automatically) dependencies
         with:
           working-directory: ${{ env.BACKEND_DIR }}
-          extra-dependencies: --extra tests
+          uv-args: --extra tests
       - name: Build UI components
         run: pnpm run buildUi
         timeout-minutes: 5
