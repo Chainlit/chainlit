@@ -4,6 +4,18 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.8.5] - 2025-11-07
+### Added
+- Add display_name to ChatProfile
+- Add slack reaction event callback
+- Add raw response from OAuth providers
+
+### Fixed
+- Security vulnerability in Chainlint: added missed ACL check for session initialization
+
+### Changed
+- Remove FastAPI version restrictions
+
 ## [2.8.4] - 2025-10-29
 
 ### Added
