@@ -4,6 +4,14 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.9.0] - 2025-11-06
+
+### Added
+- Add better support for Multi-Agent implementations
+  - Nested steps are now step.input -> child step -> step.output
+  - Improved formatting and styling of Tasklist
+
+
 ## [2.8.5] - 2025-11-07
 ### Added
 - Add display_name to ChatProfile
