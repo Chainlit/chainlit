@@ -1,6 +1,6 @@
 import asyncio
 import json
-from typing import Any, Dict, Literal, Optional, Tuple, Union
+from typing import Any, Dict, Literal, Optional, Tuple, TypedDict, Union
 from urllib.parse import unquote
 
 from starlette.requests import cookie_parser
@@ -18,7 +18,7 @@ from chainlit.data import get_data_layer
 from chainlit.logger import logger
 from chainlit.message import ErrorMessage, Message
 from chainlit.server import sio
-from chainlit.session import WebsocketSession
+from chainlit.session import ClientType, WebsocketSession
 from chainlit.types import (
     InputAudioChunk,
     InputAudioChunkPayload,
@@ -29,8 +29,13 @@ from chainlit.user_session import user_sessions
 
 WSGIEnvironment: TypeAlias = dict[str, Any]
 
-# Generic error message reused across resume flows.
-THREAD_NOT_FOUND_MSG = "Thread not found."
+
+class WebSocketSessionAuth(TypedDict):
+    sessionId: str
+    userEnv: str
+    clientType: ClientType
+    chatProfile: str | None
+    threadId: str | None
 
 
 def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
@@ -96,16 +101,15 @@ def _get_token_from_cookie(environ: WSGIEnvironment) -> Optional[str]:
     return None
 
 
-def _get_token(environ: WSGIEnvironment, auth: dict) -> Optional[str]:
+def _get_token(environ: WSGIEnvironment) -> Optional[str]:
     """Take WSGI environ, return access token."""
     return _get_token_from_cookie(environ)
 
 
 async def _authenticate_connection(
-    environ,
-    auth,
+    environ: WSGIEnvironment,
 ) -> Union[Tuple[Union[User, PersistedUser], str], Tuple[None, None]]:
-    if token := _get_token(environ, auth):
+    if token := _get_token(environ):
         user = await get_current_user(token=token)
         if user:
             return user, token
@@ -114,18 +118,30 @@ async def _authenticate_connection(
 
 
 @sio.on("connect")  # pyright: ignore [reportOptionalCall]
-async def connect(sid, environ, auth):
-    user = token = None
+async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth):
+    user: User | PersistedUser | None = None
+    token: str | None = None
+    thread_id = auth.get("threadId")
 
     if require_login():
         try:
-            user, token = await _authenticate_connection(environ, auth)
+            user, token = await _authenticate_connection(environ)
         except Exception as e:
             logger.exception("Exception authenticating connection: %s", e)
 
         if not user:
             logger.error("Authentication failed in websocket connect.")
             raise ConnectionRefusedError("authentication failed")
+
+        if thread_id:
+            data_layer = get_data_layer()
+            if not data_layer:
+                logger.error("Data layer is not initialized.")
+                raise ConnectionRefusedError("data layer not initialized")
+
+            if not (await data_layer.get_thread_author(thread_id) == user.identifier):
+                logger.error("Authorization for the thread failed.")
+                raise ConnectionRefusedError("authorization failed")
 
     # Session scoped function to emit to the client
     def emit_fn(event, data):
@@ -135,14 +151,14 @@ async def connect(sid, environ, auth):
     def emit_call_fn(event: Literal["ask", "call_fn"], data, timeout):
         return sio.call(event, data, timeout=timeout, to=sid)
 
-    session_id = auth.get("sessionId")
+    session_id = auth["sessionId"]
     if restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
         return True
 
     user_env_string = auth.get("userEnv")
     user_env = load_user_env(user_env_string)
 
-    client_type = auth.get("clientType")
+    client_type = auth["clientType"]
     url_encoded_chat_profile = auth.get("chatProfile")
     chat_profile = (
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
@@ -158,7 +174,7 @@ async def connect(sid, environ, auth):
         user=user,
         token=token,
         chat_profile=chat_profile,
-        thread_id=auth.get("threadId"),
+        thread_id=thread_id,
         environ=environ,
     )
 
