@@ -14,11 +14,11 @@ jobs:
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python dependencies
         with:
-          extra-dependencies: --extra tests --extra mypy --extra custom-data
+          extra-dependencies: --extra mypy
           working-directory: ${{ env.BACKEND_DIR }}
       - name: Lint backend
-        run: uv run scripts/lint.py
+        run: uv run --no-project scripts/lint.py
       - name: Check backend formatting
-        run: uv run scripts/format.py --check
+        run: uv run --no-project scripts/format.py --check
       - name: Typecheck backend
-        run: uv run scripts/type-check.py
+        run: uv run --no-project scripts/type-check.py
