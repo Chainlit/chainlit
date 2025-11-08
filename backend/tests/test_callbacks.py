@@ -68,7 +68,6 @@ async def test_oauth_callback(test_config: config.ChainlitConfig):
     from chainlit.callbacks import oauth_callback
     from chainlit.user import User
 
-    # Ein gültiges Dummy-Raw-Response-Objekt zum Testen
     valid_raw_response = {"access_token": "valid_token", "token_type": "Bearer"}
 
     # Mock the get_configured_oauth_providers function
