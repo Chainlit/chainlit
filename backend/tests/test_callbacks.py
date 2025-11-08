@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock
 
 from chainlit import config
@@ -78,10 +79,12 @@ async def test_oauth_callback(test_config: config.ChainlitConfig):
             token: str,
             raw_user_data: dict,
             default_app_user: User,
+            raw_oauth_response: Dict[str, Any],
             id_token: str | None = None,
         ) -> User | None:
-            if provider_id == "google" and token == "valid_token":  # nosec B105
-                return User(identifier="oauth_user")
+            if raw_oauth_response.get("token_type") == "Bearer":
+                if provider_id == "google" and token == "valid_token":  # nosec B105
+                    return User(identifier="oauth_user")
             return None
 
         # Test that the callback is properly registered

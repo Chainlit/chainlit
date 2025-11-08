@@ -1,7 +1,7 @@
 import base64
 import os
 import urllib.parse
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
 from fastapi import HTTPException
@@ -27,7 +27,7 @@ class OAuthProvider:
     async def get_raw_token_response(self, code: str, url: str) -> dict:
         raise NotImplementedError
 
-    async def get_token(self, code: str, url: str) -> str:
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
         raise NotImplementedError
 
     async def get_user_info(self, token: str) -> Tuple[Dict[str, str], User]:
@@ -72,26 +72,31 @@ class GithubOAuthProvider(OAuthProvider):
         if prompt := self.get_prompt():
             self.authorize_params["prompt"] = prompt
 
-    async def get_raw_token_response(self, code: str, url: str) -> Dict[str, List[str]]:
+    async def get_raw_token_response(self, code: str, url: str):
         payload = {
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "code": code,
         }
+
+        # Get response only as json
+        headers = {"Accept": "application/json"}
+
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 self.token_url,
                 data=payload,
+                headers=headers,
             )
             response.raise_for_status()
-            return urllib.parse.parse_qs(response.text)
+            return response.json()
 
-    async def get_token(self, code: str, url: str):
-        content = await self.get_raw_token_response(code, url)
-        token = content.get("access_token", [""])[0]
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -150,12 +155,12 @@ class GoogleOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json = await self.get_raw_token_response(code, url)
-        token = json.get("access_token")
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -219,15 +224,15 @@ class AzureADOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json = await self.get_raw_token_response(code, url)
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
 
-        token = json["access_token"]
-        refresh_token = json.get("refresh_token")
+        token = raw_json_response["access_token"]
+        refresh_token = raw_json_response.get("refresh_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
         self._refresh_token = refresh_token
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -313,15 +318,15 @@ class AzureADHybridOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json = await self.get_raw_token_response(code, url)
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
 
-        token = json["access_token"]
-        refresh_token = json.get("refresh_token")
+        token = raw_json_response["access_token"]
+        refresh_token = raw_json_response.get("refresh_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
         self._refresh_token = refresh_token
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -409,12 +414,12 @@ class OktaOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json_data = await self.get_raw_token_response(code, url)
-        token = json_data.get("access_token")
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -474,12 +479,12 @@ class Auth0OAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json_content = await self.get_raw_token_response(code, url)
-        token = json_content.get("access_token")
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -535,12 +540,12 @@ class DescopeOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json_content = await self.get_raw_token_response(code, url)
-        token = json_content.get("access_token")
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -596,12 +601,12 @@ class AWSCognitoOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json = await self.get_raw_token_response(code, url)
-        token = json.get("access_token")
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         user_info_url = (
@@ -667,12 +672,12 @@ class GitlabOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json_content = await self.get_raw_token_response(code, url)
-        token = json_content.get("access_token")
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -735,14 +740,14 @@ class KeycloakOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str):
-        json = await self.get_raw_token_response(code, url)
-        token = json.get("access_token")
-        refresh_token = json.get("refresh_token")
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
+        refresh_token = raw_json_response.get("refresh_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
         self.refresh_token = refresh_token
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:
@@ -800,12 +805,12 @@ class GenericOAuthProvider(OAuthProvider):
             response.raise_for_status()
             return response.json()
 
-    async def get_token(self, code: str, url: str) -> str:
-        json = await self.get_raw_token_response(code, url)
-        token = json.get("access_token")
+    async def get_token(self, code: str, url: str) -> Tuple[str, Dict[str, Any]]:
+        raw_json_response = await self.get_raw_token_response(code, url)
+        token = raw_json_response.get("access_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
-        return token
+        return token, raw_json_response
 
     async def get_user_info(self, token: str):
         async with httpx.AsyncClient() as client:

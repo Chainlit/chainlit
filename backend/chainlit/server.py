@@ -679,12 +679,12 @@ async def oauth_callback(
         )
 
     url = get_user_facing_url(request.url)
-    token = await provider.get_token(code, url)
+    token, raw_oauth_response = await provider.get_token(code, url)
 
     (raw_user_data, default_user) = await provider.get_user_info(token)
 
     user = await config.code.oauth_callback(
-        provider_id, token, raw_user_data, default_user
+        provider_id, token, raw_user_data, default_user, raw_oauth_response
     )
 
     response = await _authenticate_user(request, user, redirect_to_callback=True)
@@ -728,12 +728,12 @@ async def oauth_azure_hf_callback(
         )
 
     url = get_user_facing_url(request.url)
-    token = await provider.get_token(code, url)
+    token, raw_oauth_response = await provider.get_token(code, url)
 
     (raw_user_data, default_user) = await provider.get_user_info(token)
 
     user = await config.code.oauth_callback(
-        provider_id, token, raw_user_data, default_user, id_token
+        provider_id, token, raw_user_data, default_user, raw_oauth_response, id_token
     )
 
     response = await _authenticate_user(request, user, redirect_to_callback=True)
