@@ -396,7 +396,10 @@ class CodeSettings(BaseModel):
         None
     )
     oauth_callback: Optional[
-        Callable[[str, str, Dict[str, str], "User"], Awaitable[Optional["User"]]]
+        Callable[
+            [str, str, Dict[str, str], "User", Dict[str, Any]],
+            Awaitable[Optional["User"]],
+        ]
     ] = None
 
     # Helpers
