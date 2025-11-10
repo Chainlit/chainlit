@@ -48,9 +48,15 @@ def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
     return False
 
 
-async def persist_user_session(thread_id: str, metadata: Dict):
+async def persist_user_session(thread_id: str, user_session: Dict):
     if data_layer := get_data_layer():
-        await data_layer.update_thread(thread_id=thread_id, metadata=metadata)
+        thread = await data_layer.get_thread(thread_id=thread_id)
+        current_meta = thread.get("metadata") or {}
+        if isinstance(current_meta, str):
+            current_meta = json.loads(current_meta)
+        current_meta["user_session"] = user_session
+
+        await data_layer.update_thread(thread_id=thread_id, metadata=current_meta)
 
 
 async def resume_thread(session: WebsocketSession):
@@ -68,10 +74,16 @@ async def resume_thread(session: WebsocketSession):
         metadata = thread.get("metadata") or {}
         if isinstance(metadata, str):
             metadata = json.loads(metadata)
-        user_sessions[session.id] = metadata.copy()
-        if chat_profile := metadata.get("chat_profile"):
+
+        session_meta = metadata.get("user_session") or metadata
+
+        if isinstance(session_meta, str):
+            session_meta = json.loads(session_meta)
+        user_sessions[session.id] = session_meta.copy()
+
+        if chat_profile := session_meta.get("chat_profile"):
             session.chat_profile = chat_profile
-        if chat_settings := metadata.get("chat_settings"):
+        if chat_settings := session_meta.get("chat_settings"):
             session.chat_settings = chat_settings
 
         return thread
