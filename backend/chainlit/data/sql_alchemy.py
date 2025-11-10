@@ -261,7 +261,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             "name": name_value,
             "userId": user_id,
             "userIdentifier": user_identifier,
-            "tags": tags,
+            "tags": (json.dumps(tags) if self._conninfo.startswith("sqlite") else tags)
+            if tags
+            else None,
             "metadata": json.dumps(metadata) if metadata else None,
         }
         parameters = {
@@ -383,6 +385,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         }
         parameters["metadata"] = json.dumps(step_dict.get("metadata", {}))
         parameters["generation"] = json.dumps(step_dict.get("generation", {}))
+        if self._conninfo.startswith("sqlite"):
+            parameters["tags"] = json.dumps(step_dict.get("tags", []))
         columns = ", ".join(f'"{key}"' for key in parameters.keys())
         values = ", ".join(f":{key}" for key in parameters.keys())
         updates = ", ".join(
@@ -682,7 +686,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                     name=thread["thread_name"],
                     userId=thread["user_id"],
                     userIdentifier=thread["user_identifier"],
-                    tags=thread["thread_tags"],
+                    tags=json.loads(thread["thread_tags"])
+                    if self._conninfo.startswith("sqlite")
+                    else thread["thread_tags"],
                     metadata=thread["thread_metadata"],
                     steps=[],
                     elements=[],
@@ -700,6 +706,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                             value=step_feedback["feedback_value"],
                             comment=step_feedback.get("feedback_comment"),
                         )
+                    step_tags = step_feedback.get("step_tags")
+                    if step_tags and self._conninfo.startswith("sqlite"):
+                        step_tags = json.loads(step_tags)
                     step_dict = StepDict(
                         id=step_feedback["step_id"],
                         name=step_feedback["step_name"],
@@ -714,7 +723,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                             if step_feedback.get("step_metadata") is not None
                             else {}
                         ),
-                        tags=step_feedback.get("step_tags"),
+                        tags=step_tags,
                         input=(
                             step_feedback.get("step_input", "")
                             if step_feedback.get("step_showinput")
