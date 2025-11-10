@@ -25,12 +25,7 @@ jobs:
         with:
           working-directory: ${{ env.BACKEND_DIR }}
           uv-args: --extra tests
-      - name: Build UI components
-        run: pnpm run buildUi
-        timeout-minutes: 5
       - name: Run tests
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
         run: pnpm test:e2e
         shell: bash
       - name: Upload screenshots

@@ -32,13 +32,7 @@ Always reference these instructions first and fallback to search or bash command
    # NOTE: Cypress download may fail due to network restrictions - this is expected in CI environments
    ```
 
-2. **Build the Frontend - takes ~1 minute, NEVER CANCEL**:
-   ```bash
-   pnpm run buildUi
-   # Timeout: Use 300+ seconds (5+ minutes)
-   ```
-
-3. **Run Tests**:
+2. **Run Tests**:
    ```bash
    # Backend tests - takes ~17 seconds, NEVER CANCEL
    cd backend
@@ -55,7 +49,7 @@ Always reference these instructions first and fallback to search or bash command
    # If available: pnpm test:e2e (takes variable time depending on tests)
    ```
 
-4. **Run Development Servers**:
+3. **Run Development Servers**:
    ```bash
    # Start backend (in one terminal)
    cd backend
