@@ -3,6 +3,8 @@ from typing import Optional, Dict, List
 
 import chainlit as cl
 import chainlit.data as cl_data
+from chainlit.element import ElementDict, Element
+from chainlit.step import StepDict
 from chainlit.types import (
     ThreadDict,
     Pagination,
@@ -29,6 +31,62 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
         return cl.PersistedUser(
             id=user.identifier, createdAt=now, identifier=user.identifier
         )
+
+    async def delete_feedback(
+        self,
+        feedback_id: str,
+    ) -> bool:
+        pass
+
+    async def upsert_feedback(
+        self,
+        feedback: Feedback,
+    ) -> str:
+        pass
+
+    async def create_element(self, element: "Element"):
+        pass
+
+    async def get_element(
+        self, thread_id: str, element_id: str
+    ) -> Optional["ElementDict"]:
+        pass
+
+    async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
+        pass
+
+    async def create_step(self, step_dict: "StepDict"):
+        pass
+
+    async def update_step(self, step_dict: "StepDict"):
+        pass
+
+    async def delete_step(self, step_id: str):
+        pass
+
+    async def get_thread_author(self, thread_id: str) -> str:
+        return (await self.get_thread(thread_id))["userIdentifier"]
+
+    async def delete_thread(self, thread_id: str):
+        for uid, threads in THREADS.items():
+            THREADS[uid] = [t for t in threads if t["id"] != thread_id]
+
+    async def list_threads(
+        self, pagination: Pagination, filters: ThreadFilter
+    ) -> PaginatedResponse[ThreadDict]:
+        user_id = filters.userId or ""
+        data = THREADS.get(user_id, [])
+        return PaginatedResponse(
+            data=data,
+            pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
+        )
+
+    async def get_thread(self, thread_id: str) -> "Optional[ThreadDict]":
+        for threads in THREADS.values():
+            for t in threads:
+                if t["id"] == thread_id:
+                    return t
+        return None
 
     async def update_thread(
         self,
@@ -57,55 +115,7 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
         if tags is not None:
             thr["tags"] = tags
 
-    async def list_threads(
-        self, pagination: Pagination, filters: ThreadFilter
-    ) -> PaginatedResponse[ThreadDict]:
-        user_id = filters.userId or ""
-        data = THREADS.get(user_id, [])
-        return PaginatedResponse(
-            data=data,
-            pageInfo=PageInfo(hasNextPage=False, startCursor=None, endCursor=None),
-        )
-
-    async def get_thread(self, thread_id: str):
-        for threads in THREADS.values():
-            for t in threads:
-                if t["id"] == thread_id:
-                    return t
-        return None
-
-    async def delete_thread(self, thread_id: str):
-        for uid, threads in THREADS.items():
-            THREADS[uid] = [t for t in threads if t["id"] != thread_id]
-
-    async def upsert_feedback(self, feedback: Feedback) -> str:
-        return ""
-
-    async def build_debug_url(self):
-        pass
-
-    async def create_element(self):
-        pass
-
-    async def create_step(self):
-        pass
-
-    async def delete_element(self):
-        pass
-
-    async def delete_feedback(self):
-        pass
-
-    async def delete_step(self):
-        pass
-
-    async def get_element(self):
-        pass
-
-    async def get_thread_author(self):
-        pass
-
-    async def update_step(self):
+    async def build_debug_url(self) -> str:
         pass
 
     async def close(self) -> None:
