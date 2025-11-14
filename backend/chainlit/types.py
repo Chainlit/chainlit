@@ -32,6 +32,7 @@ InputWidgetType = Literal[
     "multiselect",
     "checkbox",
     "radio",
+    "datepicker",
 ]
 ToastType = Literal["info", "success", "warning", "error"]
 
