@@ -24,7 +24,13 @@ import { InputStateHandler } from './InputStateHandler';
 const parseDate = (dateStr: string | undefined | null): Date | undefined => {
   if (!dateStr) return undefined;
   try {
-    return new Date(dateStr);
+    const date = new Date(dateStr);
+    // Check if date is valid (Invalid Date has NaN time)
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid date string provided: "${dateStr}"`);
+      return undefined;
+    }
+    return date;
   } catch {
     return undefined;
   }
