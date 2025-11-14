@@ -572,7 +572,7 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
         """Process a run upon update."""
         context_var.set(self.context)
 
-        ignore, parent_id = self._should_ignore_run(run)
+        ignore, _parent_id = self._should_ignore_run(run)
 
         if ignore:
             return
