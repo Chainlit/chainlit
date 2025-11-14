@@ -391,7 +391,7 @@ class DatePicker(InputWidget):
     ) -> date | None:
         if isinstance(date_value, str):
             try:
-                return datetime.fromisoformat(date_value)
+                return date.fromisoformat(date_value)
             except ValueError as e:
                 raise ValueError(f"'{field_name}' must be in ISO format") from e
 
