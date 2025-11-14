@@ -121,7 +121,7 @@ async def _authenticate_connection(
 async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth):
     user: User | PersistedUser | None = None
     token: str | None = None
-    thread_id = auth.get("threadId")
+    thread_id = auth.get("threadId", None)
 
     if require_login():
         try:
@@ -155,11 +155,11 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
     if restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
         return True
 
-    user_env_string = auth.get("userEnv")
+    user_env_string = auth.get("userEnv", None)
     user_env = load_user_env(user_env_string)
 
     client_type = auth["clientType"]
-    url_encoded_chat_profile = auth.get("chatProfile")
+    url_encoded_chat_profile = auth.get("chatProfile", None)
     chat_profile = (
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
     )
