@@ -1,6 +1,9 @@
-import { Translator } from 'components/i18n';
+import { Markdown } from '@/components/Markdown';
+import { useTranslation } from '@/components/i18n/Translator';
 
 export default function WaterMark() {
+  const { t } = useTranslation();
+
   return (
     <div
       className="watermark"
@@ -10,9 +13,9 @@ export default function WaterMark() {
         textDecoration: 'none'
       }}
     >
-      <div className="text-xs text-muted-foreground">
-        <Translator path="chat.watermark" />
-      </div>
+      <Markdown className="[&_p]:m-0 [&_p]:leading-snug [&_div]:leading-snug [&_div]:mt-0 [&_strong]:font-semibold text-xs text-muted-foreground">
+        {t('chat.watermark')}
+      </Markdown>
     </div>
   );
 }
