@@ -244,6 +244,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "ചൂണ്ടിക്കാണിക്കുക..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "തീയതി തിരഞ്ഞെടുക്കുക",
+        "range": "തീയതി ശ്രേണി തിരഞ്ഞെടുക്കുക"
+      }
     }
   }
 }

@@ -244,6 +244,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "Επιλέξτε..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "Επιλέξτε ημερομηνία",
+        "range": "Επιλέξτε εύρος ημερομηνιών"
+      }
     }
   }
 }

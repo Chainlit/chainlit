@@ -244,6 +244,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "चुनें..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "तारीख निवडा",
+        "range": "तारीख श्रेणी निवडा"
+      }
     }
   }
 }

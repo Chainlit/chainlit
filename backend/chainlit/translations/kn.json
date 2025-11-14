@@ -244,6 +244,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "ಚುನಾಯಿಸಿ..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "ದಿನಾಂಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
+        "range": "ದಿನಾಂಕ ಶ್ರೇಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"
+      }
     }
   }
 }
