@@ -5,7 +5,7 @@ on: [workflow_call]
 permissions: read-all
 
 jobs:
-  pytest:
+  tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -20,11 +20,8 @@ jobs:
         name: Install Python, uv and Python dependencies
         with:
           python-version: ${{ matrix.python-version }}
-          extra-dependencies: --extra tests --extra mypy --extra custom-data
-          working-directory: ${{ env.BACKEND_DIR }}
-      - name: Build UI components
-        run: pnpm run buildUi
-        timeout-minutes: 5
-      - name: Run Pytest
+          uv-args: --extra tests --extra custom-data
+      - name: Run backend tests
         run: uv run --no-project pytest --cov=chainlit/
-        working-directory: ${{ env.BACKEND_DIR }}
+      - name: Run frontend tests
+        run: pnpm run test

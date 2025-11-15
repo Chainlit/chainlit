@@ -1,0 +1,24 @@
+name: LintBackend
+
+on: [workflow_call]
+
+permissions: read-all
+
+jobs:
+  check-backend:
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_DIR: ./backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/uv-python-install
+        name: Install Python, uv and Python dependencies
+        with:
+          uv-args: --no-install-workspace --all-extras
+          working-directory: ${{ env.BACKEND_DIR }}
+      - name: Lint backend
+        run: uv run --no-project scripts/lint.py
+      - name: Check backend formatting
+        run: uv run --no-project scripts/format.py --check
+      - name: Typecheck backend
+        run: uv run --no-project scripts/type_check.py

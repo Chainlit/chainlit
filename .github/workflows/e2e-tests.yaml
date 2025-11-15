@@ -5,7 +5,7 @@ on: [workflow_call]
 permissions: read-all
 
 jobs:
-  ci:
+  e2e-tests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -24,14 +24,9 @@ jobs:
         name: Install Python, uv and Python & pnpm (uv does it automatically) dependencies
         with:
           working-directory: ${{ env.BACKEND_DIR }}
-          extra-dependencies: --extra tests
-      - name: Build UI components
-        run: pnpm run buildUi
-        timeout-minutes: 5
+          uv-args: --extra tests
       - name: Run tests
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        run: pnpm test
+        run: pnpm test:e2e
         shell: bash
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
