@@ -134,14 +134,11 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
             raise ConnectionRefusedError("authentication failed")
 
         if thread_id:
-            data_layer = get_data_layer()
-            if not data_layer:
-                logger.error("Data layer is not initialized.")
-                raise ConnectionRefusedError("data layer not initialized")
-
-            if not (await data_layer.get_thread_author(thread_id) == user.identifier):
-                logger.error("Authorization for the thread failed.")
-                raise ConnectionRefusedError("authorization failed")
+            if data_layer := get_data_layer():
+                thread = await data_layer.get_thread(thread_id)
+                if thread and not (thread["userIdentifier"] == user.identifier):
+                    logger.error("Authorization for the thread failed.")
+                    raise ConnectionRefusedError("authorization failed")
 
     # Session scoped function to emit to the client
     def emit_fn(event, data):

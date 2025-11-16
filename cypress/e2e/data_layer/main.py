@@ -234,8 +234,10 @@ async def handle_message():
 
 @cl.password_auth_callback
 def auth_callback(username: str, password: str) -> Optional[cl.User]:
-    if (username, password) == ("admin", "admin"):
-        return cl.User(identifier="admin")
+    if (username, password) == ("user1", "user1"):
+        return cl.User(identifier="user1")
+    elif (username, password) == ("user2", "user2"):
+        return cl.User(identifier="user2")
     else:
         return None
 
