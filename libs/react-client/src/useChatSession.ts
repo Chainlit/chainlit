@@ -146,7 +146,8 @@ const useChatSession = () => {
               promise = client.connectStreamableHttpMCP(
                 sessionId,
                 mcp.name,
-                mcp.url!
+                mcp.url!,
+                mcp.headers || {}
               );
             } else {
               promise = client.connectStdioMCP(
