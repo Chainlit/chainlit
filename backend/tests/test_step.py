@@ -520,33 +520,29 @@ class TestStepHelperFunctions:
             assert stub["input"] == ""  # Stubbed
             assert stub["output"] == ""  # Stubbed
 
-    @patch("chainlit.step.config")
-    async def test_check_add_step_in_cot_hidden(
-        self, mock_config, mock_chainlit_context
-    ):
+    async def test_check_add_step_in_cot_hidden(self, mock_chainlit_context):
         """Test check_add_step_in_cot with hidden COT."""
         async with mock_chainlit_context:
-            mock_config.ui.cot = "hidden"
+            with patch("chainlit.step.config") as mock_config:
+                mock_config.ui.cot = "hidden"
 
-            # Message types should be added
-            message_step = Step(name="test", type="assistant_message")
-            assert check_add_step_in_cot(message_step) is True
+                # Message types should be added
+                message_step = Step(name="test", type="assistant_message")
+                assert check_add_step_in_cot(message_step) is True
 
-            # Non-message types should not be added
-            tool_step = Step(name="test", type="tool")
-            assert check_add_step_in_cot(tool_step) is False
+                # Non-message types should not be added
+                tool_step = Step(name="test", type="tool")
+                assert check_add_step_in_cot(tool_step) is False
 
-    @patch("chainlit.step.config")
-    async def test_check_add_step_in_cot_visible(
-        self, mock_config, mock_chainlit_context
-    ):
+    async def test_check_add_step_in_cot_visible(self, mock_chainlit_context):
         """Test check_add_step_in_cot with visible COT."""
         async with mock_chainlit_context:
-            mock_config.ui.cot = "visible"
+            with patch("chainlit.step.config") as mock_config:
+                mock_config.ui.cot = "visible"
 
-            # All steps should be added
-            tool_step = Step(name="test", type="tool")
-            assert check_add_step_in_cot(tool_step) is True
+                # All steps should be added
+                tool_step = Step(name="test", type="tool")
+                assert check_add_step_in_cot(tool_step) is True
 
 
 @pytest.mark.asyncio
