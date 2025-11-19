@@ -206,7 +206,7 @@ class TestGCSStorageClient:
 
         with pytest.raises(
             Exception,
-            match="Failed to upload file to GCS: File test/path/existing.txt already exists and overwrite is False",
+            match=r"Failed to upload file to GCS: File test/path/existing\.txt already exists and overwrite is False",
         ):
             client.sync_upload_file(
                 object_key="test/path/existing.txt",
