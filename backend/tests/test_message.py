@@ -1,9 +1,10 @@
 import uuid
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
 from chainlit.action import Action
+from chainlit.element import Text
 from chainlit.message import (
     AskActionMessage,
     AskFileMessage,
@@ -11,7 +12,6 @@ from chainlit.message import (
     ErrorMessage,
     Message,
 )
-from chainlit.element import Text
 
 
 @pytest.mark.asyncio
@@ -138,7 +138,7 @@ class TestMessageBase:
 
     async def test_message_base_stream_token_empty(self, mock_chainlit_context):
         """Test MessageBase.stream_token() with empty token."""
-        async with mock_chainlit_context:
+        async with mock_chainlit_context as ctx:
             message = Message(content="")
             message.id = "test_id"
 
@@ -305,7 +305,7 @@ class TestErrorMessage:
 
     async def test_error_message_fail_on_persist_error(self, mock_chainlit_context):
         """Test ErrorMessage with fail_on_persist_error=True."""
-        async with mock_chainlit_context as ctx:
+        async with mock_chainlit_context:
             error = ErrorMessage(
                 content="Test error", fail_on_persist_error=True
             )
