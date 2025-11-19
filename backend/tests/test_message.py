@@ -129,6 +129,12 @@ class TestMessageBase:
             message = Message(content="Initial")
             message.id = "test_id"
 
+            # Start streaming with first token
+            await message.stream_token("First")
+            assert message.streaming is True
+            ctx.emitter.stream_start.assert_called_once()
+
+            # Now send a sequence token - should call send_token
             await message.stream_token("Replaced", is_sequence=True)
 
             assert message.content == "Replaced"
