@@ -44,7 +44,7 @@ async def test_tracer_initialization(mock_chainlit_context):
     """Test LangchainTracer initialization."""
     async with mock_chainlit_context:
         tracer = LangchainTracer()
-        
+
         assert tracer.steps == {}
         assert tracer.parent_id_map == {}
         assert tracer.ignored_runs == set()
@@ -58,13 +58,13 @@ async def test_on_llm_start(mock_chainlit_context):
         tracer = LangchainTracer()
         run_id = uuid4()
         prompts = ["Test prompt"]
-        
+
         await tracer.on_llm_start(
             serialized={"name": "test_llm"},
             prompts=prompts,
             run_id=run_id,
         )
-        
+
         assert str(run_id) in tracer.completion_generations
         completion_gen = tracer.completion_generations[str(run_id)]
         assert completion_gen["prompt"] == "Test prompt"
@@ -78,20 +78,20 @@ async def test_on_llm_new_token(mock_chainlit_context):
     async with mock_chainlit_context:
         tracer = LangchainTracer()
         run_id = uuid4()
-        
+
         await tracer.on_llm_start(
             serialized={"name": "test_llm"},
             prompts=["Test prompt"],
             run_id=run_id,
         )
-        
+
         chunk = GenerationChunk(text="Hello")
         await tracer.on_llm_new_token(
             token="Hello",
             chunk=chunk,
             run_id=run_id,
         )
-        
+
         completion_gen = tracer.completion_generations[str(run_id)]
         assert completion_gen["token_count"] == 1
         assert completion_gen["tt_first_token"] is not None
@@ -101,7 +101,7 @@ async def test_start_trace(mock_chainlit_context):
     """Test _start_trace creates steps correctly."""
     async with mock_chainlit_context:
         tracer = LangchainTracer()
-        
+
         # Test LLM run
         llm_run = create_mock_run(
             id=uuid4(),
@@ -109,13 +109,13 @@ async def test_start_trace(mock_chainlit_context):
             run_type="llm",
             inputs={"input": "test"},
         )
-        
+
         with patch.object(Step, "send", new_callable=AsyncMock):
             await tracer._start_trace(llm_run)
-        
+
         assert str(llm_run.id) in tracer.steps
         assert tracer.steps[str(llm_run.id)].type == "llm"
-        
+
         # Test ignored run
         ignored_run = create_mock_run(
             id=uuid4(),
@@ -124,7 +124,7 @@ async def test_start_trace(mock_chainlit_context):
         )
         tracer.to_ignore = ["RunnableSequence"]
         await tracer._start_trace(ignored_run)
-        
+
         assert str(ignored_run.id) in tracer.ignored_runs
 
 
@@ -133,20 +133,20 @@ async def test_on_run_update(mock_chainlit_context):
     async with mock_chainlit_context:
         tracer = LangchainTracer()
         run_id = uuid4()
-        
+
         step = Step(id=str(run_id), name="test_tool", type="tool")
         tracer.steps[str(run_id)] = step
-        
+
         run = create_mock_run(
             id=run_id,
             name="test_tool",
             run_type="tool",
             outputs={"output": "result"},
         )
-        
+
         with patch.object(step, "update", new_callable=AsyncMock):
             await tracer._on_run_update(run)
-        
+
         assert step.output is not None
 
 
@@ -155,14 +155,14 @@ async def test_error_handling(mock_chainlit_context):
     async with mock_chainlit_context:
         tracer = LangchainTracer()
         run_id = uuid4()
-        
+
         step = Step(id=str(run_id), name="test_step", type="llm")
         tracer.steps[str(run_id)] = step
-        
+
         error = ValueError("Test error")
-        
+
         with patch.object(step, "update", new_callable=AsyncMock):
             await tracer._on_error(error, run_id=run_id)
-        
+
         assert step.is_error is True
         assert step.output == "Test error"
