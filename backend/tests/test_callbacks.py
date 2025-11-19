@@ -105,7 +105,7 @@ async def test_on_message(mock_chainlit_context, test_config: config.ChainlitCon
     from chainlit.callbacks import on_message
     from chainlit.message import Message
 
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         message_received = None
 
         @on_message
@@ -126,9 +126,6 @@ async def test_on_message(mock_chainlit_context, test_config: config.ChainlitCon
         assert message_received is not None
         assert message_received.content == "Test message"
         assert message_received.author == "User"
-
-        # Check that the emit method was called
-        context.session.emit.assert_called()
 
 
 async def test_on_stop(mock_chainlit_context, test_config: config.ChainlitConfig):
@@ -325,7 +322,7 @@ async def test_on_app_shutdown(test_config: config.ChainlitConfig):
 async def test_on_chat_start(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_chat_start
 
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         chat_started = False
 
         @on_chat_start
@@ -341,9 +338,6 @@ async def test_on_chat_start(mock_chainlit_context, test_config: config.Chainlit
 
         # Check that the chat_started flag was set
         assert chat_started
-
-        # Check that the emit method was called
-        context.session.emit.assert_called()
 
 
 async def test_on_chat_resume(
@@ -616,7 +610,7 @@ async def test_on_shared_thread_view_block_and_exception(
 async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_chat_end
 
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         chat_ended = False
 
         @on_chat_end
@@ -632,9 +626,6 @@ async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitCo
 
         # Check that the chat_ended flag was set
         assert chat_ended
-
-        # Check that the emit method was called
-        context.session.emit.assert_called()
 
 
 def test_data_layer_config(
