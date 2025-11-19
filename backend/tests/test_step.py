@@ -1,3 +1,4 @@
+import sys
 import uuid
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -523,7 +524,8 @@ class TestStepHelperFunctions:
     async def test_check_add_step_in_cot_hidden(self, mock_chainlit_context):
         """Test check_add_step_in_cot with hidden COT."""
         async with mock_chainlit_context:
-            with patch("chainlit.step.config") as mock_config:
+            step_module = sys.modules["chainlit.step"]
+            with patch.object(step_module, "config") as mock_config:
                 mock_config.ui.cot = "hidden"
 
                 # Message types should be added
@@ -537,7 +539,8 @@ class TestStepHelperFunctions:
     async def test_check_add_step_in_cot_visible(self, mock_chainlit_context):
         """Test check_add_step_in_cot with visible COT."""
         async with mock_chainlit_context:
-            with patch("chainlit.step.config") as mock_config:
+            step_module = sys.modules["chainlit.step"]
+            with patch.object(step_module, "config") as mock_config:
                 mock_config.ui.cot = "visible"
 
                 # All steps should be added
