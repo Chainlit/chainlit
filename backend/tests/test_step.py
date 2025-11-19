@@ -504,7 +504,7 @@ class TestStepHelperFunctions:
 
     async def test_stub_step(self, mock_chainlit_context):
         """Test stub_step function creates minimal step dict."""
-        async with mock_chainlit_context as ctx:
+        async with mock_chainlit_context:
             test_step = Step(name="test_step", type="tool")
             test_step.parent_id = "parent_123"
             test_step.input = "full input"
@@ -523,7 +523,7 @@ class TestStepHelperFunctions:
     @patch("chainlit.step.config")
     async def test_check_add_step_in_cot_hidden(self, mock_config, mock_chainlit_context):
         """Test check_add_step_in_cot with hidden COT."""
-        async with mock_chainlit_context as ctx:
+        async with mock_chainlit_context:
             mock_config.ui.cot = "hidden"
 
             # Message types should be added
@@ -537,7 +537,7 @@ class TestStepHelperFunctions:
     @patch("chainlit.step.config")
     async def test_check_add_step_in_cot_visible(self, mock_config, mock_chainlit_context):
         """Test check_add_step_in_cot with visible COT."""
-        async with mock_chainlit_context as ctx:
+        async with mock_chainlit_context:
             mock_config.ui.cot = "visible"
 
             # All steps should be added
