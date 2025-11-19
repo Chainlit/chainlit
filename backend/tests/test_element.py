@@ -1,6 +1,5 @@
-import sys
 import uuid
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock
 
 import pytest
 
@@ -12,7 +11,6 @@ from chainlit.element import (
     File,
     Image,
     Pdf,
-    Plotly,
     Task,
     TaskList,
     TaskStatus,
