@@ -4,8 +4,6 @@ from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
-import pytest
-
 from chainlit.langchain.callbacks import LangchainTracer
 from chainlit.step import Step
 

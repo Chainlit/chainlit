@@ -4,8 +4,7 @@ from datetime import datetime
 from unittest.mock import Mock
 from uuid import uuid4
 
-import pytest
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
+from langchain.schema import AIMessage, HumanMessage
 
 from chainlit.langchain.callbacks import (
     FinalStreamHelper,
@@ -104,7 +103,7 @@ class TestGenerationHelper:
             "temperature": 0.7,
         }
         
-        provider, model, tools, settings = helper._build_llm_settings(
+        provider, model, _, settings = helper._build_llm_settings(
             serialized, invocation_params
         )
         

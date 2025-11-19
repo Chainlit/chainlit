@@ -5,11 +5,9 @@ from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
 import pytest
-from langchain.schema import BaseMessage, HumanMessage, SystemMessage
-from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
+from langchain_core.outputs import GenerationChunk
 
 from chainlit.langchain.callbacks import LangchainTracer
-from chainlit.message import Message
 from chainlit.step import Step
 
 
