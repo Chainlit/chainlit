@@ -521,7 +521,9 @@ class TestStepHelperFunctions:
             assert stub["output"] == ""  # Stubbed
 
     @patch("chainlit.step.config")
-    async def test_check_add_step_in_cot_hidden(self, mock_config, mock_chainlit_context):
+    async def test_check_add_step_in_cot_hidden(
+        self, mock_config, mock_chainlit_context
+    ):
         """Test check_add_step_in_cot with hidden COT."""
         async with mock_chainlit_context:
             mock_config.ui.cot = "hidden"
@@ -535,7 +537,9 @@ class TestStepHelperFunctions:
             assert check_add_step_in_cot(tool_step) is False
 
     @patch("chainlit.step.config")
-    async def test_check_add_step_in_cot_visible(self, mock_config, mock_chainlit_context):
+    async def test_check_add_step_in_cot_visible(
+        self, mock_config, mock_chainlit_context
+    ):
         """Test check_add_step_in_cot with visible COT."""
         async with mock_chainlit_context:
             mock_config.ui.cot = "visible"

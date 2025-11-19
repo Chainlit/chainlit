@@ -55,7 +55,7 @@ def mock_session(mock_session_factory) -> Mock:
 @asynccontextmanager
 async def create_chainlit_context(mock_session):
     from chainlit.emitter import BaseChainlitEmitter
-    
+
     # Create a mock emitter with all necessary methods
     mock_emitter = Mock(spec=BaseChainlitEmitter)
     mock_emitter.send_step = AsyncMock()
@@ -65,7 +65,7 @@ async def create_chainlit_context(mock_session):
     mock_emitter.send_element = AsyncMock()
     mock_emitter.send_action = AsyncMock()
     mock_emitter.remove_action = AsyncMock()
-    
+
     context = ChainlitContext(mock_session, emitter=mock_emitter)
     token = context_var.set(context)
     try:
