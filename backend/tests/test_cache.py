@@ -265,131 +265,137 @@ class TestInitLcCache:
 
     def test_init_lc_cache_disabled_by_config(self):
         """Test that cache is not initialized when disabled in config."""
-        with patch("chainlit.cache.config") as mock_config:
-            mock_config.project.cache = False
-            mock_config.run.no_cache = False
+        with patch.object(cache_module.config, "project") as mock_project:
+            mock_project.cache = False
+            with patch.object(cache_module.config, "run") as mock_run:
+                mock_run.no_cache = False
 
-            with patch("chainlit.cache.importlib.util.find_spec") as mock_find_spec:
-                init_lc_cache()
+                with patch("chainlit.cache.importlib.util.find_spec") as mock_find_spec:
+                    init_lc_cache()
 
-                # Should not check for langchain if cache is disabled
-                mock_find_spec.assert_not_called()
+                    # Should not check for langchain if cache is disabled
+                    mock_find_spec.assert_not_called()
 
     def test_init_lc_cache_disabled_by_no_cache_flag(self):
         """Test that cache is not initialized when no_cache flag is set."""
-        with patch("chainlit.cache.config") as mock_config:
-            mock_config.project.cache = True
-            mock_config.run.no_cache = True
+        with patch.object(cache_module.config, "project") as mock_project:
+            mock_project.cache = True
+            with patch.object(cache_module.config, "run") as mock_run:
+                mock_run.no_cache = True
 
-            with patch("chainlit.cache.importlib.util.find_spec") as mock_find_spec:
-                init_lc_cache()
+                with patch("chainlit.cache.importlib.util.find_spec") as mock_find_spec:
+                    init_lc_cache()
 
-                # Should not check for langchain if no_cache is True
-                mock_find_spec.assert_not_called()
+                    # Should not check for langchain if no_cache is True
+                    mock_find_spec.assert_not_called()
 
     def test_init_lc_cache_langchain_not_installed(self):
         """Test behavior when langchain is not installed."""
-        with patch("chainlit.cache.config") as mock_config:
-            mock_config.project.cache = True
-            mock_config.run.no_cache = False
+        with patch.object(cache_module.config, "project") as mock_project:
+            mock_project.cache = True
+            with patch.object(cache_module.config, "run") as mock_run:
+                mock_run.no_cache = False
 
-            with patch(
-                "chainlit.cache.importlib.util.find_spec", return_value=None
-            ) as mock_find_spec:
-                # Should not raise an error
-                init_lc_cache()
+                with patch(
+                    "chainlit.cache.importlib.util.find_spec", return_value=None
+                ) as mock_find_spec:
+                    # Should not raise an error
+                    init_lc_cache()
 
-                mock_find_spec.assert_called_once_with("langchain")
+                    mock_find_spec.assert_called_once_with("langchain")
 
     def test_init_lc_cache_with_langchain_installed(self):
         """Test cache initialization when langchain is installed."""
-        with patch("chainlit.cache.config") as mock_config:
-            mock_config.project.cache = True
-            mock_config.run.no_cache = False
-            mock_config.project.lc_cache_path = "/tmp/test_cache.db"
+        with patch.object(cache_module.config, "project") as mock_project:
+            mock_project.cache = True
+            mock_project.lc_cache_path = "/tmp/test_cache.db"
+            with patch.object(cache_module.config, "run") as mock_run:
+                mock_run.no_cache = False
 
-            mock_spec = Mock()
-            with patch(
-                "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
-            ):
-                # Mock langchain modules
-                mock_sqlite_cache = Mock()
-                mock_set_llm_cache = Mock()
-
-                with patch.dict(
-                    sys.modules,
-                    {
-                        "langchain": Mock(),
-                        "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
-                        "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
-                    },
+                mock_spec = Mock()
+                with patch(
+                    "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
                 ):
-                    with patch("os.path.exists", return_value=True):
-                        init_lc_cache()
+                    # Mock langchain modules
+                    mock_sqlite_cache = Mock()
+                    mock_set_llm_cache = Mock()
 
-                        mock_sqlite_cache.assert_called_once_with(
-                            database_path="/tmp/test_cache.db"
-                        )
-                        mock_set_llm_cache.assert_called_once()
+                    with patch.dict(
+                        sys.modules,
+                        {
+                            "langchain": Mock(),
+                            "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
+                            "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
+                        },
+                    ):
+                        with patch("os.path.exists", return_value=True):
+                            init_lc_cache()
+
+                            mock_sqlite_cache.assert_called_once_with(
+                                database_path="/tmp/test_cache.db"
+                            )
+                            mock_set_llm_cache.assert_called_once()
 
     def test_init_lc_cache_creates_new_cache_file(self):
         """Test that logger is called when creating new cache file."""
-        with patch("chainlit.cache.config") as mock_config:
-            mock_config.project.cache = True
-            mock_config.run.no_cache = False
-            mock_config.project.lc_cache_path = "/tmp/new_cache.db"
+        with patch.object(cache_module.config, "project") as mock_project:
+            mock_project.cache = True
+            mock_project.lc_cache_path = "/tmp/new_cache.db"
+            with patch.object(cache_module.config, "run") as mock_run:
+                mock_run.no_cache = False
 
-            mock_spec = Mock()
-            with patch(
-                "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
-            ):
-                mock_sqlite_cache = Mock()
-                mock_set_llm_cache = Mock()
-
-                with patch.dict(
-                    sys.modules,
-                    {
-                        "langchain": Mock(),
-                        "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
-                        "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
-                    },
+                mock_spec = Mock()
+                with patch(
+                    "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
                 ):
-                    with patch("os.path.exists", return_value=False):
-                        with patch("chainlit.cache.logger") as mock_logger:
-                            init_lc_cache()
+                    mock_sqlite_cache = Mock()
+                    mock_set_llm_cache = Mock()
 
-                            mock_logger.info.assert_called_once()
-                            assert "LangChain cache created at" in str(
-                                mock_logger.info.call_args
-                            )
+                    with patch.dict(
+                        sys.modules,
+                        {
+                            "langchain": Mock(),
+                            "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
+                            "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
+                        },
+                    ):
+                        with patch("os.path.exists", return_value=False):
+                            with patch("chainlit.cache.logger") as mock_logger:
+                                init_lc_cache()
+
+                                mock_logger.info.assert_called_once()
+                                assert "LangChain cache created at" in str(
+                                    mock_logger.info.call_args
+                                )
 
     def test_init_lc_cache_without_cache_path(self):
         """Test that cache is not initialized when cache path is None."""
-        with patch("chainlit.cache.config") as mock_config:
-            mock_config.project.cache = True
-            mock_config.run.no_cache = False
-            mock_config.project.lc_cache_path = None
+        with patch.object(cache_module.config, "project") as mock_project:
+            mock_project.cache = True
+            mock_project.lc_cache_path = None
+            with patch.object(cache_module.config, "run") as mock_run:
+                mock_run.no_cache = False
 
-            mock_spec = Mock()
-            with patch(
-                "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
-            ):
-                mock_sqlite_cache = Mock()
-                mock_set_llm_cache = Mock()
-
-                with patch.dict(
-                    sys.modules,
-                    {
-                        "langchain": Mock(),
-                        "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
-                        "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
-                    },
+                mock_spec = Mock()
+                with patch(
+                    "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
                 ):
-                    init_lc_cache()
+                    mock_sqlite_cache = Mock()
+                    mock_set_llm_cache = Mock()
 
-                    # Should not call SQLiteCache if path is None
-                    mock_sqlite_cache.assert_not_called()
-                    mock_set_llm_cache.assert_not_called()
+                    with patch.dict(
+                        sys.modules,
+                        {
+                            "langchain": Mock(),
+                            "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
+                            "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
+                        },
+                    ):
+                        init_lc_cache()
+
+                        # Should not call SQLiteCache if path is None
+                        mock_sqlite_cache.assert_not_called()
+                        mock_set_llm_cache.assert_not_called()
 
 
 class TestCacheEdgeCases:
