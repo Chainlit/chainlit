@@ -356,9 +356,9 @@ class TestLoadUserEnv:
             mock_config.project.user_env = ["API_KEY"]
 
             # The function has a bug - it raises UnboundLocalError instead of ConnectionRefusedError
-            with pytest.raises(
-                UnboundLocalError, match="cannot access local variable 'user_env_dict'"
-            ):
+            # Python 3.10: "referenced before assignment"
+            # Python 3.11+: "cannot access local variable"
+            with pytest.raises(UnboundLocalError, match="user_env_dict"):
                 load_user_env(None)
 
     def test_load_user_env_none_without_required_keys(self):
