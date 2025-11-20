@@ -270,7 +270,9 @@ class TestInitLcCache:
             with patch.object(cache_module.config, "run") as mock_run:
                 mock_run.no_cache = False
 
-                with patch("chainlit.cache.importlib.util.find_spec") as mock_find_spec:
+                with patch.object(
+                    cache_module.importlib.util, "find_spec"
+                ) as mock_find_spec:
                     init_lc_cache()
 
                     # Should not check for langchain if cache is disabled
@@ -283,7 +285,9 @@ class TestInitLcCache:
             with patch.object(cache_module.config, "run") as mock_run:
                 mock_run.no_cache = True
 
-                with patch("chainlit.cache.importlib.util.find_spec") as mock_find_spec:
+                with patch.object(
+                    cache_module.importlib.util, "find_spec"
+                ) as mock_find_spec:
                     init_lc_cache()
 
                     # Should not check for langchain if no_cache is True
@@ -296,8 +300,8 @@ class TestInitLcCache:
             with patch.object(cache_module.config, "run") as mock_run:
                 mock_run.no_cache = False
 
-                with patch(
-                    "chainlit.cache.importlib.util.find_spec", return_value=None
+                with patch.object(
+                    cache_module.importlib.util, "find_spec", return_value=None
                 ) as mock_find_spec:
                     # Should not raise an error
                     init_lc_cache()
@@ -313,8 +317,8 @@ class TestInitLcCache:
                 mock_run.no_cache = False
 
                 mock_spec = Mock()
-                with patch(
-                    "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
+                with patch.object(
+                    cache_module.importlib.util, "find_spec", return_value=mock_spec
                 ):
                     # Mock langchain modules
                     mock_sqlite_cache = Mock()
@@ -345,8 +349,8 @@ class TestInitLcCache:
                 mock_run.no_cache = False
 
                 mock_spec = Mock()
-                with patch(
-                    "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
+                with patch.object(
+                    cache_module.importlib.util, "find_spec", return_value=mock_spec
                 ):
                     mock_sqlite_cache = Mock()
                     mock_set_llm_cache = Mock()
@@ -360,7 +364,7 @@ class TestInitLcCache:
                         },
                     ):
                         with patch("os.path.exists", return_value=False):
-                            with patch("chainlit.cache.logger") as mock_logger:
+                            with patch.object(cache_module, "logger") as mock_logger:
                                 init_lc_cache()
 
                                 mock_logger.info.assert_called_once()
@@ -377,8 +381,8 @@ class TestInitLcCache:
                 mock_run.no_cache = False
 
                 mock_spec = Mock()
-                with patch(
-                    "chainlit.cache.importlib.util.find_spec", return_value=mock_spec
+                with patch.object(
+                    cache_module.importlib.util, "find_spec", return_value=mock_spec
                 ):
                     mock_sqlite_cache = Mock()
                     mock_set_llm_cache = Mock()
