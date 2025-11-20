@@ -65,6 +65,8 @@ async def create_chainlit_context(mock_session):
     mock_emitter.send_element = AsyncMock()
     mock_emitter.send_action = AsyncMock()
     mock_emitter.remove_action = AsyncMock()
+    mock_emitter.emit = AsyncMock()
+    mock_emitter.set_chat_settings = Mock()  # Sync method, not async
 
     context = ChainlitContext(mock_session, emitter=mock_emitter)
     token = context_var.set(context)
