@@ -366,14 +366,10 @@ class TestLoadUserEnv:
         with patch("chainlit.socket.config") as mock_config:
             mock_config.project.user_env = []
 
-            # Should not raise an error, but user_env_dict is not defined
-            # This will cause a NameError in the actual function
-            # The function has a bug - it should handle this case
-            try:
+            # The function has a bug - it raises NameError when user_env is None
+            # even when no required keys are configured
+            with pytest.raises(NameError, match="user_env_dict"):
                 load_user_env(None)
-            except NameError:
-                # Expected behavior due to bug in the function
-                pass
 
 
 class TestCleanSession:
