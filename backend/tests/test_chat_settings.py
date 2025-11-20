@@ -198,12 +198,16 @@ class TestChatSettings:
             assert result_widgets["slider"] == 7
 
             # Test with only tabs
-            tab1 = Tab(id="tab1", label="Tab 1", inputs=[
-                Switch(id="t1_switch", label="Switch", initial=False)
-            ])
-            tab2 = Tab(id="tab2", label="Tab 2", inputs=[
-                Slider(id="t2_slider", label="Slider", initial=3)
-            ])
+            tab1 = Tab(
+                id="tab1",
+                label="Tab 1",
+                inputs=[Switch(id="t1_switch", label="Switch", initial=False)],
+            )
+            tab2 = Tab(
+                id="tab2",
+                label="Tab 2",
+                inputs=[Slider(id="t2_slider", label="Slider", initial=3)],
+            )
             settings_tabs = ChatSettings(inputs=[tab1, tab2])
             result_tabs = settings_tabs.settings()
             assert result_tabs["t1_switch"] is False
