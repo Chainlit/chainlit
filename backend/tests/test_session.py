@@ -259,9 +259,12 @@ class TestBaseSession:
 
     def test_base_session_to_persistable(self):
         """Test BaseSession to_persistable method."""
-        with patch(
-            "chainlit.user_session.user_sessions", {"test_id": {"key": "value"}}
-        ):
+        from chainlit.user_session import user_sessions
+
+        original_sessions = user_sessions.copy()
+        user_sessions.update({"test_id": {"key": "value"}})
+
+        try:
             with patch("chainlit.config.config") as mock_config:
                 mock_config.project.persist_user_env = True
 
@@ -281,13 +284,18 @@ class TestBaseSession:
                 assert result["chat_settings"] == {"temperature": 0.7}
                 assert result["chat_profile"] == "gpt-4"
                 assert result["client_type"] == "webapp"
+        finally:
+            user_sessions.clear()
+            user_sessions.update(original_sessions)
 
     def test_base_session_to_persistable_without_persist_user_env(self):
         """Test to_persistable removes user_env when persist_user_env is False."""
-        with patch(
-            "chainlit.user_session.user_sessions",
-            {"test_id": {"env": {"KEY": "value"}}},
-        ):
+        from chainlit.user_session import user_sessions
+
+        original_sessions = user_sessions.copy()
+        user_sessions.update({"test_id": {"env": {"KEY": "value"}}})
+
+        try:
             with patch("chainlit.config.config") as mock_config:
                 mock_config.project.persist_user_env = False
 
@@ -303,6 +311,9 @@ class TestBaseSession:
                 result = session.to_persistable()
 
                 assert result["env"] == {}
+        finally:
+            user_sessions.clear()
+            user_sessions.update(original_sessions)
 
 
 class TestHTTPSession:
