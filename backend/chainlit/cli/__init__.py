@@ -31,7 +31,7 @@ from chainlit.utils import check_file
 logging.basicConfig(
     level=logging.INFO,
     stream=sys.stdout,
-    format="%(asctime)s - %(message)s",
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 
