@@ -745,5 +745,3 @@ class TestOAuthProviderEdgeCases:
 
             assert "prompt" in provider.authorize_params
             assert provider.authorize_params["prompt"] == "consent"
-
-
