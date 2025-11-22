@@ -101,9 +101,13 @@ class TestDataLayer(cl_data.BaseDataLayer):
 
     async def create_user(self, user: cl.User):
         if user.identifier == "user1":
-            return cl.PersistedUser(id="user1_id", createdAt=now, identifier=user.identifier)
+            return cl.PersistedUser(
+                id="user1_id", createdAt=now, identifier=user.identifier
+            )
         elif user.identifier == "user2":
-            return cl.PersistedUser(id="user2_id", createdAt=now, identifier=user.identifier)
+            return cl.PersistedUser(
+                id="user2_id", createdAt=now, identifier=user.identifier
+            )
         return None
 
     async def update_thread(
@@ -131,7 +135,11 @@ class TestDataLayer(cl_data.BaseDataLayer):
                     "tags": tags,
                     "createdAt": utc_now(),
                     "userId": user_id,
-                    "userIdentifier": "user1" if user_id == "user1_id" else "user2" if user_id == "user2_id" else "unknown",
+                    "userIdentifier": "user1"
+                    if user_id == "user1_id"
+                    else "user2"
+                    if user_id == "user2_id"
+                    else "unknown",
                     "steps": [],
                 }
             )
