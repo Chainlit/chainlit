@@ -4,7 +4,7 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2.9.2] - 20250-11-22
+## [2.9.2] - 2025-11-22
 
 ### Added
 - Add tests for socker, chat context, cache, translations & oauth providers
