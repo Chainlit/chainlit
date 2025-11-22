@@ -3,7 +3,6 @@ from uuid import uuid4
 
 import chainlit as cl
 from chainlit.auth import create_jwt
-from chainlit.logger import logger
 from chainlit.server import _authenticate_user, app
 from chainlit.user import User
 from fastapi import Request, Response
@@ -21,6 +20,7 @@ async def custom_auth(request: Request) -> Response:
 
     return response
 
+
 @app.get("/auth/token")
 async def custom_token_auth() -> Response:
     user_id = str(uuid4())
@@ -29,6 +29,7 @@ async def custom_token_auth() -> Response:
     response = create_jwt(user)
 
     return response
+
 
 catch_all_route = None
 for route in app.routes:
@@ -39,6 +40,7 @@ if catch_all_route:
     app.routes.remove(catch_all_route)
     app.routes.append(catch_all_route)
 
+
 @cl.on_chat_start
 async def on_chat_start():
     user = cl.user_session.get("user")
@@ -48,4 +50,3 @@ async def on_chat_start():
 @cl.on_message
 async def on_message(msg: cl.Message):
     await cl.Message(content=f"Echo: {msg.content}").send()
-
