@@ -157,7 +157,8 @@ class TestDataLayer(cl_data.BaseDataLayer):
             thread["steps"].append(step_dict)
 
     async def get_thread_author(self, thread_id: str):
-        return (await self.get_thread(thread_id))["userIdentifier"]
+        thread = await self.get_thread(thread_id)
+        return thread["userIdentifier"] if thread else None
 
     async def list_threads(
         self, pagination: Pagination, filters: ThreadFilter
