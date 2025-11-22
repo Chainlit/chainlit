@@ -33,7 +33,9 @@ const login = (username: string = 'user1', password: string = 'user1') => {
   cy.location('pathname').should('eq', '/login');
 
   cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type(username);
-  cy.get(SELECTORS.PASSWORD_INPUT).should('be.visible').type(`${password}{enter}`);
+  cy.get(SELECTORS.PASSWORD_INPUT)
+    .should('be.visible')
+    .type(`${password}{enter}`);
 };
 
 const startConversation = () => {
@@ -190,36 +192,45 @@ describe.skip('Data Layer', () => {
 describe('Access Control', () => {
   before(cleanupThreadHistory);
 
-  it('should not allow steal user\'s thread', () => {
-    login('user1', 'user1');startConversation();
+  it("should not allow steal user's thread", () => {
+    login('user1', 'user1');
+    startConversation();
 
     let stolenThreadId = '';
-    cy.location('pathname').should('match', /^\/thread\//).then((pathname) => {
-      const parts = pathname.split('/');
-      stolenThreadId = parts[2];
-      expect(stolenThreadId).to.match(/^[a-zA-Z0-9_-]+$/);
-    });
+    cy.location('pathname')
+      .should('match', /^\/thread\//)
+      .then((pathname) => {
+        const parts = pathname.split('/');
+        stolenThreadId = parts[2];
+        expect(stolenThreadId).to.match(/^[a-zA-Z0-9_-]+$/);
+      });
 
     cy.clearCookies();
     cy.clearLocalStorage();
 
     login('user2', 'user2');
 
-    cy.intercept({
-      method: 'POST',
-      url: /\/ws\/socket\.io\/.*transport=polling/
-    }, (request) => {
-      if (typeof request.body === 'string' && request.body.includes('"threadId"')) {
-        request.body = request.body.replace(
-          /("threadId":\s*")[^"]*(")/,
-          `$1${stolenThreadId}$2`
-        );
-        expect(request.url).to.include('/ws/socket.io/');
-        expect(request.body).to.include(`"threadId":"${stolenThreadId}"`);
+    cy.intercept(
+      {
+        method: 'POST',
+        url: /\/ws\/socket\.io\/.*transport=polling/
+      },
+      (request) => {
+        if (
+          typeof request.body === 'string' &&
+          request.body.includes('"threadId"')
+        ) {
+          request.body = request.body.replace(
+            /("threadId":\s*")[^"]*(")/,
+            `$1${stolenThreadId}$2`
+          );
+          expect(request.url).to.include('/ws/socket.io/');
+          expect(request.body).to.include(`"threadId":"${stolenThreadId}"`);
+        }
       }
-    }).as('threadHijack');
+    ).as('threadHijack');
     startNewThread();
 
-    cy.get(SELECTORS.STEP).should('have.length.at.most', 1);
+    cy.get(SELECTORS.STEP).should('have.length', 0);
   });
-})
+});
