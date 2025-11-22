@@ -145,7 +145,7 @@ const cleanupThreadHistory = () => {
   cy.exec(command, { failOnNonZeroExit: false });
 };
 
-describe.skip('Data Layer', () => {
+describe('Data Layer', () => {
   describe('Data Features with Persistence', () => {
     before(cleanupThreadHistory);
     afterEach(cleanupThreadHistory);
