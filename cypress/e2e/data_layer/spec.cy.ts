@@ -228,7 +228,7 @@ describe('Access Control', () => {
           expect(request.body).to.include(`"threadId":"${stolenThreadId}"`);
         }
       }
-    ).as('threadHijack');
+    );
     startNewThread();
 
     cy.get(SELECTORS.STEP).should('have.length', 0);
