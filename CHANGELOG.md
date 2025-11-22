@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.9.2] - 2025-11-22
 
 ### Added
-- Add tests for socker, chat context, cache, translations & oauth providers
+- Add tests for socket, chat context, cache, translations & oauth providers
 
 ### Fixed
 - Fix copilot breaking change introduced in 2.8.5
