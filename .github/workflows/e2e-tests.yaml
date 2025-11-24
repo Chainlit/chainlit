@@ -3,7 +3,7 @@ name: E2E tests
 on: [workflow_call]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: e2e-tests-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 permissions: read-all

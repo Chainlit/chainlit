@@ -16,7 +16,7 @@ on:
       - LICENSE
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 permissions: read-all

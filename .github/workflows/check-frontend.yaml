@@ -3,7 +3,7 @@ name: Check frontend & libs
 on: [workflow_call]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: check-frontend-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 permissions: read-all

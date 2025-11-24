@@ -1,6 +1,10 @@
-name: Tests
+name: Unit & integration tests
 
 on: [workflow_call]
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 permissions: read-all
 
