@@ -19,26 +19,14 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
-permissions:
-  actions: read
-  artifact-metadata: read
-  attestations: read
-  checks: write
-  contents: read
-  deployments: read
-  discussions: read
-  issues: read
-  models: read
-  packages: read
-  pages: read
-  pull-requests: read
-  repository-projects: read
-  security-events: read
-  statuses: read
+permissions: read-all
 
 jobs:
   check-backend:
     uses: ./.github/workflows/check-backend.yaml
+    permissions:
+      contents: read
+      checks: write
     secrets: inherit
   check-frontend:
     uses: ./.github/workflows/check-frontend.yaml
