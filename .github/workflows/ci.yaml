@@ -20,8 +20,19 @@ concurrency:
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
 permissions:
-  contents: read
+  actions: read
+  artifact-metadata: read
+  attestations: read
   checks: write
+  contents: read
+  deployments: read
+  issues: read
+  discussions: read
+  packages: read
+  pages: read
+  pull-requests: read
+  security-events: read
+  statuses: read
 
 jobs:
   check-backend:
