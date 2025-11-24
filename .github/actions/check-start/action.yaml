@@ -1,0 +1,30 @@
+name: Start GitHub check
+description: Create a GitHub check run in progress state
+
+inputs:
+  check_name:
+    description: Check name
+    required: true
+outputs:
+  check_id:
+    description: ID of the created check run
+    
+runs:
+  using: composite
+  steps:
+    - uses: actions/github-script@v8
+      id: script
+      with:
+        script: |
+          const check = await github.rest.checks.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            name: '${{ inputs.check_name }}',
+            head_sha: context.sha,
+            status: 'in_progress'
+          });
+          return check.data.id.toString();
+    - name: Set output
+      shell: bash
+      run: echo "check_id=${{ steps.script.outputs.result }}" >> $GITHUB_OUTPUT
+

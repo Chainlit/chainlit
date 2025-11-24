@@ -6,7 +6,9 @@ concurrency:
   group: check-backend-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
-permissions: read-all
+permissions:
+  contents: read
+  checks: write
 
 jobs:
   check-backend:
@@ -20,9 +22,39 @@ jobs:
         with:
           uv-args: --no-install-workspace --all-extras --dev
           working-directory: ${{ env.BACKEND_DIR }}
+          
+      - uses: ./.github/actions/check-start
+        id: linting-start          
+        with:
+          check_name: 'Linting'
       - name: Lint backend
+        id: linting-run
         run: uv run --no-project scripts/lint.py
+      - uses: ./.github/actions/check-complete
+        with:
+          check_id: ${{ steps.linting-start.outputs.check_id }}
+          check_outcome: ${{ steps.linting-run.outcome }}
+            
+      - uses: ./.github/actions/check-start
+        id: formatting-start          
+        with:
+          check_name: 'Formatting'
       - name: Check backend formatting
+        id: formatting-run
         run: uv run --no-project scripts/format.py --check
+      - uses: ./.github/actions/check-complete
+        with:
+          check_id: ${{ steps.formatting-start.outputs.check_id }}
+          check_outcome: ${{ steps.formatting-run.outcome }}
+            
+      - uses: ./.github/actions/check-start
+        id: typechecking-start          
+        with:
+          check_name: 'Type checking'
       - name: Typecheck backend
+        id: typechecking-run
         run: uv run --no-project scripts/type_check.py
+      - uses: ./.github/actions/check-complete
+        with:
+          check_id: ${{ steps.typechecking-start.outputs.check_id }}
+          check_outcome: ${{ steps.typechecking-run.outcome }}

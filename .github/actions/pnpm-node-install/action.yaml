@@ -5,7 +5,7 @@ inputs:
   node-version:
     description: Node.js version
     required: true
-    default: '24.3.0' # Switch to 'lts' as soon as Node 24 reaches LTS status.
+    default: 'lts'
 
 runs:
   using: composite
