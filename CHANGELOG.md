@@ -4,6 +4,24 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.9.2] - 2025-11-22
+
+### Added
+- Add tests for socket, chat context, cache, translations & oauth providers
+
+### Fixed
+- Fix copilot breaking change introduced in 2.8.5
+
+## [2.9.1] - 2025-11-20
+
+### Added
+- Add support for tabs in chat settings
+- Support markdown in watermark
+- Add italian translation to translations folder
+- Add query param prefill for chat
+- Add tests for utils, markdown, sidebar, chat settings, mcp, input widget, langchain, elements, steps, and actions
+
+
 ## [2.9.0] - 2025-11-06
 
 ### Added
@@ -13,6 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 
 ## [2.8.5] - 2025-11-07
+
 ### Added
 - Add display_name to ChatProfile
 - Add slack reaction event callback

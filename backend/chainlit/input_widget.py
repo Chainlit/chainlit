@@ -300,3 +300,17 @@ class RadioGroup(InputWidget):
             "description": self.description,
             "disabled": self.disabled,
         }
+
+
+@dataclass
+class Tab:
+    id: str
+    label: str
+    inputs: list[InputWidget] = Field(default_factory=list, exclude=True)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "label": self.label,
+            "inputs": [input.to_dict() for input in self.inputs],
+        }
