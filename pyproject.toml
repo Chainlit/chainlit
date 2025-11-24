@@ -1,8 +1,71 @@
 [dependency-groups]
 backend = ["chainlit"]
 
+[tool.mypy]
+python_version = "3.10"
+
+[[tool.mypy.overrides]]
+module = [
+    "boto3.dynamodb.types",
+    "botbuilder.*",
+    "filetype",
+    "langflow",
+    "lazify",
+    "plotly",
+    "nest_asyncio",
+    "socketio.*",
+    "syncer",
+    "azure.storage.filedatalake",
+    "google-cloud-storage",
+    "azure.storage.blob",
+    "azure.storage.blob.aio",
+    "google.auth",
+    "google.oauth2",
+]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
+testpaths = ["backend/tests"]
 asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "LOG",
+    "UP",
+    "T10",
+    "ISC",
+    "ICN",
+    "LOG",
+    "G",
+    "PIE",
+    "PT",
+    "Q",
+    "RSE",
+    "FURB",
+    "RUF",
+]
+ignore = [
+    "E712",
+    "E501",
+    "UP006",
+    "UP007",
+    "UP035",
+    "UP045",
+    "PIE790",
+    "RUF005",
+    "RUF006",
+    "RUF012",
+    "ISC001",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
 
 [tool.uv]
 default-groups = ["backend"]

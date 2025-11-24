@@ -20,7 +20,7 @@ authors = [
 ]
 license = { text = "Apache-2.0" }
 readme = "README.md"
-requires-python = ">=3.10,<4.0.0"
+requires-python = ">=3.10,<3.14.0"
 classifiers = [
     "Framework :: FastAPI",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
@@ -60,6 +60,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "hatchling",
     "ruff>=0.13.3,<1.0.0",
 ]
 
@@ -136,71 +137,3 @@ artifacts = [
 
 [tool.hatch.version]
 path = "chainlit/version.py"
-
-[tool.mypy]
-python_version = "3.10"
-explicit_package_bases = true
-
-[[tool.mypy.overrides]]
-module = [
-    "boto3.dynamodb.types",
-    "botbuilder.*",
-    "filetype",
-    "langflow",
-    "lazify",
-    "plotly",
-    "nest_asyncio",
-    "socketio.*",
-    "syncer",
-    "azure.storage.filedatalake",
-    "google-cloud-storage",
-    "azure.storage.blob",
-    "azure.storage.blob.aio",
-    "google.auth",
-    "google.oauth2",
-]
-
-ignore_missing_imports = true
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-asyncio_mode = "auto"
-
-[tool.ruff]
-target-version = "py310"
-
-[tool.ruff.lint]
-select = [
-    "E",
-    "F",
-    "I",
-    "LOG",
-    "UP",
-    "T10",
-    "ISC",
-    "ICN",
-    "LOG",
-    "G",
-    "PIE",
-    "PT",
-    "Q",
-    "RSE",
-    "FURB",
-    "RUF",
-]
-ignore = [
-    "E712",
-    "E501",
-    "UP006",
-    "UP007",
-    "UP035",
-    "UP045",
-    "PIE790",
-    "RUF005",
-    "RUF006",
-    "RUF012",
-    "ISC001",
-]
-
-[tool.ruff.lint.isort]
-combine-as-imports = true

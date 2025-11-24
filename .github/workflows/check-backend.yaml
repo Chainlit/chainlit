@@ -14,7 +14,7 @@ jobs:
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python dependencies
         with:
-          uv-args: --no-install-workspace --all-extras
+          uv-args: --no-install-workspace --all-extras --dev
           working-directory: ${{ env.BACKEND_DIR }}
       - name: Lint backend
         run: uv run --no-project scripts/lint.py

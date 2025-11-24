@@ -75,7 +75,7 @@ The following command will install Python dependencies, Node (pnpm) dependencies
 
 ```sh
 cd backend
-uv sync --extra tests --extra mypy --extra dev --extra custom-data
+uv sync --all-packages --all-extras --dev
 ```
 
 ## Start the Chainlit server from source
@@ -148,5 +148,3 @@ pnpm test:e2e:interactive // runs `cypress open`
 ```
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
-
-Make sure to run `uv sync` again whenever you've updated the frontend!
