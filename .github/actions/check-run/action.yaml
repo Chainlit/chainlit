@@ -23,7 +23,7 @@ runs:
             head_sha: context.sha,
             status: 'in_progress'
           });
-          return check.data.id.toString();
+          return check.data.id;
     - name: Run command
       id: run-command
       shell: bash
@@ -36,7 +36,7 @@ runs:
           await github.rest.checks.update({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            check_run_id: '${{ steps.create-check.outputs.result }}',
+            check_run_id: ${{ steps.create-check.outputs.result }},
             status: 'completed',
             conclusion: conclusion
           });
