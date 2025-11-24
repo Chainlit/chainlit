@@ -8,10 +8,15 @@ from fastapi import HTTPException
 from chainlit.oauth_providers import (
     ACCESS_TOKEN_MISSING,
     Auth0OAuthProvider,
+    AWSCognitoOAuthProvider,
+    AzureADHybridOAuthProvider,
     AzureADOAuthProvider,
+    DescopeOAuthProvider,
     GenericOAuthProvider,
     GithubOAuthProvider,
+    GitlabOAuthProvider,
     GoogleOAuthProvider,
+    KeycloakOAuthProvider,
     OAuthProvider,
     OktaOAuthProvider,
     get_configured_oauth_providers,
@@ -646,6 +651,496 @@ class TestGenericOAuthProvider:
             provider = GenericOAuthProvider()
 
             assert provider.user_identifier == "username"
+
+
+class TestAzureADHybridOAuthProvider:
+    """Test suite for AzureADHybridOAuthProvider."""
+
+    def test_azure_ad_hybrid_provider_initialization(self):
+        """Test AzureADHybridOAuthProvider initialization."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_AZURE_AD_HYBRID_CLIENT_ID": "hybrid_client_id",
+                "OAUTH_AZURE_AD_HYBRID_CLIENT_SECRET": "hybrid_secret",
+                "OAUTH_AZURE_AD_HYBRID_TENANT_ID": "tenant_456",
+            },
+        ):
+            provider = AzureADHybridOAuthProvider()
+
+            assert provider.id == "azure-ad-hybrid"
+            assert provider.client_id == "hybrid_client_id"
+            assert provider.client_secret == "hybrid_secret"
+            assert "tenant" in provider.authorize_params
+            assert provider.authorize_params["tenant"] == "tenant_456"
+            assert provider.authorize_params["response_type"] == "code id_token"
+            assert provider.authorize_params["response_mode"] == "form_post"
+            assert "nonce" in provider.authorize_params
+
+    @pytest.mark.asyncio
+    async def test_azure_ad_hybrid_get_token_success(self):
+        """Test AzureADHybrid get_token with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_AZURE_AD_HYBRID_CLIENT_ID": "hybrid_id",
+                "OAUTH_AZURE_AD_HYBRID_CLIENT_SECRET": "hybrid_secret",
+                "OAUTH_AZURE_AD_HYBRID_TENANT_ID": "tenant_789",
+            },
+        ):
+            provider = AzureADHybridOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "access_token": "hybrid_access_token",
+                "refresh_token": "hybrid_refresh_token",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.post = AsyncMock(
+                    return_value=mock_response
+                )
+
+                token = await provider.get_token(
+                    "auth_code", "http://localhost/callback"
+                )
+
+                assert token == "hybrid_access_token"
+                assert provider._refresh_token == "hybrid_refresh_token"
+
+    @pytest.mark.asyncio
+    async def test_azure_ad_hybrid_get_user_info_success(self):
+        """Test AzureADHybrid get_user_info with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_AZURE_AD_HYBRID_CLIENT_ID": "hybrid_id",
+                "OAUTH_AZURE_AD_HYBRID_CLIENT_SECRET": "hybrid_secret",
+                "OAUTH_AZURE_AD_HYBRID_TENANT_ID": "tenant_789",
+            },
+        ):
+            provider = AzureADHybridOAuthProvider()
+            provider._refresh_token = "refresh_token_hybrid"
+
+            mock_user_response = Mock()
+            mock_user_response.json.return_value = {
+                "userPrincipalName": "hybrid@company.com",
+                "displayName": "Hybrid User",
+            }
+            mock_user_response.raise_for_status = Mock()
+
+            mock_photo_response = Mock()
+            mock_photo_response.aread = AsyncMock(return_value=b"photo_bytes")
+            mock_photo_response.headers = {"Content-Type": "image/png"}
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_get = AsyncMock(
+                    side_effect=[mock_user_response, mock_photo_response]
+                )
+                mock_client.return_value.__aenter__.return_value.get = mock_get
+
+                azure_user, user = await provider.get_user_info("test_token")
+
+                assert azure_user["userPrincipalName"] == "hybrid@company.com"
+                assert isinstance(user, User)
+                assert user.identifier == "hybrid@company.com"
+                assert user.metadata["provider"] == "azure-ad"
+                assert user.metadata["refresh_token"] == "refresh_token_hybrid"
+
+
+class TestDescopeOAuthProvider:
+    """Test suite for DescopeOAuthProvider."""
+
+    def test_descope_provider_initialization(self):
+        """Test DescopeOAuthProvider initialization."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_DESCOPE_CLIENT_ID": "descope_client_id",
+                "OAUTH_DESCOPE_CLIENT_SECRET": "descope_secret",
+            },
+        ):
+            provider = DescopeOAuthProvider()
+
+            assert provider.id == "descope"
+            assert provider.client_id == "descope_client_id"
+            assert provider.client_secret == "descope_secret"
+            assert "openid profile email" in provider.authorize_params["scope"]
+
+    @pytest.mark.asyncio
+    async def test_descope_get_token_success(self):
+        """Test Descope get_token with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_DESCOPE_CLIENT_ID": "descope_id",
+                "OAUTH_DESCOPE_CLIENT_SECRET": "descope_secret",
+            },
+        ):
+            provider = DescopeOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "access_token": "descope_access_token",
+                "token_type": "Bearer",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.post = AsyncMock(
+                    return_value=mock_response
+                )
+
+                token = await provider.get_token(
+                    "auth_code", "http://localhost/callback"
+                )
+
+                assert token == "descope_access_token"
+
+    @pytest.mark.asyncio
+    async def test_descope_get_user_info_success(self):
+        """Test Descope get_user_info with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_DESCOPE_CLIENT_ID": "descope_id",
+                "OAUTH_DESCOPE_CLIENT_SECRET": "descope_secret",
+            },
+        ):
+            provider = DescopeOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "email": "user@descope.com",
+                "name": "Descope User",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.get = AsyncMock(
+                    return_value=mock_response
+                )
+
+                descope_user, user = await provider.get_user_info("test_token")
+
+                assert descope_user["email"] == "user@descope.com"
+                assert isinstance(user, User)
+                assert user.identifier == "user@descope.com"
+                assert user.metadata["provider"] == "descope"
+
+
+class TestAWSCognitoOAuthProvider:
+    """Test suite for AWSCognitoOAuthProvider."""
+
+    def test_cognito_provider_initialization(self):
+        """Test AWSCognitoOAuthProvider initialization."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_COGNITO_CLIENT_ID": "cognito_client_id",
+                "OAUTH_COGNITO_CLIENT_SECRET": "cognito_secret",
+                "OAUTH_COGNITO_DOMAIN": "my-app.auth.us-east-1.amazoncognito.com",
+            },
+        ):
+            provider = AWSCognitoOAuthProvider()
+
+            assert provider.id == "aws-cognito"
+            assert provider.client_id == "cognito_client_id"
+            assert provider.client_secret == "cognito_secret"
+            assert "openid profile email" in provider.scopes
+
+    def test_cognito_provider_custom_scopes(self):
+        """Test AWSCognitoOAuthProvider with custom scopes."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_COGNITO_CLIENT_ID": "cognito_id",
+                "OAUTH_COGNITO_CLIENT_SECRET": "cognito_secret",
+                "OAUTH_COGNITO_DOMAIN": "my-app.auth.us-east-1.amazoncognito.com",
+                "OAUTH_COGNITO_SCOPE": "openid email phone",
+            },
+        ):
+            provider = AWSCognitoOAuthProvider()
+
+            assert provider.scopes == "openid email phone"
+            assert provider.authorize_params["scope"] == "openid email phone"
+
+    @pytest.mark.asyncio
+    async def test_cognito_get_token_success(self):
+        """Test Cognito get_token with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_COGNITO_CLIENT_ID": "cognito_id",
+                "OAUTH_COGNITO_CLIENT_SECRET": "cognito_secret",
+                "OAUTH_COGNITO_DOMAIN": "my-app.auth.us-east-1.amazoncognito.com",
+            },
+        ):
+            provider = AWSCognitoOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "access_token": "cognito_access_token",
+                "token_type": "Bearer",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.post = AsyncMock(
+                    return_value=mock_response
+                )
+
+                token = await provider.get_token(
+                    "auth_code", "http://localhost/callback"
+                )
+
+                assert token == "cognito_access_token"
+
+    @pytest.mark.asyncio
+    async def test_cognito_get_user_info_success(self):
+        """Test Cognito get_user_info with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_COGNITO_CLIENT_ID": "cognito_id",
+                "OAUTH_COGNITO_CLIENT_SECRET": "cognito_secret",
+                "OAUTH_COGNITO_DOMAIN": "my-app.auth.us-east-1.amazoncognito.com",
+            },
+        ):
+            provider = AWSCognitoOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "email": "user@cognito.com",
+                "picture": "https://cognito.com/photo.jpg",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.get = AsyncMock(
+                    return_value=mock_response
+                )
+
+                cognito_user, user = await provider.get_user_info("test_token")
+
+                assert cognito_user["email"] == "user@cognito.com"
+                assert isinstance(user, User)
+                assert user.identifier == "user@cognito.com"
+                assert user.metadata["provider"] == "aws-cognito"
+                assert user.metadata["image"] == "https://cognito.com/photo.jpg"
+
+
+class TestGitlabOAuthProvider:
+    """Test suite for GitlabOAuthProvider."""
+
+    def test_gitlab_provider_initialization(self):
+        """Test GitlabOAuthProvider initialization."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_GITLAB_CLIENT_ID": "gitlab_client_id",
+                "OAUTH_GITLAB_CLIENT_SECRET": "gitlab_secret",
+                "OAUTH_GITLAB_DOMAIN": "gitlab.example.com",
+            },
+        ):
+            provider = GitlabOAuthProvider()
+
+            assert provider.id == "gitlab"
+            assert provider.client_id == "gitlab_client_id"
+            assert provider.client_secret == "gitlab_secret"
+            assert "gitlab.example.com" in provider.domain
+            assert "openid profile email" in provider.authorize_params["scope"]
+
+    def test_gitlab_provider_strips_trailing_slash(self):
+        """Test GitlabOAuthProvider strips trailing slash from domain."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_GITLAB_CLIENT_ID": "gitlab_id",
+                "OAUTH_GITLAB_CLIENT_SECRET": "gitlab_secret",
+                "OAUTH_GITLAB_DOMAIN": "gitlab.example.com/",
+            },
+        ):
+            provider = GitlabOAuthProvider()
+
+            assert not provider.domain.endswith("/")
+
+    @pytest.mark.asyncio
+    async def test_gitlab_get_token_success(self):
+        """Test Gitlab get_token with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_GITLAB_CLIENT_ID": "gitlab_id",
+                "OAUTH_GITLAB_CLIENT_SECRET": "gitlab_secret",
+                "OAUTH_GITLAB_DOMAIN": "gitlab.example.com",
+            },
+        ):
+            provider = GitlabOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "access_token": "gitlab_access_token",
+                "token_type": "Bearer",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.post = AsyncMock(
+                    return_value=mock_response
+                )
+
+                token = await provider.get_token(
+                    "auth_code", "http://localhost/callback"
+                )
+
+                assert token == "gitlab_access_token"
+
+    @pytest.mark.asyncio
+    async def test_gitlab_get_user_info_success(self):
+        """Test Gitlab get_user_info with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_GITLAB_CLIENT_ID": "gitlab_id",
+                "OAUTH_GITLAB_CLIENT_SECRET": "gitlab_secret",
+                "OAUTH_GITLAB_DOMAIN": "gitlab.example.com",
+            },
+        ):
+            provider = GitlabOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "email": "user@gitlab.com",
+                "picture": "https://gitlab.com/avatar.png",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.get = AsyncMock(
+                    return_value=mock_response
+                )
+
+                gitlab_user, user = await provider.get_user_info("test_token")
+
+                assert gitlab_user["email"] == "user@gitlab.com"
+                assert isinstance(user, User)
+                assert user.identifier == "user@gitlab.com"
+                assert user.metadata["provider"] == "gitlab"
+                assert user.metadata["image"] == "https://gitlab.com/avatar.png"
+
+
+class TestKeycloakOAuthProvider:
+    """Test suite for KeycloakOAuthProvider."""
+
+    def test_keycloak_provider_initialization(self):
+        """Test KeycloakOAuthProvider initialization."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_KEYCLOAK_CLIENT_ID": "keycloak_client_id",
+                "OAUTH_KEYCLOAK_CLIENT_SECRET": "keycloak_secret",
+                "OAUTH_KEYCLOAK_REALM": "my-realm",
+                "OAUTH_KEYCLOAK_BASE_URL": "https://keycloak.example.com",
+            },
+        ):
+            provider = KeycloakOAuthProvider()
+
+            assert provider.client_id == "keycloak_client_id"
+            assert provider.client_secret == "keycloak_secret"
+            assert provider.realm == "my-realm"
+            assert provider.base_url == "https://keycloak.example.com"
+            assert "profile email openid" in provider.authorize_params["scope"]
+
+    def test_keycloak_provider_custom_name(self):
+        """Test KeycloakOAuthProvider with custom name."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_KEYCLOAK_NAME": "my-keycloak",
+                "OAUTH_KEYCLOAK_CLIENT_ID": "keycloak_id",
+                "OAUTH_KEYCLOAK_CLIENT_SECRET": "keycloak_secret",
+                "OAUTH_KEYCLOAK_REALM": "my-realm",
+                "OAUTH_KEYCLOAK_BASE_URL": "https://keycloak.example.com",
+            },
+            clear=False,
+        ):
+            from importlib import reload
+
+            import chainlit.oauth_providers as oauth_module
+
+            reload(oauth_module)
+
+            provider = oauth_module.KeycloakOAuthProvider()
+
+            assert provider.id == "my-keycloak"
+
+    @pytest.mark.asyncio
+    async def test_keycloak_get_token_success(self):
+        """Test Keycloak get_token with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_KEYCLOAK_CLIENT_ID": "keycloak_id",
+                "OAUTH_KEYCLOAK_CLIENT_SECRET": "keycloak_secret",
+                "OAUTH_KEYCLOAK_REALM": "my-realm",
+                "OAUTH_KEYCLOAK_BASE_URL": "https://keycloak.example.com",
+            },
+        ):
+            provider = KeycloakOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "access_token": "keycloak_access_token",
+                "refresh_token": "keycloak_refresh_token",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.post = AsyncMock(
+                    return_value=mock_response
+                )
+
+                token = await provider.get_token(
+                    "auth_code", "http://localhost/callback"
+                )
+
+                assert token == "keycloak_access_token"
+                assert provider.refresh_token == "keycloak_refresh_token"
+
+    @pytest.mark.asyncio
+    async def test_keycloak_get_user_info_success(self):
+        """Test Keycloak get_user_info with successful response."""
+        with patch.dict(
+            os.environ,
+            {
+                "OAUTH_KEYCLOAK_CLIENT_ID": "keycloak_id",
+                "OAUTH_KEYCLOAK_CLIENT_SECRET": "keycloak_secret",
+                "OAUTH_KEYCLOAK_REALM": "my-realm",
+                "OAUTH_KEYCLOAK_BASE_URL": "https://keycloak.example.com",
+            },
+        ):
+            provider = KeycloakOAuthProvider()
+
+            mock_response = Mock()
+            mock_response.json.return_value = {
+                "email": "user@keycloak.com",
+                "name": "Keycloak User",
+            }
+            mock_response.raise_for_status = Mock()
+
+            with patch("httpx.AsyncClient") as mock_client:
+                mock_client.return_value.__aenter__.return_value.get = AsyncMock(
+                    return_value=mock_response
+                )
+
+                keycloak_user, user = await provider.get_user_info("test_token")
+
+                assert keycloak_user["email"] == "user@keycloak.com"
+                assert isinstance(user, User)
+                assert user.identifier == "user@keycloak.com"
+                assert user.metadata["provider"] == "keycloak"
 
 
 class TestHelperFunctions:
