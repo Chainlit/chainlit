@@ -13,7 +13,7 @@ permissions:
 jobs:
   check-backend:
     runs-on: ubuntu-latest
-    name: Run checks
+    name: run checks
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/uv-python-install
