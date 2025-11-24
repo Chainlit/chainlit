@@ -16,7 +16,7 @@ runs:
       id: create-check
       with:
         script: |
-          const check = await github.checks.create({
+          const check = await github.rest.checks.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
             name: '${{ inputs.check_name }}',
@@ -33,10 +33,10 @@ runs:
       with:
         script: |
           const conclusion = '${{ steps.run-command.outcome }}' === 'success' ? 'success' : 'failure';
-          await github.checks.update({
+          await github.rest.checks.update({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            check_run_id: parseInt('${{ steps.create-check.outputs.result }}'),
+            check_run_id: '${{ steps.create-check.outputs.result }}',
             status: 'completed',
             conclusion: conclusion
           });
