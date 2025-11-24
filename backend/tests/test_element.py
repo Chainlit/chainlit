@@ -2,7 +2,6 @@ import uuid
 from unittest.mock import AsyncMock
 
 import pytest
-
 from chainlit.element import (
     Audio,
     CustomElement,

@@ -1,6 +1,5 @@
-import matplotlib.pyplot as plt
-
 import chainlit as cl
+import matplotlib.pyplot as plt
 
 
 @cl.on_chat_start

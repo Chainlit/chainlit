@@ -3,7 +3,6 @@ import uuid
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
 from chainlit.context import local_steps
 from chainlit.element import Element
 from chainlit.step import (

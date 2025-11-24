@@ -1,14 +1,13 @@
 import pytest
-from fastapi import FastAPI, Form
-from fastapi.testclient import TestClient
-from starlette.requests import Request
-from starlette.responses import Response
-
 from chainlit.auth import (
     clear_auth_cookie,
     get_token_from_cookies,
     set_auth_cookie,
 )
+from fastapi import FastAPI, Form
+from fastapi.testclient import TestClient
+from starlette.requests import Request
+from starlette.responses import Response
 
 
 @pytest.fixture

@@ -5,7 +5,6 @@ from unittest.mock import AsyncMock, patch
 
 import click
 import pytest
-
 from chainlit.utils import (
     check_file,
     check_module_version,

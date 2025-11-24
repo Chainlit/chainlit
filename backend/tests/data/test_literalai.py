@@ -3,6 +3,15 @@ import uuid
 from unittest.mock import ANY, AsyncMock, Mock, patch
 
 import pytest
+from chainlit.data.literalai import LiteralDataLayer, LiteralToChainlitConverter
+from chainlit.element import Audio, File, Image, Pdf, Text, Video
+from chainlit.step import Step, StepDict
+from chainlit.types import (
+    Feedback,
+    Pagination,
+    ThreadFilter,
+)
+from chainlit.user import PersistedUser, User
 from httpx import HTTPStatusError, RequestError
 from literalai import (
     AsyncLiteralClient,
@@ -23,16 +32,6 @@ from literalai.observability.step import (
     StepDict as LiteralStepDict,
 )
 from literalai.observability.thread import ThreadDict as LiteralThreadDict
-
-from chainlit.data.literalai import LiteralDataLayer, LiteralToChainlitConverter
-from chainlit.element import Audio, File, Image, Pdf, Text, Video
-from chainlit.step import Step, StepDict
-from chainlit.types import (
-    Feedback,
-    Pagination,
-    ThreadFilter,
-)
-from chainlit.user import PersistedUser, User
 
 
 @pytest.fixture

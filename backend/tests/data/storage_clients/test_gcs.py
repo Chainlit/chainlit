@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from chainlit.data.storage_clients.base import storage_expiry_time
 from chainlit.data.storage_clients.gcs import GCSStorageClient
 
