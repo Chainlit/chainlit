@@ -5,7 +5,7 @@ inputs:
   node-version:
     description: Node.js version
     required: true
-    default: 'lts'
+    default: 'lts/*'
 
 runs:
   using: composite
@@ -15,7 +15,7 @@ runs:
       with:
         run_install: false
     - name: Use Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
         registry-url: 'https://registry.npmjs.org'
