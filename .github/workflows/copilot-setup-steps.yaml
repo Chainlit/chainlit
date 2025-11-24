@@ -38,4 +38,4 @@ jobs:
         with:
           python-version: "3.10"
           uv-version: "latest"
-          uv-args: "--all-packages --all-extras --dev"
+          uv-args: "-all-extras --dev"
