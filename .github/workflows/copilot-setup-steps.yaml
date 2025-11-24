@@ -38,9 +38,4 @@ jobs:
         with:
           python-version: "3.10"
           uv-version: "latest"
-          working-directory: "./backend"
-          uv-args: "--all-extras"
-
-      - name: Build UI components
-        run: pnpm run buildUi
-        timeout-minutes: 5
+          uv-args: "--all-packages --all-extras --dev"
