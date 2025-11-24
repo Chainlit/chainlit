@@ -578,7 +578,8 @@ class ChainlitDataLayer(BaseDataLayer):
         # Merge incoming metadata with existing metadata, deleting incoming keys with None values
         if metadata is not None:
             existing = await self.execute_query(
-                'SELECT "metadata" FROM "Thread" WHERE id = $1', {"thread_id": thread_id}
+                'SELECT "metadata" FROM "Thread" WHERE id = $1',
+                {"thread_id": thread_id},
             )
             base = {}
             if isinstance(existing, list) and existing:
