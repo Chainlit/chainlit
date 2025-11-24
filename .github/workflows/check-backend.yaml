@@ -1,4 +1,4 @@
-name: LintBackend
+name: Check backend
 
 on: [workflow_call]
 

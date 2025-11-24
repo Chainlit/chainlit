@@ -1,4 +1,4 @@
-name: Lint frontend & libs
+name: Check frontend & libs
 
 on: [workflow_call]
 

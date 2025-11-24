@@ -1,4 +1,4 @@
-name: Pytest
+name: Tests
 
 on: [workflow_call]
 
