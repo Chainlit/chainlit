@@ -19,7 +19,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: ${{ github.ref_name != 'main' }}
 
-permissions: read-all
+permissions:
+  contents: read
+  checks: write
 
 jobs:
   check-backend:
