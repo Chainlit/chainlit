@@ -19,7 +19,7 @@ runs:
           const check = await github.rest.checks.create({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            name: '${{ inputs.check_name }}',
+            name: '${{ github.workflow }} / ${inputs.check_name }}',
             head_sha: context.sha,
             status: 'in_progress'
           });
