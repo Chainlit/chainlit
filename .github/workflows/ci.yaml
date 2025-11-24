@@ -30,6 +30,9 @@ jobs:
     secrets: inherit
   check-frontend:
     uses: ./.github/workflows/check-frontend.yaml
+    permissions:
+      contents: read
+      checks: write
     secrets: inherit
   tests:
     uses: ./.github/workflows/tests.yaml

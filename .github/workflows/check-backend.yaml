@@ -22,15 +22,15 @@ jobs:
           
       - uses: ./.github/actions/check-run
         with:
-          check_name: 'Linting'
+          check_name: 'Linting: backend'
           command: uv run --no-project scripts/lint.py
           
       - uses: ./.github/actions/check-run
         with:
-          check_name: 'Formatting'
+          check_name: 'Formatting: backend'
           command: uv run --no-project scripts/format.py --check
           
       - uses: ./.github/actions/check-run
         with:
-          check_name: 'Type checking'
+          check_name: 'Type checking: backend'
           command: uv run --no-project scripts/type_check.py
