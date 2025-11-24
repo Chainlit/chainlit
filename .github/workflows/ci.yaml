@@ -26,11 +26,14 @@ permissions:
   checks: write
   contents: read
   deployments: read
-  issues: read
   discussions: read
+  id-token: read
+  issues: read
+  models: read
   packages: read
   pages: read
   pull-requests: read
+  repository-projects: read
   security-events: read
   statuses: read
 
