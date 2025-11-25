@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from typing import Any, Dict
 from unittest.mock import AsyncMock, Mock
 
 from chainlit import config
@@ -67,6 +68,8 @@ async def test_oauth_callback(test_config: config.ChainlitConfig):
     from chainlit.callbacks import oauth_callback
     from chainlit.user import User
 
+    valid_raw_response = {"access_token": "valid_token", "token_type": "Bearer"}
+
     # Mock the get_configured_oauth_providers function
     with patch(
         "chainlit.callbacks.get_configured_oauth_providers", return_value=["google"]
@@ -78,10 +81,12 @@ async def test_oauth_callback(test_config: config.ChainlitConfig):
             token: str,
             raw_user_data: dict,
             default_app_user: User,
+            raw_oauth_response: Dict[str, Any],
             id_token: str | None = None,
         ) -> User | None:
-            if provider_id == "google" and token == "valid_token":  # nosec B105
-                return User(identifier="oauth_user")
+            if raw_oauth_response.get("token_type") == "Bearer":
+                if provider_id == "google" and token == "valid_token":  # nosec B105
+                    return User(identifier="oauth_user")
             return None
 
         # Test that the callback is properly registered
@@ -89,14 +94,18 @@ async def test_oauth_callback(test_config: config.ChainlitConfig):
 
         # Test the wrapped function with valid data
         result = await test_config.code.oauth_callback(
-            "google", "valid_token", {}, User(identifier="default_user")
+            "google",
+            "valid_token",
+            {},
+            User(identifier="default_user"),
+            valid_raw_response,
         )
         assert isinstance(result, User)
         assert result.identifier == "oauth_user"
 
         # Test with invalid data
         result = await test_config.code.oauth_callback(
-            "facebook", "invalid_token", {}, User(identifier="default_user")
+            "facebook", "invalid_token", {}, User(identifier="default_user"), {}
         )
         assert result is None
 
