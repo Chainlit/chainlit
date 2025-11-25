@@ -1,0 +1,37 @@
+name: Check backend
+
+on: [workflow_call]
+
+concurrency:
+  group: check-backend-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  check-backend:
+    runs-on: ubuntu-latest
+    name: run checks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/uv-python-install
+        name: Install Python, uv and Python dependencies
+        with:
+          uv-args: --no-install-workspace --all-extras --dev
+          
+      - uses: ./.github/actions/check-run
+        with:
+          check_name: 'Linting: backend'
+          command: uv run --no-project scripts/lint.py
+          
+      - uses: ./.github/actions/check-run
+        with:
+          check_name: 'Formatting: backend'
+          command: uv run --no-project scripts/format.py --check
+          
+      - uses: ./.github/actions/check-run
+        with:
+          check_name: 'Type checking: backend'
+          command: uv run --no-project scripts/type_check.py

@@ -3,8 +3,6 @@ from unittest.mock import AsyncMock, Mock, patch
 
 import httpx
 import pytest
-from fastapi import HTTPException
-
 from chainlit.oauth_providers import (
     ACCESS_TOKEN_MISSING,
     Auth0OAuthProvider,
@@ -23,6 +21,7 @@ from chainlit.oauth_providers import (
     get_oauth_provider,
 )
 from chainlit.user import User
+from fastapi import HTTPException
 
 
 class TestOAuthProviderBase:

@@ -15,13 +15,12 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
     - [Requirements](#requirements)
     - [Set up the repo](#set-up-the-repo)
     - [Install dependencies](#install-dependencies)
-    - [Build Frontend](#build-frontend)
   - [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
   - [Start the UI from source](#start-the-ui-from-source)
   - [Run the tests](#run-the-tests)
     - [Backend unit tests](#backend-unit-tests)
+    - [Frontend unit tests](#frontend-unit-tests)
     - [E2E tests](#e2e-tests)
-    - [Headed/debugging](#headeddebugging)
 
 ## Local setup
 
@@ -76,7 +75,7 @@ The following command will install Python dependencies, Node (pnpm) dependencies
 
 ```sh
 cd backend
-uv sync --extra tests --extra mypy --extra dev --extra custom-data
+uv sync --all-packages --all-extras --dev
 ```
 
 ## Start the Chainlit server from source
@@ -116,6 +115,14 @@ cd backend
 uv run pytest --cov=chainlit
 ```
 
+### Frontend unit tests
+
+This will run the frontend's unit tests.
+
+```
+pnpm test
+```
+
 ### E2E tests
 
 You may need additional configuration or dependency installation to run Cypress. See the [Cypress system requirements](https://docs.cypress.io/app/get-started/install-cypress#System-requirements) for details.
@@ -124,12 +131,12 @@ This will run end to end tests, assessing both the frontend, the backend and the
 
 ```sh
 // from root
-pnpm test // will do cypress run
-pnpm test -- --spec cypress/e2e/copilot // will run single test with the name copilot
-pnpm test -- --spec "cypress/e2e/copilot,cypress/e2e/data_layer" // will run two tests with the names copilot and data_layer
-pnpm test -- --spec "cypress/e2e/**/async-*" // will run all async tests
-pnpm test -- --spec "cypress/e2e/**/sync-*" // will run all sync tests
-pnpm test -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
+pnpm test:e2e // will do cypress run
+pnpm test:e2e -- --spec cypress/e2e/copilot // will run single test with the name copilot
+pnpm test:e2e -- --spec "cypress/e2e/copilot,cypress/e2e/data_layer" // will run two tests with the names copilot and data_layer
+pnpm test:e2e -- --spec "cypress/e2e/**/async-*" // will run all async tests
+pnpm test:e2e -- --spec "cypress/e2e/**/sync-*" // will run all sync tests
+pnpm test:e2e -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
 ```
 
 (Go grab a cup of something, this will take a while.)
@@ -137,18 +144,7 @@ pnpm test -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
 For debugging purposes, you can use the **interactive mode** (Cypress UI). Run:
 
 ```
-pnpm test:interactive // runs `cypress open`
+pnpm test:e2e:interactive // runs `cypress open`
 ```
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
-
-Make sure to run `uv sync` again whenever you've updated the frontend!
-
-### Headed/debugging
-
-Causes the Electron browser to be shown on screen and keeps it open after tests are done.
-Extremely useful for debugging!
-
-```sh
-SINGLE_TEST=password_auth CYPRESS_OPTIONS='--headed --no-exit' pnpm test
-```

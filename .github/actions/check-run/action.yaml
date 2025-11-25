@@ -1,0 +1,43 @@
+name: Run command with GitHub check
+description: Create a GitHub check, run a command, and complete the check based on the command outcome
+
+inputs:
+  check_name:
+    description: Check name
+    required: true
+  command:
+    description: Command to run
+    required: true
+    
+runs:
+  using: composite
+  steps:
+    - uses: actions/github-script@v8
+      id: create-check
+      with:
+        script: |
+          const check = await github.rest.checks.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            name: '${{ inputs.check_name }}',
+            head_sha: context.sha,
+            status: 'in_progress'
+          });
+          return check.data.id;
+    - name: Run command
+      id: run-command
+      shell: bash
+      run: ${{ inputs.command }}
+    - uses: actions/github-script@v8
+      if: always()
+      with:
+        script: |
+          const conclusion = '${{ steps.run-command.outcome }}' === 'success' ? 'success' : 'failure';
+          await github.rest.checks.update({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            check_run_id: ${{ steps.create-check.outputs.result }},
+            status: 'completed',
+            conclusion: conclusion
+          });
+

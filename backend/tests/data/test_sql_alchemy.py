@@ -2,13 +2,12 @@ import uuid
 from pathlib import Path
 
 import pytest
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
-
 from chainlit import User
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
 from chainlit.element import Text
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import create_async_engine
 
 
 @pytest.fixture

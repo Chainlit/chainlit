@@ -1,10 +1,9 @@
 from unittest.mock import patch
 
-from llama_index.core.callbacks.schema import CBEventType, EventPayload
-from llama_index.core.tools.types import ToolMetadata
-
 from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
 from chainlit.step import Step
+from llama_index.core.callbacks.schema import CBEventType, EventPayload
+from llama_index.core.tools.types import ToolMetadata
 
 
 async def test_on_event_start_for_function_calls(mock_chainlit_context):

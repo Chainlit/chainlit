@@ -1,0 +1,35 @@
+name: Check frontend & libs
+
+on: [workflow_call]
+
+concurrency:
+  group: check-frontend-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  check-frontend:
+    runs-on: ubuntu-latest
+    name: run checks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
+        
+      - uses: ./.github/actions/check-run
+        with:
+          check_name: 'Linting: frontend'
+          command: pnpm lint
+          
+      - uses: ./.github/actions/check-run
+        with:
+          check_name: 'Formatting: frontend'
+          command: pnpm format
+          
+      - uses: ./.github/actions/check-run
+        with:
+          check_name: 'Type checking: frontend'
+          command: pnpm type-check
