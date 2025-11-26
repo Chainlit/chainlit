@@ -8,12 +8,14 @@ interface Props {
 }
 
 const Icon = ({ name, ...props }: Props) => {
-  // Convert the name to proper case (e.g., "plus" -> "Plus", "chevron-right" -> "ChevronRight")
+  // Convert the name to proper case
+  // "plus" -> "Plus"
+  // "chevron-right" -> "ChevronRight"
+  // "ChevronRight" -> "ChevronRight"
   const formatIconName = (str: string): string => {
     return str
-      .split('-')
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join('');
+      .replace(/-([a-z])/g, (_, char) => char.toUpperCase())
+      .replace(/^[a-z]/, (char) => char.toUpperCase());
   };
 
   // Try to get the icon component using the formatted name
