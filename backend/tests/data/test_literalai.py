@@ -83,6 +83,7 @@ def test_step_dict(test_thread) -> StepDict:
         "waitForAnswer": True,
         "showInput": True,
         "language": "en",
+        "icon": "search",
     }
 
 
@@ -179,6 +180,7 @@ async def test_create_step(
                     "waitForAnswer": True,
                     "language": "en",
                     "showInput": True,
+                    "icon": "search",
                 },
                 "input": {"content": "test input"},
                 "output": {"content": "test output"},
@@ -768,6 +770,7 @@ async def test_update_step(
                     "waitForAnswer": True,
                     "language": "en",
                     "showInput": True,
+                    "icon": "search",
                 },
                 "input": {"content": "test input"},
                 "output": {"content": "test output"},
