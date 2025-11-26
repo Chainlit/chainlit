@@ -9,13 +9,20 @@ interface Props {
 
 const Icon = ({ name, ...props }: Props) => {
   // Convert the name to proper case
-  // "plus" -> "Plus"
-  // "chevron-right" -> "ChevronRight"
-  // "ChevronRight" -> "ChevronRight"
-  const formatIconName = (str: string): string => {
-    return str
-      .replace(/-([a-z])/g, (_, char) => char.toUpperCase())
-      .replace(/^[a-z]/, (char) => char.toUpperCase());
+  const formatIconName = (name: string): string => {
+    //aggressively lowercase the parts to clean up inputs like "ChEvRoN-rIgHt"
+    if (name.includes('-')) {
+      return name
+        .split('-')
+        .map(
+          (part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+        )
+        .join('');
+    }
+    if (name === name.toUpperCase()) {
+      return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+    }
+    return name.charAt(0).toUpperCase() + name.slice(1);
   };
 
   // Try to get the icon component using the formatted name

@@ -19,6 +19,16 @@ describe('Icon component', () => {
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
+  it('renders icon with all uppercase name', () => {
+    const { container } = render(<Icon name="PLUS" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
+  it('renders icon with mixed case name', () => {
+    const { container } = render(<Icon name="ChEvRoN-rIgHt" />);
+    expect(container.querySelector('svg')).toBeInTheDocument();
+  });
+
   it('returns null and warns for invalid icon name', () => {
     const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { container } = render(<Icon name="invalid-icon-name" />);
