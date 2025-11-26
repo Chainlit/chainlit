@@ -111,7 +111,21 @@ const MessageContent = memo(
         </div>
       );
     }
-  )
+  ),
+  (prevProps, nextProps) => {
+    return (
+      prevProps.allowHtml === nextProps.allowHtml &&
+      prevProps.latex === nextProps.latex &&
+      prevProps.elements === nextProps.elements &&
+      prevProps.message.id === nextProps.message.id &&
+      prevProps.message.output === nextProps.message.output &&
+      prevProps.message.input === nextProps.message.input &&
+      prevProps.message.language === nextProps.message.language &&
+      prevProps.message.streaming === nextProps.message.streaming &&
+      prevProps.message.showInput === nextProps.message.showInput &&
+      prevProps.message.type === nextProps.message.type
+    );
+  }
 );
 
 export { MessageContent };

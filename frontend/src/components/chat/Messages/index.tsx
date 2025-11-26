@@ -1,5 +1,5 @@
 import { MessageContext } from 'contexts/MessageContext';
-import React, { memo, useContext } from 'react';
+import React, { memo, useContext, useMemo } from 'react';
 
 import {
   type IAction,
@@ -44,6 +44,17 @@ const hasAssistantMessage = (step: IStep): boolean => {
 const Messages = memo(
   ({ messages, elements, actions, indent, isRunning, scorableRun }: Props) => {
     const messageContext = useContext(MessageContext);
+
+    const lastAssistantMessage = useMemo(() => {
+      return messages.findLast((m) => m.type === 'assistant_message');
+    }, [messages]);
+
+    const lastScorableAssistantMessage = useMemo(() => {
+      return scorableRun?.steps?.findLast(
+        (m) => m.type === 'assistant_message'
+      );
+    }, [scorableRun]);
+
     return (
       <>
         {messages.map((m) => {
@@ -89,13 +100,9 @@ const Messages = memo(
             // The message is scorable if it is the last assistant message of the run
 
             const isRunLastAssistantMessage =
-              m ===
-              _scorableRun?.steps?.findLast(
-                (_m) => _m.type === 'assistant_message'
-              );
+              m.type === 'run' ? false : m === lastScorableAssistantMessage;
 
-            const isLastAssistantMessage =
-              messages.findLast((_m) => _m.type === 'assistant_message') === m;
+            const isLastAssistantMessage = m === lastAssistantMessage;
 
             const isScorable =
               isRunLastAssistantMessage || isLastAssistantMessage;

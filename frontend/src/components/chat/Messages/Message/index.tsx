@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext, useRef } from 'react';
+import { memo, useContext, useMemo, useRef } from 'react';
 
 import {
   type IAction,
@@ -28,6 +28,8 @@ interface Props {
   isScorable?: boolean;
   scorableRun?: IStep;
 }
+
+const EMPTY_ELEMENTS: IMessageElement[] = [];
 
 const Message = memo(
   ({
@@ -87,12 +89,17 @@ const Message = memo(
               {isUserMessage ? (
                 <div className="flex flex-col flex-grow max-w-full">
                   <UserMessage message={message} elements={elements}>
-                    <MessageContent
-                      elements={[]}
-                      message={message}
-                      allowHtml={allowHtml}
-                      latex={latex}
-                    />
+                    {useMemo(
+                      () => (
+                        <MessageContent
+                          elements={EMPTY_ELEMENTS}
+                          message={message}
+                          allowHtml={allowHtml}
+                          latex={latex}
+                        />
+                      ),
+                      [message, allowHtml, latex]
+                    )}
                   </UserMessage>
                 </div>
               ) : (

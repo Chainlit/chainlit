@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
-import { useContext, useMemo, useState } from 'react';
+import { memo, useContext, useMemo, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
 import {
@@ -22,7 +22,7 @@ interface Props {
   elements: IMessageElement[];
 }
 
-export default function UserMessage({
+const UserMessage = memo(function UserMessage({
   message,
   elements,
   children
@@ -120,4 +120,6 @@ export default function UserMessage({
       </div>
     </div>
   );
-}
+});
+
+export default UserMessage;
