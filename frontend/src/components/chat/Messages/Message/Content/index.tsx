@@ -112,6 +112,9 @@ const MessageContent = memo(
       );
     }
   ),
+  // Custom comparison function to prevent unnecessary re-renders.
+  // IMPORTANT: If you add new properties to the message object that should trigger a re-render,
+  // you MUST update this function to include them.
   (prevProps, nextProps) => {
     return (
       prevProps.allowHtml === nextProps.allowHtml &&
