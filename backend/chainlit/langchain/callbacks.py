@@ -3,11 +3,11 @@ from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 from uuid import UUID
 
 import pydantic
-from langchain.callbacks.tracers.schemas import Run
-from langchain.load.dump import dumps
-from langchain.schema import BaseMessage
+from langchain_core.load import dumps
+from langchain_core.messages import BaseMessage
 from langchain_core.outputs import ChatGenerationChunk, GenerationChunk
 from langchain_core.tracers.base import AsyncBaseTracer
+from langchain_core.tracers.schemas import Run
 from literalai import ChatGeneration, CompletionGeneration, GenerationMessage
 from literalai.observability.step import TrueStepType
 
