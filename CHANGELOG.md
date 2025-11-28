@@ -4,6 +4,81 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.9.2] - 2025-11-22
+
+### Added
+- Add tests for socket, chat context, cache, translations & oauth providers
+
+### Fixed
+- Fix copilot breaking change introduced in 2.8.5
+
+## [2.9.1] - 2025-11-20
+
+### Added
+- Add support for tabs in chat settings
+- Support markdown in watermark
+- Add italian translation to translations folder
+- Add query param prefill for chat
+- Add tests for utils, markdown, sidebar, chat settings, mcp, input widget, langchain, elements, steps, and actions
+
+
+## [2.9.0] - 2025-11-06
+
+### Added
+- Add better support for Multi-Agent implementations
+  - Nested steps are now step.input -> child step -> step.output
+  - Improved formatting and styling of Tasklist
+
+
+## [2.8.5] - 2025-11-07
+
+### Added
+- Add display_name to ChatProfile
+- Add slack reaction event callback
+- Add raw response from OAuth providers
+
+### Fixed
+- Security vulnerability in Chainlint: added missed ACL check for session initialization
+
+### Changed
+- Remove FastAPI version restrictions
+
+## [2.8.4] - 2025-10-29
+
+### Added
+- Add support for GitHub Enterprise OAuth provider
+- Explicit disable on input widgets
+
+
+### Fixed
+- Tasklist tasks are now properly reconnected to their steps/messages
+- ci: fix pnpm publish checks
+- fix: missing / in url with base path when connecting Streamable HTTP MCP
+- fix - persist custom_elements to data layer without cloud storage
+- fix: propagate IME composition events in AutoResizeTextarea
+- fix: confirm when enter
+- Fix(translation): correct French translation of chat watermark 
+- fix(ui): add fallback logo if custom logo is missing
+
+## [2.8.3] - 2025-10-06
+
+### Added
+- Support for the `target` attribute in header links, which can be configured through the configuration options
+
+### Changed
+- `@chainlit/react-client` automatic publishing
+
+## [2.8.2] - 2025-10-01
+
+### Changed
+- Remove autofocus in mobile message composer
+- Improve error handling in sqlalchemy data layer `get_read_url()`
+
+### Fixed
+- Fix voice hotkey (P) triggering when typing in chat input
+- Properly finalize data layers
+- Fix `on_chat_start` not always firing
+
 ## [2.8.1] - 2025-09-24
 
 ### Added

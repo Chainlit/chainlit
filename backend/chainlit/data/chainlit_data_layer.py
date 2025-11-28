@@ -153,12 +153,6 @@ class ChainlitDataLayer(BaseDataLayer):
 
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
-        if not self.storage_client:
-            logger.warning(
-                "Data Layer: create_element error. No cloud storage configured!"
-            )
-            return
-
         if not element.for_id:
             return
 
@@ -181,38 +175,51 @@ class ChainlitDataLayer(BaseDataLayer):
                         "end_time": await self.get_current_timestamp(),
                     }
                 )
-        content: Optional[Union[bytes, str]] = None
 
-        if element.path:
-            async with aiofiles.open(element.path, "rb") as f:
-                content = await f.read()
-        elif element.content:
-            content = element.content
-        elif not element.url:
-            raise ValueError("Element url, path or content must be provided")
+        # Handle file uploads only if storage_client is configured
+        path = None
+        if self.storage_client:
+            content: Optional[Union[bytes, str]] = None
 
-        if element.thread_id:
-            path = f"threads/{element.thread_id}/files/{element.id}"
-        else:
-            path = f"files/{element.id}"
+            if element.path:
+                async with aiofiles.open(element.path, "rb") as f:
+                    content = await f.read()
+            elif element.content:
+                content = element.content
+            elif not element.url:
+                raise ValueError("Element url, path or content must be provided")
 
-        if content is not None:
-            content_disposition = (
-                f'attachment; filename="{element.name}"'
-                if not (
-                    GCSStorageClient is not None
-                    and isinstance(self.storage_client, GCSStorageClient)
+            if content is not None:
+                if element.thread_id:
+                    path = f"threads/{element.thread_id}/files/{element.id}"
+                else:
+                    path = f"files/{element.id}"
+
+                content_disposition = (
+                    f'attachment; filename="{element.name}"'
+                    if not (
+                        GCSStorageClient is not None
+                        and isinstance(self.storage_client, GCSStorageClient)
+                    )
+                    else None
                 )
-                else None
-            )
-            await self.storage_client.upload_file(
-                object_key=path,
-                data=content,
-                mime=element.mime or "application/octet-stream",
-                overwrite=True,
-                content_disposition=content_disposition,
-            )
+                await self.storage_client.upload_file(
+                    object_key=path,
+                    data=content,
+                    mime=element.mime or "application/octet-stream",
+                    overwrite=True,
+                    content_disposition=content_disposition,
+                )
 
+        else:
+            # Log warning only if element has file content that needs uploading
+            if element.path or element.url or element.content:
+                logger.warning(
+                    "Data Layer: No storage client configured. "
+                    "File will not be uploaded."
+                )
+
+        # Always persist element metadata to database
         query = """
         INSERT INTO "Element" (
             id, "threadId", "stepId", metadata, mime, name, "objectKey", url,
@@ -567,6 +574,27 @@ class ChainlitDataLayer(BaseDataLayer):
             if name is not None
             else (metadata.get("name") if metadata and "name" in metadata else None)
         )
+
+        # Merge incoming metadata with existing metadata, deleting incoming keys with None values
+        if metadata is not None:
+            existing = await self.execute_query(
+                'SELECT "metadata" FROM "Thread" WHERE id = $1',
+                {"thread_id": thread_id},
+            )
+            base = {}
+            if isinstance(existing, list) and existing:
+                raw = existing[0].get("metadata") or {}
+                if isinstance(raw, str):
+                    try:
+                        base = json.loads(raw)
+                    except json.JSONDecodeError:
+                        base = {}
+                elif isinstance(raw, dict):
+                    base = raw
+            to_delete = {k for k, v in metadata.items() if v is None}
+            incoming = {k: v for k, v in metadata.items() if v is not None}
+            base = {k: v for k, v in base.items() if k not in to_delete}
+            metadata = {**base, **incoming}
 
         data = {
             "id": thread_id,

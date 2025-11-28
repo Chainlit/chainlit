@@ -9,6 +9,7 @@ export interface ChatProfile {
   default: boolean;
   icon?: string;
   name: string;
+  display_name?: string;
   markdown_description: string;
   starters?: IStarter[];
 }
@@ -52,6 +53,7 @@ export interface IChainlitConfig {
       display_name: string;
       icon_url: string;
       url: string;
+      target?: '_blank' | '_self' | '_parent' | '_top';
     }[];
   };
   features: {
