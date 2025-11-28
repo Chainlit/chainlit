@@ -10,9 +10,10 @@ export const runChainlit = async (
   spec: Cypress.Spec | null = null
 ): Promise<ChildProcessWithoutNullStreams> => {
   const CHAILIT_DIR = join(process.cwd(), 'backend', 'chainlit');
+  const BACKEND_DIR = join(process.cwd(), 'backend');
 
   return new Promise((resolve, reject) => {
-    const testDir = spec ? dirname(spec.absolute) : CHAILIT_DIR;
+    const testDir = spec ? dirname(spec.absolute) : BACKEND_DIR;
     const entryPointFileName = spec
       ? spec.name.startsWith('async')
         ? 'main_async.py'

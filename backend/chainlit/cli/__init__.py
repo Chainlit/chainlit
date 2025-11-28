@@ -211,7 +211,7 @@ def chainlit_run(
 @cli.command("hello")
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
-    hello_path = os.path.join(BACKEND_ROOT, "hello.py")
+    hello_path = os.path.join(os.path.dirname(BACKEND_ROOT), "hello.py")
     run_chainlit(hello_path)
 
 
