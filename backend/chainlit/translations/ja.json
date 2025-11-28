@@ -239,6 +239,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "選択..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "日付を選択",
+        "range": "日付範囲を選択"
+      }
     }
   }
 }
