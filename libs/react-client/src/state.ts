@@ -126,16 +126,35 @@ export const chatSettingsDefaultValueSelector = selector({
   key: 'ChatSettingsValue/Default',
   get: ({ get }) => {
     const chatSettings = get(chatSettingsInputsState);
-    return chatSettings.reduce(
-      (form: { [key: string]: any }, input: any) => (
-        (form[input.id] = input.initial), form
-      ),
-      {}
-    );
+
+    const collectInitialValues = (
+      inputs: any[],
+      acc: Record<string, any>
+    ): Record<string, any> => {
+      if (!Array.isArray(inputs)) {
+        return acc;
+      }
+
+      inputs.forEach((input) => {
+        if (!input) {
+          return;
+        }
+        if (Array.isArray(input?.inputs) && input.inputs.length > 0) {
+          // Handle tabs
+          collectInitialValues(input.inputs, acc);
+        } else if (input?.id !== undefined) {
+          acc[input.id] = input.initial;
+        }
+      });
+
+      return acc;
+    };
+
+    return collectInitialValues(chatSettings, {});
   }
 });
 
-export const chatSettingsValueState = atom({
+export const chatSettingsValueState = atom<Record<string, any>>({
   key: 'ChatSettingsValue',
   default: chatSettingsDefaultValueSelector
 });

@@ -32,9 +32,6 @@ jobs:
 
       - name: Install Node.js, pnpm and dependencies
         uses: ./.github/actions/pnpm-node-install
-        with:
-          node-version: "24.3.0"
-          pnpm-install-args: "--frozen-lockfile"
 
       - name: Install Python, uv and dependencies
         uses: ./.github/actions/uv-python-install

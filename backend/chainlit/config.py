@@ -214,6 +214,7 @@ default_avatar_file_url = ""
 #     display_name = "Report Issue"
 #     icon_url = "https://avatars.githubusercontent.com/u/128686189?s=200&v=4"
 #     url = "https://github.com/Chainlit/chainlit/issues"
+#     target = "_blank" (default)  # Optional: "_self", "_parent", "_top".
 
 [meta]
 generated_by = "{__version__}"
@@ -314,6 +315,7 @@ class HeaderLink(BaseModel):
     icon_url: str
     url: str
     display_name: Optional[str] = None
+    target: Optional[Literal["_blank", "_self", "_parent", "_top"]] = None
 
 
 class UISettings(BaseModel):
@@ -370,6 +372,7 @@ class CodeSettings(BaseModel):
     on_chat_resume: Optional[Callable[["ThreadDict"], Any]] = None
     on_message: Optional[Callable[["Message"], Any]] = None
     on_feedback: Optional[Callable[["Feedback"], Any]] = None
+    on_slack_reaction_added: Optional[Callable[[Dict[str, Any]], Any]] = None
     on_audio_start: Optional[Callable[[], Any]] = None
     on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[], Any]] = None
