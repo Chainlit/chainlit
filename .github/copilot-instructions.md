@@ -60,7 +60,7 @@ Always reference these instructions first and fallback to search or bash command
    # Start backend (in one terminal)
    cd backend
    export PATH="$HOME/.local/bin:$PATH" 
-   uv run chainlit run hello.py -h
+   uv run chainlit run chainlit/sample/hello.py -h
    # Available at http://localhost:8000
    
    # Start frontend dev server (in another terminal)
@@ -125,7 +125,7 @@ uv run ruff format chainlit/ tests/
 - **Entry point**: `backend/chainlit/` 
 - **Tests**: `backend/tests/`
 - **Dependencies**: Defined in `backend/pyproject.toml`
-- **Hello app**: `backend/hello.py`
+- **Hello app**: `backend/chainlit/sample/hello.py`
 
 ### Working with the Frontend  
 - **Technology**: React 18+ with Vite, TypeScript, Tailwind CSS
