@@ -165,7 +165,7 @@ const Markdown = ({
           
           const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogv', '.m4v'];
           const isVideo = videoExtensions.some(ext => 
-            src.toLowerCase().includes(ext)
+            src.toLowerCase().split(/[?#]/)[0].endsWith(ext)
           );
 
           if (isVideo) {
