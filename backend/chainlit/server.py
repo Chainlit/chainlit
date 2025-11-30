@@ -784,8 +784,8 @@ async def project_translations(
 ):
     """Return project translations."""
 
-    # Use configured default_language if set, otherwise use the language from query
-    effective_language = config.ui.default_language or language
+    # Use configured language if set, otherwise use the language from query
+    effective_language = config.ui.language or language
 
     # Load translation based on the effective language
     translation = config.load_translation(effective_language)
@@ -809,8 +809,8 @@ async def project_settings(
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
 
-    # Use configured default_language if set, otherwise use the language from query
-    effective_language = config.ui.default_language or language
+    # Use configured language if set, otherwise use the language from query
+    effective_language = config.ui.language or language
 
     # Load the markdown file based on the provided language
     markdown = get_markdown_str(config.root, effective_language)

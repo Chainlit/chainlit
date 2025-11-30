@@ -159,7 +159,7 @@ name = "Assistant"
 
 # Force a specific language for all users (e.g., "en-US", "he-IL", "fr-FR")
 # If not set, the browser's language will be used
-# default_language = "en-US"
+# language = "en-US"
 
 # layout = "wide"
 
@@ -327,7 +327,7 @@ class UISettings(BaseModel):
     description: str = ""
     cot: Literal["hidden", "tool_call", "full"] = "full"
     default_theme: Optional[Literal["light", "dark"]] = "dark"
-    default_language: Optional[str] = None
+    language: Optional[str] = None
     layout: Optional[Literal["default", "wide"]] = "default"
     default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
     github: Optional[str] = None
