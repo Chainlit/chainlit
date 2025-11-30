@@ -784,8 +784,11 @@ async def project_translations(
 ):
     """Return project translations."""
 
-    # Load translation based on the provided language
-    translation = config.load_translation(language)
+    # Use configured default_language if set, otherwise use the language from query
+    effective_language = config.ui.default_language or language
+
+    # Load translation based on the effective language
+    translation = config.load_translation(effective_language)
 
     return JSONResponse(
         content={
@@ -806,13 +809,18 @@ async def project_settings(
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
 
+    # Use configured default_language if set, otherwise use the language from query
+    effective_language = config.ui.default_language or language
+
     # Load the markdown file based on the provided language
-    markdown = get_markdown_str(config.root, language)
+    markdown = get_markdown_str(config.root, effective_language)
 
     chat_profiles = []
     profiles: list[dict] = []
     if config.code.set_chat_profiles:
-        chat_profiles = await config.code.set_chat_profiles(current_user, language)
+        chat_profiles = await config.code.set_chat_profiles(
+            current_user, effective_language
+        )
         if chat_profiles:
             for p in chat_profiles:
                 d = p.to_dict()
@@ -821,7 +829,7 @@ async def project_settings(
 
     starters = []
     if config.code.set_starters:
-        s = await config.code.set_starters(current_user, language)
+        s = await config.code.set_starters(current_user, effective_language)
         if s:
             starters = [it.to_dict() for it in s]
 
