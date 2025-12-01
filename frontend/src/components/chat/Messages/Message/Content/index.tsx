@@ -19,11 +19,6 @@ export interface Props {
   sections?: ContentSection[];
 }
 
-/**
- * Extracts the message properties that affect MessageContent rendering.
- * When adding new properties to IStep that should trigger a re-render of MessageContent,
- * add them to the returned object.
- */
 const getMessageRenderProps = (message: IStep) => ({
   id: message.id,
   output: message.output,
@@ -128,8 +123,6 @@ const MessageContent = memo(
       );
     }
   ),
-  // Custom comparison function to prevent unnecessary re-renders.
-  // Returns true when props are equal (skip re-render), false when different (re-render).
   (prevProps, nextProps) => {
     return (
       prevProps.allowHtml === nextProps.allowHtml &&

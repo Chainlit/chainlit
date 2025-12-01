@@ -57,7 +57,6 @@ const addIndentMessage = (
   const msgSteps = msg.steps || [];
 
   if (currentIndentation + 1 === indent) {
-    // Add message at current indent level
     const updatedMsg = {
       ...msg,
       steps: [...msgSteps, newMessage]
@@ -66,7 +65,6 @@ const addIndentMessage = (
     nextMessages[index] = updatedMsg;
     return nextMessages;
   } else {
-    // Recurse deeper
     const updatedSteps = addIndentMessage(
       msgSteps,
       indent,
@@ -74,7 +72,6 @@ const addIndentMessage = (
       currentIndentation + 1
     );
 
-    // Only create new array if steps actually changed
     if (updatedSteps === msgSteps) {
       return messages;
     }
