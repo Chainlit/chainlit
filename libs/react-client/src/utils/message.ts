@@ -48,31 +48,40 @@ const addIndentMessage = (
   newMessage: IStep,
   currentIndentation: number = 0
 ): IStep[] => {
-  const nextMessages = [...messages];
+  if (messages.length === 0) {
+    return [newMessage];
+  }
 
-  if (nextMessages.length === 0) {
-    return [...nextMessages, newMessage];
+  const index = messages.length - 1;
+  const msg = messages[index];
+  const msgSteps = msg.steps || [];
+
+  if (currentIndentation + 1 === indent) {
+    // Add message at current indent level
+    const updatedMsg = {
+      ...msg,
+      steps: [...msgSteps, newMessage]
+    };
+    const nextMessages = [...messages];
+    nextMessages[index] = updatedMsg;
+    return nextMessages;
   } else {
-    const index = nextMessages.length - 1;
-    const msg = nextMessages[index];
-    msg.steps = msg.steps || [];
+    // Recurse deeper
+    const updatedSteps = addIndentMessage(
+      msgSteps,
+      indent,
+      newMessage,
+      currentIndentation + 1
+    );
 
-    if (currentIndentation + 1 === indent) {
-      msg.steps = [...msg.steps, newMessage];
-      nextMessages[index] = { ...msg };
-
-      return nextMessages;
-    } else {
-      msg.steps = addIndentMessage(
-        msg.steps,
-        indent,
-        newMessage,
-        currentIndentation + 1
-      );
-
-      nextMessages[index] = { ...msg };
-      return nextMessages;
+    // Only create new array if steps actually changed
+    if (updatedSteps === msgSteps) {
+      return messages;
     }
+
+    const nextMessages = [...messages];
+    nextMessages[index] = { ...msg, steps: updatedSteps };
+    return nextMessages;
   }
 };
 
@@ -81,21 +90,26 @@ const addMessageToParent = (
   parentId: string,
   newMessage: IStep
 ): IStep[] => {
-  const nextMessages = [...messages];
+  let hasChanges = false;
 
-  for (let index = 0; index < nextMessages.length; index++) {
-    const msg = nextMessages[index];
-
+  const nextMessages = messages.map((msg) => {
     if (isEqual(msg.id, parentId)) {
-      msg.steps = msg.steps ? [...msg.steps, newMessage] : [newMessage];
-      nextMessages[index] = { ...msg };
-    } else if (hasMessageById(nextMessages, parentId) && msg.steps) {
-      msg.steps = addMessageToParent(msg.steps, parentId, newMessage);
-      nextMessages[index] = { ...msg };
+      hasChanges = true;
+      return {
+        ...msg,
+        steps: msg.steps ? [...msg.steps, newMessage] : [newMessage]
+      };
+    } else if (hasMessageById(messages, parentId) && msg.steps) {
+      const updatedSteps = addMessageToParent(msg.steps, parentId, newMessage);
+      if (updatedSteps !== msg.steps) {
+        hasChanges = true;
+        return { ...msg, steps: updatedSteps };
+      }
     }
-  }
+    return msg;
+  });
 
-  return nextMessages;
+  return hasChanges ? nextMessages : messages;
 };
 
 const findMessageById = (

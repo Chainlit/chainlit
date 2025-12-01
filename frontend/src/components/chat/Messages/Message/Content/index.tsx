@@ -1,4 +1,5 @@
 import { prepareContent } from '@/lib/message';
+import { isEqual } from 'lodash';
 import { forwardRef, memo, useMemo } from 'react';
 
 import type { IMessageElement, IStep } from '@chainlit/react-client';
@@ -17,6 +18,21 @@ export interface Props {
   latex?: boolean;
   sections?: ContentSection[];
 }
+
+/**
+ * Extracts the message properties that affect MessageContent rendering.
+ * When adding new properties to IStep that should trigger a re-render of MessageContent,
+ * add them to the returned object.
+ */
+const getMessageRenderProps = (message: IStep) => ({
+  id: message.id,
+  output: message.output,
+  input: message.input,
+  language: message.language,
+  streaming: message.streaming,
+  showInput: message.showInput,
+  type: message.type
+});
 
 const MessageContent = memo(
   forwardRef<HTMLDivElement, Props>(
@@ -113,20 +129,16 @@ const MessageContent = memo(
     }
   ),
   // Custom comparison function to prevent unnecessary re-renders.
-  // IMPORTANT: If you add new properties to the message object that should trigger a re-render,
-  // you MUST update this function to include them.
+  // Returns true when props are equal (skip re-render), false when different (re-render).
   (prevProps, nextProps) => {
     return (
       prevProps.allowHtml === nextProps.allowHtml &&
       prevProps.latex === nextProps.latex &&
       prevProps.elements === nextProps.elements &&
-      prevProps.message.id === nextProps.message.id &&
-      prevProps.message.output === nextProps.message.output &&
-      prevProps.message.input === nextProps.message.input &&
-      prevProps.message.language === nextProps.message.language &&
-      prevProps.message.streaming === nextProps.message.streaming &&
-      prevProps.message.showInput === nextProps.message.showInput &&
-      prevProps.message.type === nextProps.message.type
+      isEqual(
+        getMessageRenderProps(prevProps.message),
+        getMessageRenderProps(nextProps.message)
+      )
     );
   }
 );
