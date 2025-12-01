@@ -56,6 +56,18 @@ const Message = memo(
     const showInputSection = Boolean(message.input && message.showInput);
     const shouldRenderOutput = !showInputSection || Boolean(message.output);
 
+    const userMessageContent = useMemo(
+      () => (
+        <MessageContent
+          elements={EMPTY_ELEMENTS}
+          message={message}
+          allowHtml={allowHtml}
+          latex={latex}
+        />
+      ),
+      [message, allowHtml, latex]
+    );
+
     if (skip) {
       if (!message.steps) {
         return null;
@@ -89,17 +101,7 @@ const Message = memo(
               {isUserMessage ? (
                 <div className="flex flex-col flex-grow max-w-full">
                   <UserMessage message={message} elements={elements}>
-                    {useMemo(
-                      () => (
-                        <MessageContent
-                          elements={EMPTY_ELEMENTS}
-                          message={message}
-                          allowHtml={allowHtml}
-                          latex={latex}
-                        />
-                      ),
-                      [message, allowHtml, latex]
-                    )}
+                    {userMessageContent}
                   </UserMessage>
                 </div>
               ) : (

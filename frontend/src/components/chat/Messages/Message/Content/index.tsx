@@ -129,6 +129,10 @@ const MessageContent = memo(
       prevProps.latex === nextProps.latex &&
       prevProps.elements === nextProps.elements &&
       isEqual(
+        prevProps.sections ?? ['input', 'output'],
+        nextProps.sections ?? ['input', 'output']
+      ) &&
+      isEqual(
         getMessageRenderProps(prevProps.message),
         getMessageRenderProps(nextProps.message)
       )
