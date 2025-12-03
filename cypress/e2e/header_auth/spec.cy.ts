@@ -1,3 +1,5 @@
+import { Interception } from 'cypress/types/net-stubbing';
+
 describe('Header auth', () => {
   beforeEach(() => {
     cy.visit('/');
@@ -10,15 +12,21 @@ describe('Header auth', () => {
   });
 
   describe('with authorization header set', () => {
+    let interceptionPromise: Promise<Interception>;
     const setupInterceptors = () => {
+      // @ts-expect-error Promise.withResolvers not in lib yet
+      const { promise, resolve } = Promise.withResolvers<Interception>();
+      interceptionPromise = promise;
+
       cy.intercept('/auth/header', (req) => {
         req.headers['test-header'] = 'test header value';
         req.reply();
       }).as('auth');
 
       // Only intercept /user _after_ we're logged in.
-      cy.wait('@auth').then(() => {
+      cy.wait('@auth').then((interception) => {
         cy.intercept('GET', '/user').as('user');
+        resolve(interception);
       });
     };
 
@@ -28,7 +36,7 @@ describe('Header auth', () => {
 
     const shouldBeLoggedIn = () => {
       it('should have an access_token cookie in /auth/header response', () => {
-        cy.wait('@auth').then((interception) => {
+        cy.wrap(interceptionPromise).then((interception: Interception) => {
           expect(interception.response, 'Intercepted response').to.satisfy(
             () => true
           );
