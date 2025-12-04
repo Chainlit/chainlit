@@ -4,6 +4,24 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.9.3] - 2025-12-04
+
+### Added
+- Add tests for oauth providers and messages
+- Merge metadata in chainlit data layer
+- Add native video support in markdown rendering
+- Optimize chat message rendering
+- Add language configuration option to config.toml
+- Upgrade langchain imports for v1 compatibility
+- Improve icon name formatting issues
+
+### Fixed
+- Fixed page blinking issue with header_auth
+- Set environ when restoring websocket session
+- Move hello.py to avoid import issues
+- Fix issue showing thread sharing when disabled
+- Disable Chainlit from setting logging globally
+
 ## [2.9.2] - 2025-11-22
 
 ### Added
