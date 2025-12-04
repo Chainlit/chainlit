@@ -158,6 +158,31 @@ const Markdown = ({
           }
         },
         img: (image: any) => {
+          // Check if the image source is actually a video file
+          const src = image.src.startsWith('/public')
+            ? apiClient.buildEndpoint(image.src)
+            : image.src;
+          
+          const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogv', '.m4v'];
+          const isVideo = videoExtensions.some(ext => 
+            src.toLowerCase().split(/[?#]/)[0].endsWith(ext)
+          );
+
+          if (isVideo) {
+            return (
+              <div className="sm:max-w-sm md:max-w-md">
+                <video
+                  src={src}
+                  controls
+                  className="w-full h-auto rounded-md"
+                  style={{ maxWidth: '100%' }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            );
+          }
+
           return (
             <div className="sm:max-w-sm md:max-w-md">
               <AspectRatio
@@ -165,11 +190,7 @@ const Markdown = ({
                 className="bg-muted rounded-md overflow-hidden"
               >
                 <img
-                  src={
-                    image.src.startsWith('/public')
-                      ? apiClient.buildEndpoint(image.src)
-                      : image.src
-                  }
+                  src={src}
                   alt={image.alt}
                   className="h-full w-full object-contain"
                 />
