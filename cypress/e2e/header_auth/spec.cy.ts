@@ -21,21 +21,8 @@ describe('Header auth', () => {
       setupInterceptors();
     });
 
+    // Tests that verify the user is logged in (applicable both initially and after reload)
     const shouldBeLoggedIn = () => {
-      it('should have an access_token cookie in /auth/header response', () => {
-        cy.wait('@auth').then((interception) => {
-          expect(interception.response, 'Intercepted response').to.satisfy(
-            () => true
-          );
-          expect(interception.response.statusCode).to.equal(200);
-
-          // Response contains `Authorization` cookie, starting with Bearer
-          expect(interception.response.headers).to.have.property('set-cookie');
-          const cookie = interception.response.headers['set-cookie'][0];
-          expect(cookie).to.contain('access_token');
-        });
-      });
-
       it('should not display an alert message', () => {
         cy.get('.alert').should('not.exist');
       });
@@ -44,6 +31,21 @@ describe('Header auth', () => {
         cy.get('.step').eq(0).should('contain', 'Hello admin');
       });
     };
+
+    // This test only applies to initial login where /auth/header is called
+    it('should have an access_token cookie in /auth/header response', () => {
+      cy.wait('@auth').then((interception) => {
+        expect(interception.response, 'Intercepted response').to.satisfy(
+          () => true
+        );
+        expect(interception.response.statusCode).to.equal(200);
+
+        // Response contains `Authorization` cookie, starting with Bearer
+        expect(interception.response.headers).to.have.property('set-cookie');
+        const cookie = interception.response.headers['set-cookie'][0];
+        expect(cookie).to.contain('access_token');
+      });
+    });
 
     shouldBeLoggedIn();
 
