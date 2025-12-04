@@ -575,6 +575,27 @@ class ChainlitDataLayer(BaseDataLayer):
             else (metadata.get("name") if metadata and "name" in metadata else None)
         )
 
+        # Merge incoming metadata with existing metadata, deleting incoming keys with None values
+        if metadata is not None:
+            existing = await self.execute_query(
+                'SELECT "metadata" FROM "Thread" WHERE id = $1',
+                {"thread_id": thread_id},
+            )
+            base = {}
+            if isinstance(existing, list) and existing:
+                raw = existing[0].get("metadata") or {}
+                if isinstance(raw, str):
+                    try:
+                        base = json.loads(raw)
+                    except json.JSONDecodeError:
+                        base = {}
+                elif isinstance(raw, dict):
+                    base = raw
+            to_delete = {k for k, v in metadata.items() if v is None}
+            incoming = {k: v for k, v in metadata.items() if v is not None}
+            base = {k: v for k, v in base.items() if k not in to_delete}
+            metadata = {**base, **incoming}
+
         data = {
             "id": thread_id,
             "name": thread_name,
