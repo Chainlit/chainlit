@@ -73,7 +73,7 @@ export default function Login() {
     if (!config.requireLogin) {
       navigate('/');
     }
-    if (config.headerAuth) {
+    if (config.headerAuth && !user) {
       handleHeaderAuth();
     }
     if (user) {
