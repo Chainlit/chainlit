@@ -38,12 +38,13 @@ class WebSocketSessionAuth(TypedDict):
     threadId: str | None
 
 
-def restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
+def restore_existing_session(sid, session_id, emit_fn, emit_call_fn, environ):
     """Restore a session from the sessionId provided by the client."""
     if session := WebsocketSession.get_by_id(session_id):
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
         session.emit_call = emit_call_fn
+        session.environ = environ
         return True
     return False
 
@@ -149,7 +150,7 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
         return sio.call(event, data, timeout=timeout, to=sid)
 
     session_id = auth["sessionId"]
-    if restore_existing_session(sid, session_id, emit_fn, emit_call_fn):
+    if restore_existing_session(sid, session_id, emit_fn, emit_call_fn, environ):
         return True
 
     user_env_string = auth.get("userEnv", None)
