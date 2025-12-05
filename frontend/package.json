@@ -96,6 +96,7 @@
     "tslib": "^2.6.2",
     "typescript": "^5.2.2",
     "vite": "^5.4.14",
+    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-svgr": "^4.2.0",
     "vite-tsconfig-paths": "^4.2.0",
     "vitest": "^0.34.4"
