@@ -346,11 +346,12 @@ class TaskList(Element):
         self.tasks.append(task)
 
     async def update(self):
-        await self.send()
+        # generate a new message id for update.
+        await self.send(for_id=uuid.uuid4().hex)
 
-    async def send(self):
+    async def send(self, for_id: str, persist=True):
         await self.preprocess_content()
-        await super().send(for_id="")
+        await super().send(for_id=for_id, persist=persist)
 
     async def preprocess_content(self):
         # serialize enum
