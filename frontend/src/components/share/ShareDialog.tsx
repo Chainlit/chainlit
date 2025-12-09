@@ -1,4 +1,5 @@
-import { useContext, useMemo, useState, useCallback } from 'react';
+import { useCallback, useContext, useMemo, useState } from 'react';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
 import {
@@ -6,10 +7,14 @@ import {
   ClientError,
   threadHistoryState
 } from '@chainlit/react-client';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 
 import { Translator } from '../i18n';
 
@@ -19,7 +24,11 @@ type ShareDialogProps = {
   threadId?: string | null;
 };
 
-export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) {
+export function ShareDialog({
+  open,
+  onOpenChange,
+  threadId
+}: ShareDialogProps) {
   const apiClient = useContext(ChainlitContext);
   const [isCopying, setIsCopying] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
@@ -51,21 +60,26 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
           setHasBeenCopied(true);
           setIsCopied(true);
           setTimeout(() => setIsCopied(false), 2000);
-          toast.success(<Translator path="threadHistory.thread.actions.share.status.copied" />);
+          toast.success(
+            <Translator path="threadHistory.thread.actions.share.status.copied" />
+          );
           return;
         }
         setIsCopying(true);
         if (typeof (apiClient as any)?.shareThread === 'function') {
           await (apiClient as any).shareThread(threadId, true);
         } else {
-          const putRes = await (apiClient as any).put?.(`/project/thread/share`, {
-            threadId,
-            isShared: true
-          });
+          const putRes = await (apiClient as any).put?.(
+            `/project/thread/share`,
+            {
+              threadId,
+              isShared: true
+            }
+          );
           await putRes?.json?.();
         }
         setSharedThreadId(threadId);
-  await navigator.clipboard.writeText(shareLink);
+        await navigator.clipboard.writeText(shareLink);
         await new Promise((resolve) => setTimeout(resolve, 1000));
         setIsCopying(false);
         setHasBeenCopied(true);
@@ -80,7 +94,9 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
           }
           return next;
         });
-        toast.success(<Translator path="threadHistory.thread.actions.share.status.created" />);
+        toast.success(
+          <Translator path="threadHistory.thread.actions.share.status.created" />
+        );
       } else {
         await navigator.clipboard.writeText(shareLink);
       }
@@ -92,7 +108,9 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
         // Show server-provided detail when available
         toast.error(err.toString());
       } else {
-        toast.error(<Translator path="threadHistory.thread.actions.share.error.create" />);
+        toast.error(
+          <Translator path="threadHistory.thread.actions.share.error.create" />
+        );
       }
     }
   };
@@ -123,14 +141,18 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
         return next;
       });
       setIsCopying(false);
-      toast.success(<Translator path="threadHistory.thread.actions.share.status.unshared" />);
+      toast.success(
+        <Translator path="threadHistory.thread.actions.share.status.unshared" />
+      );
       onOpenChange(false);
     } catch (err: any) {
       setIsCopying(false);
       if (err instanceof ClientError) {
         toast.error(err.toString());
       } else {
-        toast.error(<Translator path="threadHistory.thread.actions.share.error.unshare" />);
+        toast.error(
+          <Translator path="threadHistory.thread.actions.share.error.unshare" />
+        );
       }
     }
   }, [apiClient, onOpenChange, setThreadHistory, threadId]);
@@ -148,7 +170,7 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
         }
       }}
     >
-  <DialogContent className="sm:max-w-lg overflow-hidden">
+      <DialogContent className="flex flex-col sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>
             <Translator path="threadHistory.thread.actions.share.title" />
@@ -164,7 +186,10 @@ export function ShareDialog({ open, onOpenChange, threadId }: ShareDialogProps) 
             </span>
           </div>
           <div className="flex gap-2 justify-center">
-            <Button onClick={handleCopy} disabled={!threadId || isCopying || isCopied}>
+            <Button
+              onClick={handleCopy}
+              disabled={!threadId || isCopying || isCopied}
+            >
               <Translator path="threadHistory.thread.actions.share.button" />
             </Button>
             {isAlreadyShared ? (

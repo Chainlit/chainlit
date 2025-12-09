@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { size } from 'lodash';
+import { Share2 } from 'lucide-react';
 import { useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
@@ -334,11 +335,21 @@ export function ThreadList({
                             <Link to={isResumed ? '' : `/thread/${thread.id}`}>
                               <SidebarMenuButton
                                 isActive={isSelected}
-                                className="relative truncate h-9 group/thread"
+                                className="relative h-9 group/thread"
                               >
-                                {thread.name || (
-                                  <Translator path="threadHistory.thread.untitled" />
-                                )}
+                                <span className="flex min-w-0 items-center gap-2">
+                                  {thread.metadata?.is_shared ? (
+                                    <Share2
+                                      className="h-4 w-4 shrink-0 text-muted-foreground"
+                                      aria-hidden="true"
+                                    />
+                                  ) : null}
+                                  <span className="truncate">
+                                    {thread.name || (
+                                      <Translator path="threadHistory.thread.untitled" />
+                                    )}
+                                  </span>
+                                </span>
                                 <div
                                   className={cn(
                                     'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
