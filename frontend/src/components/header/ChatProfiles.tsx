@@ -9,18 +9,12 @@ import {
 } from '@chainlit/react-client';
 
 import { Markdown } from '@/components/Markdown';
+import { Button } from '@/components/ui/button';
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger
 } from '@/components/ui/hover-card';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 
 import { NewChatDialog } from './NewChat';
 
@@ -79,65 +73,59 @@ export default function ChatProfiles({ navigate }: Props) {
 
   return (
     <div className="relative">
-      <Select
-        value={chatProfile || ''}
-        onValueChange={(value) => {
-          setNewChatProfile(value);
-          if (firstInteraction) {
-            setOpenDialog(true);
-          } else {
-            handleConfirm(value);
-          }
-        }}
-      >
-        <SelectTrigger
-          id="chat-profiles"
-          className="w-fit border-none bg-transparent text-muted-foreground font-semibold text-lg hover:bg-accent"
-        >
-          <SelectValue placeholder="Select profile" />
-        </SelectTrigger>
-        <SelectContent>
-          {config.chatProfiles.map((profile) => {
-            const icon = profile.icon?.includes('/public')
-              ? apiClient.buildEndpoint(profile.icon)
-              : profile.icon;
+      <div id="chat-profiles" className="flex items-center gap-2">
+        {config.chatProfiles.map((profile) => {
+          const icon = profile.icon?.includes('/public')
+            ? apiClient.buildEndpoint(profile.icon)
+            : profile.icon;
 
-            return (
-              <HoverCard openDelay={0} closeDelay={0} key={profile.name}>
-                <HoverCardTrigger asChild>
-                  <SelectItem
-                    data-test={`select-item:${profile.name}`}
-                    value={profile.name}
-                    className="cursor-pointer"
-                  >
-                    <div className="flex items-center gap-2">
-                      {icon && (
-                        <img
-                          src={icon}
-                          alt={profile.display_name || profile.name}
-                          className="w-6 h-6 rounded-md object-cover"
-                        />
-                      )}
-                      <span>{profile.display_name || profile.name}</span>
-                    </div>
-                  </SelectItem>
-                </HoverCardTrigger>
-                <HoverCardContent
-                  side="right"
-                  id="chat-profile-description"
-                  align="start"
-                  className="w-80 overflow-visible"
-                  sideOffset={10}
+          const isSelected = profile.name === chatProfile;
+
+          return (
+            <HoverCard openDelay={0} closeDelay={0} key={profile.name}>
+              <HoverCardTrigger asChild>
+                <Button
+                  type="button"
+                  data-test={`select-item:${profile.name}`}
+                  onClick={() => {
+                    const value = profile.name;
+                    setNewChatProfile(value);
+                    if (firstInteraction) {
+                      setOpenDialog(true);
+                    } else {
+                      handleConfirm(value);
+                    }
+                  }}
+                  variant={isSelected ? 'secondary' : 'ghost'}
+                  className="h-9 px-3 text-sm font-semibold text-muted-foreground"
                 >
-                  <Markdown allowHtml={allowHtml} latex={latex}>
-                    {profile.markdown_description}
-                  </Markdown>
-                </HoverCardContent>
-              </HoverCard>
-            );
-          })}
-        </SelectContent>
-      </Select>
+                  <div className="flex items-center gap-2">
+                    {icon && (
+                      <img
+                        src={icon}
+                        alt={profile.display_name || profile.name}
+                        className="w-6 h-6 rounded-md object-cover"
+                      />
+                    )}
+                    <span>{profile.display_name || profile.name}</span>
+                  </div>
+                </Button>
+              </HoverCardTrigger>
+              <HoverCardContent
+                side="right"
+                id="chat-profile-description"
+                align="start"
+                className="w-80 overflow-visible"
+                sideOffset={10}
+              >
+                <Markdown allowHtml={allowHtml} latex={latex}>
+                  {profile.markdown_description}
+                </Markdown>
+              </HoverCardContent>
+            </HoverCard>
+          );
+        })}
+      </div>
       <NewChatDialog
         open={openDialog}
         handleClose={handleClose}
