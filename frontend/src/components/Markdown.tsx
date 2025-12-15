@@ -37,6 +37,7 @@ import {
 interface Props {
   allowHtml?: boolean;
   latex?: boolean;
+  renderMarkdown?: boolean;
   refElements?: IMessageElement[];
   children: string;
   className?: string;
@@ -91,11 +92,23 @@ const cursorPlugin = () => {
 const Markdown = ({
   allowHtml,
   latex,
+  renderMarkdown,
   refElements,
   className,
   children
 }: Props) => {
   const apiClient = useContext(ChainlitContext);
+
+  if (!renderMarkdown) {
+    return (
+      <pre
+        className={cn('whitespace-pre-wrap break-words', className)}
+        style={{ fontFamily: 'inherit' }}
+      >
+        {children}
+      </pre>
+    );
+  }
 
   const rehypePlugins = useMemo(() => {
     let rehypePlugins: PluggableList = [];

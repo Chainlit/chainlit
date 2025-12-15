@@ -96,6 +96,9 @@ unsafe_allow_html = false
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
 
+# Enable rendering of user messages markdown
+user_message_markdown = true
+
 # Autoscroll new user messages at the top of the window
 user_message_autoscroll = true
 
@@ -307,6 +310,7 @@ class FeaturesSettings(BaseModel):
     mcp: McpFeature = Field(default_factory=McpFeature)
     slack: SlackFeature = Field(default_factory=SlackFeature)
     latex: bool = False
+    user_message_markdown: bool = True
     user_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
