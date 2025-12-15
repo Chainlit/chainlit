@@ -38,9 +38,13 @@ const ReadOnlyThread = ({ id }: Props) => {
     error: threadError,
     isLoading
   } = useApi<IThread>(
-    id ? (isSharedRoute ? `/project/share/${id}` : `/project/thread/${id}`) : null,
+    id
+      ? isSharedRoute
+        ? `/project/share/${id}`
+        : `/project/thread/${id}`
+      : null,
     {
-    revalidateOnFocus: false
+      revalidateOnFocus: false
     }
   );
   const navigate = useNavigate();

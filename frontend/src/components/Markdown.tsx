@@ -162,9 +162,16 @@ const Markdown = ({
           const src = image.src.startsWith('/public')
             ? apiClient.buildEndpoint(image.src)
             : image.src;
-          
-          const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogv', '.m4v'];
-          const isVideo = videoExtensions.some(ext => 
+
+          const videoExtensions = [
+            '.mp4',
+            '.webm',
+            '.mov',
+            '.avi',
+            '.ogv',
+            '.m4v'
+          ];
+          const isVideo = videoExtensions.some((ext) =>
             src.toLowerCase().split(/[?#]/)[0].endsWith(ext)
           );
 
