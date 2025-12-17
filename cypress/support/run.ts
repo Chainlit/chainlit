@@ -8,29 +8,56 @@ import { dirname, join } from 'node:path';
 
 let currentChainlit: ChildProcessWithoutNullStreams | null = null;
 
+/**
+ * Kill a process tree on Windows using taskkill /T /F
+ */
+async function taskkillTree(pid: number): Promise<void> {
+  await new Promise<void>((resolve) => {
+    const p = spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {
+      windowsHide: true,
+      stdio: 'ignore'
+    });
+
+    p.on('exit', () => resolve());
+    p.on('error', () => resolve()); // best-effort
+  });
+
+  // Give Windows time to release the port
+  await sleep(750);
+}
+
+function sleep(ms: number) {
+  return new Promise((r) => setTimeout(r, ms));
+}
+
 export async function stopChainlit(): Promise<boolean> {
   const proc = currentChainlit;
   if (!proc?.pid) return false;
 
   const pid = proc.pid;
-  const killTarget = process.platform === 'win32' ? pid : -pid;
 
-  // Kill the entire process group (requires detached: true when spawned)
-  try {
-    process.kill(killTarget, 'SIGTERM');
-  } catch {
-    // ignore
-  }
+  if (process.platform === 'win32') {
+    // Windows: kill entire process tree
+    await taskkillTree(pid);
+  } else {
+    // POSIX: kill process group (requires detached: true)
+    try {
+      process.kill(-pid, 'SIGTERM');
+    } catch {
+      // ignore
+    }
 
-  await new Promise((r) => setTimeout(r, 1500));
+    await sleep(1500);
 
-  try {
-    process.kill(killTarget, 'SIGKILL');
-  } catch {
-    // ignore
+    try {
+      process.kill(-pid, 'SIGKILL');
+    } catch {
+      // ignore
+    }
   }
 
   currentChainlit = null;
+
   return true;
 }
 
