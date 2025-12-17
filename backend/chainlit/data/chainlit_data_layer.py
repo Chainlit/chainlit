@@ -408,6 +408,21 @@ class ChainlitDataLayer(BaseDataLayer):
             'DELETE FROM "Step" WHERE id = $1', {"step_id": step_id}
         )
 
+    async def get_step(self, step_id: str) -> Optional[StepDict]:
+        # Get step and related feedback
+        query = """
+        SELECT  s.*,
+                f.id feedback_id,
+                f.value feedback_value,
+                f."comment" feedback_comment
+        FROM "Step" s left join "Feedback" f on s.id = f."stepId"
+        WHERE s.id = $1
+        """
+        result = await self.execute_query(query, {"step_id": step_id})
+        if not result:
+            return None
+        return self._convert_step_row_to_dict(result[0])
+
     async def get_thread_author(self, thread_id: str) -> str:
         query = """
         SELECT u.identifier
