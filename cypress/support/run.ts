@@ -1,10 +1,38 @@
 import {
-  ChildProcessWithoutNullStreams,
-  SpawnOptionsWithoutStdio,
+  type ChildProcessWithoutNullStreams,
+  type SpawnOptionsWithoutStdio,
   spawn
-} from 'child_process';
-import { access } from 'fs/promises';
-import { dirname, join } from 'path';
+} from 'node:child_process';
+import { access } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
+
+let currentChainlit: ChildProcessWithoutNullStreams | null = null;
+
+export async function stopChainlit(): Promise<boolean> {
+  const proc = currentChainlit;
+  if (!proc?.pid) return false;
+
+  const pid = proc.pid;
+  const killTarget = process.platform === 'win32' ? pid : -pid;
+
+  // Kill the entire process group (requires detached: true when spawned)
+  try {
+    process.kill(killTarget, 'SIGTERM');
+  } catch {
+    // ignore
+  }
+
+  await new Promise((r) => setTimeout(r, 1500));
+
+  try {
+    process.kill(killTarget, 'SIGKILL');
+  } catch {
+    // ignore
+  }
+
+  currentChainlit = null;
+  return true;
+}
 
 export const runChainlit = async (
   spec: Cypress.Spec | null = null
@@ -12,24 +40,24 @@ export const runChainlit = async (
   const CHAILIT_DIR = join(process.cwd(), 'backend', 'chainlit');
   const SAMPLE_DIR = join(CHAILIT_DIR, 'sample');
 
+  const testDir = spec ? dirname(spec.absolute) : SAMPLE_DIR;
+  const entryPointFileName = spec
+    ? spec.name.startsWith('async')
+      ? 'main_async.py'
+      : spec.name.startsWith('sync')
+      ? 'main_sync.py'
+      : 'main.py'
+    : 'hello.py';
+
+  const entryPointPath = join(testDir, entryPointFileName);
+
+  try {
+    await access(entryPointPath);
+  } catch {
+    throw new Error(`Entry point file does not exist: ${entryPointPath}`);
+  }
+
   return new Promise((resolve, reject) => {
-    const testDir = spec ? dirname(spec.absolute) : SAMPLE_DIR;
-    const entryPointFileName = spec
-      ? spec.name.startsWith('async')
-        ? 'main_async.py'
-        : spec.name.startsWith('sync')
-        ? 'main_sync.py'
-        : 'main.py'
-      : 'hello.py';
-
-    const entryPointPath = join(testDir, entryPointFileName);
-
-    if (!access(entryPointPath)) {
-      return reject(
-        new Error(`Entry point file does not exist: ${entryPointPath}`)
-      );
-    }
-
     const command = 'uv';
 
     const args = [
@@ -47,10 +75,13 @@ export const runChainlit = async (
       env: {
         ...process.env,
         CHAINLIT_APP_ROOT: testDir
-      }
+      },
+      detached: true
     };
 
     const chainlit = spawn(command, args, options);
+
+    currentChainlit = chainlit;
 
     chainlit.stdout.on('data', (data) => {
       const output = data.toString();
@@ -64,11 +95,11 @@ export const runChainlit = async (
     });
 
     chainlit.on('error', (error) => {
-      reject(error.message);
+      reject(error);
     });
 
-    chainlit.on('exit', function (code) {
-      reject('Chainlit process exited with code ' + code);
+    chainlit.on('exit', (code) => {
+      reject(new Error('Chainlit process exited with code ' + code));
     });
   });
 };
