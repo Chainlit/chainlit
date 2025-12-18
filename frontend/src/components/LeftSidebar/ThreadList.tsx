@@ -149,6 +149,7 @@ export function ThreadList({
       threadIdToDelete === currentThreadId
     ) {
       clear();
+      navigate('/');
       await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
@@ -161,7 +162,6 @@ export function ThreadList({
           ...prev,
           threads: prev?.threads?.filter((t) => t.id !== threadIdToDelete)
         }));
-        navigate('/');
         return (
           <Translator path="threadHistory.thread.actions.delete.success" />
         );
