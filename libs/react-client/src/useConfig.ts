@@ -29,9 +29,7 @@ const useConfig = () => {
     if (!data) return;
     setConfig(data);
     // Set LLMs from config if available
-    if (data.llms) {
-      setLLMs(data.llms);
-    }
+    setLLMs(data.llms ?? []);
   }, [data, setConfig, setLLMs]);
 
   // Clear config when chat profile changes to force re-fetch
