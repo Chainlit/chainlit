@@ -19,6 +19,7 @@ import {
   commandsState,
   currentThreadIdState,
   elementState,
+  favoriteMessagesState,
   firstUserInteraction,
   isAiSpeakingState,
   loadingState,
@@ -85,6 +86,7 @@ const useChatSession = () => {
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
+  const setFavoriteMessages = useSetRecoilState(favoriteMessagesState);
 
   const [currentThreadId, setCurrentThreadId] =
     useRecoilState(currentThreadIdState);
@@ -140,6 +142,7 @@ const useChatSession = () => {
       socket.on('connect', () => {
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
+        socket.emit('fetch_favorites');
         setMcps((prev) =>
           prev.map((mcp) => {
             let promise;
@@ -245,7 +248,9 @@ const useChatSession = () => {
       });
 
       socket.on('resume_thread', (thread: IThread) => {
-        const isReadOnlyView = Boolean((thread as any)?.metadata?.viewer_read_only);
+        const isReadOnlyView = Boolean(
+          (thread as any)?.metadata?.viewer_read_only
+        );
         if (!isReadOnlyView && idToResume && thread.id !== idToResume) {
           window.location.href = `/thread/${thread.id}`;
         }
@@ -360,6 +365,10 @@ const useChatSession = () => {
 
       socket.on('set_modes', (modes: IMode[]) => {
         setModes(modes);
+      });
+
+      socket.on('set_favorites', (steps: IStep[]) => {
+        setFavoriteMessages(steps);
       });
 
       socket.on('set_sidebar_title', (title: string) => {

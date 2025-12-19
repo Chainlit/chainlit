@@ -271,3 +271,8 @@ export const mcpState = atom<IMcp[]>({
   default: [],
   effects: [localStorageEffect<IMcp[]>('mcp_storage_key')]
 });
+
+export const favoriteMessagesState = atom<IStep[]>({
+  key: 'favoriteMessagesState',
+  default: []
+});
