@@ -10,6 +10,7 @@ from chainlit.data import get_data_layer
 from chainlit.element import Element, ElementDict, File
 from chainlit.logger import logger
 from chainlit.message import Message
+from chainlit.mode import Mode
 from chainlit.session import BaseSession, WebsocketSession
 from chainlit.step import StepDict
 from chainlit.types import (
@@ -25,7 +26,6 @@ from chainlit.types import (
     ThreadDict,
     ToastType,
 )
-from chainlit.mode import Mode
 from chainlit.user import PersistedUser
 from chainlit.utils import utc_now
 
