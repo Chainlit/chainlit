@@ -4,7 +4,7 @@ import { Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ICommand } from './types/command';
-import { ILLM } from './types/model';
+import { IMode } from './types/mode';
 
 import {
   IAction,
@@ -76,8 +76,8 @@ export const commandsState = atom<ICommand[]>({
   default: []
 });
 
-export const llmsState = atom<ILLM[]>({
-  key: 'LLMs',
+export const modesState = atom<IMode[]>({
+  key: 'Modes',
   default: []
 });
 

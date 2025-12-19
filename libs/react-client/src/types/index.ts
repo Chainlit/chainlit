@@ -2,6 +2,7 @@ export * from './action';
 export * from './element';
 export * from './command';
 export * from './model';
+export * from './mode';
 export * from './file';
 export * from './feedback';
 export * from './step';

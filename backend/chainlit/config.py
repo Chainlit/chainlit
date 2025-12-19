@@ -390,9 +390,6 @@ class CodeSettings(BaseModel):
     set_starters: Optional[
         Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]
     ] = None
-    set_llms: Optional[
-        Callable[[Optional["User"], Optional["str"]], Awaitable[List[Dict]]]
-    ] = None
     on_shared_thread_view: Optional[
         Callable[["ThreadDict", Optional["User"]], Awaitable[bool]]
     ] = None

@@ -30,14 +30,14 @@ import {
   persistentCommandState
 } from 'state/chat';
 
-import type { ILLM } from '@chainlit/react-client';
-import { llmsState } from '@chainlit/react-client';
+import type { IMode } from '@chainlit/react-client';
+import { modesState } from '@chainlit/react-client';
 
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
 import CommandButton from './CommandPopoverButton';
 import Input, { InputMethods } from './Input';
-import LLMPicker from './LLMPicker';
+import ModePicker from './ModePicker';
 import McpButton from './Mcp';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
@@ -61,7 +61,8 @@ export default function MessageComposer({
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
-  const [selectedLLM, setSelectedLLM] = useState<ILLM | undefined>(undefined);
+  // Track selected options for each mode: { modeId: optionId }
+  const [selectedModes, setSelectedModes] = useState<Record<string, string>>({});
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
@@ -74,17 +75,30 @@ export default function MessageComposer({
 
   const isMobile = useIsMobile();
 
-  // Get available LLMs from state
-  const llms = useRecoilValue(llmsState);
+  // Get available modes from state
+  const modes = useRecoilValue(modesState);
 
-  // Set default LLM on mount
+  // Set default mode options on mount or when modes change
   useEffect(() => {
-    if (llms.length > 0 && !selectedLLM) {
-      // Find the default LLM or use the first one
-      const defaultLLM = llms.find((llm: ILLM) => llm.default) || llms[0];
-      setSelectedLLM(defaultLLM);
+    if (modes.length > 0) {
+      const defaults: Record<string, string> = {};
+      modes.forEach((mode: IMode) => {
+        if (!selectedModes[mode.id] && mode.options.length > 0) {
+          // Find default option or use first
+          const defaultOption = mode.options.find(opt => opt.default) || mode.options[0];
+          defaults[mode.id] = defaultOption.id;
+        }
+      });
+      if (Object.keys(defaults).length > 0) {
+        setSelectedModes(prev => ({ ...prev, ...defaults }));
+      }
     }
-  }, [llms, selectedLLM]);
+  }, [modes]);
+
+  // Handler for mode option selection
+  const handleModeSelect = useCallback((modeId: string, optionId: string) => {
+    setSelectedModes(prev => ({ ...prev, [modeId]: optionId }));
+  }, []);
 
   let promptValue = '';
   try {
@@ -121,10 +135,18 @@ export default function MessageComposer({
       attachments?: IAttachment[],
       selectedCommand?: string
     ) => {
+      // Build modes dict: only include modes that have selections
+      const modesDict: Record<string, string> = {};
+      Object.entries(selectedModes).forEach(([modeId, optionId]) => {
+        if (optionId) {
+          modesDict[modeId] = optionId;
+        }
+      });
+
       const message: IStep = {
         threadId: '',
         command: selectedCommand,
-        llm: selectedLLM?.id,
+        modes: Object.keys(modesDict).length > 0 ? modesDict : undefined,
         id: uuidv4(),
         name: user?.identifier || 'User',
         type: 'user_message',
@@ -142,7 +164,7 @@ export default function MessageComposer({
       }
       sendMessage(message, fileReferences);
     },
-    [user, sendMessage, autoScrollRef, selectedLLM]
+    [user, sendMessage, autoScrollRef, selectedModes]
   );
 
   const onReply = useCallback(
@@ -250,11 +272,15 @@ export default function MessageComposer({
             </Button>
           )}
           <McpButton disabled={disabled} />
-          <LLMPicker
-            disabled={disabled}
-            selectedLLM={selectedLLM}
-            onLLMSelect={setSelectedLLM}
-          />
+          {modes.map((mode) => (
+            <ModePicker
+              key={mode.id}
+              mode={mode}
+              disabled={disabled}
+              selectedOptionId={selectedModes[mode.id]}
+              onOptionSelect={handleModeSelect}
+            />
+          ))}
           <CommandButton
             disabled={disabled}
             selectedCommandId={selectedCommand?.id}

@@ -326,19 +326,6 @@ class CommandDict(TypedDict):
     persistent: Optional[bool]
 
 
-class LLMDict(TypedDict):
-    # The unique identifier of the LLM (e.g., "gemini_3_pro")
-    id: str
-    # The display name of the LLM (e.g., "Gemini 3 Pro")
-    name: str
-    # The description of the LLM, will be displayed in the UI
-    description: str
-    # The lucide icon name or URL
-    icon: Optional[str]
-    # Whether this is the default LLM
-    default: Optional[bool]
-
-
 class FeedbackDict(TypedDict):
     forId: str
     id: Optional[str]

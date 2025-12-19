@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { useApi, useAuth } from './api';
-import { configState, chatProfileState, llmsState } from './state';
+import { configState, chatProfileState } from './state';
 import { IChainlitConfig } from './types';
 
 const useConfig = () => {
@@ -11,7 +11,6 @@ const useConfig = () => {
   const chatProfile = useRecoilValue(chatProfileState);
   const language = navigator.language || 'en-US';
   const prevChatProfileRef = useRef(chatProfile);
-  const setLLMs = useSetRecoilState(llmsState);
 
   // Build the API URL with optional chat profile parameter
   const apiUrl = isAuthenticated
@@ -28,9 +27,7 @@ const useConfig = () => {
   useEffect(() => {
     if (!data) return;
     setConfig(data);
-    // Set LLMs from config if available
-    setLLMs(data.llms ?? []);
-  }, [data, setConfig, setLLMs]);
+  }, [data, setConfig]);
 
   // Clear config when chat profile changes to force re-fetch
   useEffect(() => {

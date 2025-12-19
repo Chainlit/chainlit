@@ -20,12 +20,12 @@ from chainlit.types import (
     CommandDict,
     FileDict,
     FileReference,
-    LLMDict,
     MessagePayload,
     OutputAudioChunk,
     ThreadDict,
     ToastType,
 )
+from chainlit.mode import Mode
 from chainlit.user import PersistedUser
 from chainlit.utils import utc_now
 
@@ -143,8 +143,8 @@ class BaseChainlitEmitter:
         """Stub method to send the available commands to the UI."""
         pass
 
-    async def set_llms(self, llms: List[LLMDict]):
-        """Stub method to send the available LLMs to the UI."""
+    async def set_modes(self, modes: List[Mode]):
+        """Stub method to send the available modes to the UI."""
         pass
 
     async def send_window_message(self, data: Any):
@@ -443,11 +443,11 @@ class ChainlitEmitter(BaseChainlitEmitter):
             commands,
         )
 
-    def set_llms(self, llms: List[LLMDict]):
-        """Send the available LLMs to the UI."""
+    def set_modes(self, modes: List[Mode]):
+        """Send the available modes to the UI."""
         return self.emit(
-            "set_llms",
-            llms,
+            "set_modes",
+            [mode.to_dict() for mode in modes],
         )
 
     def send_window_message(self, data: Any):

@@ -5,10 +5,9 @@ import {
     PopoverTrigger
 } from '@radix-ui/react-popover';
 import { ChevronDown, ChevronUp } from 'lucide-react';
-import { useRef, useState } from 'react';
-import { useRecoilValue } from 'recoil';
+import { useContext, useRef, useState } from 'react';
 
-import { ChainlitContext, ILLM, llmsState } from '@chainlit/react-client';
+import { ChainlitContext, IMode, IModeOption } from '@chainlit/react-client';
 
 import Icon from '@/components/Icon';
 import { Button } from '@/components/ui/button';
@@ -18,28 +17,35 @@ import {
     CommandItemAnimated,
     CommandListScrollable
 } from '@/components/ui/command';
-import { useContext } from 'react';
 
 interface Props {
+    mode: IMode;
     disabled?: boolean;
-    selectedLLM?: ILLM;
-    onLLMSelect: (llm: ILLM) => void;
+    selectedOptionId?: string;
+    onOptionSelect: (modeId: string, optionId: string) => void;
 }
 
-export const LLMPicker = ({
+/**
+ * ModePicker displays a single mode category and allows selection from its options.
+ * Multiple ModePicker instances can be rendered for different mode categories.
+ */
+export const ModePicker = ({
+    mode,
     disabled = false,
-    selectedLLM,
-    onLLMSelect
+    selectedOptionId,
+    onOptionSelect
 }: Props) => {
     const apiClient = useContext(ChainlitContext);
-    const llms = useRecoilValue(llmsState);
     const [open, setOpen] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const popoverRef = useRef<HTMLDivElement>(null);
 
-    // Handle direct LLM selection
-    const handleLLMSelect = (llm: ILLM) => {
-        onLLMSelect(llm);
+    const options = mode.options;
+    const selectedOption = options.find(opt => opt.id === selectedOptionId) || options[0];
+
+    // Handle option selection
+    const handleOptionSelect = (option: IModeOption) => {
+        onOptionSelect(mode.id, option.id);
         setOpen(false);
     };
 
@@ -56,16 +62,16 @@ export const LLMPicker = ({
         switch (e.key) {
             case 'ArrowDown':
                 e.preventDefault();
-                setSelectedIndex((prev) => (prev + 1) % llms.length);
+                setSelectedIndex((prev) => (prev + 1) % options.length);
                 break;
             case 'ArrowUp':
                 e.preventDefault();
-                setSelectedIndex((prev) => (prev - 1 + llms.length) % llms.length);
+                setSelectedIndex((prev) => (prev - 1 + options.length) % options.length);
                 break;
             case 'Enter':
                 e.preventDefault();
-                if (llms[selectedIndex]) {
-                    handleLLMSelect(llms[selectedIndex]);
+                if (options[selectedIndex]) {
+                    handleOptionSelect(options[selectedIndex]);
                 }
                 break;
             case 'Escape':
@@ -83,33 +89,46 @@ export const LLMPicker = ({
         // Keep current selection on mouse leave
     };
 
-    // Helper to render icon (either Lucide or local file)
+    // Helper to render icon - supports Lucide names, local paths, and URLs
     const renderIcon = (icon: string | undefined, className: string) => {
         if (!icon) return null;
 
+        // Local public file path
         if (icon.startsWith('/public')) {
             return (
                 <img
                     className={cn('rounded-md', className)}
                     src={apiClient.buildEndpoint(icon)}
-                    alt="LLM icon"
+                    alt="Mode option icon"
                 />
             );
         }
 
+        // Remote URL
+        if (icon.startsWith('http://') || icon.startsWith('https://')) {
+            return (
+                <img
+                    className={cn('rounded-md', className)}
+                    src={icon}
+                    alt="Mode option icon"
+                />
+            );
+        }
+
+        // Lucide icon name
         return <Icon name={icon} className={className} />;
     };
 
-    if (!llms.length) return null;
+    if (!options.length) return null;
 
     const Chevron = open ? ChevronUp : ChevronDown;
 
     return (
-        <div className="llm-picker-wrapper inline-flex items-center" ref={popoverRef}>
+        <div className="mode-picker-wrapper inline-flex items-center" ref={popoverRef}>
             <Popover open={open} onOpenChange={setOpen}>
                 <PopoverTrigger asChild>
                     <Button
-                        id="llm-picker-trigger"
+                        id={`mode-picker-trigger-${mode.id}`}
                         variant="ghost"
                         size="sm"
                         disabled={disabled}
@@ -122,16 +141,16 @@ export const LLMPicker = ({
                         )}
                         onKeyDown={handleKeyDown}
                     >
-                        {renderIcon(selectedLLM?.icon, '!size-4')}
+                        {renderIcon(selectedOption?.icon, '!size-4')}
                         <span className="max-w-[120px] truncate">
-                            {selectedLLM?.name || 'Select LLM'}
+                            {selectedOption?.name || mode.name}
                         </span>
                         <Chevron className="!size-3.5 text-muted-foreground" />
                     </Button>
                 </PopoverTrigger>
 
                 <PopoverContent
-                    id="llm-picker-popover"
+                    id={`mode-picker-popover-${mode.id}`}
                     align="start"
                     side="top"
                     sideOffset={4}
@@ -146,20 +165,20 @@ export const LLMPicker = ({
                     <Command className="overflow-hidden bg-transparent">
                         <CommandListScrollable maxItems={6} className="custom-scrollbar">
                             <CommandGroup className="p-0">
-                                {llms.map((llm, index) => (
+                                {options.map((option, index) => (
                                     <CommandItemAnimated
-                                        key={llm.id}
+                                        key={option.id}
                                         index={index}
                                         isSelected={index === selectedIndex}
                                         onMouseMove={() => handleMouseMove(index)}
-                                        onSelect={() => handleLLMSelect(llm)}
+                                        onSelect={() => handleOptionSelect(option)}
                                         className={cn(
                                             'flex items-start gap-2 px-2 py-2 cursor-pointer',
-                                            selectedLLM?.id === llm.id && 'bg-accent'
+                                            selectedOptionId === option.id && 'bg-accent'
                                         )}
                                     >
                                         {renderIcon(
-                                            llm.icon,
+                                            option.icon,
                                             cn(
                                                 '!size-5 mt-0.5 text-muted-foreground flex-shrink-0',
                                                 index === selectedIndex && 'text-foreground'
@@ -167,11 +186,13 @@ export const LLMPicker = ({
                                         )}
                                         <div className="flex-1 min-w-0">
                                             <div className="font-medium text-sm leading-tight">
-                                                {llm.name}
+                                                {option.name}
                                             </div>
-                                            <div className="text-xs text-muted-foreground mt-0.5 leading-tight">
-                                                {llm.description}
-                                            </div>
+                                            {option.description && (
+                                                <div className="text-xs text-muted-foreground mt-0.5 leading-tight">
+                                                    {option.description}
+                                                </div>
+                                            )}
                                         </div>
                                     </CommandItemAnimated>
                                 ))}
@@ -184,4 +205,4 @@ export const LLMPicker = ({
     );
 };
 
-export default LLMPicker;
+export default ModePicker;

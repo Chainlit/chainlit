@@ -49,7 +49,7 @@ class StepDict(TypedDict, total=False):
     threadId: str
     parentId: Optional[str]
     command: Optional[str]
-    llm: Optional[str]
+    modes: Optional[Dict[str, str]]
     streaming: bool
     waitForAnswer: Optional[bool]
     isError: Optional[bool]

@@ -277,33 +277,6 @@ def set_starters(func):
     return func
 
 
-@overload
-def set_llms(
-    func: Callable[[Optional["User"]], Awaitable[List[Dict]]],
-) -> Callable[[Optional["User"]], Awaitable[List[Dict]]]: ...
-
-
-@overload
-def set_llms(
-    func: Callable[[Optional["User"], Optional["str"]], Awaitable[List[Dict]]],
-) -> Callable[[Optional["User"], Optional["str"]], Awaitable[List[Dict]]]: ...
-
-
-def set_llms(func):
-    """
-    Programmatic declaration of the available LLMs (can depend on the User from the session if authentication is setup).
-
-    Args:
-        func (Callable[[Optional["User"]], Awaitable[List[Dict]]]): The function declaring the LLMs.
-
-    Returns:
-        Callable[[Optional["User"]], Awaitable[List[Dict]]]: The decorated function.
-    """
-
-    config.code.set_llms = wrap_user_function(func)
-    return func
-
-
 def on_chat_end(func: Callable) -> Callable:
     """
     Hook to react to the user websocket disconnect event.
