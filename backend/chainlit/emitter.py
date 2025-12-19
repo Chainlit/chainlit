@@ -20,6 +20,7 @@ from chainlit.types import (
     CommandDict,
     FileDict,
     FileReference,
+    LLMDict,
     MessagePayload,
     OutputAudioChunk,
     ThreadDict,
@@ -140,6 +141,10 @@ class BaseChainlitEmitter:
 
     async def set_commands(self, commands: List[CommandDict]):
         """Stub method to send the available commands to the UI."""
+        pass
+
+    async def set_llms(self, llms: List[LLMDict]):
+        """Stub method to send the available LLMs to the UI."""
         pass
 
     async def send_window_message(self, data: Any):
@@ -436,6 +441,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
         return self.emit(
             "set_commands",
             commands,
+        )
+
+    def set_llms(self, llms: List[LLMDict]):
+        """Send the available LLMs to the UI."""
+        return self.emit(
+            "set_llms",
+            llms,
         )
 
     def send_window_message(self, data: Any):

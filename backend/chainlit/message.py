@@ -40,6 +40,7 @@ class MessageBase(ABC):
     persisted = False
     is_error = False
     command: Optional[str] = None
+    llm: Optional[str] = None
     parent_id: Optional[str] = None
     language: Optional[str] = None
     metadata: Optional[Dict] = None
@@ -67,6 +68,7 @@ class MessageBase(ABC):
             content=_dict["output"],
             author=_dict.get("name", config.ui.name),
             command=_dict.get("command"),
+            llm=_dict.get("llm"),
             type=type,  # type: ignore
             language=_dict.get("language"),
             metadata=_dict.get("metadata", {}),
@@ -79,6 +81,7 @@ class MessageBase(ABC):
             "parentId": self.parent_id,
             "createdAt": self.created_at,
             "command": self.command,
+            "llm": self.llm,
             "start": self.created_at,
             "end": self.created_at,
             "output": self.content,
@@ -221,6 +224,7 @@ class Message(MessageBase):
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
         command: Optional[str] = None,
+        llm: Optional[str] = None,
         created_at: Union[str, None] = None,
     ):
         time.sleep(0.001)
@@ -246,6 +250,9 @@ class Message(MessageBase):
 
         if command:
             self.command = str(command)
+
+        if llm:
+            self.llm = str(llm)
 
         if created_at:
             self.created_at = created_at

@@ -83,6 +83,7 @@ from .callbacks import (
     password_auth_callback,
     send_window_message,
     set_chat_profiles,
+    set_llms,
     set_starters,
 )
 
@@ -200,6 +201,7 @@ __all__ = [
     "run_sync",
     "send_window_message",
     "set_chat_profiles",
+    "set_llms",
     "set_starters",
     "sleep",
     "step",

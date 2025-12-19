@@ -833,6 +833,12 @@ async def project_settings(
         if s:
             starters = [it.to_dict() for it in s]
 
+    llms = []
+    if config.code.set_llms:
+        llm_list = await config.code.set_llms(current_user, effective_language)
+        if llm_list:
+            llms = llm_list
+
     data_layer = get_data_layer()
     debug_url = (
         await data_layer.build_debug_url() if data_layer and config.run.debug else None
@@ -862,6 +868,7 @@ async def project_settings(
             "markdown": markdown,
             "chatProfiles": profiles,
             "starters": starters,
+            "llms": llms,
             "debugUrl": debug_url,
         }
     )

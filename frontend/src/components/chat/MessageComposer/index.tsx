@@ -5,7 +5,7 @@ import {
   useRef,
   useState
 } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -30,10 +30,14 @@ import {
   persistentCommandState
 } from 'state/chat';
 
+import type { ILLM } from '@chainlit/react-client';
+import { llmsState } from '@chainlit/react-client';
+
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
 import CommandButton from './CommandPopoverButton';
 import Input, { InputMethods } from './Input';
+import LLMPicker from './LLMPicker';
 import McpButton from './Mcp';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
@@ -57,6 +61,7 @@ export default function MessageComposer({
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
+  const [selectedLLM, setSelectedLLM] = useState<ILLM | undefined>(undefined);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
@@ -68,6 +73,18 @@ export default function MessageComposer({
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
   const isMobile = useIsMobile();
+
+  // Get available LLMs from state
+  const llms = useRecoilValue(llmsState);
+
+  // Set default LLM on mount
+  useEffect(() => {
+    if (llms.length > 0 && !selectedLLM) {
+      // Find the default LLM or use the first one
+      const defaultLLM = llms.find((llm: ILLM) => llm.default) || llms[0];
+      setSelectedLLM(defaultLLM);
+    }
+  }, [llms, selectedLLM]);
 
   let promptValue = '';
   try {
@@ -107,6 +124,7 @@ export default function MessageComposer({
       const message: IStep = {
         threadId: '',
         command: selectedCommand,
+        llm: selectedLLM?.id,
         id: uuidv4(),
         name: user?.identifier || 'User',
         type: 'user_message',
@@ -232,6 +250,11 @@ export default function MessageComposer({
             </Button>
           )}
           <McpButton disabled={disabled} />
+          <LLMPicker
+            disabled={disabled}
+            selectedLLM={selectedLLM}
+            onLLMSelect={setSelectedLLM}
+          />
           <CommandButton
             disabled={disabled}
             selectedCommandId={selectedCommand?.id}

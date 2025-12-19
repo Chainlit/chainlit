@@ -22,6 +22,7 @@ import {
   firstUserInteraction,
   isAiSpeakingState,
   loadingState,
+  llmsState,
   mcpState,
   messagesState,
   resumeThreadErrorState,
@@ -38,6 +39,7 @@ import {
   IAction,
   ICommand,
   IElement,
+  ILLM,
   IMessageElement,
   IStep,
   ITasklistElement,
@@ -73,6 +75,7 @@ const useChatSession = () => {
   const setAskUser = useSetRecoilState(askUserState);
   const setCallFn = useSetRecoilState(callFnState);
   const setCommands = useSetRecoilState(commandsState);
+  const setLLMs = useSetRecoilState(llmsState);
   const setSideView = useSetRecoilState(sideViewState);
   const setElements = useSetRecoilState(elementState);
   const setTasklists = useSetRecoilState(tasklistState);
@@ -353,6 +356,10 @@ const useChatSession = () => {
 
       socket.on('set_commands', (commands: ICommand[]) => {
         setCommands(commands);
+      });
+
+      socket.on('set_llms', (llms: ILLM[]) => {
+        setLLMs(llms);
       });
 
       socket.on('set_sidebar_title', (title: string) => {
