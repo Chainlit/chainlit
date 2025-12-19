@@ -5,7 +5,7 @@ import {
   useRef,
   useState
 } from 'react';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { useRecoilState, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -15,6 +15,8 @@ import {
   useChatData,
   useChatInteract
 } from '@chainlit/react-client';
+import type { IMode, IModeOption } from '@chainlit/react-client';
+import { modesState } from '@chainlit/react-client';
 
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
@@ -30,15 +32,12 @@ import {
   persistentCommandState
 } from 'state/chat';
 
-import type { IMode } from '@chainlit/react-client';
-import { modesState } from '@chainlit/react-client';
-
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
 import CommandButton from './CommandPopoverButton';
 import Input, { InputMethods } from './Input';
-import ModePicker from './ModePicker';
 import McpButton from './Mcp';
+import ModePicker from './ModePicker';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
@@ -61,8 +60,6 @@ export default function MessageComposer({
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
-  // Track selected options for each mode: { modeId: optionId }
-  const [selectedModes, setSelectedModes] = useState<Record<string, string>>({});
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
@@ -75,29 +72,31 @@ export default function MessageComposer({
 
   const isMobile = useIsMobile();
 
-  // Get available modes from state
-  const modes = useRecoilValue(modesState);
+  // Get/set available modes from state - selections are tracked via the 'default' flag on options
+  const [modes, setModes] = useRecoilState(modesState);
 
-  // Set default mode options on mount or when modes change
-  useEffect(() => {
-    if (modes.length > 0) {
-      const defaults: Record<string, string> = {};
-      modes.forEach((mode: IMode) => {
-        if (!selectedModes[mode.id] && mode.options.length > 0) {
-          // Find default option or use first
-          const defaultOption = mode.options.find(opt => opt.default) || mode.options[0];
-          defaults[mode.id] = defaultOption.id;
-        }
-      });
-      if (Object.keys(defaults).length > 0) {
-        setSelectedModes(prev => ({ ...prev, ...defaults }));
-      }
-    }
-  }, [modes]);
+  const handleModeSelect = useCallback(
+    (modeId: string, optionId: string) => {
+      setModes((prevModes) =>
+        prevModes.map((mode) => {
+          if (mode.id !== modeId) return mode;
+          return {
+            ...mode,
+            options: mode.options.map((opt: IModeOption) => ({
+              ...opt,
+              default: opt.id === optionId
+            }))
+          };
+        })
+      );
+    },
+    [setModes]
+  );
 
-  // Handler for mode option selection
-  const handleModeSelect = useCallback((modeId: string, optionId: string) => {
-    setSelectedModes(prev => ({ ...prev, [modeId]: optionId }));
+  // Helper to get selected option for a mode (the one with default=true, or first option)
+  const getSelectedOptionId = useCallback((mode: IMode): string | undefined => {
+    const defaultOpt = mode.options.find((opt) => opt.default);
+    return defaultOpt?.id || mode.options[0]?.id;
   }, []);
 
   let promptValue = '';
@@ -137,9 +136,10 @@ export default function MessageComposer({
     ) => {
       // Build modes dict: only include modes that have selections
       const modesDict: Record<string, string> = {};
-      Object.entries(selectedModes).forEach(([modeId, optionId]) => {
-        if (optionId) {
-          modesDict[modeId] = optionId;
+      modes.forEach((mode) => {
+        const selectedId = getSelectedOptionId(mode);
+        if (selectedId) {
+          modesDict[mode.id] = selectedId;
         }
       });
 
@@ -164,7 +164,7 @@ export default function MessageComposer({
       }
       sendMessage(message, fileReferences);
     },
-    [user, sendMessage, autoScrollRef, selectedModes]
+    [user, sendMessage, autoScrollRef, modes, getSelectedOptionId]
   );
 
   const onReply = useCallback(
@@ -277,7 +277,7 @@ export default function MessageComposer({
               key={mode.id}
               mode={mode}
               disabled={disabled}
-              selectedOptionId={selectedModes[mode.id]}
+              selectedOptionId={getSelectedOptionId(mode)}
               onOptionSelect={handleModeSelect}
             />
           ))}
