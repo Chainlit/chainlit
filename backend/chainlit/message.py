@@ -68,7 +68,7 @@ class MessageBase(ABC):
             content=_dict["output"],
             author=_dict.get("name", config.ui.name),
             command=_dict.get("command"),
-            llm=_dict.get("llm"),
+            llm=_dict.get("llm"),  # type: ignore[typeddict-item]
             type=type,  # type: ignore
             language=_dict.get("language"),
             metadata=_dict.get("metadata", {}),
@@ -81,7 +81,7 @@ class MessageBase(ABC):
             "parentId": self.parent_id,
             "createdAt": self.created_at,
             "command": self.command,
-            "llm": self.llm,
+            "llm": self.llm,  # type: ignore[typeddict-unknown-key]
             "start": self.created_at,
             "end": self.created_at,
             "output": self.content,
