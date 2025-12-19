@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { size } from 'lodash';
+import { Share2 } from 'lucide-react';
 import { useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
@@ -9,8 +10,7 @@ import { toast } from 'sonner';
 import {
   ChainlitContext,
   ClientError,
-  ThreadHistory,
-  // sessionIdState,
+  ThreadHistory, // sessionIdState,
   threadHistoryState,
   useChatInteract,
   useChatMessages,
@@ -20,6 +20,7 @@ import {
 
 import Alert from '@/components/Alert';
 import { Loader } from '@/components/Loader';
+import ShareDialog from '@/components/share/ShareDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +32,14 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -50,7 +58,6 @@ import {
 } from '@/components/ui/tooltip';
 
 import { Translator } from '../i18n';
-import ShareDialog from '@/components/share/ShareDialog';
 import ThreadOptions from './ThreadOptions';
 
 interface ThreadListProps {
@@ -90,7 +97,7 @@ export function ThreadList({
     if (!threadSharingReady) return;
     setThreadIdToShare(threadId);
     setIsShareDialogOpen(true);
-  // ShareDialog handles its own internal state; we just open it
+    // ShareDialog handles its own internal state; we just open it
   };
 
   const sortedTimeGroupKeys = useMemo(() => {
@@ -328,11 +335,21 @@ export function ThreadList({
                             <Link to={isResumed ? '' : `/thread/${thread.id}`}>
                               <SidebarMenuButton
                                 isActive={isSelected}
-                                className="relative truncate h-9 group/thread"
+                                className="relative h-9 group/thread"
                               >
-                                {thread.name || (
-                                  <Translator path="threadHistory.thread.untitled" />
-                                )}
+                                <span className="flex min-w-0 items-center gap-2">
+                                  {thread.metadata?.is_shared ? (
+                                    <Share2
+                                      className="h-4 w-4 shrink-0 text-muted-foreground"
+                                      aria-hidden="true"
+                                    />
+                                  ) : null}
+                                  <span className="truncate">
+                                    {thread.name || (
+                                      <Translator path="threadHistory.thread.untitled" />
+                                    )}
+                                  </span>
+                                </span>
                                 <div
                                   className={cn(
                                     'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
@@ -347,7 +364,7 @@ export function ThreadList({
                                     setThreadNewName(thread.name);
                                   }}
                                   onShare={
-                                    dataPersistence
+                                    dataPersistence && threadSharingReady
                                       ? () => handleShareThread(thread.id)
                                       : undefined
                                   }

@@ -18,6 +18,7 @@ interface SliderInputProps extends IInput {
   max?: number;
   step?: number;
   defaultValue?: number[];
+  disabled?: boolean;
   onValueChange?: (value: number[]) => void;
   setField?: (field: string, value: number, shouldValidate?: boolean) => void;
   className?: string;
@@ -34,6 +35,7 @@ const SliderInput = ({
   max = 100,
   step = 1,
   defaultValue = [0],
+  disabled,
   onValueChange,
   setField,
   className,
@@ -70,6 +72,7 @@ const SliderInput = ({
         max={max}
         min={min}
         step={step}
+        disabled={disabled}
         value={value !== undefined ? [value] : defaultValue}
         onValueChange={handleValueChange}
         className={cn('w-full', className)}

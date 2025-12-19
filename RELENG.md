@@ -17,6 +17,7 @@ This document outlines the steps for maintainers to create a new release of the 
 2. **Bump the package version**:
 
    - Update `version` in `backend/chainlit/version.py`.
+   - Update  `version` in `libs/*/package.json` if there were any changes in the corresponding directories.
 
 3. **Update the changelog**:
 

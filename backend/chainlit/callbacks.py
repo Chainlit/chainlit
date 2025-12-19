@@ -453,6 +453,33 @@ def on_feedback(func: Callable) -> Callable:
     return func
 
 
+def on_slack_reaction_added(func: Callable[[Dict[str, Any]], Any]) -> Callable:
+    """
+    Hook to react to Slack reaction_added events.
+    The decorated function is called every time a user adds a reaction to a message in Slack.
+
+    Args:
+        func (Callable[[Dict[str, Any]], Any]): The function to be called when a reaction is added.
+            Takes a Slack event dictionary containing:
+            - reaction: The emoji reaction name (e.g., "thumbsup")
+            - user: The user ID who added the reaction
+            - item: Dictionary with type, ts, and channel of the reacted item
+
+    Example:
+        @cl.on_slack_reaction_added
+        async def handle_reaction(event: Dict[str, Any]):
+            reaction = event.get("reaction")
+            user_id = event.get("user")
+            print(f"User {user_id} added reaction {reaction}")
+            # Handle reaction here
+
+    Returns:
+        Callable[[Dict[str, Any]], Any]: The decorated on_slack_reaction_added function.
+    """
+    config.code.on_slack_reaction_added = wrap_user_function(func)
+    return func
+
+
 def on_shared_thread_view(
     func: Callable[[ThreadDict, Optional[User]], Awaitable[bool]],
 ) -> Callable[[ThreadDict, Optional[User]], Awaitable[bool]]:

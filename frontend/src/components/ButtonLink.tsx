@@ -15,15 +15,18 @@ export interface ButtonLinkProps {
   displayName?: string;
   iconUrl?: string;
   url: string;
+  target?: '_blank' | '_self' | '_parent' | '_top';
 }
 
 export default function ButtonLink({
   name,
   displayName,
   iconUrl,
-  url
+  url,
+  target
 }: ButtonLinkProps) {
   const apiClient = useContext(ChainlitContext);
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -35,7 +38,8 @@ export default function ButtonLink({
           >
             <a
               href={url}
-              target="_blank"
+              target={target ?? '_blank'}
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-1"
             >
               <img

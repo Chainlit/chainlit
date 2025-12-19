@@ -8,6 +8,7 @@ const SELECTORS = {
   EMAIL_INPUT: '#email',
   PASSWORD_INPUT: '#password',
   AI_MESSAGE: "[data-step-type='assistant_message']",
+  CHAT_SUBMIT: '#chat-submit',
   POSITIVE_FEEDBACK: '.positive-feedback-off',
   NEGATIVE_FEEDBACK: '.negative-feedback-off',
   SUBMIT_FEEDBACK: '#submit-feedback',
@@ -26,13 +27,15 @@ const SELECTORS = {
 
 // Utility functions
 
-const login = () => {
+const login = (username: string = 'user1', password: string = 'user1') => {
   cy.step('Verify login');
 
   cy.location('pathname').should('eq', '/login');
 
-  cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type('admin');
-  cy.get(SELECTORS.PASSWORD_INPUT).should('be.visible').type('admin{enter}');
+  cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type(username);
+  cy.get(SELECTORS.PASSWORD_INPUT)
+    .should('be.visible')
+    .type(`${password}{enter}`);
 };
 
 const startConversation = () => {
@@ -129,20 +132,20 @@ const startNewThread = () => {
   cy.get(SELECTORS.CONFIRM_NEW).click();
 };
 
-describe('Data Layer', () => {
+const cleanupThreadHistory = () => {
   const pathItems = Cypress.spec.absolute.split(sep);
   pathItems[pathItems.length - 1] = 'thread_history.pickle';
   const threadHistoryFile = pathItems.join(sep);
 
-  const cleanupThreadHistory = () => {
-    // Clean up thread history file
-    const command =
-      platform() === 'win32'
-        ? `del /f "${threadHistoryFile}"`
-        : `rm -f "${threadHistoryFile}"`;
-    cy.exec(command, { failOnNonZeroExit: false });
-  };
+  // Clean up thread history file
+  const command =
+    platform() === 'win32'
+      ? `del /f "${threadHistoryFile}"`
+      : `rm -f "${threadHistoryFile}"`;
+  cy.exec(command, { failOnNonZeroExit: false });
+};
 
+describe('Data Layer', () => {
   describe('Data Features with Persistence', () => {
     before(cleanupThreadHistory);
     afterEach(cleanupThreadHistory);
@@ -183,5 +186,51 @@ describe('Data Layer', () => {
         verifyThreadQueue();
       });
     });
+  });
+});
+
+describe('Access Control', () => {
+  before(cleanupThreadHistory);
+
+  it("should not allow steal user's thread", () => {
+    login('user1', 'user1');
+    startConversation();
+
+    let stolenThreadId = '';
+    cy.location('pathname')
+      .should('match', /^\/thread\//)
+      .then((pathname) => {
+        const parts = pathname.split('/');
+        stolenThreadId = parts[2];
+        expect(stolenThreadId).to.match(/^[a-zA-Z0-9_-]+$/);
+      });
+
+    cy.clearCookies();
+    cy.clearLocalStorage();
+
+    login('user2', 'user2');
+
+    cy.intercept(
+      {
+        method: 'POST',
+        url: /\/ws\/socket\.io\/.*transport=polling/
+      },
+      (request) => {
+        if (
+          typeof request.body === 'string' &&
+          request.body.includes('"threadId"')
+        ) {
+          request.body = request.body.replace(
+            /("threadId":\s*")[^"]*(")/,
+            `$1${stolenThreadId}$2`
+          );
+          expect(request.url).to.include('/ws/socket.io/');
+          expect(request.body).to.include(`"threadId":"${stolenThreadId}"`);
+        }
+      }
+    );
+    startNewThread();
+
+    cy.get(SELECTORS.STEP).should('have.length', 0);
   });
 });

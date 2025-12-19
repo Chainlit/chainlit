@@ -35,7 +35,7 @@ dependencies = [
     "httpx>=0.23.0",
     "literalai==0.1.201",
     "dataclasses_json>=0.6.7,<0.7.0",
-    "fastapi>=0.116.1,<0.117",
+    "fastapi>=0.116.1",
     "starlette>=0.47.2",
     "uvicorn>=0.35.0",
     "python-socketio>=5.11.0,<6.0.0",

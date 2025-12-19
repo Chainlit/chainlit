@@ -29,8 +29,38 @@ const VoiceButton = ({ disabled }: Props) => {
     'p',
     () => {
       if (!isEnabled) return;
+
+      // Double-check at execution time that we're not in a form field
+      const getDeepActiveElement = (): Element | null => {
+        let activeElement = document.activeElement;
+        while (
+          activeElement &&
+          activeElement.shadowRoot &&
+          activeElement.shadowRoot.activeElement
+        ) {
+          activeElement = activeElement.shadowRoot.activeElement;
+        }
+        return activeElement;
+      };
+
+      const activeElement = getDeepActiveElement();
+      if (activeElement) {
+        const tagName = activeElement.tagName.toLowerCase();
+        const isFormField = ['input', 'textarea', 'select'].includes(tagName);
+        const isContentEditable =
+          activeElement.getAttribute('contenteditable') === 'true';
+
+        if (isFormField || isContentEditable) {
+          return; // Don't execute the hotkey
+        }
+      }
+
       if (audioConnection === 'on') return endConversation();
       return startConversation();
+    },
+    {
+      enableOnFormTags: false,
+      preventDefault: false // Don't prevent default - let letters be typed
     },
     [isEnabled, audioConnection, startConversation, endConversation]
   );

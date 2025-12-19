@@ -169,6 +169,26 @@ users_by_slack_id: Dict[str, Union[User, PersistedUser]] = {}
 USER_PREFIX = "slack_"
 
 
+bot_user_id: Optional[str] = None
+
+
+async def get_bot_user_id() -> Optional[str]:
+    """Get and cache the bot's user ID."""
+    global bot_user_id
+    if bot_user_id:
+        return bot_user_id
+
+    try:
+        result = await slack_app.client.auth_test()
+        if result.get("ok"):
+            bot_user_id = result.get("user_id")
+            return bot_user_id
+    except Exception as e:
+        logger.error(f"Failed to get bot user ID: {e}")
+
+    return None
+
+
 def clean_content(message: str):
     cleaned_text = re.sub(r"<@[\w]+>", "", message).strip()
     return cleaned_text
@@ -367,6 +387,84 @@ async def handle_message(message, say):
         bind_thread_to_user=True,
         thread_ts=thread_ts,
     )
+
+
+@slack_app.event("reaction_added")
+async def handle_reaction_added(event):
+    bot_id = await get_bot_user_id()
+
+    if event.get("user") == bot_id:
+        return
+
+    item = event.get("item", {})
+    channel_id = item.get("channel")
+    thread_ts = item.get("ts")
+
+    if not channel_id:
+        logger.warning(
+            "reaction_added event missing channel_id, skipping context setup"
+        )
+        return
+
+    try:
+        result = await slack_app.client.conversations_replies(
+            channel=channel_id, ts=thread_ts, limit=1
+        )
+
+        if result.get("ok"):
+            messages = result.get("messages")
+            message = messages[0]
+            message_user = message.get("user")
+            message_bot_id = message.get("bot_id")
+
+            if message_user != bot_id and message_bot_id != bot_id:
+                return
+        else:
+            raise Exception(
+                f"Failed to fetch message: {result.get('error', 'Unknown error')}"
+            )
+
+    except Exception as e:
+        logger.warning(f"Failed to fetch message for reaction: {e}")
+        return
+
+    async def say(text: str = "", **kwargs):
+        await slack_app.client.chat_postMessage(
+            channel=channel_id, text=text, thread_ts=thread_ts, **kwargs
+        )
+
+    user = await get_user(event["user"])
+
+    thread_id = (
+        str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
+        if thread_ts
+        else str(uuid.uuid4())
+    )
+
+    session_id = str(uuid.uuid4())
+    session = HTTPSession(
+        id=session_id,
+        thread_id=thread_id,
+        user=user,
+        client_type="slack",
+    )
+
+    ctx = init_slack_context(
+        session=session,
+        slack_channel_id=channel_id,
+        event=event,
+        say=say,
+        thread_ts=thread_ts,
+    )
+
+    try:
+        if on_chat_start := config.code.on_chat_start:
+            await on_chat_start()
+
+        if on_slack_reaction_added := config.code.on_slack_reaction_added:
+            await on_slack_reaction_added(event)
+    finally:
+        await ctx.session.delete()
 
 
 @slack_app.block_action("thumbdown")

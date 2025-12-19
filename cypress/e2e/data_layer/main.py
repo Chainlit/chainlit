@@ -28,8 +28,8 @@ thread_history = [
         "id": "test1",
         "name": "thread 1",
         "createdAt": now,
-        "userId": "test",
-        "userIdentifier": "admin",
+        "userId": "user1_id",
+        "userIdentifier": "user1",
         "steps": [
             {
                 "id": "test1",
@@ -50,8 +50,8 @@ thread_history = [
     {
         "id": "test2",
         "createdAt": now,
-        "userId": "test",
-        "userIdentifier": "admin",
+        "userId": "user1_id",
+        "userIdentifier": "user1",
         "name": "thread 2",
         "steps": [
             {
@@ -93,10 +93,22 @@ async def save_thread_history():
 
 class TestDataLayer(cl_data.BaseDataLayer):
     async def get_user(self, identifier: str):
-        return cl.PersistedUser(id="test", createdAt=now, identifier=identifier)
+        if identifier == "user1":
+            return cl.PersistedUser(id="user1_id", createdAt=now, identifier=identifier)
+        elif identifier == "user2":
+            return cl.PersistedUser(id="user2_id", createdAt=now, identifier=identifier)
+        return None
 
     async def create_user(self, user: cl.User):
-        return cl.PersistedUser(id="test", createdAt=now, identifier=user.identifier)
+        if user.identifier == "user1":
+            return cl.PersistedUser(
+                id="user1_id", createdAt=now, identifier=user.identifier
+            )
+        elif user.identifier == "user2":
+            return cl.PersistedUser(
+                id="user2_id", createdAt=now, identifier=user.identifier
+            )
+        return None
 
     async def update_thread(
         self,
@@ -123,7 +135,11 @@ class TestDataLayer(cl_data.BaseDataLayer):
                     "tags": tags,
                     "createdAt": utc_now(),
                     "userId": user_id,
-                    "userIdentifier": "admin",
+                    "userIdentifier": "user1"
+                    if user_id == "user1_id"
+                    else "user2"
+                    if user_id == "user2_id"
+                    else "unknown",
                     "steps": [],
                 }
             )
@@ -141,7 +157,8 @@ class TestDataLayer(cl_data.BaseDataLayer):
             thread["steps"].append(step_dict)
 
     async def get_thread_author(self, thread_id: str):
-        return "admin"
+        thread = await self.get_thread(thread_id)
+        return thread["userIdentifier"] if thread else None
 
     async def list_threads(
         self, pagination: Pagination, filters: ThreadFilter
@@ -234,8 +251,10 @@ async def handle_message():
 
 @cl.password_auth_callback
 def auth_callback(username: str, password: str) -> Optional[cl.User]:
-    if (username, password) == ("admin", "admin"):
-        return cl.User(identifier="admin")
+    if (username, password) == ("user1", "user1"):
+        return cl.User(identifier="user1")
+    elif (username, password) == ("user2", "user2"):
+        return cl.User(identifier="user2")
     else:
         return None
 

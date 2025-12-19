@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext, useRef } from 'react';
+import { memo, useContext, useMemo, useRef } from 'react';
 
 import {
   type IAction,
@@ -29,6 +29,8 @@ interface Props {
   scorableRun?: IStep;
 }
 
+const EMPTY_ELEMENTS: IMessageElement[] = [];
+
 const Message = memo(
   ({
     message,
@@ -51,6 +53,20 @@ const Message = memo(
     const hiddenSkip = isStep && cot === 'hidden';
 
     const skip = toolCallSkip || hiddenSkip;
+    const showInputSection = Boolean(message.input && message.showInput);
+    const shouldRenderOutput = !showInputSection || Boolean(message.output);
+
+    const userMessageContent = useMemo(
+      () => (
+        <MessageContent
+          elements={EMPTY_ELEMENTS}
+          message={message}
+          allowHtml={allowHtml}
+          latex={latex}
+        />
+      ),
+      [message, allowHtml, latex]
+    );
 
     if (skip) {
       if (!message.steps) {
@@ -85,12 +101,7 @@ const Message = memo(
               {isUserMessage ? (
                 <div className="flex flex-col flex-grow max-w-full">
                   <UserMessage message={message} elements={elements}>
-                    <MessageContent
-                      elements={[]}
-                      message={message}
-                      allowHtml={allowHtml}
-                      latex={latex}
-                    />
+                    {userMessageContent}
                   </UserMessage>
                 </div>
               ) : (
@@ -105,6 +116,15 @@ const Message = memo(
                   {/* Display the step and its children */}
                   {isStep ? (
                     <Step step={message} isRunning={isRunning}>
+                      {showInputSection ? (
+                        <MessageContent
+                          elements={elements}
+                          message={message}
+                          allowHtml={allowHtml}
+                          latex={latex}
+                          sections={['input']}
+                        />
+                      ) : null}
                       {message.steps ? (
                         <Messages
                           messages={message.steps.filter(
@@ -116,13 +136,16 @@ const Message = memo(
                           isRunning={isRunning}
                         />
                       ) : null}
-                      <MessageContent
-                        ref={contentRef}
-                        elements={elements}
-                        message={message}
-                        allowHtml={allowHtml}
-                        latex={latex}
-                      />
+                      {shouldRenderOutput ? (
+                        <MessageContent
+                          ref={contentRef}
+                          elements={elements}
+                          message={message}
+                          allowHtml={allowHtml}
+                          latex={latex}
+                          sections={showInputSection ? ['output'] : undefined}
+                        />
+                      ) : null}
                       <MessageButtons
                         message={message}
                         actions={actions}

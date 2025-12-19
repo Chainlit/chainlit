@@ -114,11 +114,11 @@ export default function ChatProfiles({ navigate }: Props) {
                       {icon && (
                         <img
                           src={icon}
-                          alt={profile.name}
+                          alt={profile.display_name || profile.name}
                           className="w-6 h-6 rounded-md object-cover"
                         />
                       )}
-                      <span>{profile.name}</span>
+                      <span>{profile.display_name || profile.name}</span>
                     </div>
                   </SelectItem>
                 </HoverCardTrigger>

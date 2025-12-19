@@ -47,8 +47,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
-        with:
-          pnpm-install-args: --no-frozen-lockfile
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python dependencies
         with:
