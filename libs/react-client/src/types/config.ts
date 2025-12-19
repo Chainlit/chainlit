@@ -5,8 +5,6 @@ export interface IStarter {
   command?: string;
 }
 
-import type { ILLM } from './model';
-
 export interface ChatProfile {
   default: boolean;
   icon?: string;
@@ -92,6 +90,6 @@ export interface IChainlitConfig {
   threadSharing?: boolean;
   chatProfiles: ChatProfile[];
   starters?: IStarter[];
-  llms?: ILLM[];
+
   translation: object;
 }
