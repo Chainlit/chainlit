@@ -142,7 +142,7 @@ export default function MessageComposer({
       }
       sendMessage(message, fileReferences);
     },
-    [user, sendMessage, autoScrollRef]
+    [user, sendMessage, autoScrollRef, selectedLLM]
   );
 
   const onReply = useCallback(

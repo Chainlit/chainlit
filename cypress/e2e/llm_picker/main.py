@@ -36,5 +36,5 @@ async def on_message(message: cl.Message):
     """Echo the message with the selected LLM."""
     selected_llm = message.llm or "No LLM selected"
     await cl.Message(
-        content=f"You selected: {selected_llm}\\n\\nYour message: {message.content}"
+        content=f"You selected: {selected_llm}\n\nYour message: {message.content}"
     ).send()
