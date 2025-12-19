@@ -66,6 +66,7 @@ export interface IChainlitConfig {
     audio: IAudioConfig;
     unsafe_allow_html?: boolean;
     user_message_autoscroll?: boolean;
+    assistant_message_autoscroll?: boolean;
     latex?: boolean;
     edit_message?: boolean;
     mcp?: {

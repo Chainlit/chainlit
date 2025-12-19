@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 
 interface Props {
   autoScrollUserMessage?: boolean;
+  autoScrollAssistantMessage?: boolean;
   autoScrollRef?: MutableRefObject<boolean>;
   children: React.ReactNode;
   className?: string;
@@ -22,6 +23,7 @@ interface Props {
 export default function ScrollContainer({
   autoScrollRef,
   autoScrollUserMessage,
+  autoScrollAssistantMessage,
   children,
   className
 }: Props) {
@@ -63,13 +65,13 @@ export default function ScrollContainer({
       // Scroll to position the message at the top
       if (afterMessagesHeight === 0) {
         scrollToPosition();
-      } else if (autoScrollRef?.current) {
+      } else if (autoScrollAssistantMessage && autoScrollRef?.current) {
         ref.current.scrollTop = ref.current.scrollHeight;
       }
-    } else if (autoScrollRef?.current) {
+    } else if (autoScrollAssistantMessage && autoScrollRef?.current) {
       ref.current.scrollTop = ref.current.scrollHeight;
     }
-  }, [autoScrollUserMessage, autoScrollRef]);
+  }, [autoScrollUserMessage, autoScrollAssistantMessage, autoScrollRef]);
 
   // Find and set a ref to the last user message element
   useEffect(() => {
