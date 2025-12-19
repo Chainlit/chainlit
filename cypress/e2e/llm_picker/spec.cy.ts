@@ -1,9 +1,6 @@
-import { runTestServer, submitMessage } from '../../support/testUtils';
+import { submitMessage } from '../../support/testUtils';
 
 describe('LLM Picker', () => {
-    before(() => {
-        runTestServer();
-    });
 
     it('should display LLM picker when LLMs are available', () => {
         cy.get('#llm-picker-trigger').should('exist');
