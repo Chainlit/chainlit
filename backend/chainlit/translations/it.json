@@ -65,6 +65,10 @@
         "attachFiles": "Allega file"
       }
     },
+    "favorites": {
+      "use": "Usa un messaggio preferito",
+      "headline": "Messaggi preferiti"
+    },
     "commands": {
       "button": "Strumenti",
       "changeTool": "Cambia strumento",

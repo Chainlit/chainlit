@@ -65,6 +65,10 @@
         "attachFiles": "Dateien anhängen"
       }
     },
+    "favorites": {
+      "use": "Eine favorisierte Nachricht verwenden",
+      "headline": "Favorisierte Nachrichten"
+    },
     "commands": {
       "button": "Tools",
       "changeTool": "Tool wechseln",

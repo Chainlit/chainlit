@@ -83,6 +83,10 @@
           "removeAttachment": "Verwijder bijlage"
         }
       },
+      "favorites": {
+        "use": "Gebruik een favoriet bericht",
+        "headline": "Favoriete berichten"
+      },
       "commands": {
         "button": "Hulpmiddelen",
         "changeTool": "Wijzig hulpmiddel",

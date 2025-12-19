@@ -70,6 +70,10 @@
       "stop": "עצור הקלטה",
       "connecting": "מתחבר"
     },
+    "favorites": {
+      "use": "השתמש בהודעה מועדפת",
+      "headline": "הודעות מועדפות"
+    },
     "commands": {
       "button": "כלים",
       "changeTool": "שנה כלי",
