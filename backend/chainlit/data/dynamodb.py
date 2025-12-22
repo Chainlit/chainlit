@@ -6,7 +6,7 @@ import random
 from dataclasses import asdict
 from datetime import datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import aiofiles
 import aiohttp
@@ -611,6 +611,69 @@ class DynamoDBDataLayer(BaseDataLayer):
             },
             updates=item,
         )
+
+    async def get_favorite_steps(self, user_id: str) -> List["StepDict"]:
+        _logger.info("DynamoDB: get_favorite_steps user_id=%s", user_id)
+
+        thread_ids = []
+        query_args: Dict[str, Any] = {
+            "TableName": self.table_name,
+            "IndexName": "UserThread",
+            "KeyConditionExpression": "#UserThreadPK = :pk",
+            "ExpressionAttributeNames": {"#UserThreadPK": "UserThreadPK"},
+            "ExpressionAttributeValues": {":pk": {"S": f"USER#{user_id}"}},
+        }
+
+        while True:
+            response = self.client.query(**query_args)  # type: ignore
+            for item in response.get("Items", []):
+                pk = item.get("PK", {}).get("S")
+                if pk:
+                    thread_ids.append(pk.strip("THREAD#"))
+
+            if "LastEvaluatedKey" not in response:
+                break
+            query_args["ExclusiveStartKey"] = response["LastEvaluatedKey"]
+
+        favorite_steps: List[Dict[str, Any]] = []
+
+        for thread_id in thread_ids:
+            t_query_args: Dict[str, Any] = {
+                "TableName": self.table_name,
+                "KeyConditionExpression": "#pk = :pk AND begins_with(#sk, :sk_prefix)",
+                "FilterExpression": "#metadata.#favorite = :true",
+                "ExpressionAttributeNames": {
+                    "#pk": "PK",
+                    "#sk": "SK",
+                    "#metadata": "metadata",
+                    "#favorite": "favorite",
+                },
+                "ExpressionAttributeValues": {
+                    ":pk": {"S": f"THREAD#{thread_id}"},
+                    ":sk_prefix": {"S": "STEP#"},
+                    ":true": {"BOOL": True},
+                },
+            }
+
+            while True:
+                response = self.client.query(**t_query_args)  # type: ignore
+                for item in response.get("Items", []):
+                    step = self._deserialize_item(item)
+                    if "PK" in step:
+                        del step["PK"]
+                    if "SK" in step:
+                        del step["SK"]
+                    if "feedback" in step:
+                        del step["feedback"]
+
+                    favorite_steps.append(step)
+
+                if "LastEvaluatedKey" not in response:
+                    break
+                t_query_args["ExclusiveStartKey"] = response["LastEvaluatedKey"]
+
+        favorite_steps.sort(key=lambda x: x.get("createdAt", ""), reverse=True)
+        return cast(List["StepDict"], favorite_steps)
 
     async def build_debug_url(self) -> str:
         return ""

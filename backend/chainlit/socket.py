@@ -322,6 +322,36 @@ async def edit_message(sid, payload: MessagePayload):
             await context.emitter.task_end()
 
 
+@sio.on("message_favorite")
+async def message_favorite(sid, payload: MessagePayload):  # pyright: ignore [reportOptionalCall]
+    """Handle a message favorite toggle."""
+    session = WebsocketSession.require(sid)
+    init_ws_context(session)
+    messages = chat_context.get()
+    if config.features.favorites:
+        for message in messages:
+            if message.id == payload["message"]["id"]:
+                if message.metadata is None:
+                    message.metadata = {}
+
+                message.metadata["favorite"] = not message.metadata.get(
+                    "favorite", False
+                )
+                await message.update()
+                await fetch_favorites(sid)
+                break
+
+
+@sio.on("fetch_favorites")
+async def fetch_favorites(sid):
+    session = WebsocketSession.require(sid)
+    context = init_ws_context(session)
+    if session.user and config.features.favorites:
+        if data_layer := get_data_layer():
+            favorites = await data_layer.get_favorite_steps(session.user.id)
+            await context.emitter.set_favorites(favorites)
+
+
 @sio.on("client_message")  # pyright: ignore [reportOptionalCall]
 async def message(sid, payload: MessagePayload):
     """Handle a message sent by the User."""
