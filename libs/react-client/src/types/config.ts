@@ -90,5 +90,6 @@ export interface IChainlitConfig {
   threadSharing?: boolean;
   chatProfiles: ChatProfile[];
   starters?: IStarter[];
+
   translation: object;
 }
