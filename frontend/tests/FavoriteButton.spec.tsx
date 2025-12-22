@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { RecoilRoot } from 'recoil';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   IStep,
@@ -63,6 +63,11 @@ describe('FavoriteButton', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   const renderComponent = (favorites = mockFavorites, props = {}) => {
@@ -105,24 +110,6 @@ describe('FavoriteButton', () => {
     const button = screen.getByRole('button');
     expect(button).toBeInTheDocument();
     expect(button.querySelector('svg')).toBeInTheDocument();
-  });
-
-  it('shows tooltip text on hover', async () => {
-    (useConfig as any).mockReturnValue({
-      config: { features: { favorites: true } }
-    });
-
-    renderComponent();
-
-    const button = screen.getByRole('button');
-    fireEvent.mouseOver(button);
-    fireEvent.focus(button);
-
-    await waitFor(() => {
-      const tooltips = screen.getAllByText('Use favorite');
-      expect(tooltips.length).toBeGreaterThan(0);
-      expect(tooltips[0]).toBeInTheDocument();
-    });
   });
 
   it('opens the popover and displays the list of favorites when clicked', () => {
@@ -169,5 +156,57 @@ describe('FavoriteButton', () => {
 
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
+  });
+
+  it('shows tooltip text after delay on hover', async () => {
+    (useConfig as any).mockReturnValue({
+      config: { features: { favorites: true } }
+    });
+
+    renderComponent();
+    const button = screen.getByRole('button');
+    fireEvent.mouseEnter(button);
+    expect(screen.queryByText('Use favorite')).not.toBeInTheDocument();
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+
+    const tooltips = screen.getAllByText('Use favorite');
+    expect(tooltips.length).toBeGreaterThan(0);
+  });
+
+  it('cancels tooltip if mouse leaves before delay', async () => {
+    (useConfig as any).mockReturnValue({
+      config: { features: { favorites: true } }
+    });
+
+    renderComponent();
+    const button = screen.getByRole('button');
+
+    fireEvent.mouseEnter(button);
+    fireEvent.mouseLeave(button);
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(screen.queryByText('Use favorite')).not.toBeInTheDocument();
+  });
+
+  it('hides the tooltip instantly when the popover opens', async () => {
+    (useConfig as any).mockReturnValue({
+      config: { features: { favorites: true } }
+    });
+
+    renderComponent();
+    const button = screen.getByRole('button');
+
+    fireEvent.mouseEnter(button);
+    act(() => {
+      vi.advanceTimersByTime(800);
+    });
+    expect(screen.getAllByText('Use favorite').length).toBeGreaterThan(0);
+
+    fireEvent.click(button);
+    expect(screen.queryByText('Use favorite')).not.toBeInTheDocument();
+    expect(screen.getByText('Favorites List')).toBeInTheDocument();
   });
 });

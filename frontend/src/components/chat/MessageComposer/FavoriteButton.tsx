@@ -5,7 +5,7 @@ import {
   PopoverTrigger
 } from '@radix-ui/react-popover';
 import { Star } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
 import { favoriteMessagesState, useConfig } from '@chainlit/react-client';
@@ -25,6 +25,8 @@ import {
   TooltipTrigger
 } from '@/components/ui/tooltip';
 
+const TOOLTIP_DELAY_MS = 700;
+
 interface Props {
   disabled?: boolean;
   onSelect: (content: string) => void;
@@ -34,16 +36,57 @@ export const FavoriteButton = ({ disabled = false, onSelect }: Props) => {
   const favorites = useRecoilValue(favoriteMessagesState);
   const { config } = useConfig();
   const { t } = useTranslation();
+
   const [open, setOpen] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
+  const hoverTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      cancelTooltipOpen();
+    }
+  }, [open]);
+
+  const scheduleTooltipOpen = () => {
+    if (disabled || open) return;
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+    hoverTimerRef.current = window.setTimeout(() => {
+      setTooltipOpen(true);
+    }, TOOLTIP_DELAY_MS);
+  };
+
+  const cancelTooltipOpen = () => {
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+    setTooltipOpen(false);
+  };
 
   if (!config?.features?.favorites) return null;
   if (!favorites.length) return null;
 
   return (
     <div className={cn('favorite-popover-wrapper')}>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover
+        open={open}
+        onOpenChange={(val) => {
+          setOpen(val);
+          if (val) cancelTooltipOpen();
+        }}
+      >
         <TooltipProvider>
-          <Tooltip>
+          <Tooltip open={!open && tooltipOpen}>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
                 <Button
@@ -55,6 +98,9 @@ export const FavoriteButton = ({ disabled = false, onSelect }: Props) => {
                     open && 'bg-muted/50'
                   )}
                   disabled={disabled}
+                  onMouseEnter={scheduleTooltipOpen}
+                  onMouseLeave={cancelTooltipOpen}
+                  onFocus={cancelTooltipOpen}
                 >
                   <Star className="!size-5" />
                 </Button>
@@ -80,6 +126,7 @@ export const FavoriteButton = ({ disabled = false, onSelect }: Props) => {
                     onSelect={() => {
                       onSelect(step.output);
                       setOpen(false);
+                      cancelTooltipOpen();
                     }}
                     className="cursor-pointer"
                   >
