@@ -889,7 +889,7 @@ requires-dist = [
     { name = "types-aiofiles", marker = "extra == 'mypy'", specifier = ">=23.1.0.5,<24.0.0" },
     { name = "types-requests", marker = "extra == 'mypy'", specifier = ">=2.31.0.2,<3.0.0" },
     { name = "uvicorn", specifier = ">=0.35.0" },
-    { name = "watchfiles", specifier = ">=1.0.0,<2.0.0" },
+    { name = "watchfiles", specifier = ">=1.1.1,<2.0.0" },
 ]
 provides-extras = ["custom-data", "dev", "mypy", "tests"]
 
