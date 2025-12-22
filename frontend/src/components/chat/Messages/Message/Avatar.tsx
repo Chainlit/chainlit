@@ -44,7 +44,9 @@ const MessageAvatar = ({ author, hide, isError }: Props) => {
 
   if (isError) {
     return (
-      <AlertCircle className="h-5 w-5 fill-destructive mt-[5px] text-destructive-foreground" />
+      <span className={cn('inline-block', hide && 'invisible')}>
+        <AlertCircle className="h-5 w-5 fill-destructive mt-[5px] text-destructive-foreground" />
+      </span>
     );
   }
 
