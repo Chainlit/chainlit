@@ -629,7 +629,7 @@ class DynamoDBDataLayer(BaseDataLayer):
             for item in response.get("Items", []):
                 pk = item.get("PK", {}).get("S")
                 if pk:
-                    thread_ids.append(pk.strip("THREAD#"))
+                    thread_ids.append(pk.removeprefix("THREAD#"))
 
             if "LastEvaluatedKey" not in response:
                 break

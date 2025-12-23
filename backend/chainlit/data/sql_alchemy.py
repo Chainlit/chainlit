@@ -838,7 +838,11 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                             isError=row.get("step_iserror"),
                             metadata=meta_dict,
                             tags=row.get("step_tags"),
-                            input=row.get("step_input", ""),
+                            input=(
+                                row.get("step_input", "")
+                                if row.get("step_showinput") not in [None, "false"]
+                                else ""
+                            ),
                             output=row.get("step_output", ""),
                             createdAt=row.get("step_createdat"),
                             start=row.get("step_start"),
