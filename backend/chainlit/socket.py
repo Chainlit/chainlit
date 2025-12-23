@@ -323,7 +323,7 @@ async def edit_message(sid, payload: MessagePayload):
 
 
 @sio.on("message_favorite")
-async def message_favorite(sid, payload: MessagePayload):  # pyright: ignore [reportOptionalCall]
+async def message_favorite(sid, payload: MessagePayload):
     """Handle a message favorite toggle."""
     session = WebsocketSession.require(sid)
     init_ws_context(session)
