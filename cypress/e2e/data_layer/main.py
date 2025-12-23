@@ -211,6 +211,9 @@ class TestDataLayer(cl_data.BaseDataLayer):
     async def delete_step(self, step_id: str):
         pass
 
+    async def get_favorite_steps(self, user_id: str) -> List["StepDict"]:
+        return []
+
     async def build_debug_url(self) -> str:
         return ""
 
