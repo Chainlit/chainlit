@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add an icon for shared thread
 - New option to allow disabling auto scroll of assistant messages
 - Add modes: you may allow users to select an LLM model, a mode (for example, planning), allow to enable reasoning etc.
-  - Breaking change: users need to run `ALTER TABLE steps ADD COLUMN IF NOT EXISTS modes JSONB;`
+  - Breaking change: you need to run `ALTER TABLE steps ADD COLUMN IF NOT EXISTS modes JSONB;` for migration
 
 ### Fixed
 - Fix tiny avatar for long messages
