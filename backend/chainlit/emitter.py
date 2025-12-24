@@ -155,6 +155,10 @@ class BaseChainlitEmitter:
         """Stub method to send a toast message to the UI."""
         pass
 
+    async def set_favorites(self, steps: List[StepDict]):
+        """Stub method to send the favorite messages to the UI."""
+        pass
+
 
 class ChainlitEmitter(BaseChainlitEmitter):
     """
@@ -448,6 +452,13 @@ class ChainlitEmitter(BaseChainlitEmitter):
         return self.emit(
             "set_modes",
             [mode.to_dict() for mode in modes],
+        )
+
+    def set_favorites(self, steps: List[StepDict]):
+        """Send the favorite messages to the UI."""
+        return self.emit(
+            "set_favorites",
+            steps,
         )
 
     def send_window_message(self, data: Any):

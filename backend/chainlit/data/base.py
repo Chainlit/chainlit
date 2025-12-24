@@ -109,3 +109,7 @@ class BaseDataLayer(ABC):
     @abstractmethod
     async def close(self) -> None:
         pass
+
+    @abstractmethod
+    async def get_favorite_steps(self, user_id: str) -> List["StepDict"]:
+        pass

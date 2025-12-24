@@ -83,6 +83,10 @@
         "removeAttachment": "移除附件"
       }
     },
+    "favorites": {
+      "use": "使用收藏的訊息",
+      "headline": "收藏的訊息"
+    },
     "commands": {
       "button": "工具",
       "changeTool": "更換工具",

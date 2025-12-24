@@ -69,6 +69,7 @@ export interface IChainlitConfig {
     assistant_message_autoscroll?: boolean;
     latex?: boolean;
     edit_message?: boolean;
+    favorites?: boolean;
     mcp?: {
       enabled?: boolean;
       sse?: {

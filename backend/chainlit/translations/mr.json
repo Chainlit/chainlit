@@ -70,6 +70,10 @@
       "stop": "रेकॉर्डिंग थांबवा",
       "connecting": "कनेक्ट करत आहे"
     },
+    "favorites": {
+      "use": "आवडता संदेश वापरा",
+      "headline": "आवडते संदेश"
+    },
     "commands": {
       "button": "साधने",
       "changeTool": "साधन बदला",

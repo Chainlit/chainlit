@@ -65,6 +65,10 @@
                 "attachFiles": "Joindre des fichiers"
             }
         },
+        "favorites": {
+          "use": "Utiliser un message favori",
+          "headline": "Messages favoris"
+        },
         "commands": {
             "button": "Outils",
             "changeTool": "Changer d'outil",

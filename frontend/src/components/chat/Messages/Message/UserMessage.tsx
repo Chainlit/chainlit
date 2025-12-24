@@ -1,13 +1,15 @@
 import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
 import { memo, useContext, useMemo, useState } from 'react';
+import { Star } from 'lucide-react';
 import { useSetRecoilState } from 'recoil';
 
 import {
   IMessageElement,
   IStep,
   messagesState,
-  useChatInteract
+  useChatInteract,
+  useConfig
 } from '@chainlit/react-client';
 
 import AutoResizeTextarea from '@/components/AutoResizeTextarea';
@@ -28,9 +30,11 @@ const UserMessage = memo(function UserMessage({
   children
 }: React.PropsWithChildren<Props>) {
   const { askUser, loading, editable } = useContext(MessageContext);
-  const { editMessage } = useChatInteract();
+  const { editMessage, toggleMessageFavorite } = useChatInteract();
+  const { config } = useConfig();
   const setMessages = useSetRecoilState(messagesState);
   const disabled = loading || !!askUser;
+  const isFavorite = message.metadata?.favorite === true;
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
 
@@ -39,6 +43,7 @@ const UserMessage = memo(function UserMessage({
       (el) => el.forId === message.id && el.display === 'inline'
     );
   }, [message.id, elements]);
+  const favoritesEnabled = !!config?.features?.favorites;
 
   const handleEdit = () => {
     if (editValue) {
@@ -73,6 +78,21 @@ const UserMessage = memo(function UserMessage({
             disabled={disabled}
           >
             <Pencil />
+          </Button>
+        )}
+        {!isEditing && favoritesEnabled && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'favorite-message invisible group-hover:visible',
+              isFavorite ? 'visible text-yellow-500' : 'text-muted-foreground',
+              !editable && 'ml-auto'
+            )}
+            onClick={() => toggleMessageFavorite(message)}
+            disabled={disabled}
+          >
+            <Star className={cn('h-4 w-4', isFavorite ? 'fill-current' : '')} />
           </Button>
         )}
         <div

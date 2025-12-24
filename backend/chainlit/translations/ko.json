@@ -65,6 +65,10 @@
                 "attachFiles": "파일 첨부"
             }
         },
+        "favorites": {
+          "use": "즐겨찾기 메시지 사용",
+          "headline": "즐겨찾기 메시지"
+        },
         "commands": {
             "button": "도구",
             "changeTool": "도구 변경",

@@ -35,6 +35,7 @@ import {
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
 import CommandButton from './CommandPopoverButton';
+import FavoriteButton from './FavoriteButton';
 import Input, { InputMethods } from './Input';
 import McpButton from './Mcp';
 import ModePicker from './ModePicker';
@@ -108,6 +109,13 @@ export default function MessageComposer({
   }
 
   const [promptUsed, setPromptUsed] = useState(false);
+
+  const onFavoriteSelect = useCallback((content: string) => {
+    setValue(content);
+    if (inputRef.current) {
+      inputRef.current.setValueExtern(content);
+    }
+  }, []);
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -291,6 +299,8 @@ export default function MessageComposer({
             selectedCommandId={selectedCommand?.id}
             onCommandSelect={setSelectedCommand}
           />
+
+          <FavoriteButton disabled={disabled} onSelect={onFavoriteSelect} />
         </div>
         <div className="flex items-center gap-1">
           <SubmitButton

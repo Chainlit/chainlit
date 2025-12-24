@@ -115,6 +115,9 @@ class MemoryDataLayer(cl_data.BaseDataLayer):
         if tags is not None:
             thr["tags"] = tags
 
+    async def get_favorite_steps(self, user_id: str) -> List["StepDict"]:
+        return []
+
     async def build_debug_url(self) -> str:
         pass
 

@@ -631,8 +631,20 @@ class ChainlitDataLayer(BaseDataLayer):
 
         await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
 
+    async def get_favorite_steps(self, user_id: str) -> List[StepDict]:
+        query = """
+                SELECT s.*
+                FROM "Step" s
+                         JOIN "Thread" t ON s."threadId" = t.id
+                WHERE t."userId" = $1
+                  AND s.metadata::jsonb->>'favorite' = 'true'
+                ORDER BY s."createdAt" DESC \
+                """
+        results = await self.execute_query(query, {"user_id": user_id})
+        return [self._convert_step_row_to_dict(row) for row in results]
+
     def _extract_feedback_dict_from_step_row(self, row: Dict) -> Optional[FeedbackDict]:
-        if row["feedback_id"] is not None:
+        if row.get("feedback_id", None) is not None:
             return FeedbackDict(
                 forId=row["id"],
                 id=row["feedback_id"],

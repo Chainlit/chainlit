@@ -83,6 +83,10 @@
         "removeAttachment": "संलग्नक हटाएं"
       }
     },
+    "favorites": {
+      "use": "पसंदीदा संदेश का उपयोग करें",
+      "headline": "पसंदीदा संदेश"
+    },
     "commands": {
       "button": "उपकरण",
       "changeTool": "उपकरण बदलें",
