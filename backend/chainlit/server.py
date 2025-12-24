@@ -1119,6 +1119,7 @@ async def delete_thread_element(
 
     return {"success": True}
 
+
 def _sanitize_custom_element(element_dict: "ElementDict") -> "CustomElement":
     from chainlit.element import CustomElement
 

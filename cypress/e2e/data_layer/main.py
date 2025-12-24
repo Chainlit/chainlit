@@ -195,7 +195,7 @@ class TestDataLayer(cl_data.BaseDataLayer):
     async def create_element(self, element: "Element"):
         if element.url == "http://example.org/test.txt":
             element.url = "http://example.com/test.txt"
-        
+
         ELEMENTS_STORAGE.append(element.to_dict())
 
     async def get_element(
