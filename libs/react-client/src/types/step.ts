@@ -20,6 +20,7 @@ export interface IStep {
   parentId?: string;
   isError?: boolean;
   command?: string;
+  modes?: Record<string, string>;
   showInput?: boolean | string;
   waitForAnswer?: boolean;
   input?: string;
