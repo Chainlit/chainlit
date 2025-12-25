@@ -16,6 +16,7 @@ export interface Props {
   message: IStep;
   allowHtml?: boolean;
   latex?: boolean;
+  renderMarkdown?: boolean;
   sections?: ContentSection[];
 }
 
@@ -31,7 +32,10 @@ const getMessageRenderProps = (message: IStep) => ({
 
 const MessageContent = memo(
   forwardRef<HTMLDivElement, Props>(
-    ({ message, elements, allowHtml, latex, sections }, ref) => {
+    (
+      { message, elements, allowHtml, latex, renderMarkdown, sections },
+      ref
+    ) => {
       const outputContent =
         message.streaming && message.output
           ? message.output + CURSOR_PLACEHOLDER
@@ -68,6 +72,7 @@ const MessageContent = memo(
           <Markdown
             allowHtml={allowHtml}
             latex={latex}
+            renderMarkdown={renderMarkdown}
             refElements={outputRefElements}
           >
             {output}
@@ -98,6 +103,7 @@ const MessageContent = memo(
             <Markdown
               allowHtml={allowHtml}
               latex={latex}
+              renderMarkdown={renderMarkdown}
               refElements={inputRefElements}
             >
               {input}
