@@ -240,6 +240,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "Selecteer..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "Kies een datum",
+        "range": "Kies een datumbereik"
+      }
     }
   }
 }

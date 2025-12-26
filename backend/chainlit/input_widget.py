@@ -1,5 +1,6 @@
 from abc import abstractmethod
-from typing import Any, Dict, List, Optional
+from datetime import date
+from typing import Any, Dict, List, Literal, Optional
 
 from pydantic import Field
 from pydantic.dataclasses import dataclass
@@ -313,4 +314,111 @@ class Tab:
             "id": self.id,
             "label": self.label,
             "inputs": [input.to_dict() for input in self.inputs],
+        }
+
+
+@dataclass
+class DatePicker(InputWidget):
+    """
+    Datepicker input widget.
+    Supports both single date and date range selection.
+    """
+
+    type: InputWidgetType = "datepicker"
+    mode: Literal["single", "range"] = "single"
+    initial: str | date | tuple[str | date, str | date] | None = None
+    min_date: str | date | None = None
+    max_date: str | date | None = None
+    format: str | None = None
+    """date-fns format string"""
+    placeholder: str | None = None
+    """Placeholder to use when no date is selected"""
+
+    def __post_init__(self) -> None:
+        super().__post_init__()
+
+        if self.mode not in ("single", "range"):
+            raise ValueError("mode must be 'single' or 'range'")
+
+        if (
+            self.mode == "range"
+            and self.initial is not None
+            and not isinstance(self.initial, tuple)
+        ):
+            raise ValueError("'initial' must be a tuple for range mode")
+
+        (initial_start, initial_end), min_date, max_date = (
+            [
+                DatePicker._validate_iso_format(date, "initial")
+                for date in (
+                    self.initial
+                    if isinstance(self.initial, tuple)
+                    else [self.initial, None]
+                )
+            ],
+            DatePicker._validate_iso_format(self.min_date, "min_date"),
+            DatePicker._validate_iso_format(self.max_date, "max_date"),
+        )
+
+        if self.mode == "range":
+            self._validate_range(initial_start, initial_end, "initial")
+            self._validate_range(min_date, max_date, "[min_date, max_date]")
+
+        # Validate that initial value(s) are within min_date and max_date bounds
+        for d in [initial_start, initial_end]:
+            if d is not None and (
+                (min_date is not None and d < min_date)
+                or (max_date is not None and d > max_date)
+            ):
+                raise ValueError(
+                    "'initial' must be within 'min_date' and 'max_date' bounds"
+                )
+
+    @staticmethod
+    def _validate_range(
+        start: date | None,
+        end: date | None,
+        field_name: str,
+    ) -> None:
+        if start is not None and end is not None and start > end:
+            raise ValueError(
+                f"'{field_name}' range is invalid, start must be before end."
+            )
+
+    @staticmethod
+    def _validate_iso_format(
+        date_value: str | date | None, field_name: str
+    ) -> date | None:
+        if isinstance(date_value, str):
+            try:
+                return date.fromisoformat(date_value)
+            except ValueError as e:
+                raise ValueError(f"'{field_name}' must be in ISO format") from e
+
+        return date_value
+
+    @staticmethod
+    def _format_date(date_value: str | date | None) -> str | None:
+        if isinstance(date_value, date):
+            return date_value.isoformat()
+        return date_value
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "type": self.type,
+            "id": self.id,
+            "label": self.label,
+            "tooltip": self.tooltip,
+            "description": self.description,
+            "mode": self.mode,
+            "initial": (
+                self._format_date(self.initial[0]),
+                self._format_date(self.initial[1]),
+            )
+            if isinstance(self.initial, tuple)
+            else DatePicker._format_date(self.initial),
+            "min_date": DatePicker._format_date(self.min_date),
+            "max_date": DatePicker._format_date(self.max_date),
+            "format": self.format,
+            "placeholder": self.placeholder,
         }
