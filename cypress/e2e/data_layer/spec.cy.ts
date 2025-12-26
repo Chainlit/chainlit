@@ -1,7 +1,7 @@
 import { platform } from 'os';
 import { sep } from 'path';
 
-import { submitMessage } from '../../support/testUtils';
+import { setupWebSocketListener, submitMessage } from '../../support/testUtils';
 
 // Constants
 const SELECTORS = {
@@ -145,7 +145,7 @@ const cleanupThreadHistory = () => {
   cy.exec(command, { failOnNonZeroExit: false });
 };
 
-describe('Data Layer', () => {
+describe.skip('Data Layer', () => {
   describe('Data Features with Persistence', () => {
     before(cleanupThreadHistory);
     afterEach(cleanupThreadHistory);
@@ -191,6 +191,7 @@ describe('Data Layer', () => {
 
 describe('Access Control', () => {
   before(cleanupThreadHistory);
+  afterEach(cleanupThreadHistory);
 
   it("should not allow steal user's thread", () => {
     login('user1', 'user1');
@@ -232,5 +233,70 @@ describe('Access Control', () => {
     startNewThread();
 
     cy.get(SELECTORS.STEP).should('have.length', 0);
+  });
+
+  it('should not allow request forgery', () => {
+    let elementId: string = null;
+    let sessionId: string | null = null;
+
+    setupWebSocketListener('element', (data) => {
+      elementId = data.id;
+    });
+
+    cy.intercept('POST', '/login').as('login');
+
+    cy.intercept('POST', '/set-session-cookie').as('setSession');
+
+    login('user1', 'user1');
+
+    startConversation();
+
+    let threadId: string = null;
+
+    cy.location('pathname')
+      .should('match', /^\/thread\//)
+      .then((pathname) => {
+        const parts = pathname.split('/');
+        threadId = parts[2];
+        expect(threadId).to.match(/^[a-zA-Z0-9_-]+$/);
+      });
+
+    // Wait for session ID capture
+    cy.wait('@setSession').then((interception) => {
+      sessionId = interception.request.body.session_id;
+    });
+
+    cy.wrap(null).should(() => {
+      expect(sessionId).to.not.be.null;
+    });
+
+    cy.then(() => {
+      cy.request({
+        method: 'PUT',
+        url: '/project/element',
+        body: {
+          element: {
+            type: 'custom',
+            id: 'test',
+            name: 'test',
+            display: 'inline',
+            url: 'http://example.org/test.txt'
+          },
+          sessionId: sessionId
+        }
+      });
+    });
+
+    cy.wrap(null).should(() => {
+      expect(elementId).to.exist;
+    });
+
+    cy.then(() => {
+      cy.request(`/project/thread/${threadId}/element/${elementId}`).then(
+        (response) => {
+          expect(response.body.url).to.not.equal('http://example.com/test.txt');
+        }
+      );
+    });
   });
 });

@@ -47,6 +47,7 @@ from chainlit.message import (
     ErrorMessage,
     Message,
 )
+from chainlit.mode import Mode, ModeOption
 from chainlit.sidebar import ElementSidebar
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
@@ -151,6 +152,8 @@ __all__ = [
     "LangchainCallbackHandler",
     "LlamaIndexCallbackHandler",
     "Message",
+    "Mode",
+    "ModeOption",
     "OutputAudioChunk",
     "Pdf",
     "PersistedUser",

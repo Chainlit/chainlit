@@ -66,6 +66,7 @@ export interface IChainlitConfig {
     audio: IAudioConfig;
     unsafe_allow_html?: boolean;
     user_message_autoscroll?: boolean;
+    assistant_message_autoscroll?: boolean;
     latex?: boolean;
     edit_message?: boolean;
     mcp?: {
@@ -89,5 +90,6 @@ export interface IChainlitConfig {
   threadSharing?: boolean;
   chatProfiles: ChatProfile[];
   starters?: IStarter[];
+
   translation: object;
 }

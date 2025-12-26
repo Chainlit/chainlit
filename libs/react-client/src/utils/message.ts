@@ -48,31 +48,37 @@ const addIndentMessage = (
   newMessage: IStep,
   currentIndentation: number = 0
 ): IStep[] => {
-  const nextMessages = [...messages];
+  if (messages.length === 0) {
+    return [newMessage];
+  }
 
-  if (nextMessages.length === 0) {
-    return [...nextMessages, newMessage];
+  const index = messages.length - 1;
+  const msg = messages[index];
+  const msgSteps = msg.steps || [];
+
+  if (currentIndentation + 1 === indent) {
+    const updatedMsg = {
+      ...msg,
+      steps: [...msgSteps, newMessage]
+    };
+    const nextMessages = [...messages];
+    nextMessages[index] = updatedMsg;
+    return nextMessages;
   } else {
-    const index = nextMessages.length - 1;
-    const msg = nextMessages[index];
-    msg.steps = msg.steps || [];
+    const updatedSteps = addIndentMessage(
+      msgSteps,
+      indent,
+      newMessage,
+      currentIndentation + 1
+    );
 
-    if (currentIndentation + 1 === indent) {
-      msg.steps = [...msg.steps, newMessage];
-      nextMessages[index] = { ...msg };
-
-      return nextMessages;
-    } else {
-      msg.steps = addIndentMessage(
-        msg.steps,
-        indent,
-        newMessage,
-        currentIndentation + 1
-      );
-
-      nextMessages[index] = { ...msg };
-      return nextMessages;
+    if (updatedSteps === msgSteps) {
+      return messages;
     }
+
+    const nextMessages = [...messages];
+    nextMessages[index] = { ...msg, steps: updatedSteps };
+    return nextMessages;
   }
 };
 
@@ -81,21 +87,26 @@ const addMessageToParent = (
   parentId: string,
   newMessage: IStep
 ): IStep[] => {
-  const nextMessages = [...messages];
+  let hasChanges = false;
 
-  for (let index = 0; index < nextMessages.length; index++) {
-    const msg = nextMessages[index];
-
+  const nextMessages = messages.map((msg) => {
     if (isEqual(msg.id, parentId)) {
-      msg.steps = msg.steps ? [...msg.steps, newMessage] : [newMessage];
-      nextMessages[index] = { ...msg };
-    } else if (hasMessageById(nextMessages, parentId) && msg.steps) {
-      msg.steps = addMessageToParent(msg.steps, parentId, newMessage);
-      nextMessages[index] = { ...msg };
+      hasChanges = true;
+      return {
+        ...msg,
+        steps: msg.steps ? [...msg.steps, newMessage] : [newMessage]
+      };
+    } else if (hasMessageById(messages, parentId) && msg.steps) {
+      const updatedSteps = addMessageToParent(msg.steps, parentId, newMessage);
+      if (updatedSteps !== msg.steps) {
+        hasChanges = true;
+        return { ...msg, steps: updatedSteps };
+      }
     }
-  }
+    return msg;
+  });
 
-  return nextMessages;
+  return hasChanges ? nextMessages : messages;
 };
 
 const findMessageById = (
@@ -124,40 +135,47 @@ const updateMessageById = (
   messageId: string,
   updatedMessage: IStep
 ): IStep[] => {
-  const nextMessages = [...messages];
-
-  for (let index = 0; index < nextMessages.length; index++) {
-    const msg = nextMessages[index];
-
+  let hasChanges = false;
+  const nextMessages = messages.map((msg) => {
     if (isEqual(msg.id, messageId)) {
-      nextMessages[index] = { steps: msg.steps, ...updatedMessage };
-    } else if (hasMessageById(nextMessages, messageId) && msg.steps) {
-      msg.steps = updateMessageById(msg.steps, messageId, updatedMessage);
-      nextMessages[index] = { ...msg };
+      hasChanges = true;
+      return { ...msg, ...updatedMessage };
+    } else if (msg.steps) {
+      const updatedSteps = updateMessageById(
+        msg.steps,
+        messageId,
+        updatedMessage
+      );
+      if (updatedSteps !== msg.steps) {
+        hasChanges = true;
+        return { ...msg, steps: updatedSteps };
+      }
     }
-  }
+    return msg;
+  });
 
-  return nextMessages;
+  return hasChanges ? nextMessages : messages;
 };
 
-const deleteMessageById = (messages: IStep[], messageId: string) => {
-  let nextMessages = [...messages];
-
-  for (let index = 0; index < nextMessages.length; index++) {
-    const msg = nextMessages[index];
-
+const deleteMessageById = (messages: IStep[], messageId: string): IStep[] => {
+  let hasChanges = false;
+  const nextMessages = messages.reduce((acc, msg) => {
     if (msg.id === messageId) {
-      nextMessages = [
-        ...nextMessages.slice(0, index),
-        ...nextMessages.slice(index + 1)
-      ];
-    } else if (hasMessageById(nextMessages, messageId) && msg.steps) {
-      msg.steps = deleteMessageById(msg.steps, messageId);
-      nextMessages[index] = { ...msg };
+      hasChanges = true;
+      return acc;
+    } else if (msg.steps) {
+      const updatedSteps = deleteMessageById(msg.steps, messageId);
+      if (updatedSteps !== msg.steps) {
+        hasChanges = true;
+        acc.push({ ...msg, steps: updatedSteps });
+        return acc;
+      }
     }
-  }
+    acc.push(msg);
+    return acc;
+  }, [] as IStep[]);
 
-  return nextMessages;
+  return hasChanges ? nextMessages : messages;
 };
 
 const updateMessageContentById = (
@@ -167,49 +185,52 @@ const updateMessageContentById = (
   isSequence: boolean,
   isInput: boolean
 ): IStep[] => {
-  const nextMessages = [...messages];
-  for (let index = 0; index < nextMessages.length; index++) {
-    const msg = nextMessages[index];
-
+  let hasChanges = false;
+  const nextMessages = messages.map((msg) => {
     if (isEqual(msg.id, messageId)) {
-      if ('content' in msg && msg.content !== undefined) {
+      hasChanges = true;
+      const newMsg = { ...msg };
+      if ('content' in newMsg && newMsg.content !== undefined) {
         if (isSequence) {
-          msg.content = updatedContent;
+          newMsg.content = updatedContent;
         } else {
-          msg.content += updatedContent;
+          newMsg.content += updatedContent;
         }
       } else if (isInput) {
-        if ('input' in msg && msg.input !== undefined) {
+        if ('input' in newMsg && newMsg.input !== undefined) {
           if (isSequence) {
-            msg.input = updatedContent;
+            newMsg.input = updatedContent;
           } else {
-            msg.input += updatedContent;
+            newMsg.input += updatedContent;
           }
         }
       } else {
-        if ('output' in msg && msg.output !== undefined) {
+        if ('output' in newMsg && newMsg.output !== undefined) {
           if (isSequence) {
-            msg.output = updatedContent;
+            newMsg.output = updatedContent;
           } else {
-            msg.output += updatedContent;
+            newMsg.output += updatedContent;
           }
         }
       }
-
-      nextMessages[index] = { ...msg };
+      return newMsg;
     } else if (msg.steps) {
-      msg.steps = updateMessageContentById(
+      const updatedSteps = updateMessageContentById(
         msg.steps,
         messageId,
         updatedContent,
         isSequence,
         isInput
       );
-      nextMessages[index] = { ...msg };
+      if (updatedSteps !== msg.steps) {
+        hasChanges = true;
+        return { ...msg, steps: updatedSteps };
+      }
     }
-  }
+    return msg;
+  });
 
-  return nextMessages;
+  return hasChanges ? nextMessages : messages;
 };
 
 export {

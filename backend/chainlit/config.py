@@ -99,6 +99,9 @@ latex = false
 # Autoscroll new user messages at the top of the window
 user_message_autoscroll = true
 
+# Autoscroll new assistant messages
+assistant_message_autoscroll = true
+
 # Automatically tag threads with the current chat profile (if a chat profile is used)
 auto_tag_thread = true
 
@@ -156,6 +159,10 @@ reaction_on_message_received = false
 name = "Assistant"
 
 # default_theme = "dark"
+
+# Force a specific language for all users (e.g., "en-US", "he-IL", "fr-FR")
+# If not set, the browser's language will be used
+# language = "en-US"
 
 # layout = "wide"
 
@@ -304,6 +311,7 @@ class FeaturesSettings(BaseModel):
     slack: SlackFeature = Field(default_factory=SlackFeature)
     latex: bool = False
     user_message_autoscroll: bool = True
+    assistant_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
     edit_message: bool = True
@@ -323,6 +331,7 @@ class UISettings(BaseModel):
     description: str = ""
     cot: Literal["hidden", "tool_call", "full"] = "full"
     default_theme: Optional[Literal["light", "dark"]] = "dark"
+    language: Optional[str] = None
     layout: Optional[Literal["default", "wide"]] = "default"
     default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
     github: Optional[str] = None

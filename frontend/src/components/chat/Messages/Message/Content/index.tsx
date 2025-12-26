@@ -1,4 +1,5 @@
 import { prepareContent } from '@/lib/message';
+import { isEqual } from 'lodash';
 import { forwardRef, memo, useMemo } from 'react';
 
 import type { IMessageElement, IStep } from '@chainlit/react-client';
@@ -17,6 +18,16 @@ export interface Props {
   latex?: boolean;
   sections?: ContentSection[];
 }
+
+const getMessageRenderProps = (message: IStep) => ({
+  id: message.id,
+  output: message.output,
+  input: message.input,
+  language: message.language,
+  streaming: message.streaming,
+  showInput: message.showInput,
+  type: message.type
+});
 
 const MessageContent = memo(
   forwardRef<HTMLDivElement, Props>(
@@ -111,7 +122,22 @@ const MessageContent = memo(
         </div>
       );
     }
-  )
+  ),
+  (prevProps, nextProps) => {
+    return (
+      prevProps.allowHtml === nextProps.allowHtml &&
+      prevProps.latex === nextProps.latex &&
+      prevProps.elements === nextProps.elements &&
+      isEqual(
+        prevProps.sections ?? ['input', 'output'],
+        nextProps.sections ?? ['input', 'output']
+      ) &&
+      isEqual(
+        getMessageRenderProps(prevProps.message),
+        getMessageRenderProps(nextProps.message)
+      )
+    );
+  }
 );
 
 export { MessageContent };

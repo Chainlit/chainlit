@@ -72,6 +72,7 @@ thread_history = [
     },
 ]  # type: List[ThreadDict]
 deleted_thread_ids = []  # type: List[str]
+ELEMENTS_STORAGE = []
 
 THREAD_HISTORY_PICKLE_PATH = os.path.join(
     os.path.dirname(__file__), "thread_history.pickle"
@@ -192,12 +193,15 @@ class TestDataLayer(cl_data.BaseDataLayer):
 
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
-        pass
+        if element.url == "http://example.org/test.txt":
+            element.url = "http://example.com/test.txt"
+
+        ELEMENTS_STORAGE.append(element.to_dict())
 
     async def get_element(
         self, thread_id: str, element_id: str
     ) -> Optional["ElementDict"]:
-        pass
+        return next((e for e in ELEMENTS_STORAGE if e["id"] == element_id), None)
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):

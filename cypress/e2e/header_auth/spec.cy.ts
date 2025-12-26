@@ -15,11 +15,6 @@ describe('Header auth', () => {
         req.headers['test-header'] = 'test header value';
         req.reply();
       }).as('auth');
-
-      // Only intercept /user _after_ we're logged in.
-      cy.wait('@auth').then(() => {
-        cy.intercept('GET', '/user').as('user');
-      });
     };
 
     beforeEach(() => {
@@ -55,6 +50,10 @@ describe('Header auth', () => {
     shouldBeLoggedIn();
 
     it('should request and have access to /user', () => {
+      // Only intercept /user _after_ we're logged in.
+      cy.wait('@auth').then(() => {
+        cy.intercept('GET', '/user').as('user');
+      });
       cy.wait('@user').then((interception) => {
         expect(interception.response, 'Intercepted response').to.satisfy(
           () => true
