@@ -48,6 +48,7 @@ export interface IChainlitConfig {
     custom_meta_image_url?: string;
     logo_file_url?: string;
     default_avatar_file_url?: string;
+    avatar_size?: number;
     header_links?: {
       name: string;
       display_name: string;

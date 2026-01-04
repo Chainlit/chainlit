@@ -23,10 +23,14 @@ interface Props {
   isError?: boolean;
 }
 
+const DEFAULT_AVATAR_SIZE = 20;
+
 const MessageAvatar = ({ author, hide, isError }: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
   const { config } = useConfig();
+
+  const avatarSize = config?.ui?.avatar_size ?? DEFAULT_AVATAR_SIZE;
 
   const selectedChatProfile = useMemo(() => {
     return config?.chatProfiles.find((profile) => profile.name === chatProfile);
@@ -45,7 +49,10 @@ const MessageAvatar = ({ author, hide, isError }: Props) => {
   if (isError) {
     return (
       <span className={cn('inline-block', hide && 'invisible')}>
-        <AlertCircle className="h-5 w-5 fill-destructive mt-[5px] text-destructive-foreground" />
+        <AlertCircle
+          className="fill-destructive text-destructive-foreground"
+          style={{ width: avatarSize, height: avatarSize, marginTop: 5 }}
+        />
       </span>
     );
   }
@@ -55,7 +62,7 @@ const MessageAvatar = ({ author, hide, isError }: Props) => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Avatar className="h-5 w-5 mt-[3px]">
+            <Avatar style={{ width: avatarSize, height: avatarSize, marginTop: 3 }}>
               <AvatarImage
                 src={avatarUrl}
                 alt={`Avatar for ${author || 'default'}`}
