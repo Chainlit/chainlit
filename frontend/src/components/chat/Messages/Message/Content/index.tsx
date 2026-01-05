@@ -133,6 +133,7 @@ const MessageContent = memo(
     return (
       prevProps.allowHtml === nextProps.allowHtml &&
       prevProps.latex === nextProps.latex &&
+      prevProps.renderMarkdown === nextProps.renderMarkdown &&
       prevProps.elements === nextProps.elements &&
       isEqual(
         prevProps.sections ?? ['input', 'output'],
