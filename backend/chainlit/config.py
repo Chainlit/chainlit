@@ -102,6 +102,9 @@ user_message_markdown = true
 # Autoscroll new user messages at the top of the window
 user_message_autoscroll = true
 
+# Autoscroll new assistant messages
+assistant_message_autoscroll = true
+
 # Automatically tag threads with the current chat profile (if a chat profile is used)
 auto_tag_thread = true
 
@@ -312,6 +315,7 @@ class FeaturesSettings(BaseModel):
     latex: bool = False
     user_message_markdown: bool = True
     user_message_autoscroll: bool = True
+    assistant_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
     auto_tag_thread: bool = True
     edit_message: bool = True

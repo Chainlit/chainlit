@@ -4,6 +4,21 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.9.4] - 2025-12-24
+
+### Added
+- Add an icon for shared thread
+- New option to allow disabling auto scroll of assistant messages
+- Add modes: you may allow users to select an LLM model, a mode (for example, planning), allow to enable reasoning etc.
+  - Breaking change: you need to run `ALTER TABLE steps ADD COLUMN IF NOT EXISTS modes JSONB;` for migration
+
+### Fixed
+- Fix tiny avatar for long messages
+- Security vulnerability in Chainlit: added missed sanitization to custom elements update endpoint
+
+### Changed
+- Bumped watchfiles version
+
 ## [2.9.3] - 2025-12-04
 
 ### Added

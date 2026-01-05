@@ -164,6 +164,9 @@ const Chat = () => {
         <ErrorBoundary>
           <ScrollContainer
             autoScrollUserMessage={config?.features?.user_message_autoscroll}
+            autoScrollAssistantMessage={
+              config?.features?.assistant_message_autoscroll
+            }
             autoScrollRef={autoScrollRef}
           >
             <div
