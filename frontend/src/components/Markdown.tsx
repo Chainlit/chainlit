@@ -99,7 +99,7 @@ const Markdown = ({
 }: Props) => {
   const apiClient = useContext(ChainlitContext);
 
-  if (!renderMarkdown) {
+  if (renderMarkdown === false) {
     return (
       <pre
         className={cn('whitespace-pre-wrap break-words', className)}

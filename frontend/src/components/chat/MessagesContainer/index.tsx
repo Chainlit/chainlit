@@ -142,6 +142,7 @@ const MessagesContainer = ({ navigate }: Props) => {
     config?.ui?.name,
     config?.ui?.cot,
     config?.features?.unsafe_allow_html,
+    config?.features?.user_message_markdown,
     onElementRefClick,
     onError,
     onFeedbackUpdated
