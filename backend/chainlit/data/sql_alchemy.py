@@ -777,6 +777,84 @@ class SQLAlchemyDataLayer(BaseDataLayer):
 
         return list(thread_dicts.values())
 
+    async def get_favorite_steps(self, user_id: str) -> List[StepDict]:
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: get_favorite_steps, user_id={user_id}")
+
+        query = """
+                SELECT
+                    s."id" AS step_id,
+                    s."name" AS step_name,
+                    s."type" AS step_type,
+                    s."threadId" AS step_threadid,
+                    s."parentId" AS step_parentid,
+                    s."streaming" AS step_streaming,
+                    s."waitForAnswer" AS step_waitforanswer,
+                    s."isError" AS step_iserror,
+                    s."metadata" AS step_metadata,
+                    s."tags" AS step_tags,
+                    s."input" AS step_input,
+                    s."output" AS step_output,
+                    s."createdAt" AS step_createdat,
+                    s."start" AS step_start,
+                    s."end" AS step_end,
+                    s."generation" AS step_generation,
+                    s."showInput" AS step_showinput,
+                    s."language" AS step_language
+                FROM steps s
+                         JOIN threads t ON s."threadId" = t.id
+                WHERE t."userId" = :user_id
+                  AND s."metadata" LIKE :favorite_pattern
+                ORDER BY s."createdAt" DESC \
+                """
+
+        result = await self.execute_sql(
+            query, {"user_id": user_id, "favorite_pattern": '%"favorite": true%'}
+        )
+
+        steps = []
+        if isinstance(result, list):
+            for row in result:
+                metadata_raw = row["step_metadata"]
+                meta_dict = {}
+                if isinstance(metadata_raw, str):
+                    try:
+                        meta_dict = json.loads(metadata_raw)
+                    except Exception:
+                        pass
+                elif isinstance(metadata_raw, dict):
+                    meta_dict = metadata_raw
+
+                if meta_dict.get("favorite"):
+                    steps.append(
+                        StepDict(
+                            id=row["step_id"],
+                            name=row["step_name"],
+                            type=row["step_type"],
+                            threadId=row["step_threadid"],
+                            parentId=row["step_parentid"],
+                            streaming=row.get("step_streaming", False),
+                            waitForAnswer=row.get("step_waitforanswer"),
+                            isError=row.get("step_iserror"),
+                            metadata=meta_dict,
+                            tags=row.get("step_tags"),
+                            input=(
+                                row.get("step_input", "")
+                                if row.get("step_showinput") not in [None, "false"]
+                                else ""
+                            ),
+                            output=row.get("step_output", ""),
+                            createdAt=row.get("step_createdat"),
+                            start=row.get("step_start"),
+                            end=row.get("step_end"),
+                            generation=row.get("step_generation"),
+                            showInput=row.get("step_showinput"),
+                            language=row.get("step_language"),
+                            feedback=None,
+                        )
+                    )
+        return steps
+
     async def close(self) -> None:
         if self.storage_provider:
             await self.storage_provider.close()

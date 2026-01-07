@@ -65,6 +65,10 @@
         "attachFiles": "Attach files"
       }
     },
+    "favorites": {
+      "use": "Use a favorite message",
+      "headline": "Favorite Messages"
+    },
     "commands": {
       "button": "Tools",
       "changeTool": "Change Tool",

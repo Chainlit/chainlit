@@ -88,6 +88,13 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  const toggleMessageFavorite = useCallback(
+    (message: IStep) => {
+      session?.socket.emit('message_favorite', { message });
+    },
+    [session?.socket]
+  );
+
   const windowMessage = useCallback(
     (data: any) => {
       session?.socket.emit('window_message', data);
@@ -170,7 +177,8 @@ const useChatInteract = () => {
     endAudioStream,
     stopTask,
     setIdToResume,
-    updateChatSettings
+    updateChatSettings,
+    toggleMessageFavorite
   };
 };
 

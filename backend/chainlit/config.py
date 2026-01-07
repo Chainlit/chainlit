@@ -111,6 +111,9 @@ edit_message = true
 # Allow users to share threads (backend + UI). Requires an app-defined on_shared_thread_view callback.
 allow_thread_sharing = false
 
+# Enable favorite messages
+favorites = false
+
 [features.slack]
 # Add emoji reaction when message is received (requires reactions:write OAuth scope)
 reaction_on_message_received = false
@@ -316,6 +319,7 @@ class FeaturesSettings(BaseModel):
     auto_tag_thread: bool = True
     edit_message: bool = True
     allow_thread_sharing: bool = False
+    favorites: bool = False
 
 
 class HeaderLink(BaseModel):

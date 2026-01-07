@@ -70,6 +70,10 @@
         "stop": "録音停止",
         "connecting": "接続中"
       },
+      "favorites": {
+        "use": "お気に入りのメッセージを使用",
+        "headline": "お気に入りのメッセージ"
+      },
       "commands": {
         "button": "ツール",
         "changeTool": "ツールを変更",
