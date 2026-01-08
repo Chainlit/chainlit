@@ -415,6 +415,82 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         await self.execute_sql(query=elements_query, parameters=parameters)
         await self.execute_sql(query=steps_query, parameters=parameters)
 
+    async def get_step(self, step_id: str) -> Optional["StepDict"]:
+        if self.show_logger:
+            logger.info(f"SQLAlchemy: get_step, step_id={step_id}")
+        steps_feedbacks_query = """
+            SELECT
+                s."id" AS step_id,
+                s."name" AS step_name,
+                s."type" AS step_type,
+                s."threadId" AS step_threadid,
+                s."parentId" AS step_parentid,
+                s."streaming" AS step_streaming,
+                s."waitForAnswer" AS step_waitforanswer,
+                s."isError" AS step_iserror,
+                s."metadata" AS step_metadata,
+                s."tags" AS step_tags,
+                s."input" AS step_input,
+                s."output" AS step_output,
+                s."createdAt" AS step_createdat,
+                s."start" AS step_start,
+                s."end" AS step_end,
+                s."generation" AS step_generation,
+                s."showInput" AS step_showinput,
+                s."language" AS step_language,
+                f."value" AS feedback_value,
+                f."comment" AS feedback_comment,
+                f."id" AS feedback_id
+            FROM steps s LEFT JOIN feedbacks f ON s."id" = f."forId"
+            WHERE s."id" = :step_id
+        """
+        steps_feedbacks = await self.execute_sql(
+            query=steps_feedbacks_query, parameters={"step_id": step_id}
+        )
+
+        if not isinstance(steps_feedbacks, list) or not steps_feedbacks:
+            return None
+
+        step_feedback = steps_feedbacks[0]
+
+        feedback = None
+        if step_feedback["feedback_value"] is not None:
+            feedback = FeedbackDict(
+                forId=step_feedback["step_id"],
+                id=step_feedback.get("feedback_id"),
+                value=step_feedback["feedback_value"],
+                comment=step_feedback.get("feedback_comment"),
+            )
+        return StepDict(
+            id=step_feedback["step_id"],
+            name=step_feedback["step_name"],
+            type=step_feedback["step_type"],
+            threadId=step_feedback.get("step_threadid", ""),
+            parentId=step_feedback.get("step_parentid"),
+            streaming=step_feedback.get("step_streaming", False),
+            waitForAnswer=step_feedback.get("step_waitforanswer"),
+            isError=step_feedback.get("step_iserror"),
+            metadata=(
+                step_feedback["step_metadata"]
+                if step_feedback.get("step_metadata") is not None
+                else {}
+            ),
+            tags=step_feedback.get("step_tags"),
+            input=(
+                step_feedback.get("step_input", "")
+                if step_feedback.get("step_showinput") not in [None, "false"]
+                else ""
+            ),
+            output=step_feedback.get("step_output", ""),
+            createdAt=step_feedback.get("step_createdat"),
+            start=step_feedback.get("step_start"),
+            end=step_feedback.get("step_end"),
+            generation=step_feedback.get("step_generation"),
+            showInput=step_feedback.get("step_showinput"),
+            language=step_feedback.get("step_language"),
+            feedback=feedback,
+        )
+
     ###### Feedback ######
     async def upsert_feedback(self, feedback: Feedback) -> str:
         if self.show_logger:
