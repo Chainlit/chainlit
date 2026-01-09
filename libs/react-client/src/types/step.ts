@@ -16,7 +16,6 @@ export interface IStep {
   id: string;
   name: string;
   type: StepType;
-  icon?: string;
   threadId?: string;
   parentId?: string;
   isError?: boolean;
