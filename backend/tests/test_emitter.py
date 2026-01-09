@@ -54,6 +54,22 @@ async def test_send_step(
     mock_websocket_session.emit.assert_called_once_with("new_message", step_dict)
 
 
+async def test_send_step_with_icon(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
+    step_dict: StepDict = {
+        "id": "test_step_with_icon",
+        "type": "tool",
+        "name": "Test Step with Icon",
+        "output": "This is a test step with an icon",
+        "metadata": {"icon": "search"},
+    }
+
+    await emitter.send_step(step_dict)
+
+    mock_websocket_session.emit.assert_called_once_with("new_message", step_dict)
+
+
 async def test_update_step(
     emitter: ChainlitEmitter, mock_websocket_session: MagicMock
 ) -> None:
@@ -62,6 +78,22 @@ async def test_update_step(
         "type": "assistant_message",
         "name": "Updated Test Step",
         "output": "This is an updated test step",
+    }
+
+    await emitter.update_step(step_dict)
+
+    mock_websocket_session.emit.assert_called_once_with("update_message", step_dict)
+
+
+async def test_update_step_with_icon(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
+    step_dict: StepDict = {
+        "id": "test_step_with_icon",
+        "type": "tool",
+        "name": "Updated Test Step with Icon",
+        "output": "This is an updated test step with an icon",
+        "metadata": {"icon": "database"},
     }
 
     await emitter.update_step(step_dict)
@@ -134,6 +166,20 @@ async def test_stream_start(
         "type": "run",
         "name": "Test Stream",
         "output": "This is a test stream",
+    }
+    await emitter.stream_start(step_dict)
+    mock_websocket_session.emit.assert_called_once_with("stream_start", step_dict)
+
+
+async def test_stream_start_with_icon(
+    emitter: ChainlitEmitter, mock_websocket_session: MagicMock
+) -> None:
+    step_dict: StepDict = {
+        "id": "test_stream_with_icon",
+        "type": "tool",
+        "name": "Test Stream with Icon",
+        "output": "This is a test stream with an icon",
+        "metadata": {"icon": "cpu"},
     }
     await emitter.stream_start(step_dict)
     mock_websocket_session.emit.assert_called_once_with("stream_start", step_dict)
