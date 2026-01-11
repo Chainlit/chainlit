@@ -4,6 +4,14 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.9.5] - 2026-01-08
+
+### Added
+- Add favorite messages (prompt templates)
+
+### Fixed
+- Fix: Starters now correctly use the selected/default mode if configured
+
 ## [2.9.4] - 2025-12-24
 
 ### Added
