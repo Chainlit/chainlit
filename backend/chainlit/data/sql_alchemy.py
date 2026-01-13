@@ -383,6 +383,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         }
         parameters["metadata"] = json.dumps(step_dict.get("metadata", {}))
         parameters["generation"] = json.dumps(step_dict.get("generation", {}))
+        parameters["modes"] = json.dumps(step_dict.get("modes", {}))
         columns = ", ".join(f'"{key}"' for key in parameters.keys())
         values = ", ".join(f":{key}" for key in parameters.keys())
         updates = ", ".join(
