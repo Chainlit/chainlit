@@ -881,7 +881,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                 FROM steps s
                          JOIN threads t ON s."threadId" = t.id
                 WHERE t."userId" = :user_id
-                  AND s."metadata" LIKE :favorite_pattern
+                  AND CAST(s."metadata" AS TEXT) LIKE :favorite_pattern
                 ORDER BY s."createdAt" DESC \
                 """
 
