@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import { useChatInteract } from '@chainlit/react-client';
+import { useChatInteract, useConfig } from '@chainlit/react-client';
 
 import { Translator } from '@/components/i18n';
 import { Button } from '@/components/ui/button';
@@ -75,9 +75,14 @@ interface Props extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 const NewChatButton = ({ navigate, onConfirm, ...buttonProps }: Props) => {
   const [open, setOpen] = useState(false);
   const { clear } = useChatInteract();
+  const { config } = useConfig();
 
   const handleClickOpen = () => {
-    setOpen(true);
+    if (config?.ui?.confirm_new_chat === false) {
+      handleConfirm();
+    } else {
+      setOpen(true);
+    }
   };
 
   const handleClose = () => {

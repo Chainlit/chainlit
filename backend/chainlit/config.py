@@ -171,6 +171,9 @@ name = "Assistant"
 
 # default_sidebar_state = "open"
 
+# Whether to prompt user confirmation on clicking 'New Chat'
+confirm_new_chat = true
+
 # Description of the assistant. This is used for HTML tags.
 # description = ""
 
@@ -338,6 +341,7 @@ class UISettings(BaseModel):
     language: Optional[str] = None
     layout: Optional[Literal["default", "wide"]] = "default"
     default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
+    confirm_new_chat: bool = True
     github: Optional[str] = None
     # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
