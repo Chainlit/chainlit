@@ -612,7 +612,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             "forId": element.for_id,
             "mime": element.mime,
             "props": json.dumps(element_dict.get("props", {})),
-            "autoPlay": getattr(element, "autoPlay", None),
+            "autoPlay": element_dict.get("autoPlay"),
             "playerConfig": getattr(element, "playerConfig", None),
         }
         values = {k: v for k, v in values.items() if v is not None}
