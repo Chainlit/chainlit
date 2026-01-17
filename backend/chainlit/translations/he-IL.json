@@ -244,6 +244,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "בחר..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "בחר תאריך",
+        "range": "בחר טווח תאריכים"
+      }
     }
   }
 }

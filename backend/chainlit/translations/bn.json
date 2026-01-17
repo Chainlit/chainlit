@@ -244,6 +244,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "বেছে নিন..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "একটি তারিখ বেছে নিন",
+        "range": "তারিখের পরিসীমা বেছে নিন"
+      }
     }
   }
 }
