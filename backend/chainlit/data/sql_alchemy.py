@@ -112,34 +112,19 @@ class SQLAlchemyDataLayer(BaseDataLayer):
     def _get_upsert(
         self, model: type, values: dict[str, Any], index_elements: list[str]
     ) -> Any:
-        if self._dialect_name == "postgresql":
-            stmt = pg_insert(model).values(**values)
-            update_dict = {
-                k: stmt.excluded[k] for k in values if k not in index_elements
-            }
-            return stmt.on_conflict_do_update(
-                index_elements=index_elements, set_=update_dict
-            )
-        elif self._dialect_name == "sqlite":
-            stmt = sqlite_insert(model).values(**values)  # type: ignore[arg-type]
-            update_dict = {
-                k: stmt.excluded[k] for k in values if k not in index_elements
-            }
-            return stmt.on_conflict_do_update(
-                index_elements=index_elements, set_=update_dict
-            )
-        elif self._dialect_name in ("mysql", "mariadb"):
-            stmt = mysql_insert(model).values(**values)  # type: ignore[arg-type]
+        # MySQL/MariaDB uses different upsert syntax
+        if self._dialect_name in ("mysql", "mariadb"):
+            stmt = mysql_insert(model).values(**values)  # type: ignore[assignment]
             update_dict = {k: v for k, v in values.items() if k not in index_elements}
             return stmt.on_duplicate_key_update(**update_dict)  # type: ignore[attr-defined]
-        else:
-            stmt = pg_insert(model).values(**values)
-            update_dict = {
-                k: stmt.excluded[k] for k in values if k not in index_elements
-            }
-            return stmt.on_conflict_do_update(
-                index_elements=index_elements, set_=update_dict
-            )
+
+        # PostgreSQL, SQLite, and others use on_conflict_do_update
+        insert_fn = sqlite_insert if self._dialect_name == "sqlite" else pg_insert
+        stmt = insert_fn(model).values(**values)  # type: ignore[assignment]
+        update_dict = {k: stmt.excluded[k] for k in values if k not in index_elements}  # type: ignore[attr-defined]
+        return stmt.on_conflict_do_update(  # type: ignore[attr-defined]
+            index_elements=index_elements, set_=update_dict
+        )
 
     async def build_debug_url(self) -> str:
         return ""
