@@ -1,11 +1,22 @@
 import { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSetRecoilState } from 'recoil';
 
-import { useAudio, useAuth, useConfig } from '@chainlit/react-client';
+import { useAudio, useAuth, useChatData, useConfig } from '@chainlit/react-client';
 
 import AudioPresence from '@/components/AudioPresence';
 import ButtonLink from '@/components/ButtonLink';
+import { Settings } from '@/components/icons/Settings';
+import { Button } from '@/components/ui/button';
 import { useSidebar } from '@/components/ui/sidebar';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+import { Translator } from 'components/i18n';
+
+import { chatSettingsSidebarOpenState } from '@/state/project';
 
 import ApiKeys from './ApiKeys';
 import ChatProfiles from './ChatProfiles';
@@ -21,13 +32,21 @@ const Header = memo(() => {
   const navigate = useNavigate();
   const { data } = useAuth();
   const { config } = useConfig();
+  const { chatSettingsInputs } = useChatData();
   const { open, openMobile, isMobile } = useSidebar();
+  const setChatSettingsSidebarOpen = useSetRecoilState(
+    chatSettingsSidebarOpenState
+  );
 
   const sidebarOpen = isMobile ? openMobile : open;
 
   const historyEnabled = data?.requireLogin && config?.dataPersistence;
 
   const links = config?.ui?.header_links || [];
+
+  const showSettingsInHeader =
+    config?.ui?.chat_settings_location === 'sidebar' &&
+    chatSettingsInputs.length > 0;
 
   return (
     <div
@@ -75,6 +94,24 @@ const Header = memo(() => {
               target={link.target}
             />
           ))}
+        {showSettingsInHeader && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                id="chat-settings-header-button"
+                onClick={() => setChatSettingsSidebarOpen(true)}
+                variant="ghost"
+                size="icon"
+                className="text-muted-foreground hover:text-muted-foreground"
+              >
+                <Settings className="!size-5" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <Translator path="chat.settings.title" />
+            </TooltipContent>
+          </Tooltip>
+        )}
         <ThemeToggle />
         <UserNav />
       </div>
