@@ -5,6 +5,12 @@ export interface IStarter {
   command?: string;
 }
 
+export interface IStarterCategory {
+  label: string;
+  icon?: string;
+  starters: IStarter[];
+}
+
 export interface ChatProfile {
   default: boolean;
   icon?: string;
@@ -91,6 +97,7 @@ export interface IChainlitConfig {
   threadSharing?: boolean;
   chatProfiles: ChatProfile[];
   starters?: IStarter[];
+  starterCategories?: IStarterCategory[];
 
   translation: object;
 }

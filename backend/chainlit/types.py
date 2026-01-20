@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from chainlit.element import ElementDict
     from chainlit.step import StepDict
 
+from dataclasses import field
+
 from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -295,6 +297,15 @@ class Starter(DataClassJsonMixin):
     message: str
     command: Optional[str] = None
     icon: Optional[str] = None
+
+
+@dataclass
+class StarterCategory(DataClassJsonMixin):
+    """A category/group of starters with an optional icon."""
+
+    label: str
+    icon: Optional[str] = None
+    starters: List[Starter] = field(default_factory=list)
 
 
 @dataclass
