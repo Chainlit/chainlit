@@ -3,9 +3,8 @@ import { useMemo, useState } from 'react';
 
 import { useChatSession, useConfig } from '@chainlit/react-client';
 
-import { Button } from '@/components/ui/button';
-
 import Starter from './Starter';
+import StarterCategory from './StarterCategory';
 
 interface Props {
   className?: string;
@@ -42,21 +41,16 @@ export default function Starters({ className }: Props) {
       >
         <div className="flex gap-2 justify-center flex-wrap">
           {starterCategories.map((category) => (
-            <Button
+            <StarterCategory
               key={category.label}
-              variant={selectedCategory === category.label ? 'default' : 'outline'}
-              className="rounded-full gap-2"
+              category={category}
+              isSelected={selectedCategory === category.label}
               onClick={() =>
                 setSelectedCategory(
                   selectedCategory === category.label ? null : category.label
                 )
               }
-            >
-              {category.icon && (
-                <img className="h-4 w-4" src={category.icon} alt="" />
-              )}
-              {category.label}
-            </Button>
+            />
           ))}
         </div>
         {selectedCategoryData?.starters?.length && (
