@@ -244,6 +244,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "બેંચી લો..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "તારીખ પસંદ કરો",
+        "range": "તારીખની શ્રેણી પસંદ કરો"
+      }
     }
   }
 }

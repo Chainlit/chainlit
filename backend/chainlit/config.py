@@ -172,6 +172,15 @@ name = "Assistant"
 
 # default_sidebar_state = "open"
 
+# Chat settings display location: "message_composer" (default) or "sidebar" (header)
+# chat_settings_location = "message_composer"
+
+# Default state of chat settings sidebar when location is "sidebar"
+# default_chat_settings_open = false
+
+# Whether to prompt user confirmation on clicking 'New Chat'
+confirm_new_chat = true
+
 # Description of the assistant. This is used for HTML tags.
 # description = ""
 
@@ -339,31 +348,27 @@ class UISettings(BaseModel):
     language: Optional[str] = None
     layout: Optional[Literal["default", "wide"]] = "default"
     default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
+    chat_settings_location: Optional[Literal["message_composer", "sidebar"]] = (
+        "message_composer"
+    )
+    default_chat_settings_open: bool = False
+    confirm_new_chat: bool = True
     github: Optional[str] = None
-    # Optional custom CSS file that allows you to customize the UI
     custom_css: Optional[str] = None
     custom_css_attributes: Optional[str] = ""
-    # Optional custom JS file that allows you to customize the UI
     custom_js: Optional[str] = None
 
     alert_style: Optional[Literal["classic", "modern"]] = "classic"
     custom_js_attributes: Optional[str] = "defer"
-    # Optional custom background image for login page
     login_page_image: Optional[str] = None
     login_page_image_filter: Optional[str] = None
     login_page_image_dark_filter: Optional[str] = None
 
-    # Optional custom meta tag for URL preview
     custom_meta_url: Optional[str] = None
-    # Optional custom meta tag for image preview
     custom_meta_image_url: Optional[str] = None
-    # Optional logo file url
     logo_file_url: Optional[str] = None
-    # Optional avatar image file url
     default_avatar_file_url: Optional[str] = None
-    # Optional custom build directory for the frontend
     custom_build: Optional[str] = None
-    # Optional header links
     header_links: Optional[List[HeaderLink]] = None
 
 

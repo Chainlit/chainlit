@@ -13,7 +13,8 @@ import {
   IStep,
   useAuth,
   useChatData,
-  useChatInteract
+  useChatInteract,
+  useConfig
 } from '@chainlit/react-client';
 import type { IMode, IModeOption } from '@chainlit/react-client';
 import { modesState } from '@chainlit/react-client';
@@ -70,6 +71,11 @@ export default function MessageComposer({
   const { askUser, chatSettingsInputs, disabled: _disabled } = useChatData();
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
+
+  const { config } = useConfig();
+  const showSettingsInComposer =
+    config?.ui?.chat_settings_location !== 'sidebar' &&
+    chatSettingsInputs.length > 0;
 
   const isMobile = useIsMobile();
 
@@ -267,7 +273,7 @@ export default function MessageComposer({
             onFileUploadError={onFileUploadError}
             onFileUpload={onFileUpload}
           />
-          {chatSettingsInputs.length > 0 && (
+          {showSettingsInComposer && (
             <Button
               id="chat-settings-open-modal"
               disabled={disabled}

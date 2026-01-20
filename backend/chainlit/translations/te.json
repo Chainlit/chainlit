@@ -244,6 +244,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "ఎంచుకోండి..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "తేదీని ఎంచుకోండి",
+        "range": "తేదీ పరిధిని ఎంచుకోండి"
+      }
     }
   }
 }
