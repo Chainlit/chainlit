@@ -4,6 +4,16 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.9.6] - 2026-01-20
+
+### Added
+- Allow skip new chat creation
+- Add data picker input widget
+- Toggle chat settings in sidebar instead of composer
+
+### Fixed
+- Fix: Starters now correctly use the selected/default mode if configured
+
 ## [2.9.5] - 2026-01-08
 
 ### Added
