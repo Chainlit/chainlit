@@ -67,7 +67,11 @@
     },
     "favorites": {
       "use": "Use a favorite message",
-      "headline": "Favorite Messages"
+      "headline": "Favorite Messages",
+      "empty": {
+        "title": "No Saved Prompts Yet",
+        "description": "Start by sending a prompt and star it or star a prompt from previous chats"
+      }
     },
     "commands": {
       "button": "Tools",

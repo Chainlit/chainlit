@@ -67,7 +67,11 @@
     },
     "favorites": {
       "use": "Usar un mensaje favorito",
-      "headline": "Mensajes favoritos"
+      "headline": "Mensajes favoritos",
+      "empty": {
+        "title": "Aún no hay prompts guardados",
+        "description": "Comienza enviando un prompt y márcalo con estrella o marca un prompt de chats anteriores"
+      }
     },
     "commands": {
       "button": "Herramientas",

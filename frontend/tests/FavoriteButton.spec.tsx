@@ -15,7 +15,9 @@ vi.mock('@/components/i18n/Translator', () => ({
     t: (key: string) => {
       const trans: Record<string, string> = {
         'chat.favorites.use': 'Use favorite',
-        'chat.favorites.headline': 'Favorites List'
+        'chat.favorites.headline': 'Favorites List',
+        'chat.favorites.empty.title': 'No Saved Prompts Yet',
+        'chat.favorites.empty.description': 'Start by sending a prompt and star it or star a prompt from previous chats'
       };
       return trans[key] || key;
     }
@@ -91,13 +93,43 @@ describe('FavoriteButton', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('returns null if there are no favorites in the state', () => {
+  it('renders the button with empty state when there are no favorites', () => {
     (useConfig as any).mockReturnValue({
       config: { features: { favorites: true } }
     });
 
-    const { container } = renderComponent([]);
-    expect(container.firstChild).toBeNull();
+    renderComponent([]);
+
+    const button = screen.getByRole('button');
+    expect(button).toBeInTheDocument();
+
+    // Click to open popover
+    fireEvent.click(button);
+
+    // Verify empty state message appears
+    expect(screen.getByText('No Saved Prompts Yet')).toBeInTheDocument();
+    expect(screen.getByText('Start by sending a prompt and star it or star a prompt from previous chats')).toBeInTheDocument();
+  });
+
+  it('shows empty state message when popover is opened with no favorites', () => {
+    (useConfig as any).mockReturnValue({
+      config: { features: { favorites: true } }
+    });
+
+    renderComponent([]);
+
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
+    // Empty state should be visible
+    const emptyTitle = screen.getByText('No Saved Prompts Yet');
+    const emptyDescription = screen.getByText('Start by sending a prompt and star it or star a prompt from previous chats');
+
+    expect(emptyTitle).toBeInTheDocument();
+    expect(emptyDescription).toBeInTheDocument();
+
+    // Regular favorites list heading should not be visible
+    expect(screen.queryByText('Favorites List')).not.toBeInTheDocument();
   });
 
   it('renders the button when feature is enabled and favorites exist', () => {

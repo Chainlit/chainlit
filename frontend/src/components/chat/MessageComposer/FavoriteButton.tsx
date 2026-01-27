@@ -14,6 +14,7 @@ import { useTranslation } from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
 import {
   Command,
+  CommandEmpty,
   CommandGroup,
   CommandItem,
   CommandListScrollable
@@ -74,7 +75,6 @@ export const FavoriteButton = ({ disabled = false, onSelect }: Props) => {
   };
 
   if (!config?.features?.favorites) return null;
-  if (!favorites.length) return null;
 
   return (
     <div className={cn('favorite-popover-wrapper')}>
@@ -119,26 +119,39 @@ export const FavoriteButton = ({ disabled = false, onSelect }: Props) => {
         >
           <Command>
             <CommandListScrollable className="max-h-[300px] custom-scrollbar">
-              <CommandGroup heading={t('chat.favorites.headline')}>
-                {favorites.map((step) => (
-                  <CommandItem
-                    key={step.id}
-                    onSelect={() => {
-                      onSelect(step.output);
-                      setOpen(false);
-                      cancelTooltipOpen();
-                    }}
-                    className="cursor-pointer"
-                  >
-                    <div className="flex flex-col gap-1 w-full overflow-hidden">
-                      <span className="truncate text-sm">{step.output}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(step.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              {favorites.length === 0 ? (
+                <CommandEmpty className="py-6 px-4">
+                  <div className="flex flex-col items-center gap-2 text-center">
+                    <p className="text-sm font-medium text-foreground">
+                      {t('chat.favorites.empty.title')}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {t('chat.favorites.empty.description')}
+                    </p>
+                  </div>
+                </CommandEmpty>
+              ) : (
+                <CommandGroup heading={t('chat.favorites.headline')}>
+                  {favorites.map((step) => (
+                    <CommandItem
+                      key={step.id}
+                      onSelect={() => {
+                        onSelect(step.output);
+                        setOpen(false);
+                        cancelTooltipOpen();
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <div className="flex flex-col gap-1 w-full overflow-hidden">
+                        <span className="truncate text-sm">{step.output}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(step.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              )}
             </CommandListScrollable>
           </Command>
         </PopoverContent>
