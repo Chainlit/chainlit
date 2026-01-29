@@ -23,9 +23,9 @@ import {
   firstUserInteraction,
   isAiSpeakingState,
   loadingState,
-  modesState,
   mcpState,
   messagesState,
+  modesState,
   resumeThreadErrorState,
   sessionIdState,
   sessionState,
@@ -40,8 +40,8 @@ import {
   IAction,
   ICommand,
   IElement,
-  IMode,
   IMessageElement,
+  IMode,
   IStep,
   ITasklistElement,
   IThread
@@ -217,20 +217,31 @@ const useChatSession = () => {
           let isFirstChunk = true;
           const startTime = Date.now();
           const mimeType = 'pcm16';
-          // Connect to microphone
-          await wavRecorder.begin();
-          await wavStreamPlayer.connect();
-          await wavRecorder.record(async (data) => {
-            const elapsedTime = Date.now() - startTime;
-            socket.emit('audio_chunk', {
-              isStart: isFirstChunk,
-              mimeType,
-              elapsedTime,
-              data: data.mono
+          try {
+            await wavRecorder.begin();
+            await wavStreamPlayer.connect();
+            await wavRecorder.record(async (data) => {
+              const elapsedTime = Date.now() - startTime;
+              socket.emit('audio_chunk', {
+                isStart: isFirstChunk,
+                mimeType,
+                elapsedTime,
+                data: data.mono
+              });
+              isFirstChunk = false;
             });
-            isFirstChunk = false;
-          });
-          wavStreamPlayer.onStop = () => setIsAiSpeaking(false);
+            wavStreamPlayer.onStop = () => setIsAiSpeaking(false);
+          } catch {
+            try {
+              await wavRecorder.end();
+            } catch {
+              // ignored
+            }
+            await wavStreamPlayer.interrupt();
+            socket.emit('audio_end');
+            setAudioConnection('off');
+            return;
+          }
         } else {
           await wavRecorder.end();
           await wavStreamPlayer.interrupt();
