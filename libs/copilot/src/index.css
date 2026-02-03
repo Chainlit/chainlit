@@ -16,7 +16,7 @@
 }
 
 @layer base {
-  #shadow-root-container {
+  #cl-shadow-root {
     --font-sans: 'Inter', sans-serif;
     --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
     --background: 0 0% 100%;
@@ -53,7 +53,9 @@
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
-  .dark {
+  #cl-shadow-root.light {
+  }
+  #cl-shadow-root.dark {
     --background: 0 0% 13%;
     --foreground: 0 0% 93%;
     --card: 0 0% 18%;
