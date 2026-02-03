@@ -13,7 +13,7 @@ from chainlit.mcp import McpConnection
 from chainlit.message import Message
 from chainlit.oauth_providers import get_configured_oauth_providers
 from chainlit.step import Step, step
-from chainlit.types import ChatProfile, Starter, ThreadDict
+from chainlit.types import ChatProfile, Starter, StarterCategory, ThreadDict
 from chainlit.user import User
 from chainlit.utils import wrap_user_function
 
@@ -274,6 +274,37 @@ def set_starters(func):
     """
 
     config.code.set_starters = wrap_user_function(func)
+    return func
+
+
+@overload
+def set_starter_categories(
+    func: Callable[[Optional["User"]], Awaitable[List["StarterCategory"]]],
+) -> Callable[[Optional["User"]], Awaitable[List["StarterCategory"]]]: ...
+
+
+@overload
+def set_starter_categories(
+    func: Callable[
+        [Optional["User"], Optional["str"]], Awaitable[List["StarterCategory"]]
+    ],
+) -> Callable[
+    [Optional["User"], Optional["str"]], Awaitable[List["StarterCategory"]]
+]: ...
+
+
+def set_starter_categories(func):
+    """
+    Programmatic declaration of starter categories with grouped starters.
+
+    Args:
+        func (Callable[[Optional["User"], Optional["str"]], Awaitable[List["StarterCategory"]]]): The function declaring the starter categories with optional user and language arguments.
+
+    Returns:
+        Callable[[Optional["User"], Optional["str"]], Awaitable[List["StarterCategory"]]]: The decorated function.
+    """
+
+    config.code.set_starter_categories = wrap_user_function(func)
     return func
 
 
