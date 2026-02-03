@@ -37,6 +37,7 @@ import {
 interface Props {
   allowHtml?: boolean;
   latex?: boolean;
+  renderMarkdown?: boolean;
   refElements?: IMessageElement[];
   children: string;
   className?: string;
@@ -91,11 +92,23 @@ const cursorPlugin = () => {
 const Markdown = ({
   allowHtml,
   latex,
+  renderMarkdown,
   refElements,
   className,
   children
 }: Props) => {
   const apiClient = useContext(ChainlitContext);
+
+  if (renderMarkdown === false) {
+    return (
+      <pre
+        className={cn('whitespace-pre-wrap break-words', className)}
+        style={{ fontFamily: 'inherit' }}
+      >
+        {children}
+      </pre>
+    );
+  }
 
   const rehypePlugins = useMemo(() => {
     let rehypePlugins: PluggableList = [];
@@ -162,9 +175,16 @@ const Markdown = ({
           const src = image.src.startsWith('/public')
             ? apiClient.buildEndpoint(image.src)
             : image.src;
-          
-          const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogv', '.m4v'];
-          const isVideo = videoExtensions.some(ext => 
+
+          const videoExtensions = [
+            '.mp4',
+            '.webm',
+            '.mov',
+            '.avi',
+            '.ogv',
+            '.m4v'
+          ];
+          const isVideo = videoExtensions.some((ext) =>
             src.toLowerCase().split(/[?#]/)[0].endsWith(ext)
           );
 
