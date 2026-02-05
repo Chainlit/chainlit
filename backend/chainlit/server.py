@@ -1005,6 +1005,7 @@ async def get_shared_thread(
     if not isinstance(metadata, dict):
         metadata = {}
 
+    user_can_view = False
     if getattr(config.code, "on_shared_thread_view", None):
         try:
             user_can_view = await config.code.on_shared_thread_view(
