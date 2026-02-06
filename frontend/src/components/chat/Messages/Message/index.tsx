@@ -110,6 +110,7 @@ const Message = memo(
                     <MessageAvatar
                       author={message.metadata?.avatarName || message.name}
                       isError={message.isError}
+                      iconName={message.metadata?.icon}
                     />
                   ) : null}
                   {/* Display the step and its children */}
