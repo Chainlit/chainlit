@@ -30,7 +30,8 @@ async def test_update_thread_preserves_metadata_when_none():
 
     # The query should NOT include metadata in the update
     # because metadata was None and should be excluded from the data dict
-    assert "metadata" not in query.lower() or "metadata" not in str(params.values())
+    assert "metadata" not in query.lower()
+    assert "metadata" not in str(params.values())
 
 
 @pytest.mark.asyncio
