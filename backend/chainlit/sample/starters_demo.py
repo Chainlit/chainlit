@@ -12,15 +12,15 @@ async def starter_categories(user: Optional[cl.User] = None):
             starters=[
                 cl.Starter(
                     label="Write a poem about nature",
-                    message="Write a poem about nature"
+                    message="Write a poem about nature",
                 ),
                 cl.Starter(
                     label="Create a short story",
-                    message="Create a short story about adventure"
+                    message="Create a short story about adventure",
                 ),
                 cl.Starter(
                     label="Generate a creative name",
-                    message="Generate creative names for a tech startup"
+                    message="Generate creative names for a tech startup",
                 ),
             ],
         ),
@@ -30,11 +30,11 @@ async def starter_categories(user: Optional[cl.User] = None):
             starters=[
                 cl.Starter(
                     label="Explain a complex topic",
-                    message="Explain quantum computing in simple terms"
+                    message="Explain quantum computing in simple terms",
                 ),
                 cl.Starter(
                     label="Help me learn a language",
-                    message="Teach me basic French phrases"
+                    message="Teach me basic French phrases",
                 ),
             ],
         ),
@@ -44,11 +44,10 @@ async def starter_categories(user: Optional[cl.User] = None):
             starters=[
                 cl.Starter(
                     label="Summarize a topic",
-                    message="Summarize the key points of machine learning"
+                    message="Summarize the key points of machine learning",
                 ),
                 cl.Starter(
-                    label="Create a plan",
-                    message="Help me create a weekly study plan"
+                    label="Create a plan", message="Help me create a weekly study plan"
                 ),
             ],
         ),
