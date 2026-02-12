@@ -62,7 +62,9 @@ const Page = ({ children }: Props) => {
       {historyEnabled ? (
         <>
           <LeftSidebar />
-          <SidebarInset className="max-h-svh">{mainContent}</SidebarInset>
+          <SidebarInset className="max-h-svh min-w-0">
+            {mainContent}
+          </SidebarInset>
         </>
       ) : (
         <div className="h-screen w-screen flex">{mainContent}</div>
