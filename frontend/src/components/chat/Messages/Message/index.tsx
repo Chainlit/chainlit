@@ -41,7 +41,8 @@ const Message = memo(
     isScorable,
     scorableRun
   }: Props) => {
-    const { allowHtml, cot, latex, onError } = useContext(MessageContext);
+    const { allowHtml, cot, latex, renderUserMarkdown, onError } =
+      useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
     const contentRef = useRef<HTMLDivElement>(null);
     const isUserMessage = message.type === 'user_message';
@@ -63,6 +64,7 @@ const Message = memo(
           message={message}
           allowHtml={allowHtml}
           latex={latex}
+          renderMarkdown={renderUserMarkdown}
         />
       ),
       [message, allowHtml, latex]
@@ -121,6 +123,7 @@ const Message = memo(
                           message={message}
                           allowHtml={allowHtml}
                           latex={latex}
+                          renderMarkdown={true}
                           sections={['input']}
                         />
                       ) : null}
@@ -142,6 +145,7 @@ const Message = memo(
                           message={message}
                           allowHtml={allowHtml}
                           latex={latex}
+                          renderMarkdown={true}
                           sections={showInputSection ? ['output'] : undefined}
                         />
                       ) : null}
@@ -160,6 +164,7 @@ const Message = memo(
                         message={message}
                         allowHtml={allowHtml}
                         latex={latex}
+                        renderMarkdown={true}
                       />
 
                       <AskFileButton messageId={message.id} onError={onError} />
