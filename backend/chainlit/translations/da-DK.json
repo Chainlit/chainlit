@@ -252,7 +252,7 @@
         "DatePickerInput": {
             "placeholder": {
                 "single": "Vælg en dato",
-                "range": "Vælg en datointerval"
+                "range": "Vælg et datointerval"
             }
         }
     }
