@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { DefaultExtensionType, FileIcon, defaultStyles } from 'react-file-icon';
 
 import { Card } from '@/components/ui/card';
@@ -29,6 +29,15 @@ const Attachment: React.FC<AttachmentProps> = ({
     }
     return undefined;
   }, [isImage, file]);
+
+  // Cleanup Object URL on unmount or when imageUrl changes
+  useEffect(() => {
+    return () => {
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [imageUrl]);
 
   let extension: DefaultExtensionType;
   if (name.includes('.')) {
