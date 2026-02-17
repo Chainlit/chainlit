@@ -836,6 +836,12 @@ async def project_settings(
         if s:
             starters = [it.to_dict() for it in s]
 
+    starter_categories = []
+    if config.code.set_starter_categories:
+        sc = await config.code.set_starter_categories(current_user, effective_language)
+        if sc:
+            starter_categories = [it.to_dict() for it in sc]
+
     data_layer = get_data_layer()
     debug_url = (
         await data_layer.build_debug_url() if data_layer and config.run.debug else None
@@ -865,6 +871,7 @@ async def project_settings(
             "markdown": markdown,
             "chatProfiles": profiles,
             "starters": starters,
+            "starterCategories": starter_categories,
             "debugUrl": debug_url,
         }
     )
