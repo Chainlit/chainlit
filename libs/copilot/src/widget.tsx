@@ -57,7 +57,6 @@ const Widget = ({ config, error }: Props) => {
     };
   }, []);
 
-  // Persist displayMode to localStorage
   useEffect(() => {
     localStorage.setItem(LS_DISPLAY_MODE_KEY, displayMode);
   }, [displayMode]);
@@ -91,7 +90,6 @@ const Widget = ({ config, error }: Props) => {
     return <MessageCircle className="!size-7" />;
   }
 
-  // Sidebar mode: early return before the Popover
   if (displayMode === 'sidebar') {
     if (!isOpen) {
       return (
@@ -125,7 +123,6 @@ const Widget = ({ config, error }: Props) => {
         <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
           {chatContent}
         </div>
-        {/* Hidden button for test compatibility */}
         <button
           id="chainlit-copilot-button"
           aria-expanded="true"

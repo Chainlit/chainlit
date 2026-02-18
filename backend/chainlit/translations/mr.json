@@ -255,5 +255,11 @@
         "range": "तारीख श्रेणी निवडा"
       }
     }
+  },
+  "copilot": {
+    "displayMode": {
+      "floating": "फ्लोटिंग",
+      "sidebar": "साइडबार"
+    }
   }
 }

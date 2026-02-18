@@ -249,5 +249,11 @@
         "MultiSelectInput": {
             "placeholder": "선택..."
         }
+    },
+    "copilot": {
+        "displayMode": {
+            "floating": "플로팅",
+            "sidebar": "사이드바"
+        }
     }
 }

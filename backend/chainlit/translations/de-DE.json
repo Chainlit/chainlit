@@ -249,5 +249,11 @@
     "MultiSelectInput": {
       "placeholder": "Wähle aus..."
     }
+  },
+  "copilot": {
+    "displayMode": {
+      "floating": "Schwebend",
+      "sidebar": "Seitenleiste"
+    }
   }
 }

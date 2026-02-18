@@ -255,6 +255,12 @@
         "range": "选择日期范围"
       }
     }
+  },
+  "copilot": {
+    "displayMode": {
+      "floating": "浮动",
+      "sidebar": "侧边栏"
+    }
   }
 }
 

@@ -255,5 +255,11 @@
         "range": "Kies een datumbereik"
       }
     }
+  },
+  "copilot": {
+    "displayMode": {
+      "floating": "Zwevend",
+      "sidebar": "Zijbalk"
+    }
   }
 }

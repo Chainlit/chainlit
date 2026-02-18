@@ -255,5 +255,11 @@
         "range": "तारीख सीमा चुनें"
       }
     }
+  },
+  "copilot": {
+    "displayMode": {
+      "floating": "फ़्लोटिंग",
+      "sidebar": "साइडबार"
+    }
   }
 }

@@ -255,5 +255,11 @@
         "range": "Elige un rango de fechas"
       }
     }
+  },
+  "copilot": {
+    "displayMode": {
+      "floating": "Flotante",
+      "sidebar": "Barra lateral"
+    }
   }
 }
