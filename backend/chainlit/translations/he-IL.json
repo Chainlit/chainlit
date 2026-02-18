@@ -255,11 +255,5 @@
         "range": "בחר טווח תאריכים"
       }
     }
-  },
-  "copilot": {
-    "displayMode": {
-      "floating": "צף",
-      "sidebar": "סרגל צד"
-    }
   }
 }

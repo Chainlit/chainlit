@@ -4,7 +4,6 @@ import AudioPresence from '@chainlit/app/src/components/AudioPresence';
 import { Logo } from '@chainlit/app/src/components/Logo';
 import ChatProfiles from '@chainlit/app/src/components/header/ChatProfiles';
 import NewChatButton from '@chainlit/app/src/components/header/NewChat';
-import { useTranslation } from '@chainlit/app/src/components/i18n/Translator';
 import { Button } from '@chainlit/app/src/components/ui/button';
 import {
   DropdownMenu,
@@ -45,7 +44,6 @@ const Header = ({
   const { config } = projectConfig;
   const { audioConnection } = useAudio();
   const { startNewChat } = useCopilotInteract();
-  const { t } = useTranslation();
 
   const hasChatProfiles = !!config?.chatProfiles.length;
 
@@ -84,10 +82,10 @@ const Header = ({
                 onValueChange={(v) => setDisplayMode(v as DisplayMode)}
               >
                 <DropdownMenuRadioItem value="floating">
-                  {t('copilot.displayMode.floating')}
+                  Floating
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="sidebar">
-                  {t('copilot.displayMode.sidebar')}
+                  Sidebar
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>

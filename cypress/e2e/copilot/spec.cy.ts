@@ -163,6 +163,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
 
   describe('Sidebar mode', () => {
     beforeEach(() => {
+      // Clear localStorage to avoid state leaking between tests
       cy.window().then((win) => {
         win.localStorage.removeItem('chainlit-copilot-displayMode');
         win.localStorage.removeItem('chainlit-copilot-sidebarWidth');
@@ -213,6 +214,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
             const handleRect = $handle[0].getBoundingClientRect();
             const startX = handleRect.left + handleRect.width / 2;
             const startY = handleRect.top + handleRect.height / 2;
+            // Drag 200px to the left to widen the sidebar
             const targetX = startX - 200;
 
             cy.wrap($handle)
@@ -255,8 +257,10 @@ describe('Copilot', { includeShadowDom: true }, () => {
       cy.step('Switch to floating mode via dropdown');
       cy.get('#display-mode-button').click();
 
+      // Select "Floating" from dropdown
       cy.contains('[role="menuitemradio"]', 'Floating').click();
 
+      // Body margin should be restored
       cy.document().then((doc) => {
         expect(doc.body.style.marginRight).to.not.equal('400px');
       });

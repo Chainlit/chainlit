@@ -254,11 +254,5 @@
         "range": "日付範囲を選択"
       }
     }
-  },
-  "copilot": {
-    "displayMode": {
-      "floating": "フローティング",
-      "sidebar": "サイドバー"
-    }
   }
 }

@@ -249,11 +249,5 @@
     "MultiSelectInput": {
       "placeholder": "Seleziona..."
     }
-  },
-  "copilot": {
-    "displayMode": {
-      "floating": "Fluttuante",
-      "sidebar": "Barra laterale"
-    }
   }
 }

@@ -28,6 +28,7 @@ export function useSidebarResize({
   const isDragging = useRef(false);
   const originalMarginRef = useRef('');
 
+  // Persist sidebar width to localStorage
   useEffect(() => {
     if (displayMode === 'sidebar') {
       localStorage.setItem(LS_WIDTH_KEY, String(sidebarWidth));
@@ -74,6 +75,7 @@ export function useSidebarResize({
     };
   }, [stopDragging, displayMode, isOpen]);
 
+  // Capture original margin when sidebar opens, restore when it closes
   useEffect(() => {
     if (displayMode === 'sidebar' && isOpen) {
       originalMarginRef.current = document.body.style.marginRight;
@@ -85,6 +87,7 @@ export function useSidebarResize({
     }
   }, [displayMode, isOpen]);
 
+  // Sync body margin with sidebar width
   useEffect(() => {
     if (displayMode === 'sidebar' && isOpen) {
       document.body.style.marginRight = `${sidebarWidth}px`;
