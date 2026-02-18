@@ -81,15 +81,6 @@ const Widget = ({ config, error }: Props) => {
     </>
   );
 
-  function renderButtonIcon(): JSX.Element {
-    if (config?.button?.imageUrl) {
-      return (
-        <img width="100%" src={config.button.imageUrl} alt="Chat bubble icon" />
-      );
-    }
-    return <MessageCircle className="!size-7" />;
-  }
-
   if (displayMode === 'sidebar') {
     if (!isOpen) {
       return (
@@ -104,7 +95,15 @@ const Widget = ({ config, error }: Props) => {
           onClick={() => setIsOpen(true)}
         >
           <div className="relative w-full h-full flex items-center justify-center">
-            {renderButtonIcon()}
+            {config?.button?.imageUrl ? (
+              <img
+                width="100%"
+                src={config.button.imageUrl}
+                alt="Chat bubble icon"
+              />
+            ) : (
+              <MessageCircle className="!size-7" />
+            )}
           </div>
         </Button>
       );
@@ -123,11 +122,6 @@ const Widget = ({ config, error }: Props) => {
         <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
           {chatContent}
         </div>
-        <button
-          id="chainlit-copilot-button"
-          aria-expanded="true"
-          className="hidden"
-        />
       </div>
     );
   }

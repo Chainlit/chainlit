@@ -60,8 +60,6 @@ window.mountChainlitWidget = (config: IWidgetConfig) => {
 };
 
 window.unmountChainlitWidget = () => {
-  document.body.style.marginRight = '';
-  document.body.style.transition = '';
   root?.unmount();
 };
 

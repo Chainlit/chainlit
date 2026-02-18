@@ -29,8 +29,10 @@ export function useSidebarResize({
   const originalMarginRef = useRef('');
 
   useEffect(() => {
-    localStorage.setItem(LS_WIDTH_KEY, String(sidebarWidth));
-  }, [sidebarWidth]);
+    if (displayMode === 'sidebar') {
+      localStorage.setItem(LS_WIDTH_KEY, String(sidebarWidth));
+    }
+  }, [sidebarWidth, displayMode]);
 
   const stopDragging = useCallback(() => {
     if (!isDragging.current) return;
@@ -46,6 +48,8 @@ export function useSidebarResize({
   }, []);
 
   useEffect(() => {
+    if (displayMode !== 'sidebar' || !isOpen) return;
+
     function onMouseMove(e: MouseEvent): void {
       if (!isDragging.current) return;
       const maxWidth = window.innerWidth * SIDEBAR_MAX_WIDTH_RATIO;
@@ -68,7 +72,7 @@ export function useSidebarResize({
         document.body.style.userSelect = '';
       }
     };
-  }, [stopDragging]);
+  }, [stopDragging, displayMode, isOpen]);
 
   useEffect(() => {
     if (displayMode === 'sidebar' && isOpen) {

@@ -231,7 +231,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
             .parents('div.fixed')
             .first()
             .invoke('width')
-            .should('be.greaterThan', initialWidth!);
+            .should('be.greaterThan', initialWidth);
 
           cy.step('Verify body margin matches new width');
           cy.get('#chainlit-copilot-chat')
@@ -241,7 +241,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
             .then((newWidth) => {
               cy.document().then((doc) => {
                 const margin = parseFloat(doc.body.style.marginRight);
-                expect(margin).to.be.closeTo(newWidth!, 2);
+                expect(margin).to.be.closeTo(newWidth, 2);
               });
             });
         });
