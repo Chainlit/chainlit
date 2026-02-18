@@ -67,7 +67,7 @@ const Header = ({
           onConfirm={startNewChat}
         />
         {setDisplayMode && (
-          <DropdownMenu>
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <Button id="display-mode-button" size="icon" variant="ghost">
                 <PanelRight className="!size-5 text-muted-foreground" />
