@@ -13,4 +13,5 @@ export interface IWidgetConfig {
   expanded?: boolean;
   language?: string;
   opened?: boolean;
+  displayMode?: 'floating' | 'sidebar';
 }

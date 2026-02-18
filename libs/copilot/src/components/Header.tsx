@@ -1,10 +1,17 @@
-import { Maximize, Minimize } from 'lucide-react';
+import { ChevronsRight, Maximize, Minimize, PanelRight } from 'lucide-react';
 
 import AudioPresence from '@chainlit/app/src/components/AudioPresence';
 import { Logo } from '@chainlit/app/src/components/Logo';
 import ChatProfiles from '@chainlit/app/src/components/header/ChatProfiles';
 import NewChatButton from '@chainlit/app/src/components/header/NewChat';
 import { Button } from '@chainlit/app/src/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger
+} from '@chainlit/app/src/components/ui/dropdown-menu';
 import { IChainlitConfig, useAudio } from '@chainlit/react-client';
 
 import { useCopilotInteract } from '../hooks';
@@ -20,12 +27,18 @@ interface Props {
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
   projectConfig: IProjectConfig;
+  displayMode?: 'floating' | 'sidebar';
+  setDisplayMode?: (mode: 'floating' | 'sidebar') => void;
+  setIsOpen?: (open: boolean) => void;
 }
 
 const Header = ({
   expanded,
   setExpanded,
-  projectConfig
+  projectConfig,
+  displayMode,
+  setDisplayMode,
+  setIsOpen
 }: Props): JSX.Element => {
   const { config } = projectConfig;
   const { audioConnection } = useAudio();
@@ -52,17 +65,56 @@ const Header = ({
           className="text-muted-foreground mt-[1.5px]"
           onConfirm={startNewChat}
         />
-        <Button
-          size="icon"
-          variant="ghost"
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? (
-            <Minimize className="!size-5 text-muted-foreground" />
-          ) : (
-            <Maximize className="!size-5 text-muted-foreground" />
-          )}
-        </Button>
+        {setDisplayMode && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button id="display-mode-button" size="icon" variant="ghost">
+                <PanelRight className="!size-5 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              container={window.cl_shadowRootElement}
+            >
+              <DropdownMenuRadioGroup
+                value={displayMode}
+                onValueChange={(v) =>
+                  setDisplayMode(v as 'floating' | 'sidebar')
+                }
+              >
+                <DropdownMenuRadioItem value="floating">
+                  Floating
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="sidebar">
+                  Sidebar
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+        {displayMode !== 'sidebar' && (
+          <Button
+            size="icon"
+            variant="ghost"
+            onClick={() => setExpanded(!expanded)}
+          >
+            {expanded ? (
+              <Minimize className="!size-5 text-muted-foreground" />
+            ) : (
+              <Maximize className="!size-5 text-muted-foreground" />
+            )}
+          </Button>
+        )}
+        {displayMode === 'sidebar' && setIsOpen && (
+          <Button
+            id="close-sidebar-button"
+            size="icon"
+            variant="ghost"
+            onClick={() => setIsOpen(false)}
+          >
+            <ChevronsRight className="!size-5 text-muted-foreground" />
+          </Button>
+        )}
       </div>
     </div>
   );
