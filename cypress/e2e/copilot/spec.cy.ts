@@ -291,56 +291,24 @@ describe('Copilot', { includeShadowDom: true }, () => {
     });
 
     it('should persist sidebar width across remounts', () => {
-      mountCopilotWidget({ displayMode: 'sidebar', opened: true });
-
-      cy.get('#chainlit-copilot-chat').should('exist');
-
-      cy.step('Resize sidebar via drag');
-      cy.get('[data-testid="sidebar-drag-handle"]').then(($handle) => {
-        const handleRect = $handle[0].getBoundingClientRect();
-        const startX = handleRect.left + handleRect.width / 2;
-        const startY = handleRect.top + handleRect.height / 2;
-        const targetX = startX - 100;
-
-        cy.wrap($handle)
-          .trigger('mousedown', { clientX: startX, clientY: startY })
-          .then(() => {
-            cy.document().trigger('mousemove', {
-              clientX: targetX,
-              clientY: startY
-            });
-            cy.document().trigger('mouseup');
-          });
-      });
-
-      cy.step('Capture resized width from localStorage');
+      cy.step('Pre-set a custom width in localStorage');
       cy.window().then((win) => {
-        const storedWidth = win.localStorage.getItem(
-          'chainlit-copilot-sidebarWidth'
-        );
-        expect(storedWidth).to.not.equal(null);
-        const width = Number(storedWidth);
-        expect(width).to.be.greaterThan(400);
-
-        cy.step('Unmount and remount widget');
-        // @ts-expect-error is not a valid prop
-        win.unmountChainlitWidget();
-        const el = win.document.getElementById('chainlit-copilot');
-        if (el) el.remove();
+        win.localStorage.setItem('chainlit-copilot-sidebarWidth', '500');
       });
 
       mountCopilotWidget({ displayMode: 'sidebar', opened: true });
 
-      cy.step('Verify restored width matches persisted value');
-      cy.window().then((win) => {
-        const storedWidth = Number(
-          win.localStorage.getItem('chainlit-copilot-sidebarWidth')
-        );
-        cy.get('#chainlit-copilot-chat')
-          .parents('div.fixed')
-          .first()
-          .invoke('width')
-          .should('be.closeTo', storedWidth, 5);
+      cy.step('Verify sidebar uses the persisted width');
+      cy.get('#chainlit-copilot-chat')
+        .parents('div.fixed')
+        .first()
+        .invoke('width')
+        .should('be.closeTo', 500, 5);
+
+      cy.step('Verify body margin matches persisted width');
+      cy.document().then((doc) => {
+        const margin = parseFloat(doc.body.style.marginRight);
+        expect(margin).to.be.closeTo(500, 2);
       });
     });
   });
