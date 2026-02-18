@@ -1,9 +1,10 @@
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useChatSession, useConfig } from '@chainlit/react-client';
 
 import Starter from './Starter';
+import StarterCategory from './StarterCategory';
 
 interface Props {
   className?: string;
@@ -12,6 +13,7 @@ interface Props {
 export default function Starters({ className }: Props) {
   const { chatProfile } = useChatSession();
   const { config } = useConfig();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const starters = useMemo(() => {
     if (chatProfile) {
@@ -25,6 +27,43 @@ export default function Starters({ className }: Props) {
     return config?.starters;
   }, [config, chatProfile]);
 
+  const starterCategories = config?.starterCategories;
+
+  if (starterCategories?.length) {
+    const selectedCategoryData = starterCategories.find(
+      (cat) => cat.label === selectedCategory
+    );
+
+    return (
+      <div
+        id="starters"
+        className={cn('flex flex-col gap-4 items-center', className)}
+      >
+        <div className="flex gap-2 justify-center flex-wrap">
+          {starterCategories.map((category) => (
+            <StarterCategory
+              key={category.label}
+              category={category}
+              isSelected={selectedCategory === category.label}
+              onClick={() =>
+                setSelectedCategory(
+                  selectedCategory === category.label ? null : category.label
+                )
+              }
+            />
+          ))}
+        </div>
+        {selectedCategoryData?.starters?.length && (
+          <div className="flex gap-2 justify-center flex-wrap">
+            {selectedCategoryData.starters.map((starter) => (
+              <Starter key={starter.label} starter={starter} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   if (!starters?.length) return null;
 
   return (
@@ -32,7 +71,7 @@ export default function Starters({ className }: Props) {
       id="starters"
       className={cn('flex gap-2 justify-center flex-wrap', className)}
     >
-      {starters?.map((starter, i) => (
+      {starters.map((starter, i) => (
         <Starter key={i} starter={starter} />
       ))}
     </div>
