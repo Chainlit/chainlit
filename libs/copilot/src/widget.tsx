@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { MessageCircle, X } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import Alert from '@chainlit/app/src/components/Alert';
 import { Button } from '@chainlit/app/src/components/ui/button';
@@ -14,38 +14,34 @@ import { useConfig } from '@chainlit/react-client';
 import Header from './components/Header';
 
 import ChatWrapper from './chat';
+import { useSidebarResize } from './hooks';
 import {
   clearChainlitCopilotThreadId,
   getChainlitCopilotThreadId
 } from './state';
-import { IWidgetConfig } from './types';
+import { DisplayMode, IWidgetConfig } from './types';
 
 interface Props {
   config: IWidgetConfig;
   error?: string;
 }
 
-const SIDEBAR_MIN_WIDTH = 300;
-const SIDEBAR_DEFAULT_WIDTH = 400;
-const SIDEBAR_MAX_WIDTH_RATIO = 0.5;
-const LS_KEY = 'chainlit-copilot-displayMode';
-const LS_WIDTH_KEY = 'chainlit-copilot-sidebarWidth';
+const LS_DISPLAY_MODE_KEY = 'chainlit-copilot-displayMode';
 
 const Widget = ({ config, error }: Props) => {
   const [expanded, setExpanded] = useState(config?.expanded || false);
   const [isOpen, setIsOpen] = useState(config?.opened || false);
-  const [displayMode, setDisplayMode] = useState<'floating' | 'sidebar'>(
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(
     () =>
-      (localStorage.getItem(LS_KEY) as 'floating' | 'sidebar') ||
+      (localStorage.getItem(LS_DISPLAY_MODE_KEY) as DisplayMode) ||
       config?.displayMode ||
       'floating'
   );
-  const [sidebarWidth, setSidebarWidth] = useState(() => {
-    const stored = localStorage.getItem(LS_WIDTH_KEY);
-    return stored ? Number(stored) : SIDEBAR_DEFAULT_WIDTH;
-  });
-  const isDragging = useRef(false);
   const projectConfig = useConfig();
+  const { sidebarWidth, handleMouseDown } = useSidebarResize({
+    displayMode,
+    isOpen
+  });
 
   useEffect(() => {
     window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
@@ -63,59 +59,37 @@ const Widget = ({ config, error }: Props) => {
 
   // Persist displayMode to localStorage
   useEffect(() => {
-    localStorage.setItem(LS_KEY, displayMode);
+    localStorage.setItem(LS_DISPLAY_MODE_KEY, displayMode);
   }, [displayMode]);
 
-  // Persist sidebar width to localStorage
-  useEffect(() => {
-    localStorage.setItem(LS_WIDTH_KEY, String(sidebarWidth));
-  }, [sidebarWidth]);
-
-  // Drag-to-resize logic
-  const handleMouseDown = useCallback(() => {
-    isDragging.current = true;
-    document.body.style.userSelect = 'none';
-  }, []);
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging.current) return;
-      const maxWidth = window.innerWidth * SIDEBAR_MAX_WIDTH_RATIO;
-      const newWidth = Math.min(
-        maxWidth,
-        Math.max(SIDEBAR_MIN_WIDTH, window.innerWidth - e.clientX)
-      );
-      setSidebarWidth(newWidth);
-    };
-
-    const onMouseUp = () => {
-      if (!isDragging.current) return;
-      isDragging.current = false;
-      document.body.style.userSelect = '';
-    };
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-    return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', onMouseUp);
-    };
-  }, []);
-
-  // Manage body margin for sidebar mode
-  useEffect(() => {
-    if (displayMode === 'sidebar' && isOpen) {
-      const originalMargin = document.body.style.marginRight;
-      document.body.style.transition = 'margin-right 0.3s ease-in-out';
-      document.body.style.marginRight = `${sidebarWidth}px`;
-      return () => {
-        document.body.style.marginRight = originalMargin;
-        document.body.style.transition = '';
-      };
-    }
-  }, [displayMode, isOpen, sidebarWidth]);
-
   const customClassName = config?.button?.className || '';
+
+  const chatContent = error ? (
+    <Alert variant="error">{error}</Alert>
+  ) : (
+    <>
+      <Header
+        expanded={expanded}
+        setExpanded={setExpanded}
+        projectConfig={projectConfig}
+        displayMode={displayMode}
+        setDisplayMode={setDisplayMode}
+        setIsOpen={setIsOpen}
+      />
+      <div className="flex flex-grow overflow-y-auto">
+        <ChatWrapper />
+      </div>
+    </>
+  );
+
+  function renderButtonIcon(): JSX.Element {
+    if (config?.button?.imageUrl) {
+      return (
+        <img width="100%" src={config.button.imageUrl} alt="Chat bubble icon" />
+      );
+    }
+    return <MessageCircle className="!size-7" />;
+  }
 
   // Sidebar mode: early return before the Popover
   if (displayMode === 'sidebar') {
@@ -132,15 +106,7 @@ const Widget = ({ config, error }: Props) => {
           onClick={() => setIsOpen(true)}
         >
           <div className="relative w-full h-full flex items-center justify-center">
-            {config?.button?.imageUrl ? (
-              <img
-                width="100%"
-                src={config.button.imageUrl}
-                alt="Chat bubble icon"
-              />
-            ) : (
-              <MessageCircle className="!size-7" />
-            )}
+            {renderButtonIcon()}
           </div>
         </Button>
       );
@@ -157,23 +123,7 @@ const Widget = ({ config, error }: Props) => {
           className="absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-primary/20 active:bg-primary/30 z-10"
         />
         <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
-          {error ? (
-            <Alert variant="error">{error}</Alert>
-          ) : (
-            <>
-              <Header
-                expanded={expanded}
-                setExpanded={setExpanded}
-                projectConfig={projectConfig}
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
-                setIsOpen={setIsOpen}
-              />
-              <div className="flex flex-grow overflow-y-auto">
-                <ChatWrapper />
-              </div>
-            </>
-          )}
+          {chatContent}
         </div>
         {/* Hidden button for test compatibility */}
         <button
@@ -247,23 +197,7 @@ const Widget = ({ config, error }: Props) => {
         )}
       >
         <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
-          {error ? (
-            <Alert variant="error">{error}</Alert>
-          ) : (
-            <>
-              <Header
-                expanded={expanded}
-                setExpanded={setExpanded}
-                projectConfig={projectConfig}
-                displayMode={displayMode}
-                setDisplayMode={setDisplayMode}
-                setIsOpen={setIsOpen}
-              />
-              <div className="flex flex-grow overflow-y-auto">
-                <ChatWrapper />
-              </div>
-            </>
-          )}
+          {chatContent}
         </div>
       </PopoverContent>
     </Popover>

@@ -1,3 +1,5 @@
+export type DisplayMode = 'floating' | 'sidebar';
+
 export interface IWidgetConfig {
   chainlitServer: string;
   showCot?: boolean;
@@ -13,5 +15,5 @@ export interface IWidgetConfig {
   expanded?: boolean;
   language?: string;
   opened?: boolean;
-  displayMode?: 'floating' | 'sidebar';
+  displayMode?: DisplayMode;
 }

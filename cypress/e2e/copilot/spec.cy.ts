@@ -265,5 +265,83 @@ describe('Copilot', { includeShadowDom: true }, () => {
         expect(doc.body.style.marginRight).to.not.equal('400px');
       });
     });
+
+    it('should restore body margin on widget unmount', () => {
+      cy.step('Set a custom body margin before mounting');
+      cy.document().then((doc) => {
+        doc.body.style.marginRight = '20px';
+      });
+
+      mountCopilotWidget({ displayMode: 'sidebar', opened: true });
+
+      cy.get('#chainlit-copilot-chat').should('exist');
+      cy.document().then((doc) => {
+        expect(doc.body.style.marginRight).to.equal('400px');
+      });
+
+      cy.step('Unmount widget and verify margin is restored');
+      cy.window().then((win) => {
+        // @ts-expect-error is not a valid prop
+        win.unmountChainlitWidget();
+      });
+
+      cy.document().then((doc) => {
+        expect(doc.body.style.marginRight).to.equal('20px');
+      });
+    });
+
+    it('should persist sidebar width across remounts', () => {
+      mountCopilotWidget({ displayMode: 'sidebar', opened: true });
+
+      cy.get('#chainlit-copilot-chat').should('exist');
+
+      cy.step('Resize sidebar via drag');
+      cy.get('[data-testid="sidebar-drag-handle"]').then(($handle) => {
+        const handleRect = $handle[0].getBoundingClientRect();
+        const startX = handleRect.left + handleRect.width / 2;
+        const startY = handleRect.top + handleRect.height / 2;
+        const targetX = startX - 100;
+
+        cy.wrap($handle)
+          .trigger('mousedown', { clientX: startX, clientY: startY })
+          .then(() => {
+            cy.document().trigger('mousemove', {
+              clientX: targetX,
+              clientY: startY
+            });
+            cy.document().trigger('mouseup');
+          });
+      });
+
+      cy.step('Capture resized width from localStorage');
+      cy.window().then((win) => {
+        const storedWidth = win.localStorage.getItem(
+          'chainlit-copilot-sidebarWidth'
+        );
+        expect(storedWidth).to.not.equal(null);
+        const width = Number(storedWidth);
+        expect(width).to.be.greaterThan(400);
+
+        cy.step('Unmount and remount widget');
+        // @ts-expect-error is not a valid prop
+        win.unmountChainlitWidget();
+        const el = win.document.getElementById('chainlit-copilot');
+        if (el) el.remove();
+      });
+
+      mountCopilotWidget({ displayMode: 'sidebar', opened: true });
+
+      cy.step('Verify restored width matches persisted value');
+      cy.window().then((win) => {
+        const storedWidth = Number(
+          win.localStorage.getItem('chainlit-copilot-sidebarWidth')
+        );
+        cy.get('#chainlit-copilot-chat')
+          .parents('div.fixed')
+          .first()
+          .invoke('width')
+          .should('be.closeTo', storedWidth, 5);
+      });
+    });
   });
 });

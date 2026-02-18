@@ -15,6 +15,7 @@ import {
 import { IChainlitConfig, useAudio } from '@chainlit/react-client';
 
 import { useCopilotInteract } from '../hooks';
+import { DisplayMode } from '../types';
 
 interface IProjectConfig {
   config?: IChainlitConfig;
@@ -27,8 +28,8 @@ interface Props {
   expanded: boolean;
   setExpanded: (expanded: boolean) => void;
   projectConfig: IProjectConfig;
-  displayMode?: 'floating' | 'sidebar';
-  setDisplayMode?: (mode: 'floating' | 'sidebar') => void;
+  displayMode?: DisplayMode;
+  setDisplayMode?: (mode: DisplayMode) => void;
   setIsOpen?: (open: boolean) => void;
 }
 
@@ -78,9 +79,7 @@ const Header = ({
             >
               <DropdownMenuRadioGroup
                 value={displayMode}
-                onValueChange={(v) =>
-                  setDisplayMode(v as 'floating' | 'sidebar')
-                }
+                onValueChange={(v) => setDisplayMode(v as DisplayMode)}
               >
                 <DropdownMenuRadioItem value="floating">
                   Floating
@@ -92,7 +91,16 @@ const Header = ({
             </DropdownMenuContent>
           </DropdownMenu>
         )}
-        {displayMode !== 'sidebar' && (
+        {displayMode === 'sidebar' && setIsOpen ? (
+          <Button
+            id="close-sidebar-button"
+            size="icon"
+            variant="ghost"
+            onClick={() => setIsOpen(false)}
+          >
+            <ChevronsRight className="!size-5 text-muted-foreground" />
+          </Button>
+        ) : (
           <Button
             size="icon"
             variant="ghost"
@@ -103,16 +111,6 @@ const Header = ({
             ) : (
               <Maximize className="!size-5 text-muted-foreground" />
             )}
-          </Button>
-        )}
-        {displayMode === 'sidebar' && setIsOpen && (
-          <Button
-            id="close-sidebar-button"
-            size="icon"
-            variant="ghost"
-            onClick={() => setIsOpen(false)}
-          >
-            <ChevronsRight className="!size-5 text-muted-foreground" />
           </Button>
         )}
       </div>
