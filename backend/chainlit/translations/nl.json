@@ -86,6 +86,7 @@
       "favorites": {
         "use": "Gebruik een favoriet bericht",
         "headline": "Favoriete berichten",
+        "remove": "Verwijder favoriet",
         "empty": {
           "title": "Nog geen opgeslagen prompts",
           "description": "Begin door een prompt te versturen en voeg deze toe aan favorieten of voeg een prompt uit eerdere chats toe"
