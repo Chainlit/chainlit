@@ -381,7 +381,7 @@ class ChainlitDataLayer(BaseDataLayer):
             "input": step_dict.get("input") or None,  # Convert "" to None
             "metadata": json.dumps(step_dict.get("metadata", {})),
             "name": step_dict.get("name"),
-            "output": step_dict.get("output") or None, # Convert "" to None
+            "output": step_dict.get("output") or None,  # Convert "" to None
             "type": step_dict["type"],
             "start_time": timestamp,
             "end_time": timestamp,
