@@ -30,6 +30,8 @@ declare global {
     mountChainlitWidget: (config: IWidgetConfig) => void;
     unmountChainlitWidget: () => void;
     toggleChainlitCopilot: () => void;
+    openChainlitCopilot: () => void;
+    closeChainlitCopilot: () => void;
     sendChainlitMessage: (message: IStep) => void;
     getChainlitCopilotThreadId: () => string | null;
     clearChainlitCopilotThreadId: (newThreadId?: string) => void;
