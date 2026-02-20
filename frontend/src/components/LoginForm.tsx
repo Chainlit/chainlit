@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Translator, { useTranslation } from 'components/i18n/Translator';
 
+import { ClientError } from '@chainlit/react-client';
+
 import Alert from './Alert';
 import { ProviderButton } from './ProviderButton';
 
@@ -63,7 +65,9 @@ export function LoginForm({
     try {
       await onPasswordSignIn(data.email, data.password, callbackUrl);
     } catch (err) {
-      if (err instanceof Error) {
+      if (err instanceof ClientError && err.detail) {
+        setErrorState(err.detail);
+      } else if (err instanceof Error) {
         setErrorState(err.message);
       }
     } finally {
