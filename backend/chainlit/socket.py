@@ -194,7 +194,15 @@ async def connection_successful(sid):
         return
 
     if context.session.thread_id_to_resume and config.code.on_chat_resume:
-        thread = await resume_thread(context.session)
+        try:
+            thread = await resume_thread(context.session)
+        except Exception as e:
+            logger.error(f"Failed to resume thread: {e!s}")
+            await context.emitter.send_resume_thread_error(
+                "Failed to load conversation history."
+            )
+            thread = None
+
         if thread:
             context.session.has_first_interaction = True
             await context.emitter.emit(
@@ -204,10 +212,21 @@ async def connection_successful(sid):
             await config.code.on_chat_resume(thread)
 
             for step in thread.get("steps", []):
-                if "message" in step["type"]:
-                    chat_context.add(Message.from_dict(step))
+                try:
+                    if "message" in step["type"]:
+                        chat_context.add(Message.from_dict(step))
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to restore step {step.get('id')}: {e!s}"
+                    )
 
-            await context.emitter.resume_thread(thread)
+            try:
+                await context.emitter.resume_thread(thread)
+            except Exception as e:
+                logger.error(f"Failed to emit resume_thread: {e!s}")
+                await context.emitter.send_resume_thread_error(
+                    "Failed to load conversation history."
+                )
             return
         else:
             await context.emitter.send_resume_thread_error("Thread not found.")
