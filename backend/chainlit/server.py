@@ -975,7 +975,14 @@ async def get_thread(
 
     await is_thread_author(current_user.identifier, thread_id)
 
-    res = await data_layer.get_thread(thread_id)
+    try:
+        res = await data_layer.get_thread(thread_id)
+    except Exception as e:
+        logger.error(f"Failed to get thread {thread_id}: {e!s}")
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to load conversation history",
+        )
     return JSONResponse(content=res)
 
 

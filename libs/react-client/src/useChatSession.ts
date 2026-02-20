@@ -268,7 +268,19 @@ const useChatSession = () => {
           setChatSettingsValue(thread.metadata?.chat_settings);
         }
         setMessages(messages);
-        const elements = thread.elements || [];
+        const elements = (thread.elements || []).filter(
+          (e): e is IElement => e != null
+        );
+        // Resolve element URLs from chainlitKey when url is missing,
+        // matching the behavior of the 'element' socket event handler.
+        elements.forEach((element) => {
+          if (!element.url && element.chainlitKey) {
+            element.url = client.getElementUrl(
+              element.chainlitKey,
+              sessionId
+            );
+          }
+        });
         setTasklists(
           (elements as ITasklistElement[]).filter((e) => e.type === 'tasklist')
         );
