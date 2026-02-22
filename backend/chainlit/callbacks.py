@@ -449,6 +449,23 @@ def on_settings_update(
     return func
 
 
+def on_settings_edit(
+    func: Callable[[Dict[str, Any]], Any],
+) -> Callable[[Dict[str, Any]], Any]:
+    """
+    Hook to react to the user editing any settings (on the fly).
+
+    Args:
+        func (Callable[], Any]): The hook to execute while settings are being edited.
+
+    Returns:
+        Callable[], Any]: The decorated hook.
+    """
+
+    config.code.on_settings_edit = wrap_user_function(func, with_task=True)
+    return func
+
+
 def data_layer(
     func: Callable[[], BaseDataLayer],
 ) -> Callable[[], BaseDataLayer]:
