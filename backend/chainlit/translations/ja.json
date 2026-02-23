@@ -6,6 +6,7 @@
         "continue": "続ける",
         "goBack": "戻る",
         "reset": "リセット",
+        "select": "選択",
         "submit": "送信"
       },
       "status": {
@@ -175,6 +176,7 @@
           "delete": {
             "title": "削除の確認",
             "description": "このスレッドとそのメッセージ、要素が削除されます。この操作は取り消せません",
+            "description_plural": "これにより {{count}} 個のスレッドと、そのメッセージおよび要素が削除されます。この操作は取り消せません",
             "success": "チャットを削除しました",
             "inProgress": "チャットを削除中"
           },
