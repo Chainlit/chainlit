@@ -231,6 +231,10 @@ class DeleteThreadRequest(BaseModel):
     threadId: str
 
 
+class DeleteThreadsRequest(BaseModel):
+    threadIds: List[str]
+
+
 class DeleteFeedbackRequest(BaseModel):
     feedbackId: str
 

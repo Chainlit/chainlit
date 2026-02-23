@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { size } from 'lodash';
-import { Share2 } from 'lucide-react';
+import { Share2, Trash2 } from 'lucide-react';
 import { useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
@@ -32,6 +32,7 @@ import {
   AlertDialogTitle
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Dialog,
   DialogContent,
@@ -79,6 +80,9 @@ export function ThreadList({
   const { clear } = useChatInteract();
   const { threadId: currentThreadId } = useChatMessages();
   const [threadIdToDelete, setThreadIdToDelete] = useState<string>();
+  const [isDeletingSelected, setIsDeletingSelected] = useState(false);
+  const [selectedThreadIds, setSelectedThreadIds] = useState<string[]>([]);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [threadIdToRename, setThreadIdToRename] = useState<string>();
   const [threadNewName, setThreadNewName] = useState<string>();
   const setThreadHistory = useSetRecoilState(threadHistoryState);
@@ -161,6 +165,45 @@ export function ThreadList({
           ...prev,
           threads: prev?.threads?.filter((t) => t.id !== threadIdToDelete)
         }));
+        navigate('/');
+        return (
+          <Translator path="threadHistory.thread.actions.delete.success" />
+        );
+      },
+      error: (err) => {
+        if (err instanceof ClientError) {
+          return <span>{err.message}</span>;
+        } else {
+          return <span></span>;
+        }
+      }
+    });
+  };
+
+  const handleDeleteSelected = async () => {
+    if (selectedThreadIds.length === 0) return;
+
+    if (
+      selectedThreadIds.includes(idToResume || '') ||
+      selectedThreadIds.includes(currentThreadId || '')
+    ) {
+      clear();
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+
+    toast.promise(apiClient.deleteThreads(selectedThreadIds), {
+      loading: (
+        <Translator path="threadHistory.thread.actions.delete.inProgress" />
+      ),
+      success: () => {
+        setThreadHistory((prev) => ({
+          ...prev,
+          threads: prev?.threads?.filter(
+            (t) => !selectedThreadIds.includes(t.id)
+          )
+        }));
+        setSelectedThreadIds([]);
+        setIsSelectionMode(false);
         navigate('/');
         return (
           <Translator path="threadHistory.thread.actions.delete.success" />
@@ -259,6 +302,31 @@ export function ThreadList({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      <AlertDialog
+        open={isDeletingSelected}
+        onOpenChange={(open) => setIsDeletingSelected(open)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              <Translator path="threadHistory.thread.actions.delete.title" />
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('threadHistory.thread.actions.delete.description_plural', {
+                count: selectedThreadIds.length
+              })}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row gap-2 sm:gap-0">
+            <AlertDialogCancel className="mt-0">
+              <Translator path="common.actions.cancel" />
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteSelected}>
+              <Translator path="common.actions.confirm" />
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Dialog
         open={!!threadIdToRename}
         onOpenChange={() => setThreadIdToRename(undefined)}
@@ -312,6 +380,39 @@ export function ThreadList({
         threadId={threadIdToShare || null}
       />
       <TooltipProvider delayDuration={300}>
+        <div className="flex items-center justify-between px-4 py-2 border-b">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setIsSelectionMode(!isSelectionMode);
+              setSelectedThreadIds([]);
+            }}
+            className="text-xs h-8 px-2 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            {isSelectionMode ? (
+              <Translator path="common.actions.cancel" />
+            ) : (
+              <Translator path="common.actions.select" />
+            )}
+          </Button>
+          {isSelectionMode && (
+            <div className="flex items-center gap-2">
+              {selectedThreadIds.length > 0 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsDeletingSelected(true)}
+                  className="text-xs h-8 px-2 text-red-500 hover:text-red-600 transition-colors"
+                >
+                  <Trash2 className="w-4 h-4 mr-1" />
+                  <Translator path="threadHistory.thread.menu.delete" />(
+                  {selectedThreadIds.length})
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
         {sortedTimeGroupKeys.map((group) => {
           const items = threadHistory!.timeGroupedThreads![group];
           return (
@@ -329,51 +430,104 @@ export function ThreadList({
                       <SidebarMenuItem
                         key={thread.id}
                         id={`thread-${thread.id}`}
+                        className="flex items-center group/item min-w-0"
                       >
+                        {isSelectionMode && (
+                          <Checkbox
+                            checked={selectedThreadIds.includes(thread.id)}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                setSelectedThreadIds([
+                                  ...selectedThreadIds,
+                                  thread.id
+                                ]);
+                              } else {
+                                setSelectedThreadIds(
+                                  selectedThreadIds.filter(
+                                    (id) => id !== thread.id
+                                  )
+                                );
+                              }
+                            }}
+                            className="ml-2 shrink-0 transition-opacity"
+                          />
+                        )}
                         <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Link to={isResumed ? '' : `/thread/${thread.id}`}>
+                          <TooltipTrigger asChild className="flex-grow min-w-0">
+                            <Link
+                              to={
+                                isSelectionMode || isResumed
+                                  ? ''
+                                  : `/thread/${thread.id}`
+                              }
+                              className="min-w-0"
+                              onClick={(e) => {
+                                if (isSelectionMode) {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  const isSelected = selectedThreadIds.includes(
+                                    thread.id
+                                  );
+                                  if (isSelected) {
+                                    setSelectedThreadIds(
+                                      selectedThreadIds.filter(
+                                        (id) => id !== thread.id
+                                      )
+                                    );
+                                  } else {
+                                    setSelectedThreadIds([
+                                      ...selectedThreadIds,
+                                      thread.id
+                                    ]);
+                                  }
+                                }
+                              }}
+                            >
                               <SidebarMenuButton
                                 isActive={isSelected}
-                                className="relative h-9 group/thread"
+                                className="relative h-9 group/thread min-w-0 pr-8"
                               >
-                                <span className="flex min-w-0 items-center gap-2">
+                                <span className="flex min-w-0 items-center gap-2 flex-grow">
                                   {thread.metadata?.is_shared ? (
                                     <Share2
                                       className="h-4 w-4 shrink-0 text-muted-foreground"
                                       aria-hidden="true"
                                     />
                                   ) : null}
-                                  <span className="truncate">
+                                  <span className="truncate flex-grow">
                                     {thread.name || (
                                       <Translator path="threadHistory.thread.untitled" />
                                     )}
                                   </span>
                                 </span>
-                                <div
-                                  className={cn(
-                                    'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
-                                  )}
-                                />
-                                <ThreadOptions
-                                  onDelete={() =>
-                                    setThreadIdToDelete(thread.id)
-                                  }
-                                  onRename={() => {
-                                    setThreadIdToRename(thread.id);
-                                    setThreadNewName(thread.name);
-                                  }}
-                                  onShare={
-                                    dataPersistence && threadSharingReady
-                                      ? () => handleShareThread(thread.id)
-                                      : undefined
-                                  }
-                                  className={cn(
-                                    'absolute z-20 bottom-0 top-0 right-0 bg-sidebar-accent hover:bg-sidebar-accent hover:text-primary flex opacity-0 group-hover/thread:opacity-100',
-                                    isSelected &&
-                                      'bg-sidebar-accent opacity-100'
-                                  )}
-                                />
+                                {!isSelectionMode && (
+                                  <>
+                                    <div
+                                      className={cn(
+                                        'absolute w-10 bottom-0 top-0 right-0 bg-gradient-to-l from-[hsl(var(--sidebar-background))] to-transparent'
+                                      )}
+                                    />
+                                    <ThreadOptions
+                                      onDelete={() =>
+                                        setThreadIdToDelete(thread.id)
+                                      }
+                                      onRename={() => {
+                                        setThreadIdToRename(thread.id);
+                                        setThreadNewName(thread.name);
+                                      }}
+                                      onShare={
+                                        dataPersistence && threadSharingReady
+                                          ? () => handleShareThread(thread.id)
+                                          : undefined
+                                      }
+                                      className={cn(
+                                        'absolute z-20 bottom-0 top-0 right-0 hover:bg-sidebar-accent hover:text-primary flex opacity-100 md:opacity-0 md:group-hover/thread:opacity-100',
+                                        isSelected &&
+                                          'bg-sidebar-accent opacity-100'
+                                      )}
+                                    />
+                                  </>
+                                )}
                               </SidebarMenuButton>
                             </Link>
                           </TooltipTrigger>

@@ -66,6 +66,7 @@ from chainlit.types import (
     ConnectMCPRequest,
     DeleteFeedbackRequest,
     DeleteThreadRequest,
+    DeleteThreadsRequest,
     DisconnectMCPRequest,
     ElementRequest,
     GetThreadsRequest,
@@ -1238,6 +1239,31 @@ async def delete_thread(
     await is_thread_author(current_user.identifier, thread_id)
 
     await data_layer.delete_thread(thread_id)
+    return JSONResponse(content={"success": True})
+
+
+@router.delete("/project/threads")
+async def delete_threads(
+    request: Request,
+    payload: DeleteThreadsRequest,
+    current_user: UserParam,
+):
+    """Delete multiple threads."""
+
+    data_layer = get_data_layer()
+
+    if not data_layer:
+        raise HTTPException(status_code=400, detail="Data persistence is not enabled")
+
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    thread_ids = payload.threadIds
+
+    for thread_id in thread_ids:
+        await is_thread_author(current_user.identifier, thread_id)
+        await data_layer.delete_thread(thread_id)
+
     return JSONResponse(content={"success": True})
 
 
