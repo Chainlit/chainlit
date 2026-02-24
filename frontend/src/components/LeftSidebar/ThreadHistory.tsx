@@ -30,6 +30,7 @@ export function ThreadHistory() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [shouldLoadMore, setShouldLoadMore] = useState(false);
+  const prevMessageCountRef = useRef(0);
 
   // Restore scroll position
   useEffect(() => {
@@ -59,6 +60,35 @@ export function ThreadHistory() {
 
     handleFirstInteraction();
   }, [firstInteraction]);
+
+  // Reorder thread to top when a new message is sent in the current thread
+  useEffect(() => {
+    const currentCount = messages.length;
+    const prevCount = prevMessageCountRef.current;
+    prevMessageCountRef.current = currentCount;
+
+    if (
+      threadId &&
+      currentCount > prevCount &&
+      prevCount > 0 &&
+      threadHistory?.threads
+    ) {
+      const lastMessage = messages[currentCount - 1];
+      if (lastMessage?.type === 'user_message') {
+        setThreadHistory((prev) => {
+          if (!prev?.threads) return prev;
+          const threadIndex = prev.threads.findIndex((t) => t.id === threadId);
+          if (threadIndex <= 0) return prev; // Already at top or not found
+          const updatedThreads = [...prev.threads];
+          updatedThreads[threadIndex] = {
+            ...updatedThreads[threadIndex],
+            createdAt: new Date().toISOString()
+          };
+          return { ...prev, threads: updatedThreads };
+        });
+      }
+    }
+  }, [messages.length, threadId]);
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
