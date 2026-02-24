@@ -591,6 +591,7 @@ class ChainlitDataLayer(BaseDataLayer):
         )
 
         # Merge incoming metadata with existing metadata, deleting incoming keys with None values
+        merged_metadata = None
         if metadata is not None:
             existing = await self.execute_query(
                 'SELECT "metadata" FROM "Thread" WHERE id = $1',
@@ -609,14 +610,16 @@ class ChainlitDataLayer(BaseDataLayer):
             to_delete = {k for k, v in metadata.items() if v is None}
             incoming = {k: v for k, v in metadata.items() if v is not None}
             base = {k: v for k, v in base.items() if k not in to_delete}
-            metadata = {**base, **incoming}
+            merged_metadata = {**base, **incoming}
 
         data = {
             "id": thread_id,
             "name": thread_name,
             "userId": user_id,
             "tags": tags,
-            "metadata": json.dumps(metadata or {}),
+            "metadata": json.dumps(merged_metadata)
+            if merged_metadata is not None
+            else None,
             "updatedAt": datetime.now(),
         }
 
