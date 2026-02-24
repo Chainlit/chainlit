@@ -326,20 +326,45 @@ async def edit_message(sid, payload: MessagePayload):
 async def message_favorite(sid, payload: MessagePayload):
     """Handle a message favorite toggle."""
     session = WebsocketSession.require(sid)
-    init_ws_context(session)
-    messages = chat_context.get()
-    if config.features.favorites:
-        for message in messages:
-            if message.id == payload["message"]["id"]:
-                if message.metadata is None:
-                    message.metadata = {}
+    context = init_ws_context(session)
+    data_layer = get_data_layer()
 
-                message.metadata["favorite"] = not message.metadata.get(
-                    "favorite", False
-                )
-                await message.update()
-                await fetch_favorites(sid)
+    if not config.features.favorites or not session.user:
+        return
+
+    payload_message = payload["message"]
+    payload_metadata = payload_message.get("metadata") or {}
+    favorite = bool(payload_metadata.get("favorite", False))
+
+    step_dict = None
+
+    if favorite:
+        for message in chat_context.get():
+            if message.id == payload_message["id"]:
+                message.metadata = message.metadata or {}
+                message.metadata["favorite"] = favorite
+                step_dict = message.to_dict()
                 break
+    elif data_layer:
+        favorites = await data_layer.get_favorite_steps(session.user.id)
+        for fav in favorites:
+            if fav["id"] == payload_message["id"]:
+                step_dict = fav
+                break
+
+    if step_dict is None:
+        logger.error("Could not find step to update favorite status.")
+        return
+
+    created_at = step_dict.get("createdAt")
+    if created_at and not created_at.endswith("Z"):
+        step_dict["createdAt"] = f"{created_at}Z"
+
+    if data_layer:
+        step_dict = await data_layer.set_step_favorite(step_dict, favorite)
+
+    await context.emitter.update_step(step_dict)
+    await fetch_favorites(sid)
 
 
 @sio.on("fetch_favorites")  # pyright: ignore [reportOptionalCall]

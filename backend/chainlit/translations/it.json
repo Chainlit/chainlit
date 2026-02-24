@@ -68,6 +68,7 @@
     "favorites": {
       "use": "Usa un messaggio preferito",
       "headline": "Messaggi preferiti",
+      "remove": "Rimuovi preferito",
       "empty": {
         "title": "Nessun prompt salvato ancora",
         "description": "Inizia inviando un prompt e aggiungilo ai preferiti o aggiungi un prompt dalle chat precedenti"
