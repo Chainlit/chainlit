@@ -1,25 +1,36 @@
 import { defineConfig } from 'cypress';
 import fkill from 'fkill';
 
-import { runChainlit } from './cypress/support/run';
+import { runChainlit, stopChainlit } from './cypress/support/run';
 
 export const CHAINLIT_APP_PORT = 8000;
 
+const signals = ['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGBREAK'] as const;
+type ExitSignal = (typeof signals)[number];
+
+const signalMap: Record<ExitSignal, number> = {
+  SIGTERM: 15,
+  SIGINT: 2,
+  SIGHUP: 1,
+  SIGBREAK: 21
+};
+
 async function killChainlit() {
-  await fkill(`:${CHAINLIT_APP_PORT}`, {
-    force: true,
-    silent: true
-  });
+  const stoppedTracked = await stopChainlit();
+
+  if (!stoppedTracked) {
+    try {
+      await fkill(`:${CHAINLIT_APP_PORT}`, { force: true, silent: true });
+    } catch {
+      // best-effort cleanup only
+    }
+  }
 }
 
-['SIGTERM', 'SIGINT', 'SIGHUP', 'SIGBREAK'].forEach((signal) => {
-  process.on(signal, () => {
-    (async () => {
-      await killChainlit(); // Ensure Chainlit is killed on exit
-
-      const signalMap = { SIGTERM: 15, SIGINT: 2, SIGHUP: 1, SIGBREAK: 21 };
-      process.exit(128 + (signalMap[signal] || 0));
-    })();
+signals.forEach((signal) => {
+  process.on(signal, async () => {
+    await killChainlit(); // Ensure Chainlit is killed on exit
+    process.exit(128 + signalMap[signal]);
   });
 });
 
@@ -36,7 +47,7 @@ export default defineConfig({
     experimentalInteractiveRunEvents: true,
     async setupNodeEvents(on, config) {
       await killChainlit(); // Fallback to ensure no previous instance is running
-      await runChainlit(); // Start Chainlit before running tests as Cypress require
+      await runChainlit(); // Start Chainlit before running tests as Cypress requires
 
       on('before:spec', async (spec) => {
         await killChainlit();
@@ -57,15 +68,10 @@ export default defineConfig({
           return null;
         },
         restartChainlit(spec: Cypress.Spec) {
-          return new Promise((resolve) => {
-            killChainlit().then(() => {
-              runChainlit(spec).then(() => {
-                setTimeout(() => {
-                  resolve(null);
-                }, 1000);
-              });
-            });
-          });
+          return killChainlit()
+            .then(() => runChainlit(spec))
+            .then(() => new Promise((r) => setTimeout(r, 1000)))
+            .then(() => null);
         }
       });
 
