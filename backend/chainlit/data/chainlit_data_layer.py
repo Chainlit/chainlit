@@ -697,8 +697,12 @@ class ChainlitDataLayer(BaseDataLayer):
             input=row.get("input", {}),
             output=row.get("output", {}),
             metadata=json.loads(row.get("metadata", "{}")),
-            createdAt=_datetime_to_utc_iso(row["createdAt"]) if row.get("createdAt") else None,
-            start=_datetime_to_utc_iso(row["startTime"]) if row.get("startTime") else None,
+            createdAt=_datetime_to_utc_iso(row["createdAt"])
+            if row.get("createdAt")
+            else None,
+            start=_datetime_to_utc_iso(row["startTime"])
+            if row.get("startTime")
+            else None,
             showInput=row.get("showInput"),
             isError=row.get("isError"),
             end=_datetime_to_utc_iso(row["endTime"]) if row.get("endTime") else None,
