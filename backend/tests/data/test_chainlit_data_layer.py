@@ -156,7 +156,9 @@ class _FailingStorageProvider:
 class TestDynamoThreadElementUrlFailure:
     @pytest.mark.asyncio
     async def test_get_thread_tolerates_storage_read_url_error(self):
-        bootstrap = DynamoDBDataLayer(table_name="test-table", client=_FakeDynamoClient([]))
+        bootstrap = DynamoDBDataLayer(
+            table_name="test-table", client=_FakeDynamoClient([])
+        )
 
         thread_item = bootstrap._serialize_item(
             {

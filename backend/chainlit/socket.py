@@ -216,9 +216,7 @@ async def connection_successful(sid):
                     if "message" in step["type"]:
                         chat_context.add(Message.from_dict(step))
                 except Exception as e:
-                    logger.warning(
-                        f"Failed to restore step {step.get('id')}: {e!s}"
-                    )
+                    logger.warning(f"Failed to restore step {step.get('id')}: {e!s}")
 
             try:
                 await context.emitter.resume_thread(thread)
