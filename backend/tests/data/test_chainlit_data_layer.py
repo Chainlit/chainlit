@@ -24,6 +24,7 @@ class TestParseIsoDatetime:
 
     def test_parse_without_z_raises_on_bad_format(self):
         """Test that invalid format still raises ValueError."""
+        # noqa: PT011 - _parse_iso_datetime forwards ValueError from datetime.strptime.
         with pytest.raises(ValueError):
             _parse_iso_datetime("2025-09-04 02:00:42")
 
