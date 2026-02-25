@@ -10,6 +10,8 @@ import {
 
 import { FavoriteButton } from '@/components/chat/MessageComposer/FavoriteButton';
 
+const toggleMessageFavoriteMock = vi.fn();
+
 vi.mock('@/components/i18n/Translator', () => ({
   useTranslation: () => ({
     t: (key: string) => {
@@ -17,7 +19,9 @@ vi.mock('@/components/i18n/Translator', () => ({
         'chat.favorites.use': 'Use favorite',
         'chat.favorites.headline': 'Favorites List',
         'chat.favorites.empty.title': 'No Saved Prompts Yet',
-        'chat.favorites.empty.description': 'Start by sending a prompt and star it or star a prompt from previous chats'
+        'chat.favorites.empty.description':
+          'Start by sending a prompt and star it or star a prompt from previous chats',
+        'chat.favorites.remove': 'Remove favorite'
       };
       return trans[key] || key;
     }
@@ -28,6 +32,9 @@ vi.mock('@chainlit/react-client', async () => {
   const { atom } = await import('recoil');
   return {
     useConfig: vi.fn(),
+    useChatInteract: () => ({
+      toggleMessageFavorite: toggleMessageFavoriteMock
+    }),
     favoriteMessagesState: atom({
       key: 'favoriteMessagesState',
       default: []
@@ -108,7 +115,11 @@ describe('FavoriteButton', () => {
 
     // Verify empty state message appears
     expect(screen.getByText('No Saved Prompts Yet')).toBeInTheDocument();
-    expect(screen.getByText('Start by sending a prompt and star it or star a prompt from previous chats')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Start by sending a prompt and star it or star a prompt from previous chats'
+      )
+    ).toBeInTheDocument();
   });
 
   it('shows empty state message when popover is opened with no favorites', () => {
@@ -123,7 +134,9 @@ describe('FavoriteButton', () => {
 
     // Empty state should be visible
     const emptyTitle = screen.getByText('No Saved Prompts Yet');
-    const emptyDescription = screen.getByText('Start by sending a prompt and star it or star a prompt from previous chats');
+    const emptyDescription = screen.getByText(
+      'Start by sending a prompt and star it or star a prompt from previous chats'
+    );
 
     expect(emptyTitle).toBeInTheDocument();
     expect(emptyDescription).toBeInTheDocument();
@@ -177,6 +190,55 @@ describe('FavoriteButton', () => {
 
     expect(mockOnSelect).toHaveBeenCalledTimes(1);
     expect(mockOnSelect).toHaveBeenCalledWith('How do I center a div?');
+  });
+
+  it('renders favorites with duplicate text independently', () => {
+    (useConfig as any).mockReturnValue({
+      config: { features: { favorites: true } }
+    });
+
+    const duplicates: IStep[] = [
+      {
+        id: 'msg_dup_1',
+        output: 'Same prompt',
+        createdAt: new Date('2023-10-02').getTime(),
+        type: 'assistant_message',
+        name: 'Assistant'
+      },
+      {
+        id: 'msg_dup_2',
+        output: 'Same prompt',
+        createdAt: new Date('2023-10-03').getTime(),
+        type: 'assistant_message',
+        name: 'Assistant'
+      }
+    ];
+
+    renderComponent(duplicates);
+
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
+    const duplicateEntries = screen.getAllByText('Same prompt');
+    expect(duplicateEntries).toHaveLength(2);
+  });
+
+  it('removes a favorite without selecting the item', () => {
+    (useConfig as any).mockReturnValue({
+      config: { features: { favorites: true } }
+    });
+
+    renderComponent();
+
+    const button = screen.getByRole('button');
+    fireEvent.click(button);
+
+    const removeButtons = screen.getAllByLabelText('Remove favorite');
+    fireEvent.click(removeButtons[0]);
+
+    expect(toggleMessageFavoriteMock).toHaveBeenCalledTimes(1);
+    expect(toggleMessageFavoriteMock).toHaveBeenCalledWith(mockFavorites[0]);
+    expect(mockOnSelect).not.toHaveBeenCalled();
   });
 
   it('respects the disabled prop', () => {

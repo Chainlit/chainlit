@@ -129,7 +129,11 @@ export default function ChatProfiles({ navigate }: Props) {
                   className="w-80 overflow-visible"
                   sideOffset={10}
                 >
-                  <Markdown allowHtml={allowHtml} latex={latex}>
+                  <Markdown
+                    allowHtml={allowHtml}
+                    latex={latex}
+                    renderMarkdown={true}
+                  >
                     {profile.markdown_description}
                   </Markdown>
                 </HoverCardContent>

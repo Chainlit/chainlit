@@ -4,11 +4,15 @@ import {
   PopoverContent,
   PopoverTrigger
 } from '@radix-ui/react-popover';
-import { Star } from 'lucide-react';
+import { Star, Trash } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 
-import { favoriteMessagesState, useConfig } from '@chainlit/react-client';
+import {
+  favoriteMessagesState,
+  useChatInteract,
+  useConfig
+} from '@chainlit/react-client';
 
 import { useTranslation } from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
@@ -35,6 +39,7 @@ interface Props {
 
 export const FavoriteButton = ({ disabled = false, onSelect }: Props) => {
   const favorites = useRecoilValue(favoriteMessagesState);
+  const { toggleMessageFavorite } = useChatInteract();
   const { config } = useConfig();
   const { t } = useTranslation();
 
@@ -135,18 +140,38 @@ export const FavoriteButton = ({ disabled = false, onSelect }: Props) => {
                   {favorites.map((step) => (
                     <CommandItem
                       key={step.id}
+                      value={step.id}
                       onSelect={() => {
                         onSelect(step.output);
                         setOpen(false);
                         cancelTooltipOpen();
                       }}
-                      className="cursor-pointer"
+                      className="cursor-pointer group"
                     >
-                      <div className="flex flex-col gap-1 w-full overflow-hidden">
-                        <span className="truncate text-sm">{step.output}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(step.createdAt).toLocaleDateString()}
-                        </span>
+                      <div className="flex items-center justify-between gap-2 w-full overflow-hidden">
+                        <div className="flex flex-col gap-1 overflow-hidden">
+                          <span className="truncate text-sm">
+                            {step.output}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(step.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                          aria-label={t('chat.favorites.remove')}
+                          disabled={disabled}
+                          onPointerDown={(event) => event.stopPropagation()}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            toggleMessageFavorite(step);
+                          }}
+                        >
+                          <Trash className="h-3.5 w-3.5" />
+                        </Button>
                       </div>
                     </CommandItem>
                   ))}

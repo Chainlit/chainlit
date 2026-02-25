@@ -124,6 +124,7 @@ const MessagesContainer = ({ navigate }: Props) => {
       askUser,
       allowHtml: config?.features?.unsafe_allow_html,
       latex: config?.features?.latex,
+      renderUserMarkdown: config?.features?.user_message_markdown,
       editable: !!config?.features.edit_message,
       loading,
       showFeedbackButtons: enableFeedback,
@@ -141,6 +142,7 @@ const MessagesContainer = ({ navigate }: Props) => {
     config?.ui?.name,
     config?.ui?.cot,
     config?.features?.unsafe_allow_html,
+    config?.features?.user_message_markdown,
     onElementRefClick,
     onError,
     onFeedbackUpdated
