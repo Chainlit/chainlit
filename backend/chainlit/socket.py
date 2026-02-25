@@ -201,7 +201,7 @@ async def connection_successful(sid):
             await context.emitter.send_resume_thread_error(
                 "Failed to load conversation history."
             )
-            thread = None
+            return
 
         if thread:
             context.session.has_first_interaction = True

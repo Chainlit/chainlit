@@ -1,8 +1,10 @@
 import json
+from unittest.mock import AsyncMock
 
 import pytest
 
 from chainlit.data.chainlit_data_layer import ChainlitDataLayer
+from chainlit.data.dynamodb import DynamoDBDataLayer
 
 
 class TestConvertElementRowToDict:
@@ -101,8 +103,6 @@ class TestGetElementNoneHandling:
 
     @pytest.mark.asyncio
     async def test_get_element_returns_none_url_not_string(self):
-        from unittest.mock import AsyncMock
-
         layer = self._make_layer()
         layer.execute_query = AsyncMock(
             return_value=[
@@ -134,9 +134,59 @@ class TestGetElementNoneHandling:
 
     @pytest.mark.asyncio
     async def test_get_element_not_found(self):
-        from unittest.mock import AsyncMock
-
         layer = self._make_layer()
         layer.execute_query = AsyncMock(return_value=[])
         result = await layer.get_element("thread-1", "nonexistent")
         assert result is None
+
+
+class _FakeDynamoClient:
+    def __init__(self, items):
+        self.items = items
+
+    def query(self, **_kwargs):
+        return {"Items": self.items}
+
+
+class _FailingStorageProvider:
+    async def get_read_url(self, object_key: str):
+        raise RuntimeError(f"failed for {object_key}")
+
+
+class TestDynamoThreadElementUrlFailure:
+    @pytest.mark.asyncio
+    async def test_get_thread_tolerates_storage_read_url_error(self):
+        bootstrap = DynamoDBDataLayer(table_name="test-table", client=_FakeDynamoClient([]))
+
+        thread_item = bootstrap._serialize_item(
+            {
+                "PK": "THREAD#thread-1",
+                "SK": "THREAD",
+                "id": "thread-1",
+                "createdAt": "2026-01-01T00:00:00Z",
+                "name": "name",
+            }
+        )
+        element_item = bootstrap._serialize_item(
+            {
+                "PK": "THREAD#thread-1",
+                "SK": "ELEMENT#elem-1",
+                "id": "elem-1",
+                "objectKey": "threads/thread-1/files/elem-1",
+                "type": "file",
+                "name": "file.txt",
+            }
+        )
+
+        layer = DynamoDBDataLayer(
+            table_name="test-table",
+            client=_FakeDynamoClient([thread_item, element_item]),
+            storage_provider=_FailingStorageProvider(),
+        )
+
+        thread = await layer.get_thread("thread-1")
+
+        assert thread is not None
+        assert thread["id"] == "thread-1"
+        assert len(thread["elements"]) == 1
+        assert thread["elements"][0]["id"] == "elem-1"
