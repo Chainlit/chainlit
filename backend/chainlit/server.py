@@ -1417,13 +1417,13 @@ async def connect_mcp(
             # Initialize the session
             await mcp_session.initialize()
 
-            # Store the session
-            session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
-            exit_stack_stored = True
-
             # Call the callback
             if config.code.on_mcp_connect:
                 await config.code.on_mcp_connect(mcp_connection, mcp_session)
+
+            # Store the session
+            session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
+            exit_stack_stored = True
 
         except Exception as e:
             raise HTTPException(
