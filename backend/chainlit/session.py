@@ -12,6 +12,52 @@ import aiofiles
 from chainlit.logger import logger
 from chainlit.types import AskFileSpec, FileReference
 
+
+async def safe_mcp_exit_stack_close(exit_stack: AsyncExitStack) -> None:
+    """Close an MCP exit stack, suppressing cross-task cancel scope errors.
+
+    AnyIO raises RuntimeError when an AsyncExitStack that was entered in one
+    asyncio task is closed from a different task (e.g., during HTTP request
+    handling for disconnect, session deletion, or reconnection).
+
+    The MCP SDK's streamable-http transport wraps this in a
+    BaseExceptionGroup via its internal TaskGroup, so both forms are caught.
+
+    This helper catches the error so MCP cleanup never propagates a cross-task
+    cancel scope exception, which would otherwise leave orphaned resources and
+    can cause 100% CPU spin loops.
+
+    See: https://github.com/Chainlit/chainlit/issues/2182
+    """
+    try:
+        await exit_stack.aclose()
+    except (RuntimeError, BaseExceptionGroup) as exc:
+        if _is_cancel_scope_error(exc):
+            logger.debug(
+                "Suppressed cross-task cancel scope error during MCP cleanup: %s",
+                exc,
+            )
+        else:
+            logger.warning(
+                "Error closing MCP exit stack: %s", exc, exc_info=True
+            )
+    except Exception:
+        logger.debug("Error closing MCP exit stack", exc_info=True)
+
+
+def _is_cancel_scope_error(exc: BaseException) -> bool:
+    """Check whether an exception is an anyio cancel-scope cross-task error.
+
+    Handles both a bare RuntimeError and a BaseExceptionGroup wrapping one
+    (as produced by anyio's TaskGroup when the streamable-http transport
+    tears down).
+    """
+    if isinstance(exc, RuntimeError):
+        return "cancel scope" in str(exc)
+    if isinstance(exc, BaseExceptionGroup):
+        return any(_is_cancel_scope_error(e) for e in exc.exceptions)
+    return False
+
 if TYPE_CHECKING:
     from mcp import ClientSession
 
@@ -322,10 +368,7 @@ class WebsocketSession(BaseSession):
         ws_sessions_id.pop(self.id, None)
 
         for _, exit_stack in self.mcp_sessions.values():
-            try:
-                await exit_stack.aclose()
-            except Exception:
-                pass
+            await safe_mcp_exit_stack_close(exit_stack)
 
     async def flush_method_queue(self):
         for method_name, queue in self.thread_queues.items():

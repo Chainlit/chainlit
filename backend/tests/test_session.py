@@ -11,7 +11,9 @@ from chainlit.session import (
     HTTPSession,
     JSONEncoderIgnoreNonSerializable,
     WebsocketSession,
+    _is_cancel_scope_error,
     clean_metadata,
+    safe_mcp_exit_stack_close,
 )
 
 
@@ -620,3 +622,106 @@ class TestSessionEdgeCases:
                 await session.delete()
 
                 mock_exit_stack.aclose.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_websocket_session_delete_with_cancel_scope_error(self):
+        """Test that session delete handles cancel scope RuntimeError gracefully."""
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch("chainlit.config.FILES_DIRECTORY", Path(tmpdir)):
+                session = WebsocketSession(
+                    id="ws_id",
+                    socket_id="socket_123",
+                    emit=Mock(),
+                    emit_call=Mock(),
+                    user_env={},
+                    client_type="webapp",
+                )
+
+                # Mock MCP session with exit stack that raises cancel scope error
+                mock_exit_stack = AsyncMock()
+                mock_exit_stack.aclose.side_effect = RuntimeError(
+                    "Attempted to exit cancel scope in a different task"
+                )
+                session.mcp_sessions["mcp1"] = (Mock(), mock_exit_stack)
+
+                # Should not raise
+                await session.delete()
+
+                mock_exit_stack.aclose.assert_called_once()
+
+
+class TestSafeMcpExitStackClose:
+    """Test suite for safe_mcp_exit_stack_close helper."""
+
+    @pytest.mark.asyncio
+    async def test_closes_exit_stack_normally(self):
+        """Test normal exit stack close succeeds."""
+        mock_exit_stack = AsyncMock()
+        await safe_mcp_exit_stack_close(mock_exit_stack)
+        mock_exit_stack.aclose.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_suppresses_cancel_scope_runtime_error(self):
+        """Test that cancel scope RuntimeError is suppressed."""
+        mock_exit_stack = AsyncMock()
+        mock_exit_stack.aclose.side_effect = RuntimeError(
+            "Attempted to exit cancel scope in a different task than it was entered in"
+        )
+        # Should not raise
+        await safe_mcp_exit_stack_close(mock_exit_stack)
+        mock_exit_stack.aclose.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_logs_warning_for_non_cancel_scope_runtime_error(self):
+        """Test that non-cancel-scope RuntimeErrors are logged as warnings."""
+        mock_exit_stack = AsyncMock()
+        mock_exit_stack.aclose.side_effect = RuntimeError("something else")
+        # Should not raise
+        await safe_mcp_exit_stack_close(mock_exit_stack)
+        mock_exit_stack.aclose.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_suppresses_other_exceptions(self):
+        """Test that other exceptions during close are suppressed."""
+        mock_exit_stack = AsyncMock()
+        mock_exit_stack.aclose.side_effect = OSError("connection reset")
+        # Should not raise
+        await safe_mcp_exit_stack_close(mock_exit_stack)
+        mock_exit_stack.aclose.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_suppresses_cancel_scope_wrapped_in_exception_group(self):
+        """Test that a BaseExceptionGroup wrapping a cancel scope error is suppressed."""
+        mock_exit_stack = AsyncMock()
+        inner = RuntimeError(
+            "Attempted to exit cancel scope in a different task"
+        )
+        mock_exit_stack.aclose.side_effect = BaseExceptionGroup("errors", [inner])
+        # Should not raise
+        await safe_mcp_exit_stack_close(mock_exit_stack)
+        mock_exit_stack.aclose.assert_called_once()
+
+
+class TestIsCancelScopeError:
+    """Test suite for _is_cancel_scope_error helper."""
+
+    def test_matches_cancel_scope_runtime_error(self):
+        assert _is_cancel_scope_error(
+            RuntimeError("Attempted to exit cancel scope in a different task")
+        )
+
+    def test_rejects_unrelated_runtime_error(self):
+        assert not _is_cancel_scope_error(RuntimeError("something unrelated"))
+
+    def test_rejects_non_runtime_error(self):
+        assert not _is_cancel_scope_error(ValueError("cancel scope in message"))
+
+    def test_matches_wrapped_in_exception_group(self):
+        inner = RuntimeError("Attempted to exit cancel scope in a different task")
+        assert _is_cancel_scope_error(BaseExceptionGroup("errors", [inner]))
+
+    def test_rejects_exception_group_without_cancel_scope(self):
+        assert not _is_cancel_scope_error(
+            BaseExceptionGroup("errors", [RuntimeError("unrelated")])
+        )
