@@ -41,9 +41,7 @@ async def safe_mcp_exit_stack_close(exit_stack: AsyncExitStack) -> None:
                 exc,
             )
         else:
-            logger.warning(
-                "Error closing MCP exit stack: %s", exc, exc_info=True
-            )
+            logger.warning("Error closing MCP exit stack: %s", exc, exc_info=True)
     except Exception as exc:
         if _is_cancel_scope_error(exc):
             logger.debug(
@@ -66,6 +64,7 @@ def _is_cancel_scope_error(exc: BaseException) -> bool:
     if _BASE_EXCEPTION_GROUP and isinstance(exc, _BASE_EXCEPTION_GROUP):
         return any(_is_cancel_scope_error(e) for e in exc.exceptions)
     return False
+
 
 if TYPE_CHECKING:
     from mcp import ClientSession

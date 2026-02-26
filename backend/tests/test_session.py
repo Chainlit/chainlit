@@ -702,9 +702,7 @@ class TestSafeMcpExitStackClose:
     async def test_suppresses_cancel_scope_wrapped_in_exception_group(self):
         """Test that a BaseExceptionGroup wrapping a cancel scope error is suppressed."""
         mock_exit_stack = AsyncMock()
-        inner = RuntimeError(
-            "Attempted to exit cancel scope in a different task"
-        )
+        inner = RuntimeError("Attempted to exit cancel scope in a different task")
         mock_exit_stack.aclose.side_effect = make_exception_group("errors", [inner])
         # Should not raise
         await safe_mcp_exit_stack_close(mock_exit_stack)
