@@ -1,4 +1,5 @@
 import asyncio
+import builtins
 import json
 import mimetypes
 import re
@@ -11,6 +12,8 @@ import aiofiles
 
 from chainlit.logger import logger
 from chainlit.types import AskFileSpec, FileReference
+
+_BASE_EXCEPTION_GROUP = getattr(builtins, "BaseExceptionGroup", None)
 
 
 async def safe_mcp_exit_stack_close(exit_stack: AsyncExitStack) -> None:
@@ -31,7 +34,7 @@ async def safe_mcp_exit_stack_close(exit_stack: AsyncExitStack) -> None:
     """
     try:
         await exit_stack.aclose()
-    except (RuntimeError, BaseExceptionGroup) as exc:
+    except RuntimeError as exc:
         if _is_cancel_scope_error(exc):
             logger.debug(
                 "Suppressed cross-task cancel scope error during MCP cleanup: %s",
@@ -41,8 +44,14 @@ async def safe_mcp_exit_stack_close(exit_stack: AsyncExitStack) -> None:
             logger.warning(
                 "Error closing MCP exit stack: %s", exc, exc_info=True
             )
-    except Exception:
-        logger.debug("Error closing MCP exit stack", exc_info=True)
+    except Exception as exc:
+        if _is_cancel_scope_error(exc):
+            logger.debug(
+                "Suppressed cross-task cancel scope error during MCP cleanup: %s",
+                exc,
+            )
+        else:
+            logger.debug("Error closing MCP exit stack", exc_info=True)
 
 
 def _is_cancel_scope_error(exc: BaseException) -> bool:
@@ -54,7 +63,7 @@ def _is_cancel_scope_error(exc: BaseException) -> bool:
     """
     if isinstance(exc, RuntimeError):
         return "cancel scope" in str(exc)
-    if isinstance(exc, BaseExceptionGroup):
+    if _BASE_EXCEPTION_GROUP and isinstance(exc, _BASE_EXCEPTION_GROUP):
         return any(_is_cancel_scope_error(e) for e in exc.exceptions)
     return False
 

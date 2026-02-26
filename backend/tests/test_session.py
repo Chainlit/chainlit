@@ -1,3 +1,4 @@
+import builtins
 import json
 import tempfile
 import uuid
@@ -15,6 +16,13 @@ from chainlit.session import (
     clean_metadata,
     safe_mcp_exit_stack_close,
 )
+
+
+def make_exception_group(message: str, exceptions: list[BaseException]):
+    base_exception_group = getattr(builtins, "BaseExceptionGroup", None)
+    if not base_exception_group:
+        pytest.skip("BaseExceptionGroup is unavailable on this Python version")
+    return base_exception_group(message, exceptions)
 
 
 class TestJSONEncoderIgnoreNonSerializable:
@@ -697,7 +705,7 @@ class TestSafeMcpExitStackClose:
         inner = RuntimeError(
             "Attempted to exit cancel scope in a different task"
         )
-        mock_exit_stack.aclose.side_effect = BaseExceptionGroup("errors", [inner])
+        mock_exit_stack.aclose.side_effect = make_exception_group("errors", [inner])
         # Should not raise
         await safe_mcp_exit_stack_close(mock_exit_stack)
         mock_exit_stack.aclose.assert_called_once()
@@ -719,9 +727,9 @@ class TestIsCancelScopeError:
 
     def test_matches_wrapped_in_exception_group(self):
         inner = RuntimeError("Attempted to exit cancel scope in a different task")
-        assert _is_cancel_scope_error(BaseExceptionGroup("errors", [inner]))
+        assert _is_cancel_scope_error(make_exception_group("errors", [inner]))
 
     def test_rejects_exception_group_without_cancel_scope(self):
         assert not _is_cancel_scope_error(
-            BaseExceptionGroup("errors", [RuntimeError("unrelated")])
+            make_exception_group("errors", [RuntimeError("unrelated")])
         )
