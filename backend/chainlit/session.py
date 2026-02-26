@@ -57,12 +57,15 @@ def _is_cancel_scope_error(exc: BaseException) -> bool:
 
     Handles both a bare RuntimeError and a BaseExceptionGroup wrapping one
     (as produced by anyio's TaskGroup when the streamable-http transport
-    tears down).
+    tears down).  Only treats a group as a cancel-scope error when *all*
+    contained exceptions match, so mixed groups surface real failures.
     """
     if isinstance(exc, RuntimeError):
         return "cancel scope" in str(exc)
     if _BASE_EXCEPTION_GROUP and isinstance(exc, _BASE_EXCEPTION_GROUP):
-        return any(_is_cancel_scope_error(e) for e in exc.exceptions)
+        return bool(exc.exceptions) and all(
+            _is_cancel_scope_error(e) for e in exc.exceptions
+        )
     return False
 
 

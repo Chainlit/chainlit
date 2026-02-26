@@ -731,3 +731,10 @@ class TestIsCancelScopeError:
         assert not _is_cancel_scope_error(
             make_exception_group("errors", [RuntimeError("unrelated")])
         )
+
+    def test_rejects_mixed_exception_group(self):
+        cancel = RuntimeError("Attempted to exit cancel scope in a different task")
+        other = RuntimeError("unrelated failure")
+        assert not _is_cancel_scope_error(
+            make_exception_group("errors", [cancel, other])
+        )
