@@ -129,6 +129,7 @@ const Attachments = () => {
             key={attachment.id}
             name={attachment.name}
             mime={attachment.type}
+            file={attachment.file}
           >
             {progress}
             {remove}
