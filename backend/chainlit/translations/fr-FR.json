@@ -6,6 +6,7 @@
             "continue": "Continuer",
             "goBack": "Retour",
             "reset": "Réinitialiser",
+            "select": "Sélectionner",
             "submit": "Envoyer"
         },
         "status": {
@@ -177,6 +178,7 @@
                 "delete": {
                     "title": "Confirmer la suppression",
                     "description": "Cela supprimera le fil de discussion ainsi que ses messages et éléments. Cette action ne peut pas être annulée",
+                    "description_plural": "Cela supprimera {{count}} fils de discussion ainsi que leurs messages et éléments. Cette action ne peut pas être annulée",
                     "success": "Discussion supprimée",
                     "inProgress": "Suppression de la discussion"
                 },

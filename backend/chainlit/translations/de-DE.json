@@ -6,6 +6,7 @@
       "continue": "Fortfahren",
       "goBack": "Zurück",
       "reset": "Zurücksetzen",
+      "select": "Auswählen",
       "submit": "Absenden"
     },
     "status": {
@@ -177,6 +178,7 @@
         "delete": {
           "title": "Löschen bestätigen",
           "description": "Dies wird den Thread sowie seine Nachrichten und Elemente löschen. Dies kann nicht rückgängig gemacht werden",
+          "description_plural": "Dies wird {{count}} Threads sowie deren Nachrichten und Elemente löschen. Dies kann nicht rückgängig gemacht werden",
           "success": "Chat gelöscht",
           "inProgress": "Chat wird gelöscht"
         },
