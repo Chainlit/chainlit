@@ -170,6 +170,13 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  const editChatSettings = useCallback(
+    (values: object) => {
+      session?.socket.emit('chat_settings_edit', values);
+    },
+    [session?.socket]
+  );
+
   const stopTask = useCallback(() => {
     setMessages((oldMessages) =>
       oldMessages.map((m) => {
@@ -203,6 +210,7 @@ const useChatInteract = () => {
     stopTask,
     setIdToResume,
     updateChatSettings,
+    editChatSettings,
     toggleMessageFavorite
   };
 };

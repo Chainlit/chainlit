@@ -401,6 +401,7 @@ class CodeSettings(BaseModel):
     on_audio_end: Optional[Callable[[], Any]] = None
     on_mcp_connect: Optional[Callable] = None
     on_mcp_disconnect: Optional[Callable] = None
+    on_settings_edit: Optional[Callable[[Dict[str, Any]], Any]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[
         Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]]

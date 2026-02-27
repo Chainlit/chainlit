@@ -469,3 +469,12 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
+
+
+@sio.on("chat_settings_edit")
+async def edit_settings(sid, settings: Dict[str, Any]):
+    """Handle change settings edit from the UI (on the fly)."""
+    init_ws_context(sid)
+
+    if config.code.on_settings_edit:
+        await config.code.on_settings_edit(settings)
