@@ -32,11 +32,15 @@ const Widget = ({ config, error }: Props) => {
 
   useEffect(() => {
     window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
+    window.openChainlitCopilot = () => setIsOpen(true);
+    window.closeChainlitCopilot = () => setIsOpen(false);
     window.getChainlitCopilotThreadId = getChainlitCopilotThreadId;
     window.clearChainlitCopilotThreadId = clearChainlitCopilotThreadId;
 
     return () => {
       window.toggleChainlitCopilot = () => console.error('Widget not mounted.');
+      window.openChainlitCopilot = () => console.error('Widget not mounted.');
+      window.closeChainlitCopilot = () => console.error('Widget not mounted.');
       window.getChainlitCopilotThreadId = () => null;
 
       window.clearChainlitCopilotThreadId = () =>

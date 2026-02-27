@@ -22,6 +22,8 @@ declare global {
   interface Window {
     cl_shadowRootElement: HTMLDivElement;
     toggleChainlitCopilot: () => void;
+    openChainlitCopilot: () => void;
+    closeChainlitCopilot: () => void;
     theme?: {
       light: Record<string, string>;
       dark: Record<string, string>;
