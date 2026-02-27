@@ -1307,7 +1307,7 @@ async def connect_mcp(
         StdioMcpConnection,
         validate_mcp_command,
     )
-    from chainlit.session import WebsocketSession
+    from chainlit.session import WebsocketSession, safe_mcp_exit_stack_close
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
@@ -1327,14 +1327,20 @@ async def connect_mcp(
         if payload.name in session.mcp_sessions:
             old_client_session, old_exit_stack = session.mcp_sessions[payload.name]
             if on_mcp_disconnect := config.code.on_mcp_disconnect:
-                await on_mcp_disconnect(payload.name, old_client_session)
-            try:
-                await old_exit_stack.aclose()
-            except Exception:
-                pass
+                try:
+                    await on_mcp_disconnect(payload.name, old_client_session)
+                except Exception:
+                    logger.debug(
+                        "Error in on_mcp_disconnect callback for %s",
+                        payload.name,
+                        exc_info=True,
+                    )
+            await safe_mcp_exit_stack_close(old_exit_stack)
+            del session.mcp_sessions[payload.name]
 
+        exit_stack = AsyncExitStack()
+        exit_stack_stored = False
         try:
-            exit_stack = AsyncExitStack()
             mcp_connection: McpConnection
 
             if payload.clientType == "sse":
@@ -1411,18 +1417,22 @@ async def connect_mcp(
             # Initialize the session
             await mcp_session.initialize()
 
-            # Store the session
-            session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
-
             # Call the callback
             if config.code.on_mcp_connect:
                 await config.code.on_mcp_connect(mcp_connection, mcp_session)
+
+            # Store the session
+            session.mcp_sessions[mcp_connection.name] = (mcp_session, exit_stack)
+            exit_stack_stored = True
 
         except Exception as e:
             raise HTTPException(
                 status_code=400,
                 detail=f"Could not connect to the MCP: {e!s}",
             )
+        finally:
+            if not exit_stack_stored:
+                await safe_mcp_exit_stack_close(exit_stack)
     else:
         raise HTTPException(
             status_code=400,
@@ -1459,7 +1469,7 @@ async def disconnect_mcp(
     current_user: UserParam,
 ):
     from chainlit.context import init_ws_context
-    from chainlit.session import WebsocketSession
+    from chainlit.session import WebsocketSession, safe_mcp_exit_stack_close
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
@@ -1480,10 +1490,7 @@ async def disconnect_mcp(
             if callback:
                 await callback(payload.name, client_session)
 
-            try:
-                await exit_stack.aclose()
-            except Exception:
-                pass
+            await safe_mcp_exit_stack_close(exit_stack)
             del session.mcp_sessions[payload.name]
 
         except Exception as e:
