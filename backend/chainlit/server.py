@@ -278,12 +278,38 @@ async def serve_public_file(
         raise HTTPException(status_code=404, detail="File not found")
 
 
+def get_precompressed_response(
+    file_path: Path, accept_encoding: str
+) -> Optional[FileResponse]:
+    content_type = mimetypes.guess_type(str(file_path))[0] or "application/octet-stream"
+
+    if "br" in accept_encoding:
+        br_path = file_path.with_suffix(file_path.suffix + ".br")
+        if br_path.is_file():
+            return FileResponse(
+                br_path,
+                media_type=content_type,
+                headers={"Content-Encoding": "br", "Vary": "Accept-Encoding"},
+            )
+
+    if "gzip" in accept_encoding:
+        gz_path = file_path.with_suffix(file_path.suffix + ".gz")
+        if gz_path.is_file():
+            return FileResponse(
+                gz_path,
+                media_type=content_type,
+                headers={"Content-Encoding": "gzip", "Vary": "Accept-Encoding"},
+            )
+
+    return None
+
+
 @router.get("/assets/{filename:path}")
 async def serve_asset_file(
+    request: Request,
     filename: str,
 ):
     """Serve a file from assets dir."""
-
     base_path = Path(os.path.join(build_dir, "assets"))
     file_path = (base_path / filename).resolve()
 
@@ -291,6 +317,10 @@ async def serve_asset_file(
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     if file_path.is_file():
+        accept_encoding = request.headers.get("accept-encoding", "")
+        precompressed = get_precompressed_response(file_path, accept_encoding)
+        if precompressed:
+            return precompressed
         return FileResponse(file_path)
     else:
         raise HTTPException(status_code=404, detail="File not found")
@@ -298,10 +328,10 @@ async def serve_asset_file(
 
 @router.get("/copilot/{filename:path}")
 async def serve_copilot_file(
+    request: Request,
     filename: str,
 ):
     """Serve a file from assets dir."""
-
     base_path = Path(copilot_build_dir)
     file_path = (base_path / filename).resolve()
 
@@ -309,6 +339,10 @@ async def serve_copilot_file(
         raise HTTPException(status_code=400, detail="Invalid filename")
 
     if file_path.is_file():
+        accept_encoding = request.headers.get("accept-encoding", "")
+        precompressed = get_precompressed_response(file_path, accept_encoding)
+        if precompressed:
+            return precompressed
         return FileResponse(file_path)
     else:
         raise HTTPException(status_code=404, detail="File not found")
