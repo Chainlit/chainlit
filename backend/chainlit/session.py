@@ -90,9 +90,9 @@ class BaseSession:
 
     @property
     def files_dir(self):
-        from chainlit.config import FILES_DIRECTORY
+        from chainlit.config import get_files_directory
 
-        return FILES_DIRECTORY / self.id
+        return get_files_directory() / self.id
 
     async def persist_file(
         self,
