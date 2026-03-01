@@ -96,6 +96,8 @@ class Element:
     language: Optional[str] = None
     # Mime type, inferred based on content if not provided
     mime: Optional[str] = None
+    # Custom download filename. If set, this name is used when the file is downloaded.
+    download_name: Optional[str] = None
 
     def __post_init__(self) -> None:
         self.persisted = False
@@ -218,6 +220,7 @@ class Element:
                 path=self.path,
                 content=self.content,
                 mime=self.mime or "",
+                download_name=self.download_name,
             )
             self.chainlit_key = file_dict["id"]
 
