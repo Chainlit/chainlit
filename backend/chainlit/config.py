@@ -226,6 +226,9 @@ logo_file_url = ""
 # Load assistant avatar image directly from URL.
 default_avatar_file_url = ""
 
+# Avatar size in pixels (default: 20).
+# avatar_size = 20
+
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
 # Be careful: If this is a relative path, it should not start with a slash.
@@ -372,6 +375,7 @@ class UISettings(BaseModel):
     custom_meta_image_url: Optional[str] = None
     logo_file_url: Optional[str] = None
     default_avatar_file_url: Optional[str] = None
+    avatar_size: Optional[int] = None
     custom_build: Optional[str] = None
     header_links: Optional[List[HeaderLink]] = None
 
