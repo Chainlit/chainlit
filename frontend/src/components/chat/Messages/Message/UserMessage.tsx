@@ -110,6 +110,12 @@ const UserMessage = memo(function UserMessage({
                 autoFocus
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleEdit();
+                  }
+                }}
                 className="mt-1 bg-transparent placeholder:text-base placeholder:font-medium text-base"
                 maxHeight={250}
               />
