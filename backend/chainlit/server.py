@@ -410,10 +410,10 @@ def get_html_template(root_path):
         js += f"""<script src="{config.ui.custom_js}" {config.ui.custom_js_attributes}></script>"""
 
     font = None
-    if custom_theme and custom_theme.get("custom_fonts"):
+    if custom_theme and "custom_fonts" in custom_theme:
         font = "\n".join(
-            f"""<link rel="stylesheet" href="{font}">"""
-            for font in custom_theme.get("custom_fonts")
+            f"""<link rel="stylesheet" href="{f}">"""
+            for f in custom_theme["custom_fonts"]
         )
 
     index_html_file_path = os.path.join(build_dir, "index.html")
@@ -425,7 +425,7 @@ def get_html_template(root_path):
             content = content.replace(JS_PLACEHOLDER, js)
         if css:
             content = content.replace(CSS_PLACEHOLDER, css)
-        if font:
+        if font is not None:
             content = replace_between_tags(
                 content, "<!-- FONT START -->", "<!-- FONT END -->", font
             )
