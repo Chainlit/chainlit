@@ -95,7 +95,7 @@ class ChainlitDataLayer(BaseDataLayer):
         return PersistedUser(
             id=str(row.get("id")),
             identifier=str(row.get("identifier")),
-            createdAt=row.get("createdAt").isoformat(),  # type: ignore
+            createdAt=row.get("createdAt").isoformat() + "Z",  # type: ignore
             metadata=json.loads(row.get("metadata", "{}")),
         )
 
@@ -121,7 +121,7 @@ class ChainlitDataLayer(BaseDataLayer):
         return PersistedUser(
             id=str(row.get("id")),
             identifier=str(row.get("identifier")),
-            createdAt=row.get("createdAt").isoformat(),  # type: ignore
+            createdAt=row.get("createdAt").isoformat() + "Z",  # type: ignore
             metadata=json.loads(row.get("metadata", "{}")),
         )
 
@@ -497,7 +497,7 @@ class ChainlitDataLayer(BaseDataLayer):
         for thread in threads:
             thread_dict = ThreadDict(
                 id=str(thread["id"]),
-                createdAt=thread["updatedAt"].isoformat(),
+                createdAt=thread["updatedAt"].isoformat() + "Z",
                 name=thread["name"],
                 userId=str(thread["userId"]) if thread["userId"] else None,
                 userIdentifier=thread["user_identifier"],
@@ -561,7 +561,7 @@ class ChainlitDataLayer(BaseDataLayer):
 
         return ThreadDict(
             id=str(thread["id"]),
-            createdAt=thread["createdAt"].isoformat(),
+            createdAt=thread["createdAt"].isoformat() + "Z",
             name=thread["name"],
             userId=str(thread["userId"]) if thread["userId"] else None,
             userIdentifier=thread["user_identifier"],
@@ -681,11 +681,13 @@ class ChainlitDataLayer(BaseDataLayer):
             input=row.get("input", {}),
             output=row.get("output", {}),
             metadata=json.loads(row.get("metadata", "{}")),
-            createdAt=row["createdAt"].isoformat() if row.get("createdAt") else None,
-            start=row["startTime"].isoformat() if row.get("startTime") else None,
+            createdAt=row["createdAt"].isoformat() + "Z"
+            if row.get("createdAt")
+            else None,
+            start=row["startTime"].isoformat() + "Z" if row.get("startTime") else None,
             showInput=row.get("showInput"),
             isError=row.get("isError"),
-            end=row["endTime"].isoformat() if row.get("endTime") else None,
+            end=row["endTime"].isoformat() + "Z" if row.get("endTime") else None,
             feedback=self._extract_feedback_dict_from_step_row(row),
         )
 
