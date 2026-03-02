@@ -111,7 +111,12 @@ const UserMessage = memo(function UserMessage({
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (
+                    e.key === 'Enter' &&
+                    !e.shiftKey &&
+                    !e.nativeEvent.isComposing &&
+                    !disabled
+                  ) {
                     e.preventDefault();
                     handleEdit();
                   }
