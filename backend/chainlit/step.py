@@ -87,6 +87,7 @@ def step(
     language: Optional[str] = None,
     show_input: Union[bool, str] = "json",
     default_open: bool = False,
+    auto_collapse: bool = False,
 ):
     """Step decorator for async and sync functions."""
 
@@ -110,6 +111,7 @@ def step(
                     language=language,
                     show_input=show_input,
                     default_open=default_open,
+                    auto_collapse=auto_collapse,
                     metadata=metadata,
                 ) as step:
                     try:
@@ -139,6 +141,7 @@ def step(
                     language=language,
                     show_input=show_input,
                     default_open=default_open,
+                    auto_collapse=auto_collapse,
                     metadata=metadata,
                 ) as step:
                     try:
