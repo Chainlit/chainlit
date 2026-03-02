@@ -1,9 +1,12 @@
 import json
+from datetime import datetime
 from unittest.mock import AsyncMock
 
 import pytest
 
+from chainlit import User
 from chainlit.data.chainlit_data_layer import ChainlitDataLayer
+from chainlit.types import Pagination, ThreadFilter
 
 
 @pytest.mark.asyncio
@@ -139,3 +142,206 @@ async def test_update_thread_deletes_keys_with_none_values():
         # Verify "is_shared" and "keep" are preserved
         assert metadata_json.get("is_shared") is True
         assert metadata_json.get("keep") == "stays"
+
+
+@pytest.mark.asyncio
+async def test_get_user_returns_iso_format_with_z_suffix():
+    """Test that get_user returns createdAt with 'Z' suffix for chainlit/utils.py utc_now() compliance."""
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test", storage_client=None, show_logger=False
+    )
+
+    mock_created_at = datetime(2024, 1, 15, 10, 30, 45, 123456)
+
+    async def mock_execute_query(query, params):
+        if "SELECT" in query and "User" in query:
+            return [
+                {
+                    "id": "user-123",
+                    "identifier": "test@example.com",
+                    "createdAt": mock_created_at,
+                    "metadata": "{}",
+                }
+            ]
+        return []
+
+    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+
+    result = await data_layer.get_user("test@example.com")
+
+    assert result is not None
+    assert result.id == "user-123"
+    assert result.identifier == "test@example.com"
+    assert result.createdAt == "2024-01-15T10:30:45.123456Z"
+
+
+@pytest.mark.asyncio
+async def test_create_user_returns_iso_format_with_z_suffix():
+    """Test that create_user returns createdAt with 'Z' suffix for chainlit/utils.py utc_now() compliance."""
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test", storage_client=None, show_logger=False
+    )
+
+    mock_created_at = datetime(2024, 1, 15, 10, 30, 45, 123456)
+
+    async def mock_execute_query(query, params):
+        if "INSERT" in query and "User" in query:
+            return [
+                {
+                    "id": "user-456",
+                    "identifier": "newuser@example.com",
+                    "createdAt": mock_created_at,
+                    "metadata": '{"role": "admin"}',
+                }
+            ]
+        return []
+
+    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+    data_layer.get_current_timestamp = AsyncMock(return_value=mock_created_at)
+
+    user = User(identifier="newuser@example.com", metadata={"role": "admin"})
+
+    result = await data_layer.create_user(user)
+
+    assert result is not None
+    assert result.id == "user-456"
+    assert result.identifier == "newuser@example.com"
+    assert result.createdAt == "2024-01-15T10:30:45.123456Z"
+
+
+@pytest.mark.asyncio
+async def test_list_threads_returns_iso_format_with_z_suffix():
+    """Test that list_threads returns createdAt with 'Z' suffix for chainlit/utils.py utc_now() compliance."""
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test", storage_client=None, show_logger=False
+    )
+    mock_updated_at = datetime(2024, 2, 20, 14, 15, 30, 987654)
+
+    async def mock_execute_query(query, params):
+        if "SELECT" in query and "Thread" in query:
+            return [
+                {
+                    "id": "thread-789",
+                    "name": "Test Thread",
+                    "userId": "user-123",
+                    "user_identifier": "test@example.com",
+                    "updatedAt": mock_updated_at,
+                    "metadata": "{}",
+                    "total": 1,
+                }
+            ]
+        return []
+
+    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+
+    pagination = Pagination(first=10, cursor=None)
+    filters = ThreadFilter(userId=None, search=None, feedback=None)
+
+    result = await data_layer.list_threads(pagination, filters)
+
+    assert result is not None
+    assert len(result.data) == 1
+    thread = result.data[0]
+    assert thread["id"] == "thread-789"
+    assert thread["createdAt"] == "2024-02-20T14:15:30.987654Z"
+
+
+@pytest.mark.asyncio
+async def test_get_thread_returns_iso_format_with_z_suffix():
+    """Test that get_thread returns createdAt with 'Z' suffix for chainlit/utils.py utc_now() compliance."""
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test", storage_client=None, show_logger=False
+    )
+    mock_created_at = datetime(2024, 3, 10, 9, 20, 15, 456789)
+
+    async def mock_execute_query(query, params):
+        if "SELECT t.*" in query and "Thread" in query:
+            return [
+                {
+                    "id": "thread-101",
+                    "name": "Single Thread",
+                    "userId": "user-456",
+                    "user_identifier": "user@example.com",
+                    "createdAt": mock_created_at,
+                    "metadata": "{}",
+                }
+            ]
+        return []
+
+    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+
+    result = await data_layer.get_thread("thread-101")
+
+    assert result is not None
+    assert result["id"] == "thread-101"
+    assert result["createdAt"] == "2024-03-10T09:20:15.456789Z"
+
+
+@pytest.mark.asyncio
+async def test_convert_step_row_to_dict_returns_iso_format_with_z_suffix():
+    """Test that _convert_step_row_to_dict returns timestamps with 'Z' suffix for chainlit/utils.py utc_now() compliance."""
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test", storage_client=None, show_logger=False
+    )
+
+    mock_created_at = datetime(2024, 4, 5, 12, 0, 0, 111111)
+    mock_start_time = datetime(2024, 4, 5, 12, 0, 5, 222222)
+    mock_end_time = datetime(2024, 4, 5, 12, 0, 10, 333333)
+
+    mock_row = {
+        "id": "step-202",
+        "threadId": "thread-303",
+        "parentId": None,
+        "name": "Test Step",
+        "type": "user_message",
+        "input": {"content": "Hello"},
+        "output": {"response": "Hi there"},
+        "metadata": "{}",
+        "createdAt": mock_created_at,
+        "startTime": mock_start_time,
+        "endTime": mock_end_time,
+        "showInput": "json",
+        "isError": False,
+        "feedback_id": None,
+    }
+
+    result = data_layer._convert_step_row_to_dict(mock_row)
+
+    assert result is not None
+    assert result["id"] == "step-202"
+    assert result["createdAt"] == "2024-04-05T12:00:00.111111Z"
+    assert result["start"] == "2024-04-05T12:00:05.222222Z"
+    assert result["end"] == "2024-04-05T12:00:10.333333Z"
+
+
+@pytest.mark.asyncio
+async def test_convert_step_row_to_dict_handles_none_timestamps():
+    """Test that _convert_step_row_to_dict handles None timestamps correctly."""
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test", storage_client=None, show_logger=False
+    )
+
+    mock_row = {
+        "id": "step-303",
+        "threadId": "thread-404",
+        "parentId": None,
+        "name": "Test Step",
+        "type": "user_message",
+        "input": {},
+        "output": {},
+        "metadata": "{}",
+        "createdAt": None,
+        "startTime": None,
+        "endTime": None,
+        "showInput": "json",
+        "isError": False,
+        "feedback_id": None,
+    }
+
+    result = data_layer._convert_step_row_to_dict(mock_row)
+
+    assert result is not None
+    assert result["id"] == "step-303"
+    assert result["createdAt"] is None
+    assert result["start"] is None
+    assert result["end"] is None
