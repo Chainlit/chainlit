@@ -64,6 +64,7 @@ class ElementDict(TypedDict, total=False):
     playerConfig: Optional[dict]
     forId: Optional[str]
     mime: Optional[str]
+    downloadName: Optional[str]
 
 
 @dataclass
@@ -125,6 +126,7 @@ class Element:
                 "language": getattr(self, "language", None),
                 "forId": getattr(self, "for_id", None),
                 "mime": getattr(self, "mime", None),
+                "downloadName": getattr(self, "download_name", None),
             }
         )
         return _dict
@@ -151,6 +153,7 @@ class Element:
         chainlit_key = e_dict.get("chainlitKey")
         display = e_dict.get("display", "inline")
         mime_type = e_dict.get("mime", "")
+        download_name = e_dict.get("downloadName")
 
         # Common parameters for all element types
         common_params = {
@@ -164,6 +167,7 @@ class Element:
             "chainlit_key": chainlit_key,
             "display": display,
             "mime": mime_type,
+            "download_name": download_name,
         }
 
         if type == "image":
