@@ -106,7 +106,7 @@ class BaseSession:
                 "Either path or content must be provided to persist a file"
             )
 
-        self.files_dir.mkdir(exist_ok=True)
+        self.files_dir.mkdir(parents=True, exist_ok=True)
 
         file_id = str(uuid.uuid4())
 

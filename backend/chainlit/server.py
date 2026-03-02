@@ -188,7 +188,10 @@ async def lifespan(app: FastAPI):
 
         files_dir = get_files_directory()
         if files_dir.is_dir():
-            shutil.rmtree(files_dir)
+            app_root = Path(APP_ROOT).resolve()
+            resolved = files_dir.resolve()
+            if resolved == app_root / ".files" or app_root in resolved.parents:
+                shutil.rmtree(files_dir)
 
         # Force exit the process to avoid potential AnyIO threads still running
         os._exit(0)

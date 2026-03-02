@@ -690,7 +690,8 @@ config = load_config()
 
 def get_files_directory() -> Path:
     """Get the files directory from config. Relative paths resolve from APP_ROOT."""
-    files_dir = Path(config.features.spontaneous_file_upload.files_dir)
+    feature = config.features.spontaneous_file_upload
+    files_dir = Path(feature.files_dir if feature else ".files")
     if not files_dir.is_absolute():
         files_dir = Path(APP_ROOT) / files_dir
     return files_dir
