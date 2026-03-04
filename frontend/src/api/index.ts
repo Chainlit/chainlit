@@ -34,31 +34,6 @@ class ExtendedChainlitAPI extends ChainlitAPI {
     return res.json();
   }
 
-  connectStreamableHttpMCP(
-    sessionId: string,
-    name: string,
-    url: string,
-    headers?: Record<string, string>
-  ) {
-    // Assumes the backend expects { clientType, name, url }
-    return fetch(new URL("mcp", this.httpEndpoint.endsWith("/") ? this.httpEndpoint : `${this.httpEndpoint}/`), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(sessionId ? { 'x-session-id': sessionId } : {})
-      },
-      body: JSON.stringify({
-        clientType: 'streamable-http',
-        name,
-        url,
-        sessionId,
-        ...(headers ? { headers } : {})
-      })
-    }).then(async (res) => {
-      const data = await res.json();
-      return { success: res.ok, mcp: data.mcp, error: data.detail };
-    });
-  }
 }
 
 export const apiClient = new ExtendedChainlitAPI(
