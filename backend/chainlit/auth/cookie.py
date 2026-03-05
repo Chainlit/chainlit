@@ -27,7 +27,9 @@ if _cookie_root_path := os.environ.get("CHAINLIT_ROOT_PATH", None):
     _cookie_path = os.environ.get(_cookie_root_path, "/")
 else:
     _cookie_path = os.environ.get("CHAINLIT_AUTH_COOKIE_PATH", "/")
-_state_cookie_lifetime = 3 * 60  # 3m
+_state_cookie_lifetime = int(
+    os.environ.get("CHAINLIT_STATE_COOKIE_LIFETIME", str(3 * 60))
+)
 _auth_cookie_name = os.environ.get("CHAINLIT_AUTH_COOKIE_NAME", "access_token")
 _state_cookie_name = "oauth_state"
 
