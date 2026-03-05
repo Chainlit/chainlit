@@ -38,9 +38,13 @@ const ReadOnlyThread = ({ id }: Props) => {
     error: threadError,
     isLoading
   } = useApi<IThread>(
-    id ? (isSharedRoute ? `/project/share/${id}` : `/project/thread/${id}`) : null,
+    id
+      ? isSharedRoute
+        ? `/project/share/${id}`
+        : `/project/thread/${id}`
+      : null,
     {
-    revalidateOnFocus: false
+      revalidateOnFocus: false
     }
   );
   const navigate = useNavigate();
@@ -153,6 +157,7 @@ const ReadOnlyThread = ({ id }: Props) => {
     return {
       allowHtml: config?.features?.unsafe_allow_html,
       latex: config?.features?.latex,
+      renderMarkdown: config?.features?.user_message_markdown,
       editable: false,
       loading: false,
       showFeedbackButtons: !!config?.dataPersistence,
@@ -167,6 +172,7 @@ const ReadOnlyThread = ({ id }: Props) => {
     config?.ui?.name,
     config?.ui?.cot,
     config?.features?.unsafe_allow_html,
+    config?.features?.user_message_markdown,
     onElementRefClick,
     onError,
     onFeedbackUpdated,

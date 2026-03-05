@@ -1,9 +1,12 @@
+import importlib
+
 import pytest
 from fastapi import FastAPI, Form
 from fastapi.testclient import TestClient
 from starlette.requests import Request
 from starlette.responses import Response
 
+import chainlit.auth.cookie as cookie_module
 from chainlit.auth import (
     clear_auth_cookie,
     get_token_from_cookies,
@@ -128,6 +131,20 @@ def test_overwrite_shorter_token_unchunked(client):
     final_cookies = client.cookies
     chunk_cookies = [k for k in final_cookies if k.startswith("access_token_")]
     assert len(chunk_cookies) == 0, f"Found {len(chunk_cookies)} residual cookies"
+
+
+def test_state_cookie_lifetime_default(monkeypatch):
+    """Test that _state_cookie_lifetime defaults to 180 seconds (3 minutes)."""
+    monkeypatch.delenv("CHAINLIT_STATE_COOKIE_LIFETIME", raising=False)
+    importlib.reload(cookie_module)
+    assert cookie_module._state_cookie_lifetime == 180
+
+
+def test_state_cookie_lifetime_custom(monkeypatch):
+    """Test that _state_cookie_lifetime can be set via environment variable."""
+    monkeypatch.setenv("CHAINLIT_STATE_COOKIE_LIFETIME", "600")
+    importlib.reload(cookie_module)
+    assert cookie_module._state_cookie_lifetime == 600
 
 
 def test_clear_auth_cookie(client):

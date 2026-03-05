@@ -12,6 +12,7 @@ export interface IAttachment {
   uploaded?: boolean;
   cancel?: () => void;
   remove?: () => void;
+  file?: File;
 }
 
 export const attachmentsState = atom<IAttachment[]>({

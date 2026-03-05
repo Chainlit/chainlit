@@ -137,6 +137,7 @@ const Chat = () => {
           name: file.name,
           size: file.size,
           uploadProgress: 0,
+          file,
           cancel: () => {
             toast.info(`${t('chat.fileUpload.errors.cancelled')} ${file.name}`);
             xhr.abort();
