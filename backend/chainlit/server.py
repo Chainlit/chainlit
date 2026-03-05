@@ -1741,6 +1741,12 @@ def status_check():
     return {"message": "Site is operational"}
 
 
+@router.get("/health")
+def health_check():
+    """Health check endpoint for container orchestration and monitoring."""
+    return {"status": "ok"}
+
+
 @router.get("/{full_path:path}")
 async def serve(request: Request):
     """Serve the UI files."""
