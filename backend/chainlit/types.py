@@ -336,6 +336,8 @@ class CommandDict(TypedDict):
     button: Optional[bool]
     # Whether the command will be persistent unless the user toggles it
     persistent: Optional[bool]
+    # Whether the command should be pre-selected when loaded
+    selected: Optional[bool]
 
 
 class FeedbackDict(TypedDict):
