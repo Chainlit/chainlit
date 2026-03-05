@@ -1,5 +1,6 @@
+import isEqual from 'lodash/isEqual';
 import mapValues from 'lodash/mapValues';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
@@ -29,7 +30,7 @@ export default function ChatSettingsModal() {
   const { chatSettingsValue, chatSettingsInputs, chatSettingsDefaultValue } =
     useChatData();
 
-  const { updateChatSettings } = useChatInteract();
+  const { updateChatSettings, editChatSettings } = useChatInteract();
   const [chatSettingsOpen, setChatSettingsOpen] = useRecoilState(
     chatSettingsOpenState
   );
@@ -72,6 +73,15 @@ export default function ChatSettingsModal() {
   };
 
   const values = watch();
+  const prevValues = useRef(values);
+
+  useEffect(() => {
+    if (!isEqual(values, prevValues.current)) {
+      editChatSettings(values);
+      prevValues.current = values;
+    }
+  }, [values, editChatSettings]);
+
   const tabInputs = chatSettingsInputs.filter(
     (input: any) => Array.isArray(input?.inputs) && input.inputs.length > 0
   );

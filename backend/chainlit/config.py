@@ -97,6 +97,9 @@ unsafe_allow_html = false
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
 
+# Enable rendering of user messages markdown
+user_message_markdown = true
+
 # Autoscroll new user messages at the top of the window
 user_message_autoscroll = true
 
@@ -323,6 +326,7 @@ class FeaturesSettings(BaseModel):
     mcp: McpFeature = Field(default_factory=McpFeature)
     slack: SlackFeature = Field(default_factory=SlackFeature)
     latex: bool = False
+    user_message_markdown: bool = True
     user_message_autoscroll: bool = True
     assistant_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
@@ -397,6 +401,7 @@ class CodeSettings(BaseModel):
     on_audio_end: Optional[Callable[[], Any]] = None
     on_mcp_connect: Optional[Callable] = None
     on_mcp_disconnect: Optional[Callable] = None
+    on_settings_edit: Optional[Callable[[Dict[str, Any]], Any]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[
         Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]]
