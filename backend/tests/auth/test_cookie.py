@@ -147,6 +147,30 @@ def test_state_cookie_lifetime_custom(monkeypatch):
     assert cookie_module._state_cookie_lifetime == 600
 
 
+def test_cookie_path_defaults_to_root(monkeypatch):
+    """When neither CHAINLIT_ROOT_PATH nor CHAINLIT_AUTH_COOKIE_PATH is set, _cookie_path defaults to '/'."""
+    monkeypatch.delenv("CHAINLIT_ROOT_PATH", raising=False)
+    monkeypatch.delenv("CHAINLIT_AUTH_COOKIE_PATH", raising=False)
+    importlib.reload(cookie_module)
+    assert cookie_module._cookie_path == "/"
+
+
+def test_cookie_path_uses_root_path(monkeypatch):
+    """When CHAINLIT_ROOT_PATH is set, _cookie_path uses its value."""
+    monkeypatch.setenv("CHAINLIT_ROOT_PATH", "/app1")
+    monkeypatch.delenv("CHAINLIT_AUTH_COOKIE_PATH", raising=False)
+    importlib.reload(cookie_module)
+    assert cookie_module._cookie_path == "/app1"
+
+
+def test_cookie_path_explicit_overrides_root_path(monkeypatch):
+    """CHAINLIT_AUTH_COOKIE_PATH takes precedence over CHAINLIT_ROOT_PATH."""
+    monkeypatch.setenv("CHAINLIT_ROOT_PATH", "/app1")
+    monkeypatch.setenv("CHAINLIT_AUTH_COOKIE_PATH", "/custom")
+    importlib.reload(cookie_module)
+    assert cookie_module._cookie_path == "/custom"
+
+
 def test_clear_auth_cookie(client):
     """Test cookie clearing removes all chunks."""
     # Set initial token

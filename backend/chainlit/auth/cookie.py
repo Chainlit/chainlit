@@ -24,7 +24,7 @@ assert _cookie_samesite in [
 )
 _cookie_secure = _cookie_samesite == "none"
 if _cookie_root_path := os.environ.get("CHAINLIT_ROOT_PATH", None):
-    _cookie_path = os.environ.get(_cookie_root_path, "/")
+    _cookie_path = os.environ.get("CHAINLIT_AUTH_COOKIE_PATH", _cookie_root_path)
 else:
     _cookie_path = os.environ.get("CHAINLIT_AUTH_COOKIE_PATH", "/")
 _state_cookie_lifetime = int(
@@ -132,6 +132,7 @@ def set_auth_cookie(request: Request, response: Response, token: str):
             response.set_cookie(
                 key=k,
                 value=chunk,
+                path=_cookie_path,
                 httponly=True,
                 secure=_cookie_secure,
                 samesite=_cookie_samesite,
@@ -144,6 +145,7 @@ def set_auth_cookie(request: Request, response: Response, token: str):
         response.set_cookie(
             key=_auth_cookie_name,
             value=token,
+            path=_cookie_path,
             httponly=True,
             secure=_cookie_secure,
             samesite=_cookie_samesite,
@@ -178,6 +180,7 @@ def set_oauth_state_cookie(response: Response, token: str):
     response.set_cookie(
         _state_cookie_name,
         token,
+        path=_cookie_path,
         httponly=True,
         samesite=_cookie_samesite,
         secure=_cookie_secure,
@@ -196,4 +199,4 @@ def validate_oauth_state_cookie(request: Request, state: str):
 
 def clear_oauth_state_cookie(response: Response):
     """Oauth complete, delete state token."""
-    response.delete_cookie(_state_cookie_name)  # Do we set path here?
+    response.delete_cookie(_state_cookie_name, path=_cookie_path)
