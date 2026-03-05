@@ -41,7 +41,7 @@ export interface IChainlitConfig {
     description?: string;
     default_theme?: 'light' | 'dark';
     layout?: 'default' | 'wide';
-    default_sidebar_state?: 'open' | 'closed';
+    default_sidebar_state?: 'open' | 'closed' | 'hidden';
     chat_settings_location?: 'message_composer' | 'sidebar';
     default_chat_settings_open?: boolean;
     confirm_new_chat?: boolean;

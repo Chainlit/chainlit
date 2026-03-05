@@ -41,6 +41,7 @@ const Header = memo(() => {
   const sidebarOpen = isMobile ? openMobile : open;
 
   const historyEnabled = data?.requireLogin && config?.dataPersistence;
+  const sidebarHidden = config?.ui?.default_sidebar_state === 'hidden';
 
   const links = config?.ui?.header_links || [];
 
@@ -54,8 +55,8 @@ const Header = memo(() => {
       id="header"
     >
       <div className="flex items-center">
-        {historyEnabled ? !sidebarOpen ? <SidebarTrigger /> : null : null}
-        {historyEnabled ? (
+        {historyEnabled && !sidebarHidden ? !sidebarOpen ? <SidebarTrigger /> : null : null}
+        {historyEnabled && !sidebarHidden ? (
           !sidebarOpen ? (
             <NewChatButton navigate={navigate} />
           ) : null

@@ -173,7 +173,7 @@ name = "Assistant"
 
 # layout = "wide"
 
-# default_sidebar_state = "open"
+# default_sidebar_state = "open"  # Options: "open", "closed", "hidden"
 
 # Chat settings display location: "message_composer" (default) or "sidebar" (header)
 # chat_settings_location = "message_composer"
@@ -351,7 +351,7 @@ class UISettings(BaseModel):
     default_theme: Optional[Literal["light", "dark"]] = "dark"
     language: Optional[str] = None
     layout: Optional[Literal["default", "wide"]] = "default"
-    default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
+    default_sidebar_state: Optional[Literal["open", "closed", "hidden"]] = "open"
     chat_settings_location: Optional[Literal["message_composer", "sidebar"]] = (
         "message_composer"
     )
