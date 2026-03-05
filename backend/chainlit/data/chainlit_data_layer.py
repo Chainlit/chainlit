@@ -351,13 +351,13 @@ class ChainlitDataLayer(BaseDataLayer):
         )
         ON CONFLICT (id) DO UPDATE SET
             "parentId" = COALESCE(EXCLUDED."parentId", "Step"."parentId"),
-            input = COALESCE(EXCLUDED.input, "Step".input),
+            input = COALESCE(NULLIF(EXCLUDED.input, ''), "Step".input),
             metadata = CASE
                 WHEN EXCLUDED.metadata <> '{}' THEN EXCLUDED.metadata
                 ELSE "Step".metadata
             END,
             name = COALESCE(EXCLUDED.name, "Step".name),
-            output = COALESCE(EXCLUDED.output, "Step".output),
+            output = COALESCE(NULLIF(EXCLUDED.output, ''), "Step".output),
             type = CASE
                 WHEN EXCLUDED.type = 'run' THEN "Step".type
                 ELSE EXCLUDED.type
