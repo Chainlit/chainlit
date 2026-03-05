@@ -139,3 +139,24 @@ async def test_update_thread_deletes_keys_with_none_values():
         # Verify "is_shared" and "keep" are preserved
         assert metadata_json.get("is_shared") is True
         assert metadata_json.get("keep") == "stays"
+
+
+@pytest.mark.asyncio
+async def test_create_step_uses_nullif_for_output_and_input():
+    """Empty-string output/input should not overwrite existing content.
+
+    Regression test for https://github.com/Chainlit/chainlit/issues/2789
+    The SQL uses NULLIF(EXCLUDED.output, '') so that an empty string from the
+    initial Step.send() is treated as NULL by COALESCE, preventing it from
+    overwriting non-empty content saved by a subsequent Step.update().
+    """
+    import inspect
+
+    source = inspect.getsource(ChainlitDataLayer.create_step)
+
+    assert "NULLIF(EXCLUDED.output, '')" in source, (
+        "output should use NULLIF to treat empty string as NULL"
+    )
+    assert "NULLIF(EXCLUDED.input, '')" in source, (
+        "input should use NULLIF to treat empty string as NULL"
+    )
