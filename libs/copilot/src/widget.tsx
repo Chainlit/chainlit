@@ -14,21 +14,34 @@ import { useConfig } from '@chainlit/react-client';
 import Header from './components/Header';
 
 import ChatWrapper from './chat';
+import { useSidebarResize } from './hooks';
 import {
   clearChainlitCopilotThreadId,
   getChainlitCopilotThreadId
 } from './state';
-import { IWidgetConfig } from './types';
+import { DisplayMode, IWidgetConfig } from './types';
 
 interface Props {
   config: IWidgetConfig;
   error?: string;
 }
 
+const LS_DISPLAY_MODE_KEY = 'chainlit-copilot-displayMode';
+
 const Widget = ({ config, error }: Props) => {
   const [expanded, setExpanded] = useState(config?.expanded || false);
   const [isOpen, setIsOpen] = useState(config?.opened || false);
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(
+    () =>
+      (localStorage.getItem(LS_DISPLAY_MODE_KEY) as DisplayMode) ||
+      config?.displayMode ||
+      'floating'
+  );
   const projectConfig = useConfig();
+  const { sidebarWidth, handleMouseDown } = useSidebarResize({
+    displayMode,
+    isOpen
+  });
 
   useEffect(() => {
     window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
@@ -44,7 +57,74 @@ const Widget = ({ config, error }: Props) => {
     };
   }, []);
 
+  useEffect(() => {
+    localStorage.setItem(LS_DISPLAY_MODE_KEY, displayMode);
+  }, [displayMode]);
+
   const customClassName = config?.button?.className || '';
+
+  const chatContent = error ? (
+    <Alert variant="error">{error}</Alert>
+  ) : (
+    <>
+      <Header
+        expanded={expanded}
+        setExpanded={setExpanded}
+        projectConfig={projectConfig}
+        displayMode={displayMode}
+        setDisplayMode={setDisplayMode}
+        setIsOpen={setIsOpen}
+      />
+      <div className="flex flex-grow overflow-y-auto">
+        <ChatWrapper />
+      </div>
+    </>
+  );
+
+  if (displayMode === 'sidebar') {
+    if (!isOpen) {
+      return (
+        <Button
+          id="chainlit-copilot-button"
+          aria-expanded="false"
+          className={cn(
+            'fixed h-16 w-16 rounded-full bottom-8 right-8 z-[20]',
+            'transition-transform duration-300 ease-in-out',
+            customClassName
+          )}
+          onClick={() => setIsOpen(true)}
+        >
+          <div className="relative w-full h-full flex items-center justify-center">
+            {config?.button?.imageUrl ? (
+              <img
+                width="100%"
+                src={config.button.imageUrl}
+                alt="Chat bubble icon"
+              />
+            ) : (
+              <MessageCircle className="!size-7" />
+            )}
+          </div>
+        </Button>
+      );
+    }
+
+    return (
+      <div
+        className="fixed top-0 right-0 h-full z-[50] bg-background border-l shadow-lg flex flex-col"
+        style={{ width: sidebarWidth }}
+      >
+        <div
+          data-testid="sidebar-drag-handle"
+          onMouseDown={handleMouseDown}
+          className="absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-primary/20 active:bg-primary/30 z-10"
+        />
+        <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
+          {chatContent}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
@@ -108,20 +188,7 @@ const Widget = ({ config, error }: Props) => {
         )}
       >
         <div id="chainlit-copilot-chat" className="flex flex-col h-full w-full">
-          {error ? (
-            <Alert variant="error">{error}</Alert>
-          ) : (
-            <>
-              <Header
-                expanded={expanded}
-                setExpanded={setExpanded}
-                projectConfig={projectConfig}
-              />
-              <div className="flex flex-grow overflow-y-auto">
-                <ChatWrapper />
-              </div>
-            </>
-          )}
+          {chatContent}
         </div>
       </PopoverContent>
     </Popover>
