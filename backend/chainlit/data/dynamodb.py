@@ -545,9 +545,16 @@ class DynamoDBDataLayer(BaseDataLayer):
 
             elif item["SK"].startswith("ELEMENT"):
                 if self.storage_provider is not None:
-                    item["url"] = await self.storage_provider.get_read_url(
-                        object_key=item["objectKey"],
-                    )
+                    try:
+                        item["url"] = await self.storage_provider.get_read_url(
+                            object_key=item["objectKey"],
+                        )
+                    except Exception as e:
+                        _logger.warning(
+                            "Failed to get read URL for element '%s': %s",
+                            item.get("id", "unknown"),
+                            e,
+                        )
                 elements.append(item)
 
             elif item["SK"].startswith("STEP"):
