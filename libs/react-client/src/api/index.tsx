@@ -1,7 +1,10 @@
 import { IElement, IThread, IUser } from 'src/types';
 
+
+
 import { IAction } from 'src/types/action';
 import { IFeedback } from 'src/types/feedback';
+
 
 export * from './hooks/auth';
 export * from './hooks/api';
@@ -243,6 +246,12 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
+  async deleteThreads(threadIds: string[]) {
+    const res = await this.delete(`/project/threads`, { threadIds });
+
+    return res.json();
+  }
+
   uploadFile(
     file: File,
     onProgress: (progress: number) => void,
@@ -376,7 +385,10 @@ export class ChainlitAPI extends APIBase {
   getOAuthEndpoint(provider: string) {
     return this.buildEndpoint(`/auth/oauth/${provider}`);
   }
-  async shareThread(threadId: string, isShared: boolean): Promise<{ success: boolean }> {
+  async shareThread(
+    threadId: string,
+    isShared: boolean
+  ): Promise<{ success: boolean }> {
     const res = await this.put(`/project/thread/share`, {
       threadId,
       isShared

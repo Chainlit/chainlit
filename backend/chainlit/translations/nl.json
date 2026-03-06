@@ -6,6 +6,7 @@
         "continue": "Doorgaan",
         "goBack": "Terug",
         "reset": "Herstellen",
+        "select": "Selecteer",
         "submit": "Versturen"
       },
       "status": {
@@ -177,6 +178,7 @@
           "delete": {
             "title": "Verwijdering bevestigen",
             "description": "Dit zal het gesprek en bijbehorende berichten en elementen verwijderen. Deze actie kan niet ongedaan worden gemaakt",
+            "description_plural": "Dit zal {{count}} gesprekken en bijbehorende berichten en elementen verwijderen. Deze actie kan niet ongedaan worden gemaakt",
             "success": "Chat verwijderd",
             "inProgress": "Chat verwijderen"
           },

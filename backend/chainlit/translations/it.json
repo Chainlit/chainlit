@@ -6,6 +6,7 @@
       "continue": "Continua",
       "goBack": "Ritorna",
       "reset": "Reset",
+      "select": "Seleziona",
       "submit": "Invia"
     },
     "status": {
@@ -177,6 +178,7 @@
         "delete": {
           "title": "Conferma eliminazione",
           "description": "Stai per eliminare la chat insieme ai suoi messaggi ed elementi. Questa azione non può essere annullata",
+          "description_plural": "Stai per eliminare {{count}} chat insieme ai loro messaggi ed elementi. Questa azione non può essere annullata",
           "success": "Chat eliminata",
           "inProgress": "Eliminazione chat"
         },

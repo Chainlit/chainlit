@@ -6,6 +6,7 @@
       "continue": "Continue",
       "goBack": "Go Back",
       "reset": "Reset",
+      "select": "Select",
       "submit": "Submit"
     },
     "status": {
@@ -177,6 +178,7 @@
         "delete": {
           "title": "Confirm deletion",
           "description": "This will delete the thread as well as its messages and elements. This action cannot be undone",
+          "description_plural": "This will delete {{count}} threads as well as their messages and elements. This action cannot be undone",
           "success": "Chat deleted",
           "inProgress": "Deleting chat"
         },
