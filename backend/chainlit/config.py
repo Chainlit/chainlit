@@ -56,10 +56,6 @@ TRANSLATIONS_DIR = os.path.join(BACKEND_ROOT, "translations")
 # Get the directory the script is running from
 APP_ROOT = os.getenv("CHAINLIT_APP_ROOT", os.getcwd())
 
-# Create the directory to store the uploaded files
-FILES_DIRECTORY = Path(APP_ROOT) / ".files"
-FILES_DIRECTORY.mkdir(exist_ok=True)
-
 config_dir = os.path.join(APP_ROOT, ".chainlit")
 public_dir = os.path.join(APP_ROOT, "public")
 config_file = os.path.join(config_dir, "config.toml")
@@ -137,6 +133,8 @@ reaction_on_message_received = false
     accept = ["*/*"]
     max_files = 20
     max_size_mb = 500
+    # Directory to store uploaded files. Relative paths are resolved from the app root.
+    # files_dir = ".files"
 
 [features.audio]
     # Enable audio features
@@ -290,6 +288,7 @@ class SpontaneousFileUploadFeature(BaseModel):
     accept: Optional[Union[List[str], Dict[str, List[str]]]] = None
     max_files: Optional[int] = None
     max_size_mb: Optional[int] = None
+    files_dir: str = ".files"
 
 
 class AudioFeature(BaseModel):
@@ -691,3 +690,12 @@ def lint_translations():
 
 
 config = load_config()
+
+
+def get_files_directory() -> Path:
+    """Get the files directory from config. Relative paths resolve from APP_ROOT."""
+    feature = config.features.spontaneous_file_upload
+    files_dir = Path(feature.files_dir if feature else ".files")
+    if not files_dir.is_absolute():
+        files_dir = Path(APP_ROOT) / files_dir
+    return files_dir
