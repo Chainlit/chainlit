@@ -1658,7 +1658,13 @@ async def get_file(
 
     if file_id in session.files:
         file = session.files[file_id]
-        return FileResponse(file["path"], media_type=file["type"])
+        filename = file.get("download_name") or file.get("name")
+        return FileResponse(
+            file["path"],
+            media_type=file["type"],
+            filename=filename,
+            content_disposition_type="inline",
+        )
     else:
         raise HTTPException(status_code=404, detail="File not found")
 
