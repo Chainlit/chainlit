@@ -36,6 +36,8 @@ from watchfiles import awatch
 
 from chainlit.auth import create_jwt, decode_jwt, get_configuration, get_current_user
 from chainlit.auth.cookie import (
+    _cookie_path,
+    _delete_legacy_cookies,
     clear_auth_cookie,
     clear_oauth_state_cookie,
     set_auth_cookie,
@@ -771,11 +773,12 @@ async def set_session_cookie(request: Request, response: Response):
     response.set_cookie(
         key="X-Chainlit-Session-id",
         value=session_id,
-        path="/",
+        path=_cookie_path,
         httponly=True,
         secure=not is_local,
         samesite="lax" if is_local else "none",
     )
+    _delete_legacy_cookies(response, "X-Chainlit-Session-id")
 
     return {"message": "Session cookie set"}
 
