@@ -5,12 +5,13 @@ import {
   useRef,
   useState
 } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   FileSpec,
   IStep,
+  commandsState,
   useAuth,
   useChatData,
   useChatInteract,
@@ -62,7 +63,16 @@ export default function MessageComposer({
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
+  const commands = useRecoilValue(commandsState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
+
+  // Pre-select the command marked as selected by the backend
+  useEffect(() => {
+    const defaultSelected = commands.find((c) => c.selected);
+    if (defaultSelected && !selectedCommand) {
+      setSelectedCommand(defaultSelected);
+    }
+  }, [commands]);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
 

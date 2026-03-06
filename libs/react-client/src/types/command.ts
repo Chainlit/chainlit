@@ -4,4 +4,5 @@ export interface ICommand {
   description: string;
   button?: boolean;
   persistent?: boolean;
+  selected?: boolean;
 }
