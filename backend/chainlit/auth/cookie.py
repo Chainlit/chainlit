@@ -175,6 +175,7 @@ def set_auth_cookie(request: Request, response: Response, token: str):
         response.delete_cookie(
             key=k, path=_cookie_path, secure=_cookie_secure, samesite=_cookie_samesite
         )
+        _delete_legacy_cookies(response, k)
 
 
 def clear_auth_cookie(request: Request, response: Response):

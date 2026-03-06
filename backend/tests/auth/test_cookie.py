@@ -193,7 +193,8 @@ def test_delete_legacy_cookies_deletes_at_root_when_scoped(monkeypatch):
     cookie_module._delete_legacy_cookies(response, "access_token")
     set_cookie_header = response.headers.get("set-cookie", "")
     assert "access_token" in set_cookie_header
-    assert 'Path=/' in set_cookie_header
+    parts = [part.strip() for part in set_cookie_header.split(";")]
+    assert "Path=/" in parts
     assert 'Max-Age=0' in set_cookie_header
 
 
