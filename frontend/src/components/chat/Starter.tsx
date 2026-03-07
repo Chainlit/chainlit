@@ -70,7 +70,7 @@ export default function Starter({ starter }: StarterProps) {
           <img
             className="h-5 w-5 rounded-md"
             src={
-              starter.icon?.startsWith('/public')
+              starter.icon.startsWith('/public')
                 ? apiClient.buildEndpoint(starter.icon)
                 : starter.icon
             }

@@ -55,7 +55,7 @@ export default function WelcomeScreen(props: Props) {
             <img
               className="h-16 w-16 rounded-full"
               src={
-                currentChatProfile?.icon.startsWith('/public')
+                currentChatProfile?.icon?.startsWith('/public')
                   ? apiClient.buildEndpoint(currentChatProfile?.icon)
                   : currentChatProfile?.icon
               }
