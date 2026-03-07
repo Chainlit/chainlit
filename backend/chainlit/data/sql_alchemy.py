@@ -262,7 +262,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             "userId": user_id,
             "userIdentifier": user_identifier,
             "tags": tags,
-            "metadata": json.dumps(metadata) if metadata else None,
+            "metadata": json.dumps(metadata) if metadata is not None else None,
         }
         parameters = {
             key: value for key, value in data.items() if value is not None
