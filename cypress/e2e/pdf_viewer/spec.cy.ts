@@ -1,13 +1,6 @@
 describe('PDF Viewer', () => {
-  const consoleErrors: string[] = [];
-
   beforeEach(() => {
-    // Collect console errors for all tests
-    cy.on('window:console', (message) => {
-      if (message.type() === 'error') {
-        consoleErrors.push(message.text());
-      }
-    });
+    cy.intercept('GET', 'https://unpkg.com/**').as('cdnWorker');
   });
 
   it('should render an inline PDF thumbnail', () => {
@@ -32,27 +25,29 @@ describe('PDF Viewer', () => {
   });
 
   it('should load PDF without MIME type or CDN errors', () => {
-    // Visit the app
-    // Clear console errors for this specific test
-    consoleErrors.length = 0;
+    cy.get('#side-view-content').find('canvas').should('exist');
 
-    const mimeTypeErrors = consoleErrors.filter(
-      (error) =>
-        error.toLowerCase().includes('mime') ||
-        error.toLowerCase().includes('disallowed mime type') ||
-        error.toLowerCase().includes('octet-stream') ||
-        error.toLowerCase().includes('application/json') ||
-        error.toLowerCase().includes('unpkg') ||
-        error.toLowerCase().includes('cdn') ||
-        error.toLowerCase().includes('failed to load')
-    );
-
-    expect(mimeTypeErrors).to.have.length(0);
+    cy.window().then((win) => {
+      const resources = win.performance.getEntriesByType(
+        'resource'
+      ) as PerformanceResourceTiming[];
+      const pdfResources = resources.filter(
+        (r) => r.name.endsWith('.pdf') || r.name.includes('/files/')
+      );
+      pdfResources.forEach((r) => {
+        expect(
+          r.duration,
+          `PDF resource ${r.name} should load without errors`
+        ).to.be.greaterThan(0);
+      });
+    });
   });
 
   it('should have the local PDF worker file loaded (no external CDN)', () => {
     // Verify the PDF canvas exists (meaning PDF loaded successfully with local worker)
     cy.get('#side-view-content').find('canvas').should('exist');
     cy.get('.react-pdf__Document').should('exist');
+
+    cy.get('@cdnWorker.all').should('have.length', 0);
   });
 });

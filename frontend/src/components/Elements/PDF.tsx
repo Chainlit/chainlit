@@ -38,12 +38,15 @@ interface PDFViewerProps {
 
 export function PDFViewer({ url, className, startPage = 1 }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number>();
-  const [pageNumber, setPageNumber] = useState(startPage || 1);
+  const [pageNumber, setPageNumber] = useState(Math.max(1, startPage || 1));
   const [scale, setScale] = useState(1.0);
+  const [isHovered, setIsHovered] = useState(false);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
-    setPageNumber(startPage && startPage <= numPages ? startPage : 1);
+    setPageNumber(
+      startPage && startPage >= 1 && startPage <= numPages ? startPage : 1
+    );
   }
 
   const zoomIn = (e: React.MouseEvent) => {
@@ -64,17 +67,24 @@ export function PDFViewer({ url, className, startPage = 1 }: PDFViewerProps) {
   };
   const handlePrint = (e: React.MouseEvent) => {
     e.stopPropagation();
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
     <div
-      className={`flex flex-col bg-muted/20 border border-border rounded-md min-h-[300px] ${
+      className={`flex flex-col bg-muted/20 border border-border rounded-md min-h-[50vh] ${
         className || ''
       }`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onTouchStart={() => setIsHovered(true)}
     >
-      {/* Sticky toolbar — always in flow so scroll content starts below it */}
-      <div className="sticky top-0 z-10 shrink-0 flex flex-wrap items-center justify-between px-2 py-1.5 gap-2 bg-background/90 backdrop-blur-sm border-b border-border rounded-t-md">
+      {/* Sticky toolbar — lives in the normal flex flow so it never overlaps content */}
+      <div
+        className={`sticky top-0 z-10 shrink-0 flex flex-wrap items-center justify-between p-2 gap-2 bg-background/80 backdrop-blur-sm border-b border-border rounded-t-md transition-opacity duration-200 ${
+          isHovered ? 'opacity-100' : 'opacity-0'
+        }`}
+      >
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
@@ -85,7 +95,7 @@ export function PDFViewer({ url, className, startPage = 1 }: PDFViewerProps) {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-xs text-muted-foreground w-16 text-center">
+          <span className="text-xs text-muted-foreground w-16 text-center shadow-sm">
             {pageNumber} / {numPages || '?'}
           </span>
           <Button
@@ -109,7 +119,7 @@ export function PDFViewer({ url, className, startPage = 1 }: PDFViewerProps) {
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
-          <span className="text-xs text-muted-foreground w-12 text-center">
+          <span className="text-xs text-muted-foreground w-12 text-center shadow-sm">
             {Math.round(scale * 100)}%
           </span>
           <Button
@@ -150,7 +160,7 @@ export function PDFViewer({ url, className, startPage = 1 }: PDFViewerProps) {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-auto bg-muted/10">
+      <div className="flex-1 min-h-0 overflow-auto w-full bg-muted/10">
         <div className="w-fit min-w-full flex justify-center p-2 md:p-4">
           <Document
             file={url}
@@ -166,7 +176,7 @@ export function PDFViewer({ url, className, startPage = 1 }: PDFViewerProps) {
               scale={scale}
               renderTextLayer={true}
               renderAnnotationLayer={true}
-              className="shadow-md bg-white"
+              className="shadow-md bg-white max-w-full"
             />
           </Document>
         </div>
@@ -214,8 +224,17 @@ const PDFElement = ({ element }: Props) => {
     <>
       <div
         ref={containerRef}
+        role="button"
+        tabIndex={0}
+        aria-label="Open PDF in a larger view"
         className="inline-pdf relative group cursor-pointer border border-border rounded-md overflow-hidden bg-muted/20 w-full max-w-xs h-auto min-h-[160px] flex items-center justify-center hover:border-primary/50 transition-all p-2"
         onClick={() => setModalOpen(true)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setModalOpen(true);
+          }
+        }}
       >
         <div className="absolute top-2 right-2 p-1.5 bg-background/80 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10 shadow-sm">
           <Maximize2 className="h-4 w-4 text-foreground" />
