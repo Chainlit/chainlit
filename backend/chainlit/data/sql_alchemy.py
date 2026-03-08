@@ -230,6 +230,8 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if user_id:
             user_identifier = await self._get_user_identifer_by_id(user_id)
 
+        # Merge incoming metadata with existing metadata, deleting incoming keys with None values
+        merged_metadata = None
         if metadata is not None:
             existing = await self.execute_sql(
                 query='SELECT "metadata" FROM threads WHERE "id" = :id',
@@ -245,12 +247,14 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         base = {}
                 elif isinstance(raw, dict):
                     base = raw
+            to_delete = {k for k, v in metadata.items() if v is None}
             incoming = {k: v for k, v in metadata.items() if v is not None}
-            metadata = {**base, **incoming}
+            base = {k: v for k, v in base.items() if k not in to_delete}
+            merged_metadata = {**base, **incoming}
 
         name_value = name
-        if name_value is None and metadata:
-            name_value = metadata.get("name")
+        if name_value is None and merged_metadata:
+            name_value = merged_metadata.get("name")
         created_at_value = (
             await self.get_current_timestamp() if metadata is None else None
         )
@@ -262,7 +266,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             "userId": user_id,
             "userIdentifier": user_identifier,
             "tags": tags,
-            "metadata": json.dumps(metadata) if metadata is not None else None,
+            "metadata": json.dumps(merged_metadata)
+            if merged_metadata is not None
+            else None,
         }
         parameters = {
             key: value for key, value in data.items() if value is not None
