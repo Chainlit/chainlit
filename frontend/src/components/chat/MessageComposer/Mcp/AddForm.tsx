@@ -123,8 +123,11 @@ export const McpAddForm = ({
         (apiClient as any)
           .connectSseMCP(sessionId, serverName, serverUrl, headersObj)
           .then(async (resp: any) => {
-            const { success, mcp } = resp;
-            if (success && mcp) {
+            const { success, mcp, error } = resp;
+            if (!success) {
+              throw new Error(error || 'Could not connect to the MCP server');
+            }
+            if (mcp) {
               setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
             }
             resetForm();
@@ -142,8 +145,11 @@ export const McpAddForm = ({
         (apiClient as any)
           .connectStreamableHttpMCP(sessionId, serverName, httpUrl, headersObj)
           .then(async (resp: any) => {
-            const { success, mcp } = resp;
-            if (success && mcp) {
+            const { success, mcp, error } = resp;
+            if (!success) {
+              throw new Error(error || 'Could not connect to the MCP server');
+            }
+            if (mcp) {
               setMcps((prev) => [...prev, { ...mcp, status: 'connected' }]);
             }
             resetForm();
