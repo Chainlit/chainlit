@@ -1,5 +1,5 @@
 import { MessageContext } from '@/contexts/MessageContext';
-import { useCallback, useContext, useMemo } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -90,6 +90,17 @@ const MessagesContainer = ({ navigate }: Props) => {
     },
     []
   );
+
+  // Auto-open side panel when elements with display='side' arrive
+  useEffect(() => {
+    const sideElements = elements.filter((e) => e.display === 'side');
+    if (sideElements.length > 0) {
+      setSideView({
+        title: sideElements[sideElements.length - 1].name,
+        elements: sideElements
+      });
+    }
+  }, [elements]);
 
   const onElementRefClick = useCallback(
     (element: IMessageElement) => {
