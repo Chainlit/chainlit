@@ -91,23 +91,25 @@ const MessagesContainer = ({ navigate }: Props) => {
     []
   );
 
-  const knownSideElementIdsRef = useRef<Set<string>>(new Set());
+  const knownSideElementsRef = useRef<Map<string, IMessageElement>>(new Map());
 
   useEffect(() => {
     const sideElements = elements.filter((e) => e.display === 'side');
 
     if (sideElements.length === 0) {
-      knownSideElementIdsRef.current = new Set();
+      knownSideElementsRef.current = new Map();
       setSideView(undefined);
       return;
     }
 
-    const newSideElements = sideElements.filter(
-      (e) => !knownSideElementIdsRef.current.has(e.id)
+    const hasNewOrChanged = sideElements.some(
+      (e) => knownSideElementsRef.current.get(e.id) !== e
     );
 
-    if (newSideElements.length > 0) {
-      sideElements.forEach((e) => knownSideElementIdsRef.current.add(e.id));
+    if (hasNewOrChanged) {
+      const newMap = new Map<string, IMessageElement>();
+      sideElements.forEach((e) => newMap.set(e.id, e));
+      knownSideElementsRef.current = newMap;
       setSideView({
         title: sideElements[sideElements.length - 1].name,
         elements: sideElements

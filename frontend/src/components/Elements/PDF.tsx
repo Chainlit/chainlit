@@ -34,9 +34,15 @@ interface PDFViewerProps {
   url: string;
   className?: string;
   startPage?: number;
+  persistentToolbar?: boolean;
 }
 
-export function PDFViewer({ url, className, startPage = 1 }: PDFViewerProps) {
+export function PDFViewer({
+  url,
+  className,
+  startPage = 1,
+  persistentToolbar = false
+}: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number>();
   const [pageNumber, setPageNumber] = useState(Math.max(1, startPage || 1));
   const [scale, setScale] = useState(1.0);
@@ -82,7 +88,7 @@ export function PDFViewer({ url, className, startPage = 1 }: PDFViewerProps) {
       {/* Sticky toolbar — lives in the normal flex flow so it never overlaps content */}
       <div
         className={`sticky top-0 z-10 shrink-0 flex flex-wrap items-center justify-between p-2 gap-2 bg-background/80 backdrop-blur-sm border-b border-border rounded-t-md transition-opacity duration-200 ${
-          isHovered ? 'opacity-100' : 'opacity-0'
+          persistentToolbar || isHovered ? 'opacity-100' : 'opacity-0'
         }`}
       >
         <div className="flex items-center gap-1">
@@ -289,6 +295,7 @@ const PDFElement = ({ element }: Props) => {
               <PDFViewer
                 url={element.url}
                 startPage={element.page}
+                persistentToolbar
                 className="w-full h-full"
               />
             </div>

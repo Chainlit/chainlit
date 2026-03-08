@@ -32,8 +32,15 @@ describe('PDF Viewer', () => {
         'resource'
       ) as PerformanceResourceTiming[];
       const pdfResources = resources.filter(
-        (r) => r.name.endsWith('.pdf') || r.name.includes('/files/')
+        (r) =>
+          r.name.endsWith('.pdf') ||
+          r.name.includes('/files/') ||
+          r.name.includes('/project/file/')
       );
+      expect(
+        pdfResources.length,
+        'at least one PDF resource should have been loaded'
+      ).to.be.greaterThan(0);
       pdfResources.forEach((r) => {
         expect(
           r.duration,
