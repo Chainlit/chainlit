@@ -29,14 +29,14 @@ export default function Step({
   const isError = step.isError;
   const stepName = step.name;
 
-  const [openValue, setOpenValue] = useState<string | undefined>(
-    step.defaultOpen ? step.id : undefined
+  const [openValue, setOpenValue] = useState<string>(
+    step.defaultOpen ? step.id : ''
   );
 
   // Auto-collapse when step finishes if autoCollapse is set
   useEffect(() => {
     if (!using && step.autoCollapse) {
-      setOpenValue(undefined);
+      setOpenValue('');
     }
   }, [using, step.autoCollapse]);
 
@@ -73,7 +73,7 @@ export default function Step({
         type="single"
         collapsible
         value={openValue}
-        onValueChange={(val) => setOpenValue(val || undefined)}
+        onValueChange={(val) => setOpenValue(val)}
         className="w-full"
       >
         <AccordionItem value={step.id} className="border-none">
