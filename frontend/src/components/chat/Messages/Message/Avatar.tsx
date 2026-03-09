@@ -59,11 +59,14 @@ const MessageAvatar = ({ author, hide, isError, iconName }: Props) => {
 
   // Render icon or avatar based on iconName
   const avatarContent = iconName ? (
-    <span className="inline-flex">
-      <Icon name={iconName} className="h-5 w-5 mt-[3px]" />
+    <span className="inline-flex mt-[3px]">
+      <Icon name={iconName} size={avatarSize ?? 20} /> {/* 20 => h-5 w-5 */}
     </span>
   ) : (
-    <Avatar className="h-5 w-5 mt-[3px]">
+    <Avatar
+      className={avatarSize ? 'mt-[3px]' : 'h-5 w-5 mt-[3px]'}
+      style={sizeStyle}
+    >
       <AvatarImage
         src={avatarUrl}
         alt={`Avatar for ${author || 'default'}`}
