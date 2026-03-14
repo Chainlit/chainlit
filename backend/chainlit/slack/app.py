@@ -324,7 +324,8 @@ async def process_slack_message(
         slack_user_id = event.get("bot_id")
         if not slack_user_id:
             logger.warning(
-                "Skipping Slack message with no user or bot_id: %s", event.get("subtype")
+                "Skipping Slack message with no user or bot_id: %s",
+                event.get("subtype"),
             )
             return
         is_bot = True
