@@ -199,7 +199,8 @@ async def _get_bot_profile(bot_id: str) -> dict:
     """Fetch bot info from Slack and return a profile-like dict."""
     try:
         bot_info = await slack_app.client.bots_info(bot=bot_id)
-        bot_name = bot_info.get("bot", {}).get("name", bot_id)
+        bot = bot_info.get("bot") or {}
+        bot_name = bot.get("name", bot_id)
         return {"real_name": bot_name}
     except SlackApiError:
         logger.info("Could not fetch bot info for %s", bot_id)
