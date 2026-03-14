@@ -406,6 +406,11 @@ async def handle_app_mentions(event, say):
 
 @slack_app.event("message")
 async def handle_message(message, say):
+    # Ignore bot/workflow messages in DMs — only human messages should be
+    # processed here. Workflow mentions are handled via app_mention instead.
+    if message.get("bot_id") or message.get("subtype") == "bot_message":
+        return
+
     thread_ts = message.get("thread_ts", message["ts"])
     thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 
