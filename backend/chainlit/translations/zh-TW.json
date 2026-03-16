@@ -261,7 +261,7 @@
       "deselectAll": "取消全選",
       "rowsCount": "{{filtered}} / {{total}} 行",
       "rowsPerPage": "{{count}} 行",
-      "filterPlaceholder": "筛選...",
+      "filterPlaceholder": "篩選...",
       "columns": "欄位",
       "pageSizePlaceholder": "每頁行數",
       "exportExcel": "匯出 Excel",
