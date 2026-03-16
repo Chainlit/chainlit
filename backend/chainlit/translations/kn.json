@@ -258,7 +258,7 @@
     },
     "DataframeElement": {
       "selectAll": "ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆ ಮಾಡಿ",
-      "deselectAll": "ಎಲ್ಲವನ್ನೂ ತೆಗೆದುಹಾకಿ",
+      "deselectAll": "ಎಲ್ಲವನ್ನೂ ತೆಗೆದುಹಾಕಿ",
       "rowsCount": "{{total}} ರಲ್ಲಿ {{filtered}} ಸಾಲುಗಳು",
       "rowsPerPage": "{{count}} ಸಾಲುಗಳು",
       "filterPlaceholder": "ಫಿಲ್ಟರ್...",
