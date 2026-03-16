@@ -446,7 +446,9 @@ class Dataframe(Element):
         super().__post_init__()
 
     def to_dict(self) -> DataframeDict:
-        d = DataframeDict(super().to_dict())
+        # mypy expects TypedDict constructors to be called with keyword arguments
+        base = super().to_dict()
+        d = DataframeDict(**base)
         d["showColumnVisibility"] = self.show_column_visibility
         d["showColumnFilters"] = self.show_column_filters
         return d

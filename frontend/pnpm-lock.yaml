@@ -5,8 +5,20 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
+  vite@>=4.4.0 <4.4.12: '>=4.4.12'
+  vite@>=4.0.0 <=4.5.1: '>=4.5.2'
+  katex@>=0.11.0 <0.16.10: '>=0.16.10'
+  katex@>=0.15.4 <0.16.10: '>=0.16.10'
+  katex@>=0.10.0-beta <0.16.10: '>=0.16.10'
+  vite@>=4.0.0 <=4.5.2: '>=4.5.3'
   braces@<3.0.3: '>=3.0.3'
+  ws@>=8.0.0 <8.17.1: '>=8.17.1'
   micromatch@<4.0.8: '>=4.0.8'
+  vite@>=4.0.0 <4.5.4: '>=4.5.4'
+  vite@>=4.0.0 <=4.5.3: '>=4.5.4'
+  rollup@>=3.0.0 <3.29.5: '>=3.29.5'
+  rollup@>=4.0.0 <4.22.4: '>=4.22.4'
+  cross-spawn@>=7.0.0 <7.0.5: '>=7.0.5'
 
 importers:
 
@@ -1567,7 +1579,7 @@ packages:
     resolution: {integrity: sha512-XTIWOPPcpvyKI6L1NHo0lFlCyznUEyPmPY1mc3KpPVDYulHSTvyeLNVW00QTLIAFNhR3kYnJTQHeGqU4M3n09g==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
-      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+      rollup: '>=3.29.5'
     peerDependenciesMeta:
       rollup:
         optional: true
@@ -1971,13 +1983,13 @@ packages:
   '@vitejs/plugin-react-swc@3.3.2':
     resolution: {integrity: sha512-VJFWY5sfoZerQRvJrh518h3AcQt6f/yTuWn4/TRB+dqmYU0NX1qz7qM5Wfd+gOQqUzQW4gxKqKN3KpE/P3+zrA==}
     peerDependencies:
-      vite: ^4
+      vite: '>=4.5.4'
 
   '@vitejs/plugin-react@4.2.1':
     resolution: {integrity: sha512-oojO9IDc4nCUUi8qIR11KoQm0XFFLIwsRBwHRR4d/88IWghn1y6ckz/bJ8GHDCsYEJee8mDzqtJxh15/cisJNQ==}
     engines: {node: ^14.18.0 || >=16.0.0}
     peerDependencies:
-      vite: ^4.2.0 || ^5.0.0
+      vite: '>=4.5.4'
 
   '@vitest/expect@0.34.6':
     resolution: {integrity: sha512-QUzKpUQRc1qC7qdGo7rMK3AkETI7w18gTCUrsNnyjjJKYiuUB9+TQK3QnR1unhCnWRC0AbKv2omLGQDF/mIjOw==}
@@ -4434,12 +4446,12 @@ packages:
   vite-plugin-svgr@4.2.0:
     resolution: {integrity: sha512-SC7+FfVtNQk7So0XMjrrtLAbEC8qjFPifyD7+fs/E6aaNdVde6umlVVh0QuwDLdOMu7vp5RiGFsB70nj5yo0XA==}
     peerDependencies:
-      vite: ^2.6.0 || 3 || 4 || 5
+      vite: '>=4.5.4'
 
   vite-tsconfig-paths@4.2.0:
     resolution: {integrity: sha512-jGpus0eUy5qbbMVGiTxCL1iB9ZGN6Bd37VGLJU39kTDD6ZfULTTb1bcc5IeTWqWJKiWV5YihCaibeASPiGi8kw==}
     peerDependencies:
-      vite: '*'
+      vite: '>=4.5.4'
     peerDependenciesMeta:
       vite:
         optional: true
