@@ -249,6 +249,18 @@
     "components": {
         "MultiSelectInput": {
             "placeholder": "선택..."
+        },
+        "DataframeElement": {
+            "selectAll": "모두 선택",
+            "deselectAll": "모두 선택 해제",
+            "rowsCount": "{{total}}행 중 {{filtered}}행",
+            "rowsPerPage": "{{count}}행",
+            "filterPlaceholder": "필터...",
+            "columns": "열",
+            "pageSizePlaceholder": "페이지 크기",
+            "exportExcel": "Excel 내보내기",
+            "clearFilters": "필터 지우기",
+            "noResults": "결과 없음."
         }
     }
 }

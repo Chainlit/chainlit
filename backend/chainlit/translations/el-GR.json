@@ -255,6 +255,18 @@
         "single": "Επιλέξτε ημερομηνία",
         "range": "Επιλέξτε εύρος ημερομηνιών"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "Επιλογή όλων",
+      "deselectAll": "Αποεπιλογή όλων",
+      "rowsCount": "{{filtered}} από {{total}} γραμμές",
+      "rowsPerPage": "{{count}} γραμμές",
+      "filterPlaceholder": "Φίλτραρισμα...",
+      "columns": "Στήλες",
+      "pageSizePlaceholder": "Μέγεθος σελίδας",
+      "exportExcel": "Εξαγωγή Excel",
+      "clearFilters": "Καθαρισμός φίλτρων",
+      "noResults": "Δεν βρέθηκαν αποτελέσματα."
     }
   }
 }

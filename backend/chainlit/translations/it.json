@@ -249,6 +249,18 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "Seleziona..."
+    },
+    "DataframeElement": {
+      "selectAll": "Seleziona tutto",
+      "deselectAll": "Deseleziona tutto",
+      "rowsCount": "{{filtered}} di {{total}} righe",
+      "rowsPerPage": "{{count}} righe",
+      "filterPlaceholder": "Filtra...",
+      "columns": "Colonne",
+      "pageSizePlaceholder": "Dimensione pagina",
+      "exportExcel": "Esporta Excel",
+      "clearFilters": "Cancella filtri",
+      "noResults": "Nessun risultato."
     }
   }
 }

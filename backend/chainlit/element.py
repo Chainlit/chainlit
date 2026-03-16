@@ -418,6 +418,11 @@ class Plotly(Element):
         super().__post_init__()
 
 
+class DataframeDict(ElementDict, total=False):
+    showColumnVisibility: bool
+    showColumnFilters: bool
+
+
 @dataclass
 class Dataframe(Element):
     """Useful to send a pandas DataFrame to the UI."""
@@ -425,6 +430,10 @@ class Dataframe(Element):
     type: ClassVar[ElementType] = "dataframe"
     size: ElementSize = "large"
     data: Any = None  # The type is Any because it is checked in __post_init__.
+    show_column_visibility: bool = False
+    """Show column visibility toggle dropdown. Defaults to False in the UI."""
+    show_column_filters: bool = False
+    """Show per-column filter inputs. Defaults to False in the UI."""
 
     def __post_init__(self) -> None:
         """Ensures the data is a pandas DataFrame and converts it to JSON."""
@@ -435,6 +444,12 @@ class Dataframe(Element):
 
         self.content = self.data.to_json(orient="split", date_format="iso")
         super().__post_init__()
+
+    def to_dict(self) -> DataframeDict:
+        d = DataframeDict(super().to_dict())
+        d["showColumnVisibility"] = self.show_column_visibility
+        d["showColumnFilters"] = self.show_column_filters
+        return d
 
 
 @dataclass
