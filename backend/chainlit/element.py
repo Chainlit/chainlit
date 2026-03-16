@@ -417,6 +417,11 @@ class Plotly(Element):
         super().__post_init__()
 
 
+class DataframeDict(ElementDict, total=False):
+    showColumnVisibility: bool
+    showColumnFilters: bool
+
+
 @dataclass
 class Dataframe(Element):
     """Useful to send a pandas or polars DataFrame to the UI."""
@@ -424,6 +429,10 @@ class Dataframe(Element):
     type: ClassVar[ElementType] = "dataframe"
     size: ElementSize = "large"
     data: Any = None  # The type is Any because it is checked in __post_init__.
+    show_column_visibility: bool = False
+    """Show column visibility toggle dropdown. Defaults to False in the UI."""
+    show_column_filters: bool = False
+    """Show per-column filter inputs. Defaults to False in the UI."""
 
     @staticmethod
     def _is_pandas_dataframe(data: Any) -> bool:
@@ -462,6 +471,12 @@ class Dataframe(Element):
             raise TypeError("data must be a pandas.DataFrame or polars.DataFrame")
 
         super().__post_init__()
+
+    def to_dict(self) -> DataframeDict:
+        d = DataframeDict(super().to_dict())
+        d["showColumnVisibility"] = self.show_column_visibility
+        d["showColumnFilters"] = self.show_column_filters
+        return d
 
 
 @dataclass

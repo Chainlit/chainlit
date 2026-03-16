@@ -255,6 +255,18 @@
         "single": "તારીખ પસંદ કરો",
         "range": "તારીખની શ્રેણી પસંદ કરો"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "બધા પસંદ કરો",
+      "deselectAll": "બધા રદ કરો",
+      "rowsCount": "{{total}} માંથી {{filtered}} પંક્તિઓ",
+      "rowsPerPage": "{{count}} પંક્તિઓ",
+      "filterPlaceholder": "ફિલ્ટર...",
+      "columns": "કોલમ્સ",
+      "pageSizePlaceholder": "પેજ કાર્યક્ષમતા",
+      "exportExcel": "Excel નિકાસ કરો",
+      "clearFilters": "ફિલ્ટર સાવ કરો",
+      "noResults": "કોઈ પરિણામ નથી."
     }
   }
 }

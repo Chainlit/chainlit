@@ -254,6 +254,18 @@
         "single": "日付を選択",
         "range": "日付範囲を選択"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "すべて選択",
+      "deselectAll": "すべて選択解除",
+      "rowsCount": "{{total}}中{{filtered}}件",
+      "rowsPerPage": "{{count}}行",
+      "filterPlaceholder": "フィルター...",
+      "columns": "列",
+      "pageSizePlaceholder": "ページサイズ",
+      "exportExcel": "Excelにエクスポート",
+      "clearFilters": "フィルターをクリア",
+      "noResults": "結果なし。"
     }
   }
 }

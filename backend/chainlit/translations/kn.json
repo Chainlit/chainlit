@@ -255,6 +255,18 @@
         "single": "ದಿನಾಂಕವನ್ನು ಆಯ್ಕೆಮಾಡಿ",
         "range": "ದಿನಾಂಕ ಶ್ರೇಣಿಯನ್ನು ಆಯ್ಕೆಮಾಡಿ"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "ಎಲ್ಲವನ್ನೂ ಆಯ್ಕೆ ಮಾಡಿ",
+      "deselectAll": "ಎಲ್ಲವನ್ನೂ ತೆಗೆದುಹಾకಿ",
+      "rowsCount": "{{total}} ರಲ್ಲಿ {{filtered}} ಸಾಲುಗಳು",
+      "rowsPerPage": "{{count}} ಸಾಲುಗಳು",
+      "filterPlaceholder": "ಫಿಲ್ಟರ್...",
+      "columns": "ಕಾಲಮ್ಮುಗಳು",
+      "pageSizePlaceholder": "ಪುಟ ಗಾತ್ರೆ",
+      "exportExcel": "Excel ನಿರ್ಗಮಿಸಿ",
+      "clearFilters": "ಫಿಲ್ಟರ್ ತೆರವುಗೆಳಿಸಿ",
+      "noResults": "ಯಾವುದೇ ಫಲಿತಾಂಶವಿಲ್ಲ."
     }
   }
 }

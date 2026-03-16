@@ -255,6 +255,18 @@
         "single": "Pick a date",
         "range": "Pick a date range"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "rowsCount": "{{filtered}} of {{total}} rows",
+      "rowsPerPage": "{{count}} rows",
+      "filterPlaceholder": "Filter...",
+      "columns": "Columns",
+      "pageSizePlaceholder": "Page size",
+      "exportExcel": "Export Excel",
+      "clearFilters": "Clear Filters",
+      "noResults": "No results."
     }
   }
 }

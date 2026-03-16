@@ -255,6 +255,18 @@
         "single": "בחר תאריך",
         "range": "בחר טווח תאריכים"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "בחר הכל",
+      "deselectAll": "בטל בחירה",
+      "rowsCount": "{{filtered}} מתוך {{total}} שורות",
+      "rowsPerPage": "{{count}} שורות",
+      "filterPlaceholder": "סנן...",
+      "columns": "עמודות",
+      "pageSizePlaceholder": "גודל עמוד",
+      "exportExcel": "ייצוא Excel",
+      "clearFilters": "נקה סננים",
+      "noResults": "אין תוצאות."
     }
   }
 }

@@ -255,6 +255,18 @@
         "single": "तारीख निवडा",
         "range": "तारीख श्रेणी निवडा"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "सर्व निवडा",
+      "deselectAll": "सर्व रद्द करा",
+      "rowsCount": "{{total}} पैकी {{filtered}} पंक्ती",
+      "rowsPerPage": "{{count}} पंक्ती",
+      "filterPlaceholder": "फिल्टर...",
+      "columns": "स्तंभ",
+      "pageSizePlaceholder": "पृष्ठ आकार",
+      "exportExcel": "Excel निर्यात करा",
+      "clearFilters": "फिल्टर साफ करा",
+      "noResults": "कोणतेही परिणाम नाही."
     }
   }
 }
