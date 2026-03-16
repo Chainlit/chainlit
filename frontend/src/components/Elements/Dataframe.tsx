@@ -132,6 +132,12 @@ const _DataframeElement = ({
         cell: ({ getValue }: { getValue: () => any }) => {
           const value = getValue();
           return String(value);
+        },
+        filterFn: (row, columnId, filterValue: string) => {
+          const value = row.getValue(columnId);
+          return String(value ?? '')
+            .toLowerCase()
+            .includes(filterValue.toLowerCase());
         }
       })),
     [columns, showColumnFilters]
@@ -321,13 +327,13 @@ const _DataframeElement = ({
                         className="p-4"
                       >
                         <dl className="grid grid-cols-[minmax(0,max-content)_minmax(0,1fr)] gap-x-6 gap-y-1 text-sm">
-                          {columns.map((col) => (
-                            <React.Fragment key={col}>
+                          {table.getVisibleLeafColumns().map((col) => (
+                            <React.Fragment key={col.id}>
                               <dt className="font-medium text-muted-foreground py-1 border-b">
-                                {col}
+                                {col.id}
                               </dt>
                               <dd className="break-words py-1 border-b">
-                                {String(row.original[col] ?? '')}
+                                {String(row.original[col.id] ?? '')}
                               </dd>
                             </React.Fragment>
                           ))}

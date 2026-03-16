@@ -13,6 +13,7 @@ from typing import (
     TypedDict,
     TypeVar,
     Union,
+    cast,
 )
 
 import filetype
@@ -178,6 +179,16 @@ class Element:
 
         elif type == "plotly":
             return Plotly(size=e_dict.get("size", "medium"), **common_params)  # type: ignore[arg-type]
+
+        elif type == "dataframe":
+            dataframe_dict = cast(DataframeDict, e_dict)
+            return Dataframe(
+                show_column_visibility=dataframe_dict.get(
+                    "showColumnVisibility", False
+                ),
+                show_column_filters=dataframe_dict.get("showColumnFilters", False),
+                **common_params,  # type: ignore[arg-type]
+            )
 
         elif type == "custom":
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
@@ -446,9 +457,7 @@ class Dataframe(Element):
         super().__post_init__()
 
     def to_dict(self) -> DataframeDict:
-        # mypy expects TypedDict constructors to be called with keyword arguments
-        base = super().to_dict()
-        d = DataframeDict(**base)
+        d = DataframeDict(**super().to_dict())
         d["showColumnVisibility"] = self.show_column_visibility
         d["showColumnFilters"] = self.show_column_filters
         return d
