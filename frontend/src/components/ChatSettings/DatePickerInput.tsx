@@ -176,7 +176,7 @@ const DatePickerSingle = ({
   };
 
   const handleOpenChange = (isOpen: boolean) => {
-    if (baseProps.disabled) return;
+    if (baseProps.disabled && isOpen) return;
     setOpen(isOpen);
   };
 
