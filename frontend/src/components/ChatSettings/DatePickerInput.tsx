@@ -99,24 +99,26 @@ const DatePickerBase = ({
       tooltip={tooltip}
       hasError={hasError}
     >
-      <Popover open={open} onOpenChange={onOpenChange}>
+      <Popover open={open} onOpenChange={disabled ? undefined : onOpenChange}>
         <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            disabled={disabled}
-            data-empty={isEmpty}
-            className={cn(
-              'w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground px-3 py-2',
-              className
-            )}
-          >
-            <div className="flex gap-3">
-              <CalendarIcon className="!size-5" />
-              {buttonText}
-            </div>
+          <div className={disabled ? 'cursor-not-allowed' : undefined}>
+            <Button
+              variant="outline"
+              disabled={disabled}
+              data-empty={isEmpty}
+              className={cn(
+                'w-full justify-between text-left font-normal data-[empty=true]:text-muted-foreground px-3 py-2',
+                className
+              )}
+            >
+              <div className="flex gap-3">
+                <CalendarIcon className="!size-5" />
+                {buttonText}
+              </div>
 
-            <ChevronDownIcon className="!size-5" />
-          </Button>
+              <ChevronDownIcon className="!size-5" />
+            </Button>
+          </div>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           {calendarContent}
@@ -263,6 +265,7 @@ const DatePickerRange = ({
 
   // Update temp range when popover opens to sync with current value
   const handleOpenChange = (isOpen: boolean) => {
+    if (baseProps.disabled) return;
     setOpen(isOpen);
     setTempRange(dateRange);
   };
