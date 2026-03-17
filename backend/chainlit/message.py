@@ -138,9 +138,48 @@ class MessageBase(ABC):
                     raise e
                 logger.error(f"Failed to persist message deletion: {e!s}")
 
+        await self.remove_children()
         await context.emitter.delete_step(step_dict)
 
         return True
+
+    async def remove_children(self):
+        data_layer = get_data_layer()
+        if not data_layer:
+            return
+
+        thread = await data_layer.get_thread(self.thread_id)
+        if thread is None:
+            return
+
+        steps = thread.get("steps", [])
+        elements = thread.get("elements", [])
+
+        def collect_descendants(parent_id: str, visited: Optional[set] = None) -> list:
+            """Return descendant IDs in post-order (leaves first, parents last)."""
+            if visited is None:
+                visited = set()
+            if parent_id in visited:
+                return []
+            visited.add(parent_id)
+            result = []
+            for step in steps:
+                if step.get("parentId") == parent_id:
+                    result.extend(collect_descendants(step["id"], visited))
+                    result.append(step["id"])
+            return result
+
+        # Ordered leaves-first so that referential integrity constraints are respected.
+        ordered_descendant_ids = collect_descendants(self.id)
+        descendant_id_set = set(ordered_descendant_ids)
+
+        for step_id in ordered_descendant_ids:
+            await data_layer.delete_step(step_id)
+
+        orphaned_elements = [e for e in elements if e.get("forId") in descendant_id_set]
+        await asyncio.gather(
+            *[data_layer.delete_element(e["id"]) for e in orphaned_elements]
+        )
 
     async def _create(self):
         step_dict = self.to_dict()

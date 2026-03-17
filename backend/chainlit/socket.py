@@ -337,7 +337,7 @@ async def edit_message(sid, payload: MessagePayload):
         if message.id == payload["message"]["id"]:
             message.content = payload["message"]["output"]
             await message.update()
-            await delete_message_children(message.id, session.thread_id)            
+            await message.remove_children()
             orig_message = message
 
     await context.emitter.task_start()
@@ -349,37 +349,6 @@ async def edit_message(sid, payload: MessagePayload):
             pass
         finally:
             await context.emitter.task_end()
-
-async def delete_message_children(message_id: str, thread_id: str):
-    data_layer = get_data_layer()
-    if not data_layer:
-        return
-
-    thread = await data_layer.get_thread(thread_id)
-    if thread is None:
-        return
-
-    steps = thread.get("steps", [])
-    elements = thread.get("elements", [])
-
-    # Collect all descendant step IDs whose root parent is message_id
-    def collect_descendants(parent_id: str) -> set:
-        ids = set()
-        for step in steps:
-            if step.get("parentId") == parent_id:
-                ids.add(step["id"])
-                ids |= collect_descendants(step["id"])
-        return ids
-
-    descendant_ids = collect_descendants(message_id)
-
-    for step in steps:
-        if step["id"] in descendant_ids:
-            await data_layer.delete_step(step["id"])
-
-    for element in elements:
-        if element.get("forId") in descendant_ids:
-            await data_layer.delete_element(element["id"])
 
 @sio.on("message_favorite")  # pyright: ignore [reportOptionalCall]
 async def message_favorite(sid, payload: MessagePayload):
