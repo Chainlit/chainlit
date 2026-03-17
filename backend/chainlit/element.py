@@ -448,12 +448,13 @@ class Dataframe(Element):
 
     def __post_init__(self) -> None:
         """Ensures the data is a pandas DataFrame and converts it to JSON."""
-        from pandas import DataFrame
+        if self.data is not None:
+            from pandas import DataFrame
 
-        if not isinstance(self.data, DataFrame):
-            raise TypeError("data must be a pandas.DataFrame")
+            if not isinstance(self.data, DataFrame):
+                raise TypeError("data must be a pandas.DataFrame")
 
-        self.content = self.data.to_json(orient="split", date_format="iso")
+            self.content = self.data.to_json(orient="split", date_format="iso")
         super().__post_init__()
 
     def to_dict(self) -> DataframeDict:
