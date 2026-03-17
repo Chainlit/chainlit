@@ -99,7 +99,7 @@ const DatePickerBase = ({
       tooltip={tooltip}
       hasError={hasError}
     >
-      <Popover open={open} onOpenChange={disabled ? undefined : onOpenChange}>
+      <Popover open={open} onOpenChange={onOpenChange}>
         <PopoverTrigger asChild>
           <div className={disabled ? 'cursor-not-allowed' : undefined}>
             <Button
@@ -175,6 +175,11 @@ const DatePickerSingle = ({
     setOpen(false);
   };
 
+  const handleOpenChange = (isOpen: boolean) => {
+    if (baseProps.disabled) return;
+    setOpen(isOpen);
+  };
+
   const buttonText = date ? (
     format(date, dateFormat || 'PPP', { locale: dateFnsLocale })
   ) : (
@@ -201,7 +206,7 @@ const DatePickerSingle = ({
       buttonText={buttonText}
       calendarContent={calendarContent}
       open={open}
-      onOpenChange={setOpen}
+      onOpenChange={handleOpenChange}
     />
   );
 };
