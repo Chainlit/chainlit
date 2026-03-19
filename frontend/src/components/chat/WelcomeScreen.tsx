@@ -17,6 +17,7 @@ import {
 
 import { Logo } from '@/components/Logo';
 import { Markdown } from '@/components/Markdown';
+import WaterMark from '@/components/WaterMArk';
 
 import MessageComposer from './MessageComposer';
 import Starters from './Starters';
@@ -89,6 +90,7 @@ export default function WelcomeScreen(props: Props) {
     >
       {logo}
       <MessageComposer {...props} />
+      <WaterMark />
       <Starters />
     </div>
   );
