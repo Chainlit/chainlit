@@ -4,6 +4,34 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.10.0] - 2026-03-05
+
+### Added
+- Add starter categories for grouped starters
+- Always show the favorite messages button with an empty state
+- Add option to disable rendering markdown in user messages
+- Allow easy deletion of favorites
+- Make state cookie lifetime configurable via env var
+- Add Arabic translation
+- Add Danish translation
+- Add settings change listener
+- Add image preview
+- Add selected option for command pre-selection
+- Add `auto_collapse` parameter to `Step`
+- Add `/health` endpoint for container orchestration
+- Add `hidden` option for `default_sidebar_state`
+- Make avatar size configurable via `config.toml`
+
+### Fixed
+- Reorder chat history sidebar after messages in existing chats
+- Use login error detail for credential failures
+- Convert UUID fields to strings in feedback extraction
+- Preserve thread metadata when updated without metadata
+- Reset audio UI when microphone permission is denied
+- Fix sidebar inset overflow causing horizontal scroll
+- Prevent empty strings from overwriting step content on upsert
+- Use correct URL scheme when SSL is configured
+
 ## [2.9.6] - 2026-01-20
 
 ### Added

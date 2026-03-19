@@ -95,11 +95,12 @@ async def lifespan(app: FastAPI):
     host = config.run.host
     port = config.run.port
     root_path = os.getenv("CHAINLIT_ROOT_PATH", "")
+    scheme = "https" if config.run.ssl_cert else "http"
 
     if host == DEFAULT_HOST:
-        url = f"http://localhost:{port}{root_path}"
+        url = f"{scheme}://localhost:{port}{root_path}"
     else:
-        url = f"http://{host}:{port}{root_path}"
+        url = f"{scheme}://{host}:{port}{root_path}"
 
     logger.info(f"Your app is available at {url}")
 
@@ -1738,6 +1739,12 @@ async def get_avatar(avatar_id: str):
 def status_check():
     """Check if the site is operational."""
     return {"message": "Site is operational"}
+
+
+@router.get("/health")
+def health_check():
+    """Health check endpoint for container orchestration and monitoring."""
+    return {"status": "ok"}
 
 
 @router.get("/{full_path:path}")
