@@ -839,7 +839,7 @@ async def project_settings(
 
     starter_categories = []
     if config.code.set_starter_categories:
-        sc = await config.code.set_starter_categories(current_user, effective_language)
+        sc = await config.code.set_starter_categories(current_user, effective_language, chat_profile)
         if sc:
             starter_categories = [it.to_dict() for it in sc]
 
