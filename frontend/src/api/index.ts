@@ -57,8 +57,18 @@ class ExtendedChainlitAPI extends ChainlitAPI {
         ...(headers ? { headers } : {})
       })
     }).then(async (res) => {
+      if (!res.ok) {
+        let detail: string | undefined;
+        try {
+          const data = await res.json();
+          detail = data.detail;
+        } catch {
+          // Response body is not JSON (e.g. proxy HTML error page)
+        }
+        throw new ClientError(detail || res.statusText, res.status);
+      }
       const data = await res.json();
-      return { success: res.ok, mcp: data.mcp, error: data.detail };
+      return { success: true, mcp: data.mcp, error: undefined };
     });
   }
 }
