@@ -351,13 +351,13 @@ class ChainlitDataLayer(BaseDataLayer):
         )
         ON CONFLICT (id) DO UPDATE SET
             "parentId" = COALESCE(EXCLUDED."parentId", "Step"."parentId"),
-            input = COALESCE(EXCLUDED.input, "Step".input),
+            input = COALESCE(NULLIF(EXCLUDED.input, ''), "Step".input),
             metadata = CASE
                 WHEN EXCLUDED.metadata <> '{}' THEN EXCLUDED.metadata
                 ELSE "Step".metadata
             END,
             name = COALESCE(EXCLUDED.name, "Step".name),
-            output = COALESCE(EXCLUDED.output, "Step".output),
+            output = COALESCE(NULLIF(EXCLUDED.output, ''), "Step".output),
             type = CASE
                 WHEN EXCLUDED.type = 'run' THEN "Step".type
                 ELSE EXCLUDED.type
@@ -674,8 +674,8 @@ class ChainlitDataLayer(BaseDataLayer):
     def _extract_feedback_dict_from_step_row(self, row: Dict) -> Optional[FeedbackDict]:
         if row.get("feedback_id", None) is not None:
             return FeedbackDict(
-                forId=row["id"],
-                id=row["feedback_id"],
+                forId=str(row["id"]),
+                id=str(row["feedback_id"]),
                 value=row["feedback_value"],
                 comment=row["feedback_comment"],
             )

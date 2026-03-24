@@ -95,11 +95,12 @@ async def lifespan(app: FastAPI):
     host = config.run.host
     port = config.run.port
     root_path = os.getenv("CHAINLIT_ROOT_PATH", "")
+    scheme = "https" if config.run.ssl_cert else "http"
 
     if host == DEFAULT_HOST:
-        url = f"http://localhost:{port}{root_path}"
+        url = f"{scheme}://localhost:{port}{root_path}"
     else:
-        url = f"http://{host}:{port}{root_path}"
+        url = f"{scheme}://{host}:{port}{root_path}"
 
     logger.info(f"Your app is available at {url}")
 
@@ -836,6 +837,12 @@ async def project_settings(
         if s:
             starters = [it.to_dict() for it in s]
 
+    starter_categories = []
+    if config.code.set_starter_categories:
+        sc = await config.code.set_starter_categories(current_user, effective_language)
+        if sc:
+            starter_categories = [it.to_dict() for it in sc]
+
     data_layer = get_data_layer()
     debug_url = (
         await data_layer.build_debug_url() if data_layer and config.run.debug else None
@@ -865,6 +872,7 @@ async def project_settings(
             "markdown": markdown,
             "chatProfiles": profiles,
             "starters": starters,
+            "starterCategories": starter_categories,
             "debugUrl": debug_url,
         }
     )
@@ -1005,6 +1013,7 @@ async def get_shared_thread(
     if not isinstance(metadata, dict):
         metadata = {}
 
+    user_can_view = False
     if getattr(config.code, "on_shared_thread_view", None):
         try:
             user_can_view = await config.code.on_shared_thread_view(
@@ -1730,6 +1739,12 @@ async def get_avatar(avatar_id: str):
 def status_check():
     """Check if the site is operational."""
     return {"message": "Site is operational"}
+
+
+@router.get("/health")
+def health_check():
+    """Health check endpoint for container orchestration and monitoring."""
+    return {"status": "ok"}
 
 
 @router.get("/{full_path:path}")

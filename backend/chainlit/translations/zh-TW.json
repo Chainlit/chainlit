@@ -86,6 +86,7 @@
     "favorites": {
       "use": "使用收藏的訊息",
       "headline": "收藏的訊息",
+      "remove": "移除收藏",
       "empty": {
         "title": "尚未儲存的提示",
         "description": "從發送提示並加星號開始，或從之前的聊天中加星號提示"

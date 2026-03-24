@@ -38,6 +38,7 @@ if TYPE_CHECKING:
         Feedback,
         InputAudioChunk,
         Starter,
+        StarterCategory,
         ThreadDict,
     )
     from chainlit.user import User
@@ -45,7 +46,7 @@ else:
     # Pydantic needs to resolve forward annotations. Because all of these are used
     # within `typing.Callable`, alias to `Any` as Pydantic does not perform validation
     # of callable argument/return types anyway.
-    Request = Response = Action = Message = ChatProfile = InputAudioChunk = Starter = ThreadDict = User = Feedback = Any  # fmt: off
+    Request = Response = Action = Message = ChatProfile = InputAudioChunk = Starter = StarterCategory = ThreadDict = User = Feedback = Any  # fmt: off
 
 BACKEND_ROOT = os.path.dirname(__file__)
 PACKAGE_ROOT = os.path.dirname(os.path.dirname(BACKEND_ROOT))
@@ -95,6 +96,9 @@ unsafe_allow_html = false
 
 # Process and display mathematical expressions. This can clash with "$" characters in messages.
 latex = false
+
+# Enable rendering of user messages markdown
+user_message_markdown = true
 
 # Autoscroll new user messages at the top of the window
 user_message_autoscroll = true
@@ -169,7 +173,7 @@ name = "Assistant"
 
 # layout = "wide"
 
-# default_sidebar_state = "open"
+# default_sidebar_state = "open"  # Options: "open", "closed", "hidden"
 
 # Chat settings display location: "message_composer" (default) or "sidebar" (header)
 # chat_settings_location = "message_composer"
@@ -221,6 +225,9 @@ logo_file_url = ""
 
 # Load assistant avatar image directly from URL.
 default_avatar_file_url = ""
+
+# Avatar size in pixels (default: 20).
+# avatar_size = 20
 
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
@@ -322,6 +329,7 @@ class FeaturesSettings(BaseModel):
     mcp: McpFeature = Field(default_factory=McpFeature)
     slack: SlackFeature = Field(default_factory=SlackFeature)
     latex: bool = False
+    user_message_markdown: bool = True
     user_message_autoscroll: bool = True
     assistant_message_autoscroll: bool = True
     unsafe_allow_html: bool = False
@@ -346,7 +354,7 @@ class UISettings(BaseModel):
     default_theme: Optional[Literal["light", "dark"]] = "dark"
     language: Optional[str] = None
     layout: Optional[Literal["default", "wide"]] = "default"
-    default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
+    default_sidebar_state: Optional[Literal["open", "closed", "hidden"]] = "open"
     chat_settings_location: Optional[Literal["message_composer", "sidebar"]] = (
         "message_composer"
     )
@@ -367,6 +375,7 @@ class UISettings(BaseModel):
     custom_meta_image_url: Optional[str] = None
     logo_file_url: Optional[str] = None
     default_avatar_file_url: Optional[str] = None
+    avatar_size: Optional[int] = None
     custom_build: Optional[str] = None
     header_links: Optional[List[HeaderLink]] = None
 
@@ -396,12 +405,18 @@ class CodeSettings(BaseModel):
     on_audio_end: Optional[Callable[[], Any]] = None
     on_mcp_connect: Optional[Callable] = None
     on_mcp_disconnect: Optional[Callable] = None
+    on_settings_edit: Optional[Callable[[Dict[str, Any]], Any]] = None
     on_settings_update: Optional[Callable[[Dict[str, Any]], Any]] = None
     set_chat_profiles: Optional[
         Callable[[Optional["User"], Optional["str"]], Awaitable[List["ChatProfile"]]]
     ] = None
     set_starters: Optional[
         Callable[[Optional["User"], Optional["str"]], Awaitable[List["Starter"]]]
+    ] = None
+    set_starter_categories: Optional[
+        Callable[
+            [Optional["User"], Optional["str"]], Awaitable[List["StarterCategory"]]
+        ]
     ] = None
     on_shared_thread_view: Optional[
         Callable[["ThreadDict", Optional["User"]], Awaitable[bool]]

@@ -54,15 +54,18 @@ const Page = ({ children }: Props) => {
   );
 
   const historyEnabled = config?.dataPersistence && data?.requireLogin;
+  const sidebarHidden = config?.ui?.default_sidebar_state === 'hidden';
 
   return (
     <SidebarProvider
       defaultOpen={config?.ui.default_sidebar_state !== 'closed'}
     >
-      {historyEnabled ? (
+      {historyEnabled && !sidebarHidden ? (
         <>
           <LeftSidebar />
-          <SidebarInset className="max-h-svh">{mainContent}</SidebarInset>
+          <SidebarInset className="max-h-svh min-w-0">
+            {mainContent}
+          </SidebarInset>
         </>
       ) : (
         <div className="h-screen w-screen flex">{mainContent}</div>
