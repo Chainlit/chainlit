@@ -138,7 +138,13 @@ class MessageBase(ABC):
                     raise e
                 logger.error(f"Failed to persist message deletion: {e!s}")
 
-        await self.remove_children()
+        try:
+            await self.remove_children()
+        except Exception as e:
+            if self.fail_on_persist_error:
+                raise e
+            logger.error(f"Failed to persist message children deletion: {e!s}")
+
         await context.emitter.delete_step(step_dict)
 
         return True

@@ -825,8 +825,10 @@ class TestRemoveChildren:
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        deleted_ids = {call.args[0] for call in mock_data_layer.delete_step.call_args_list}
-        assert deleted_ids == {"child_1", "child_2"}
+        deleted_ids = [
+            call.args[0] for call in mock_data_layer.delete_step.call_args_list
+        ]
+        assert deleted_ids == ["child_1", "child_2"]
         mock_data_layer.delete_element.assert_not_called()
 
     @pytest.mark.asyncio
@@ -849,8 +851,10 @@ class TestRemoveChildren:
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        deleted_ids = {call.args[0] for call in mock_data_layer.delete_step.call_args_list}
-        assert deleted_ids == {"child_1", "grandchild_1", "great_grandchild_1"}
+        deleted_ids = [
+            call.args[0] for call in mock_data_layer.delete_step.call_args_list
+        ]
+        assert deleted_ids == ["child_1", "grandchild_1", "great_grandchild_1"]
         assert "msg_1" not in deleted_ids
         assert "unrelated" not in deleted_ids
 
@@ -865,7 +869,10 @@ class TestRemoveChildren:
             ],
             "elements": [
                 {"id": "elem_1", "forId": "child_1"},
-                {"id": "elem_2", "forId": "msg_1"},  # forId is the message itself — not deleted
+                {
+                    "id": "elem_2",
+                    "forId": "msg_1",
+                },  # forId is the message itself — not deleted
                 {"id": "elem_3", "forId": "unrelated"},
             ],
         }
@@ -875,9 +882,11 @@ class TestRemoveChildren:
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        mock_data_layer.delete_step.assert_called_once_with("child_1")
-        deleted_element_ids = {call.args[0] for call in mock_data_layer.delete_element.call_args_list}
-        assert deleted_element_ids == {"elem_1"}
+        mock_data_layer.delete_step.assert_awaited_once_with("child_1")
+        deleted_element_ids = [
+            call.args[0] for call in mock_data_layer.delete_element.call_args_list
+        ]
+        assert deleted_element_ids == ["elem_1"]
 
     @pytest.mark.asyncio
     async def test_message_itself_is_not_deleted(self):
@@ -896,5 +905,7 @@ class TestRemoveChildren:
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        deleted_ids = {call.args[0] for call in mock_data_layer.delete_step.call_args_list}
+        deleted_ids = [
+            call.args[0] for call in mock_data_layer.delete_step.call_args_list
+        ]
         assert "msg_1" not in deleted_ids
