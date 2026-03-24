@@ -266,9 +266,7 @@ async def test_update_thread_with_empty_metadata(
 async def test_update_thread_preserves_metadata_on_noop_call(
     data_layer: SQLAlchemyDataLayer,
 ):
-    await data_layer.update_thread(
-        "thread_preserve", metadata={"important": "data"}
-    )
+    await data_layer.update_thread("thread_preserve", metadata={"important": "data"})
 
     await data_layer.update_thread("thread_preserve")
 
@@ -301,9 +299,7 @@ async def test_update_thread_deletes_metadata_keys_via_none(
         "thread_delete_key", metadata={"a": 1, "b": 2, "c": 3}
     )
 
-    await data_layer.update_thread(
-        "thread_delete_key", metadata={"b": None}
-    )
+    await data_layer.update_thread("thread_delete_key", metadata={"b": None})
 
     raw = await _get_thread_metadata_raw(data_layer, "thread_delete_key")
     assert raw is not None
@@ -314,9 +310,7 @@ async def test_update_thread_deletes_metadata_keys_via_none(
 async def test_update_thread_name_update_preserves_metadata(
     data_layer: SQLAlchemyDataLayer,
 ):
-    await data_layer.update_thread(
-        "thread_name_meta", metadata={"saved": True}
-    )
+    await data_layer.update_thread("thread_name_meta", metadata={"saved": True})
 
     await data_layer.update_thread("thread_name_meta", name="New Name")
 

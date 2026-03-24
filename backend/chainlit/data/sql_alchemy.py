@@ -269,9 +269,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             name_value = metadata.get("name")
 
         is_new_thread = not thread_exists
-        created_at_value = (
-            await self.get_current_timestamp() if is_new_thread else None
-        )
+        created_at_value = await self.get_current_timestamp() if is_new_thread else None
 
         data = {
             "id": thread_id,
