@@ -277,8 +277,7 @@ async def test_get_thread_returns_iso_format_with_z_suffix():
     assert result["createdAt"] == "2024-03-10T09:20:15.456789Z"
 
 
-@pytest.mark.asyncio
-async def test_convert_step_row_to_dict_returns_iso_format_with_z_suffix():
+def test_convert_step_row_to_dict_returns_iso_format_with_z_suffix():
     """Test that _convert_step_row_to_dict returns timestamps with 'Z' suffix for chainlit/utils.py utc_now() compliance."""
     data_layer = ChainlitDataLayer(
         database_url="postgresql://test", storage_client=None, show_logger=False
@@ -313,9 +312,8 @@ async def test_convert_step_row_to_dict_returns_iso_format_with_z_suffix():
     assert result["start"] == "2024-04-05T12:00:05.222222Z"
     assert result["end"] == "2024-04-05T12:00:10.333333Z"
 
-
-@pytest.mark.asyncio
-async def test_convert_step_row_to_dict_handles_none_timestamps():
+    
+def test_convert_step_row_to_dict_handles_none_timestamps():
     """Test that _convert_step_row_to_dict handles None timestamps correctly."""
     data_layer = ChainlitDataLayer(
         database_url="postgresql://test", storage_client=None, show_logger=False
@@ -345,3 +343,23 @@ async def test_convert_step_row_to_dict_handles_none_timestamps():
     assert result["createdAt"] is None
     assert result["start"] is None
     assert result["end"] is None
+    
+
+def test_create_step_uses_nullif_for_output_and_input():
+    """Empty-string output/input should not overwrite existing content.
+
+    Regression test for https://github.com/Chainlit/chainlit/issues/2789
+    The SQL uses NULLIF(EXCLUDED.output, '') so that an empty string from the
+    initial Step.send() is treated as NULL by COALESCE, preventing it from
+    overwriting non-empty content saved by a subsequent Step.update().
+    """
+    import inspect
+
+    source = inspect.getsource(ChainlitDataLayer.create_step)
+
+    assert "NULLIF(EXCLUDED.output, '')" in source, (
+        "output should use NULLIF to treat empty string as NULL"
+    )
+    assert "NULLIF(EXCLUDED.input, '')" in source, (
+        "input should use NULLIF to treat empty string as NULL"
+    )
