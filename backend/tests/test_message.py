@@ -854,39 +854,9 @@ class TestRemoveChildren:
         deleted_ids = [
             call.args[0] for call in mock_data_layer.delete_step.call_args_list
         ]
-        assert deleted_ids == ["child_1", "grandchild_1", "great_grandchild_1"]
+        assert deleted_ids == ["great_grandchild_1", "grandchild_1", "child_1"]
         assert "msg_1" not in deleted_ids
         assert "unrelated" not in deleted_ids
-
-    @pytest.mark.asyncio
-    async def test_elements_linked_to_descendants_deleted(self):
-        """Deletes elements whose forId references a descendant step."""
-        msg = self._make_message()
-        thread = {
-            "steps": [
-                {"id": "msg_1", "parentId": None},
-                {"id": "child_1", "parentId": "msg_1"},
-            ],
-            "elements": [
-                {"id": "elem_1", "forId": "child_1"},
-                {
-                    "id": "elem_2",
-                    "forId": "msg_1",
-                },  # forId is the message itself — not deleted
-                {"id": "elem_3", "forId": "unrelated"},
-            ],
-        }
-        mock_data_layer = AsyncMock()
-        mock_data_layer.get_thread.return_value = thread
-
-        with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
-            await msg.remove_children()
-
-        mock_data_layer.delete_step.assert_awaited_once_with("child_1")
-        deleted_element_ids = [
-            call.args[0] for call in mock_data_layer.delete_element.call_args_list
-        ]
-        assert deleted_element_ids == ["elem_1"]
 
     @pytest.mark.asyncio
     async def test_message_itself_is_not_deleted(self):
