@@ -28,19 +28,23 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { chatSettingsSidebarOpenState } from '@/state/project';
 
 import { FormInput, TFormInputValue } from './FormInput';
+import { useChatSettingsValuesAtOpen } from './useChatSettingsValuesAtOpen';
 
 export default function ChatSettingsSidebar() {
     const { config } = useConfig();
-    const { chatSettingsValue, chatSettingsInputs, chatSettingsDefaultValue } =
-        useChatData();
-    const { updateChatSettings } = useChatInteract();
+    const { chatSettingsValue, chatSettingsInputs } = useChatData();
+    const { updateChatSettings, editChatSettings } = useChatInteract();
     const [sidebarOpen, setSidebarOpen] = useRecoilState(
         chatSettingsSidebarOpenState
     );
     const isMobile = useIsMobile();
     const [isVisible, setIsVisible] = useState(false);
+    const valuesAtOpen = useChatSettingsValuesAtOpen(
+        sidebarOpen,
+        chatSettingsValue
+    );
 
-    const { handleSubmit, setValue, reset, watch } = useForm({
+    const { handleSubmit, setValue, reset, watch, getValues } = useForm({
         defaultValues: chatSettingsValue
     });
     const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
@@ -66,7 +70,7 @@ export default function ChatSettingsSidebar() {
     }, [sidebarOpen]);
 
     const handleClose = () => {
-        reset(chatSettingsValue);
+        reset(valuesAtOpen);
         setSidebarOpen(false);
     };
 
@@ -80,13 +84,14 @@ export default function ChatSettingsSidebar() {
     });
 
     const handleReset = () => {
-        reset(chatSettingsDefaultValue);
+        reset(valuesAtOpen);
     };
 
     const handleChange = () => { };
 
     const setFieldValue = (field: string, value: any) => {
         setValue(field, value);
+        editChatSettings(getValues());
     };
 
     const values = watch();

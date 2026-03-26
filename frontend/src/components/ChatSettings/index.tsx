@@ -1,6 +1,5 @@
-import isEqual from 'lodash/isEqual';
 import mapValues from 'lodash/mapValues';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
@@ -25,17 +24,22 @@ import { Translator } from 'components/i18n';
 import { chatSettingsOpenState } from 'state/project';
 
 import { FormInput, TFormInputValue } from './FormInput';
+import { useChatSettingsValuesAtOpen } from './useChatSettingsValuesAtOpen';
 
 export default function ChatSettingsModal() {
-  const { chatSettingsValue, chatSettingsInputs, chatSettingsDefaultValue } =
-    useChatData();
+  const { chatSettingsValue, chatSettingsInputs } = useChatData();
 
   const { updateChatSettings, editChatSettings } = useChatInteract();
   const [chatSettingsOpen, setChatSettingsOpen] = useRecoilState(
     chatSettingsOpenState
   );
 
-  const { handleSubmit, setValue, reset, watch } = useForm({
+  const valuesAtOpen = useChatSettingsValuesAtOpen(
+    chatSettingsOpen,
+    chatSettingsValue
+  );
+
+  const { handleSubmit, setValue, reset, watch, getValues } = useForm({
     defaultValues: chatSettingsValue
   });
   const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
@@ -47,7 +51,7 @@ export default function ChatSettingsModal() {
 
   const handleClose = (open: boolean) => {
     if (!open) {
-      reset(chatSettingsValue);
+      reset(valuesAtOpen);
       setChatSettingsOpen(false);
     }
   };
@@ -62,7 +66,7 @@ export default function ChatSettingsModal() {
   });
 
   const handleReset = () => {
-    reset(chatSettingsDefaultValue);
+    reset(valuesAtOpen);
   };
 
   // Legacy setField compatibility layer
@@ -70,17 +74,10 @@ export default function ChatSettingsModal() {
 
   const setFieldValue = (field: string, value: any) => {
     setValue(field, value);
+    editChatSettings(getValues());
   };
 
   const values = watch();
-  const prevValues = useRef(values);
-
-  useEffect(() => {
-    if (!isEqual(values, prevValues.current)) {
-      editChatSettings(values);
-      prevValues.current = values;
-    }
-  }, [values, editChatSettings]);
 
   const tabInputs = chatSettingsInputs.filter(
     (input: any) => Array.isArray(input?.inputs) && input.inputs.length > 0
