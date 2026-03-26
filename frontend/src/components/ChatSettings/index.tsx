@@ -1,9 +1,11 @@
+import cloneDeep from 'lodash/cloneDeep';
 import mapValues from 'lodash/mapValues';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import {
+  chatSettingsInputsState,
   chatSettingsValueState,
   useChatData,
   useChatInteract
@@ -24,7 +26,7 @@ import { Translator } from 'components/i18n';
 import { chatSettingsOpenState } from 'state/project';
 
 import { FormInput, TFormInputValue } from './FormInput';
-import { useChatSettingsValuesAtOpen } from './useChatSettingsValuesAtOpen';
+import { useChatSettingsSnapshotAtOpen } from './useChatSettingsSnapshotAtOpen';
 
 export default function ChatSettingsModal() {
   const { chatSettingsValue, chatSettingsInputs } = useChatData();
@@ -34,15 +36,22 @@ export default function ChatSettingsModal() {
     chatSettingsOpenState
   );
 
-  const valuesAtOpen = useChatSettingsValuesAtOpen(
+  const { valuesAtOpen, inputsAtOpen } = useChatSettingsSnapshotAtOpen(
     chatSettingsOpen,
-    chatSettingsValue
+    chatSettingsValue,
+    chatSettingsInputs
   );
 
   const { handleSubmit, setValue, reset, watch, getValues } = useForm({
     defaultValues: chatSettingsValue
   });
   const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
+  const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
+
+  const restoreSnapshot = useCallback(() => {
+    setChatSettingsInputs(cloneDeep(inputsAtOpen));
+    setChatSettingsValue(cloneDeep(valuesAtOpen));
+  }, [inputsAtOpen, setChatSettingsInputs, setChatSettingsValue, valuesAtOpen]);
 
   // Reset form when default values change
   useEffect(() => {
@@ -51,7 +60,7 @@ export default function ChatSettingsModal() {
 
   const handleClose = (open: boolean) => {
     if (!open) {
-      reset(valuesAtOpen);
+      restoreSnapshot();
       setChatSettingsOpen(false);
     }
   };
@@ -66,7 +75,7 @@ export default function ChatSettingsModal() {
   });
 
   const handleReset = () => {
-    reset(valuesAtOpen);
+    restoreSnapshot();
   };
 
   // Legacy setField compatibility layer
