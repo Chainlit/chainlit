@@ -30,22 +30,26 @@ const _PlotlyElement = ({ element }: Props) => {
     return null;
   }
 
+  const height = state.layout?.height || 400;
+
   return (
     <Suspense fallback={<Skeleton className="h-full rounded-md" />}>
-      <Plot
-        className={`${element.display}-plotly`}
-        data={state.data}
-        layout={state.layout}
-        frames={state.frames}
-        config={state.config}
-        style={{
-          width: '100%',
-          height: '100%',
-          borderRadius: '1rem',
-          overflow: 'hidden'
-        }}
-        useResizeHandler={true}
-      />
+      <div style={{ width: '100%', height: `${height}px` }}>
+        <Plot
+          className={`${element.display}-plotly`}
+          data={state.data}
+          layout={state.layout}
+          frames={state.frames}
+          config={state.config}
+          style={{
+            width: '100%',
+            height: '100%',
+            borderRadius: '1rem',
+            overflow: 'hidden'
+          }}
+          useResizeHandler={true}
+        />
+      </div>
     </Suspense>
   );
 };
