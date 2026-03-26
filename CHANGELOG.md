@@ -4,6 +4,16 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.10.1] - 2026-03-27
+
+### Fixed
+
+- Security vulnerability in Chainlit: validate WebSocket session restore against the authenticated user
+
+### Changed
+
+- Move npm library publishing to OIDC Trusted Publishing
+
 ## [2.10.0] - 2026-03-05
 
 ### Added
@@ -336,7 +346,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
   - `null value in column "metadata" of relation "Thread"`
   - `syntax error at or near ";"`
 - Google Cloud Storage private bucket support in Chainlit data layer
-- Portals (popups, dialogs, etc.) now render correctly inside Copilot’s shadow DOM
+- Portals (popups, dialogs, etc.) now render correctly inside Copilot's shadow DOM
 
 ### Other
 - Removed telemetry
