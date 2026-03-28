@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, useMemo } from 'react';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,31 +16,33 @@ interface Props {
 const _PlotlyElement = ({ element }: Props) => {
   const { data, error, isLoading } = useFetch(element.url || null);
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  } else if (error) {
-    return <div>An error occurred</div>;
-  }
+  // deep-clone SWR data so Plotly.js mutations don't corrupt the cache.
+  // keyed on the data reference so clones stay stable between re-renders,
+  // preserving react-plotly.js's prevProps === this.props skip check.
+  const plotly = useMemo(() => {
+    if (!data) return null;
+    return {
+      data: structuredClone(data.data),
+      layout: structuredClone(data.layout),
+      frames: data.frames ? structuredClone(data.frames) : undefined,
+      config: data.config ? structuredClone(data.config) : undefined,
+      height: data.layout?.height || 400
+    };
+  }, [data]);
 
-  let state;
-
-  if (data) {
-    state = data;
-  } else {
-    return null;
-  }
-
-  const height = state.layout?.height || 400;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>An error occurred</div>;
+  if (!plotly) return null;
 
   return (
     <Suspense fallback={<Skeleton className="h-full rounded-md" />}>
-      <div style={{ width: '100%', height: `${height}px` }}>
+      <div style={{ width: '100%', height: `${plotly.height}px` }}>
         <Plot
           className={`${element.display}-plotly`}
-          data={state.data}
-          layout={state.layout}
-          frames={state.frames}
-          config={state.config}
+          data={plotly.data}
+          layout={plotly.layout}
+          frames={plotly.frames}
+          config={plotly.config}
           style={{
             width: '100%',
             height: '100%',
