@@ -74,6 +74,17 @@ This project uses [Conventional Commits](https://www.conventionalcommits.org/). 
 
 Common types: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `ci`. Scope is optional but encouraged (e.g. `fix(data): ...`, `feat(i18n): ...`).
 
+All commits made with AI assistance **must** include a `Co-Authored-By` trailer identifying the AI agent. Add it as the last line of the commit message body:
+
+```
+Co-Authored-By: <Agent Name> <agent-email-or-noreply>
+```
+
+Examples:
+- `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
+- `Co-Authored-By: GitHub Copilot <noreply@github.com>`
+- `Co-Authored-By: Gemini CLI <noreply@google.com>`
+
 ## Tech Stack
 
 | Layer | Stack |
