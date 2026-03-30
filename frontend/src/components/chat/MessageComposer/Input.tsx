@@ -154,13 +154,13 @@ const Input = forwardRef<InputMethods, Props>(
         }
       }
 
-      // Handle regular enter only if command menu is not showing
+      // Handle regular enter only if command dropdown is actually visible
       if (
         e.key === 'Enter' &&
         !e.shiftKey &&
         onEnter &&
         !isComposing &&
-        !showCommands
+        !(showCommands && filteredCommands.length > 0)
       ) {
         e.preventDefault();
         onEnter();
