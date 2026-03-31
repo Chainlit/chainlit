@@ -45,6 +45,9 @@ importers:
       fkill:
         specifier: ^9.0.0
         version: 9.0.0
+      globals:
+        specifier: ^17.4.0
+        version: 17.4.0
       husky:
         specifier: ^9.1.6
         version: 9.1.6
