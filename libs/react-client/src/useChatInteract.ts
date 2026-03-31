@@ -7,6 +7,7 @@ import {
   chatSettingsValueState,
   currentThreadIdState,
   elementState,
+  favoriteMessagesState,
   firstUserInteraction,
   loadingState,
   messagesState,
@@ -45,6 +46,7 @@ const useChatInteract = () => {
   const setIdToResume = useSetRecoilState(threadIdToResumeState);
   const setSideView = useSetRecoilState(sideViewState);
   const setCurrentThreadId = useSetRecoilState(currentThreadIdState);
+  const setFavoriteMessages = useSetRecoilState(favoriteMessagesState);
 
   const clear = useCallback(() => {
     session?.socket.emit('clear_session');
@@ -86,6 +88,36 @@ const useChatInteract = () => {
       session?.socket.emit('edit_message', { message });
     },
     [session?.socket]
+  );
+
+  const toggleMessageFavorite = useCallback(
+    (message: IStep) => {
+      const favorite = !(message.metadata?.favorite ?? false);
+      const nextMessage: IStep = {
+        ...message,
+        metadata: {
+          ...(message.metadata || {}),
+          favorite
+        }
+      };
+
+      setMessages((oldMessages) =>
+        oldMessages.map((item) => (item.id === message.id ? nextMessage : item))
+      );
+
+      setFavoriteMessages((oldFavorites) => {
+        if (favorite) {
+          const filtered = oldFavorites.filter(
+            (step) => step.id !== message.id
+          );
+          return [nextMessage, ...filtered];
+        }
+        return oldFavorites.filter((step) => step.id !== message.id);
+      });
+
+      session?.socket.emit('message_favorite', { message: nextMessage });
+    },
+    [session?.socket, setFavoriteMessages, setMessages]
   );
 
   const windowMessage = useCallback(
@@ -138,6 +170,13 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
+  const editChatSettings = useCallback(
+    (values: object) => {
+      session?.socket.emit('chat_settings_edit', values);
+    },
+    [session?.socket]
+  );
+
   const stopTask = useCallback(() => {
     setMessages((oldMessages) =>
       oldMessages.map((m) => {
@@ -170,7 +209,9 @@ const useChatInteract = () => {
     endAudioStream,
     stopTask,
     setIdToResume,
-    updateChatSettings
+    updateChatSettings,
+    editChatSettings,
+    toggleMessageFavorite
   };
 };
 

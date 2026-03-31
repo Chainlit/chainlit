@@ -4,6 +4,95 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.10.1] - 2026-03-27
+
+### Fixed
+
+- Security vulnerability in Chainlit: validate WebSocket session restore against the authenticated user
+
+### Changed
+
+- Move npm library publishing to OIDC Trusted Publishing
+
+## [2.10.0] - 2026-03-05
+
+### Added
+- Add starter categories for grouped starters
+- Always show the favorite messages button with an empty state
+- Add option to disable rendering markdown in user messages
+- Allow easy deletion of favorites
+- Make state cookie lifetime configurable via env var
+- Add Arabic translation
+- Add Danish translation
+- Add settings change listener
+- Add image preview
+- Add selected option for command pre-selection
+- Add `auto_collapse` parameter to `Step`
+- Add `/health` endpoint for container orchestration
+- Add `hidden` option for `default_sidebar_state`
+- Make avatar size configurable via `config.toml`
+
+### Fixed
+- Reorder chat history sidebar after messages in existing chats
+- Use login error detail for credential failures
+- Convert UUID fields to strings in feedback extraction
+- Preserve thread metadata when updated without metadata
+- Reset audio UI when microphone permission is denied
+- Fix sidebar inset overflow causing horizontal scroll
+- Prevent empty strings from overwriting step content on upsert
+- Use correct URL scheme when SSL is configured
+
+## [2.9.6] - 2026-01-20
+
+### Added
+- Allow skip new chat creation
+- Add data picker input widget
+- Toggle chat settings in sidebar instead of composer
+
+### Fixed
+- Fix: Starters now correctly use the selected/default mode if configured
+
+## [2.9.5] - 2026-01-08
+
+### Added
+- Add favorite messages (prompt templates)
+
+### Fixed
+- Fix: Starters now correctly use the selected/default mode if configured
+
+## [2.9.4] - 2025-12-24
+
+### Added
+- Add an icon for shared thread
+- New option to allow disabling auto scroll of assistant messages
+- Add modes: you may allow users to select an LLM model, a mode (for example, planning), allow to enable reasoning etc.
+  - Breaking change: you need to run `ALTER TABLE steps ADD COLUMN IF NOT EXISTS modes JSONB;` for migration
+
+### Fixed
+- Fix tiny avatar for long messages
+- Security vulnerability in Chainlit: added missed sanitization to custom elements update endpoint
+
+### Changed
+- Bumped watchfiles version
+
+## [2.9.3] - 2025-12-04
+
+### Added
+- Add tests for oauth providers and messages
+- Merge metadata in chainlit data layer
+- Add native video support in markdown rendering
+- Optimize chat message rendering
+- Add language configuration option to config.toml
+- Upgrade langchain imports for v1 compatibility
+- Improve icon name formatting issues
+
+### Fixed
+- Fixed page blinking issue with header_auth
+- Set environ when restoring websocket session
+- Move hello.py to avoid import issues
+- Fix issue showing thread sharing when disabled
+- Disable Chainlit from setting logging globally
+
 ## [2.9.2] - 2025-11-22
 
 ### Added
@@ -257,7 +346,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
   - `null value in column "metadata" of relation "Thread"`
   - `syntax error at or near ";"`
 - Google Cloud Storage private bucket support in Chainlit data layer
-- Portals (popups, dialogs, etc.) now render correctly inside Copilot’s shadow DOM
+- Portals (popups, dialogs, etc.) now render correctly inside Copilot's shadow DOM
 
 ### Other
 - Removed telemetry

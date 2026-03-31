@@ -137,6 +137,7 @@ const Chat = () => {
           name: file.name,
           size: file.size,
           uploadProgress: 0,
+          file,
           cancel: () => {
             toast.info(`${t('chat.fileUpload.errors.cancelled')} ${file.name}`);
             xhr.abort();
@@ -213,6 +214,9 @@ const Chat = () => {
       <ErrorBoundary>
         <ScrollContainer
           autoScrollUserMessage={config?.features?.user_message_autoscroll}
+          autoScrollAssistantMessage={
+            config?.features?.assistant_message_autoscroll
+          }
           autoScrollRef={autoScrollRef}
         >
           <div

@@ -20,6 +20,7 @@ export interface IStep {
   parentId?: string;
   isError?: boolean;
   command?: string;
+  modes?: Record<string, string>;
   showInput?: boolean | string;
   waitForAnswer?: boolean;
   input?: string;
@@ -30,6 +31,7 @@ export interface IStep {
   feedback?: IFeedback;
   language?: string;
   defaultOpen?: boolean;
+  autoCollapse?: boolean;
   streaming?: boolean;
   steps?: IStep[];
   metadata?: Record<string, any>;

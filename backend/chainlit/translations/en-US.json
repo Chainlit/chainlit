@@ -65,6 +65,15 @@
         "attachFiles": "Attach files"
       }
     },
+    "favorites": {
+      "use": "Use a favorite message",
+      "headline": "Favorite Messages",
+      "remove": "Remove favorite",
+      "empty": {
+        "title": "No Saved Prompts Yet",
+        "description": "Start by sending a prompt and star it or star a prompt from previous chats"
+      }
+    },
     "commands": {
       "button": "Tools",
       "changeTool": "Change Tool",
@@ -240,6 +249,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "Select..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "Pick a date",
+        "range": "Pick a date range"
+      }
     }
   }
 }

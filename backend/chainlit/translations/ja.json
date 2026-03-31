@@ -70,6 +70,15 @@
         "stop": "録音停止",
         "connecting": "接続中"
       },
+      "favorites": {
+        "use": "お気に入りのメッセージを使用",
+        "headline": "お気に入りのメッセージ",
+        "remove": "お気に入りを削除",
+        "empty": {
+          "title": "保存されたプロンプトがまだありません",
+          "description": "プロンプトを送信してスターを付けるか、以前のチャットからプロンプトをスターしてください"
+        }
+      },
       "commands": {
         "button": "ツール",
         "changeTool": "ツールを変更",
@@ -239,6 +248,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "選択..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "日付を選択",
+        "range": "日付範囲を選択"
+      }
     }
   }
 }

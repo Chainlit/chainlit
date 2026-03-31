@@ -115,27 +115,74 @@ class TestRestoreExistingSession:
     def test_restore_existing_session_success(self):
         """Test restoring an existing session."""
         mock_session = Mock(spec=WebsocketSession)
+        mock_session.user = None
         emit_fn = Mock()
         emit_call_fn = Mock()
+        environ = {"HTTP_COOKIE": "token=token"}
 
         with patch.object(WebsocketSession, "get_by_id") as mock_get:
             mock_get.return_value = mock_session
 
             result = restore_existing_session(
-                "new_sid", "session_123", emit_fn, emit_call_fn
+                "new_sid", "session_123", emit_fn, emit_call_fn, environ
             )
 
             assert result is True
             mock_session.restore.assert_called_once_with(new_socket_id="new_sid")
             assert mock_session.emit == emit_fn
             assert mock_session.emit_call == emit_call_fn
+            assert mock_session.environ == environ
+
+    def test_restore_existing_session_with_matching_user(self):
+        """Test restoring a session for its authenticated owner."""
+        mock_session = Mock(spec=WebsocketSession)
+        mock_session.user = Mock(identifier="user123")
+        authenticated_user = Mock(identifier="user123")
+
+        with patch.object(WebsocketSession, "get_by_id") as mock_get:
+            mock_get.return_value = mock_session
+
+            result = restore_existing_session(
+                "new_sid",
+                "session_123",
+                Mock(),
+                Mock(),
+                {"HTTP_COOKIE": "token=token"},
+                user=authenticated_user,
+            )
+
+            assert result is True
+            mock_session.restore.assert_called_once_with(new_socket_id="new_sid")
+
+    def test_restore_existing_session_rejects_different_user(self):
+        """Test that a session cannot be restored by another user."""
+        mock_session = Mock(spec=WebsocketSession)
+        mock_session.user = Mock(identifier="victim")
+        authenticated_user = Mock(identifier="attacker")
+
+        with patch.object(WebsocketSession, "get_by_id") as mock_get:
+            mock_get.return_value = mock_session
+
+            with pytest.raises(ConnectionRefusedError, match="authorization failed"):
+                restore_existing_session(
+                    "new_sid",
+                    "session_123",
+                    Mock(),
+                    Mock(),
+                    {"HTTP_COOKIE": "token=token"},
+                    user=authenticated_user,
+                )
+
+            mock_session.restore.assert_not_called()
 
     def test_restore_existing_session_not_found(self):
         """Test when session is not found."""
         with patch.object(WebsocketSession, "get_by_id") as mock_get:
             mock_get.return_value = None
 
-            result = restore_existing_session("new_sid", "session_123", Mock(), Mock())
+            result = restore_existing_session(
+                "new_sid", "session_123", Mock(), Mock(), {"HTTP_COOKIE": "token=token"}
+            )
 
             assert result is False
 
@@ -406,7 +453,7 @@ class TestSocketEdgeCases:
         with patch.object(WebsocketSession, "get_by_id") as mock_get:
             mock_get.return_value = None
 
-            result = restore_existing_session(None, None, Mock(), Mock())
+            result = restore_existing_session(None, None, Mock(), Mock(), None)
 
             assert result is False
 

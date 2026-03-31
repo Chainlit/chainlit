@@ -83,6 +83,15 @@
         "removeAttachment": "移除附件"
       }
     },
+    "favorites": {
+      "use": "使用收藏的消息",
+      "headline": "收藏的消息",
+      "remove": "移除收藏",
+      "empty": {
+        "title": "尚未保存的提示",
+        "description": "从发送提示并加星标开始，或从之前的聊天中加星标提示"
+      }
+    },
     "commands": {
       "button": "工具",
       "changeTool": "更换工具",
@@ -240,6 +249,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "选择..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "选择日期",
+        "range": "选择日期范围"
+      }
     }
   }
 }

@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from contextlib import AsyncExitStack, asynccontextmanager
 from pathlib import Path
-from typing import List, Optional, Union, cast
+from typing import TYPE_CHECKING, List, Optional, Union, cast
 
 import socketio
 from fastapi import (
@@ -79,6 +79,9 @@ from chainlit.utils import utc_now
 
 from ._utils import is_path_inside
 
+if TYPE_CHECKING:
+    from chainlit.element import CustomElement, ElementDict
+
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 
@@ -92,11 +95,12 @@ async def lifespan(app: FastAPI):
     host = config.run.host
     port = config.run.port
     root_path = os.getenv("CHAINLIT_ROOT_PATH", "")
+    scheme = "https" if config.run.ssl_cert else "http"
 
     if host == DEFAULT_HOST:
-        url = f"http://localhost:{port}{root_path}"
+        url = f"{scheme}://localhost:{port}{root_path}"
     else:
-        url = f"http://{host}:{port}{root_path}"
+        url = f"{scheme}://{host}:{port}{root_path}"
 
     logger.info(f"Your app is available at {url}")
 
@@ -784,8 +788,11 @@ async def project_translations(
 ):
     """Return project translations."""
 
-    # Load translation based on the provided language
-    translation = config.load_translation(language)
+    # Use configured language if set, otherwise use the language from query
+    effective_language = config.ui.language or language
+
+    # Load translation based on the effective language
+    translation = config.load_translation(effective_language)
 
     return JSONResponse(
         content={
@@ -806,13 +813,18 @@ async def project_settings(
 ):
     """Return project settings. This is called by the UI before the establishing the websocket connection."""
 
+    # Use configured language if set, otherwise use the language from query
+    effective_language = config.ui.language or language
+
     # Load the markdown file based on the provided language
-    markdown = get_markdown_str(config.root, language)
+    markdown = get_markdown_str(config.root, effective_language)
 
     chat_profiles = []
     profiles: list[dict] = []
     if config.code.set_chat_profiles:
-        chat_profiles = await config.code.set_chat_profiles(current_user, language)
+        chat_profiles = await config.code.set_chat_profiles(
+            current_user, effective_language
+        )
         if chat_profiles:
             for p in chat_profiles:
                 d = p.to_dict()
@@ -821,9 +833,15 @@ async def project_settings(
 
     starters = []
     if config.code.set_starters:
-        s = await config.code.set_starters(current_user, language)
+        s = await config.code.set_starters(current_user, effective_language)
         if s:
             starters = [it.to_dict() for it in s]
+
+    starter_categories = []
+    if config.code.set_starter_categories:
+        sc = await config.code.set_starter_categories(current_user, effective_language)
+        if sc:
+            starter_categories = [it.to_dict() for it in sc]
 
     data_layer = get_data_layer()
     debug_url = (
@@ -854,6 +872,7 @@ async def project_settings(
             "markdown": markdown,
             "chatProfiles": profiles,
             "starters": starters,
+            "starterCategories": starter_categories,
             "debugUrl": debug_url,
         }
     )
@@ -994,6 +1013,7 @@ async def get_shared_thread(
     if not isinstance(metadata, dict):
         metadata = {}
 
+    user_can_view = False
     if getattr(config.code, "on_shared_thread_view", None):
         try:
             user_can_view = await config.code.on_shared_thread_view(
@@ -1045,7 +1065,7 @@ async def update_thread_element(
     """Update a specific thread element."""
 
     from chainlit.context import init_ws_context
-    from chainlit.element import Element, ElementDict
+    from chainlit.element import ElementDict
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -1056,7 +1076,7 @@ async def update_thread_element(
     if element_dict["type"] != "custom":
         return {"success": False}
 
-    element = Element.from_dict(element_dict)
+    element = _sanitize_custom_element(element_dict)
 
     if current_user:
         if (
@@ -1069,6 +1089,7 @@ async def update_thread_element(
             )
 
     await element.update()
+
     return {"success": True}
 
 
@@ -1080,7 +1101,7 @@ async def delete_thread_element(
     """Delete a specific thread element."""
 
     from chainlit.context import init_ws_context
-    from chainlit.element import CustomElement, ElementDict
+    from chainlit.element import ElementDict
     from chainlit.session import WebsocketSession
 
     session = WebsocketSession.get_by_id(payload.sessionId)
@@ -1091,17 +1112,7 @@ async def delete_thread_element(
     if element_dict["type"] != "custom":
         return {"success": False}
 
-    element = CustomElement(
-        id=element_dict["id"],
-        object_key=element_dict["objectKey"],
-        chainlit_key=element_dict["chainlitKey"],
-        url=element_dict["url"],
-        for_id=element_dict.get("forId") or "",
-        thread_id=element_dict.get("threadId") or "",
-        name=element_dict["name"],
-        props=element_dict.get("props") or {},
-        display=element_dict["display"],
-    )
+    element = _sanitize_custom_element(element_dict)
 
     if current_user:
         if (
@@ -1116,6 +1127,19 @@ async def delete_thread_element(
     await element.remove()
 
     return {"success": True}
+
+
+def _sanitize_custom_element(element_dict: "ElementDict") -> "CustomElement":
+    from chainlit.element import CustomElement
+
+    return CustomElement(
+        id=element_dict["id"],
+        for_id=element_dict.get("forId") or "",
+        thread_id=element_dict.get("threadId") or "",
+        name=element_dict["name"],
+        props=element_dict.get("props") or {},
+        display=element_dict["display"],
+    )
 
 
 @router.put("/project/thread")
@@ -1715,6 +1739,12 @@ async def get_avatar(avatar_id: str):
 def status_check():
     """Check if the site is operational."""
     return {"message": "Site is operational"}
+
+
+@router.get("/health")
+def health_check():
+    """Health check endpoint for container orchestration and monitoring."""
+    return {"status": "ok"}
 
 
 @router.get("/{full_path:path}")

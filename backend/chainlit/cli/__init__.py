@@ -1,5 +1,7 @@
 import asyncio
+import logging
 import os
+import sys
 
 import click
 import nest_asyncio
@@ -25,6 +27,13 @@ from chainlit.logger import logger
 from chainlit.markdown import init_markdown
 from chainlit.secret import random_secret
 from chainlit.utils import check_file
+
+logging.basicConfig(
+    level=logging.INFO,
+    stream=sys.stdout,
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 
 def assert_app():
@@ -211,7 +220,7 @@ def chainlit_run(
 @cli.command("hello")
 @click.argument("args", nargs=-1)
 def chainlit_hello(args=None, **kwargs):
-    hello_path = os.path.join(BACKEND_ROOT, "hello.py")
+    hello_path = os.path.join(BACKEND_ROOT, "sample", "hello.py")
     run_chainlit(hello_path)
 
 

@@ -1,4 +1,5 @@
 import { prepareContent } from '@/lib/message';
+import { isEqual } from 'lodash';
 import { forwardRef, memo, useMemo } from 'react';
 
 import type { IMessageElement, IStep } from '@chainlit/react-client';
@@ -15,12 +16,26 @@ export interface Props {
   message: IStep;
   allowHtml?: boolean;
   latex?: boolean;
+  renderMarkdown?: boolean;
   sections?: ContentSection[];
 }
 
+const getMessageRenderProps = (message: IStep) => ({
+  id: message.id,
+  output: message.output,
+  input: message.input,
+  language: message.language,
+  streaming: message.streaming,
+  showInput: message.showInput,
+  type: message.type
+});
+
 const MessageContent = memo(
   forwardRef<HTMLDivElement, Props>(
-    ({ message, elements, allowHtml, latex, sections }, ref) => {
+    (
+      { message, elements, allowHtml, latex, renderMarkdown, sections },
+      ref
+    ) => {
       const outputContent =
         message.streaming && message.output
           ? message.output + CURSOR_PLACEHOLDER
@@ -57,6 +72,7 @@ const MessageContent = memo(
           <Markdown
             allowHtml={allowHtml}
             latex={latex}
+            renderMarkdown={renderMarkdown}
             refElements={outputRefElements}
           >
             {output}
@@ -87,6 +103,7 @@ const MessageContent = memo(
             <Markdown
               allowHtml={allowHtml}
               latex={latex}
+              renderMarkdown={renderMarkdown}
               refElements={inputRefElements}
             >
               {input}
@@ -111,7 +128,23 @@ const MessageContent = memo(
         </div>
       );
     }
-  )
+  ),
+  (prevProps, nextProps) => {
+    return (
+      prevProps.allowHtml === nextProps.allowHtml &&
+      prevProps.latex === nextProps.latex &&
+      prevProps.renderMarkdown === nextProps.renderMarkdown &&
+      prevProps.elements === nextProps.elements &&
+      isEqual(
+        prevProps.sections ?? ['input', 'output'],
+        nextProps.sections ?? ['input', 'output']
+      ) &&
+      isEqual(
+        getMessageRenderProps(prevProps.message),
+        getMessageRenderProps(nextProps.message)
+      )
+    );
+  }
 );
 
 export { MessageContent };

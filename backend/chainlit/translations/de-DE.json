@@ -65,6 +65,15 @@
         "attachFiles": "Dateien anhängen"
       }
     },
+    "favorites": {
+      "use": "Eine favorisierte Nachricht verwenden",
+      "headline": "Favorisierte Nachrichten",
+      "remove": "Favorit entfernen",
+      "empty": {
+        "title": "Noch keine Prompts gespeichert",
+        "description": "Beginne, indem du einen Prompt sendest und mit einem Stern markierst oder markiere einen Prompt aus vorherigen Chats"
+      }
+    },
     "commands": {
       "button": "Tools",
       "changeTool": "Tool wechseln",

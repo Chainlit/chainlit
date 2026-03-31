@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext, useRef } from 'react';
+import { memo, useContext, useMemo, useRef } from 'react';
 
 import {
   type IAction,
@@ -29,6 +29,8 @@ interface Props {
   scorableRun?: IStep;
 }
 
+const EMPTY_ELEMENTS: IMessageElement[] = [];
+
 const Message = memo(
   ({
     message,
@@ -39,7 +41,8 @@ const Message = memo(
     isScorable,
     scorableRun
   }: Props) => {
-    const { allowHtml, cot, latex, onError } = useContext(MessageContext);
+    const { allowHtml, cot, latex, renderUserMarkdown, onError } =
+      useContext(MessageContext);
     const layoutMaxWidth = useLayoutMaxWidth();
     const contentRef = useRef<HTMLDivElement>(null);
     const isUserMessage = message.type === 'user_message';
@@ -53,6 +56,19 @@ const Message = memo(
     const skip = toolCallSkip || hiddenSkip;
     const showInputSection = Boolean(message.input && message.showInput);
     const shouldRenderOutput = !showInputSection || Boolean(message.output);
+
+    const userMessageContent = useMemo(
+      () => (
+        <MessageContent
+          elements={EMPTY_ELEMENTS}
+          message={message}
+          allowHtml={allowHtml}
+          latex={latex}
+          renderMarkdown={renderUserMarkdown}
+        />
+      ),
+      [message, allowHtml, latex]
+    );
 
     if (skip) {
       if (!message.steps) {
@@ -87,12 +103,7 @@ const Message = memo(
               {isUserMessage ? (
                 <div className="flex flex-col flex-grow max-w-full">
                   <UserMessage message={message} elements={elements}>
-                    <MessageContent
-                      elements={[]}
-                      message={message}
-                      allowHtml={allowHtml}
-                      latex={latex}
-                    />
+                    {userMessageContent}
                   </UserMessage>
                 </div>
               ) : (
@@ -112,6 +123,7 @@ const Message = memo(
                           message={message}
                           allowHtml={allowHtml}
                           latex={latex}
+                          renderMarkdown={true}
                           sections={['input']}
                         />
                       ) : null}
@@ -133,6 +145,7 @@ const Message = memo(
                           message={message}
                           allowHtml={allowHtml}
                           latex={latex}
+                          renderMarkdown={true}
                           sections={showInputSection ? ['output'] : undefined}
                         />
                       ) : null}
@@ -151,6 +164,7 @@ const Message = memo(
                         message={message}
                         allowHtml={allowHtml}
                         latex={latex}
+                        renderMarkdown={true}
                       />
 
                       <AskFileButton messageId={message.id} onError={onError} />

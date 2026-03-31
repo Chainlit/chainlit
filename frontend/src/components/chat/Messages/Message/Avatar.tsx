@@ -42,9 +42,16 @@ const MessageAvatar = ({ author, hide, isError }: Props) => {
     return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
   }, [apiClient, selectedChatProfile, config, author]);
 
+  const avatarSize = config?.ui?.avatar_size;
+  const sizeStyle = avatarSize
+    ? { width: `${avatarSize}px`, height: `${avatarSize}px` }
+    : undefined;
+
   if (isError) {
     return (
-      <AlertCircle className="h-5 w-5 fill-destructive mt-[5px] text-destructive-foreground" />
+      <span className={cn('inline-block', hide && 'invisible')}>
+        <AlertCircle className="h-5 w-5 fill-destructive mt-[5px] text-destructive-foreground" />
+      </span>
     );
   }
 
@@ -53,7 +60,10 @@ const MessageAvatar = ({ author, hide, isError }: Props) => {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Avatar className="h-5 w-5 mt-[3px]">
+            <Avatar
+              className={avatarSize ? 'mt-[3px]' : 'h-5 w-5 mt-[3px]'}
+              style={sizeStyle}
+            >
               <AvatarImage
                 src={avatarUrl}
                 alt={`Avatar for ${author || 'default'}`}

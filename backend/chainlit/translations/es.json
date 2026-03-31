@@ -65,6 +65,15 @@
         "attachFiles": "Adjuntar archivos"
       }
     },
+    "favorites": {
+      "use": "Usar un mensaje favorito",
+      "headline": "Mensajes favoritos",
+      "remove": "Eliminar favorito",
+      "empty": {
+        "title": "Aún no hay prompts guardados",
+        "description": "Comienza enviando un prompt y márcalo con estrella o marca un prompt de chats anteriores"
+      }
+    },
     "commands": {
       "button": "Herramientas",
       "changeTool": "Cambiar herramienta",
@@ -240,6 +249,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "Seleccionar..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "Elige una fecha",
+        "range": "Elige un rango de fechas"
+      }
     }
   }
 }
