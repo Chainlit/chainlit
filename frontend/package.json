@@ -7,8 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
+    "lint": "eslint",
     "format": "prettier 'src/**/*.{ts,tsx,css}' --write",
+    "type-check": "tsc --noemit",
     "test": "vitest run",
     "prepublishOnly": "pnpm run build && pnpm test"
   },

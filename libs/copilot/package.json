@@ -7,8 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ./src --ext .ts,.tsx",
+    "lint": "eslint",
     "format": "prettier 'src/**/*.{ts,tsx}' --write",
+    "type-check": "tsc --noemit",
+    "test": "echo no tests yet",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
