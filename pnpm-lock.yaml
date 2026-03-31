@@ -39,6 +39,12 @@ importers:
       eslint:
         specifier: ^8.57.1
         version: 8.57.1
+      eslint-plugin-chai-friendly:
+        specifier: ^1.1.1
+        version: 1.1.1(eslint@8.57.1)
+      eslint-plugin-cypress:
+        specifier: 3.6.0
+        version: 3.6.0(eslint@8.57.1)
       fkill:
         specifier: ^9.0.0
         version: 9.0.0
@@ -685,6 +691,17 @@ packages:
   escape-string-regexp@5.0.0:
     resolution: {integrity: sha512-/veY75JbMK4j1yjvuUxuVsiS/hr/4iHs9FTT6cgTexxdE0Ly/glccBAkloH/DofkjRbZU3bnoj38mOmhkZ0lHw==}
     engines: {node: '>=12'}
+
+  eslint-plugin-chai-friendly@1.1.1:
+    resolution: {integrity: sha512-HdWGqTQAv4GLNWkSRen3mNnhFBFlovEGuyZKxdcuZnoQjcyhN8WmS3PGYOEHsqY5PTQ4EtyPaoarKO3hQISn6g==}
+    engines: {node: '>=0.10.0'}
+    peerDependencies:
+      eslint: '>=3.0.0'
+
+  eslint-plugin-cypress@3.6.0:
+    resolution: {integrity: sha512-7IAMcBbTVu5LpWeZRn5a9mQ30y4hKp3AfTz+6nSD/x/7YyLMoBI6X7XjDLYI6zFvuy4Q4QVGl563AGEXGW/aSA==}
+    peerDependencies:
+      eslint: '>=7'
 
   eslint-scope@7.2.2:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
@@ -2274,6 +2291,15 @@ snapshots:
   escape-string-regexp@4.0.0: {}
 
   escape-string-regexp@5.0.0: {}
+
+  eslint-plugin-chai-friendly@1.1.1(eslint@8.57.1):
+    dependencies:
+      eslint: 8.57.1
+
+  eslint-plugin-cypress@3.6.0(eslint@8.57.1):
+    dependencies:
+      eslint: 8.57.1
+      globals: 13.24.0
 
   eslint-scope@7.2.2:
     dependencies:

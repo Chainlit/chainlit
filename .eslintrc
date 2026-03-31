@@ -1,5 +1,6 @@
 {
   "root": true,
+  "reportUnusedDisableDirectives": true,
   "parser": "@typescript-eslint/parser",
   "ignorePatterns": ["**/*.jsx"],
   "plugins": ["@typescript-eslint"],
