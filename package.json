@@ -11,6 +11,7 @@
     "eslint-plugin-chai-friendly": "^1.1.1",
     "eslint-plugin-cypress": "^6",
     "fkill": "^9.0.0",
+    "globals": "^17.4.0",
     "husky": "^9.1.6",
     "lint-staged": "^13.3.0",
     "prettier": "^2.8.8",
