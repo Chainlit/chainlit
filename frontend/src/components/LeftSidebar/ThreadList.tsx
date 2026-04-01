@@ -102,28 +102,34 @@ export function ThreadList({
 
   const getMonthMap = (locale = navigator.language) => {
     const map = {};
+    const monthNames = [];
 
     for (let i = 0; i < 12; i++) {
       const d = new Date(2020, i, 1);
 
       const long = d.toLocaleDateString(locale, { month: 'long' }).toLocaleLowerCase(locale);
-      const short = d.toLocaleDateString(locale, { month: 'short' }).toLocaleLowerCase(locale);
 
       map[long] = i;
-      map[short.replace('.', '')] = i;
+      monthNames.push(long);
     }
-    return map;
+    const monthRegex = new RegExp(`\\b(${monthNames.join('|')})\\b`, 'i');
+    return { map, monthRegex };
   };
-  const monthMap = useMemo(() => getMonthMap(), []);
+  
+  const { map: monthMap, monthRegex } = useMemo(() => getMonthMap(), []);
 
   const parseGroupLabel = (label) => {
     const locale = navigator.language;
-    const parts = label.split(/\s+/);
+    
+    const matchMonth = label.toLocaleLowerCase(locale).match(monthRegex);
+    if (!matchMonth) return null;
+    const month = matchMonth[0];
 
-    if (parts.length < 2) return null;
-
-    const month = parts[0].toLocaleLowerCase(locale);
-    const year = Number(parts[1]);
+    const matchYear = label.match(/\d{4}/);
+    if (!matchYear) return null;
+    const year = Number(matchYear[0]);
+    
+    if (isNaN(year)) return null;
 
     return { month, year, raw: label };
   };
@@ -135,13 +141,12 @@ export function ThreadList({
     if (!aParsed || !bParsed) return a.localeCompare(b);
     
     if (aParsed.year !== bParsed.year) {
-        const diff = bParsed.year - aParsed.year;
-        return diff;
+        return  aParsed.year - bParsed.year;
       }
     const aMonth = monthMap[aParsed.month] ?? -1;
     const bMonth = monthMap[bParsed.month] ?? -1;
 
-    return bMonth - aMonth;
+    return aMonth - bMonth;
   }
   
   const sortedTimeGroupKeys = useMemo(() => {
