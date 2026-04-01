@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-undef
 module.exports = {
   'frontend/**/*.{ts,tsx}': [
     'pnpm --filter @chainlit/app lint -- --fix',
@@ -23,9 +22,9 @@ module.exports = {
   '*.{js,cjs,mjs}': ['eslint --fix', 'prettier --write'],
 
   'backend/**/*.py': [
-    'uv run ruff check',
-    'uv run ruff format --check',
-    () => 'uv run dmypy run -- backend/'
+    'uv run scripts/lint.py',
+    'uv run scripts/format.py --check',
+    () => 'uv run scripts/type_check.py'
   ],
 
   '.github/workflows/**': ['actionlint']
