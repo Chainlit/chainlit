@@ -39,6 +39,8 @@ def _delete_legacy_cookies(response: Response, *names: str):
 
     Only acts when _cookie_path != '/' to avoid no-op deletes in
     single-app deployments.
+
+    TODO: Remove this function in the next major release.
     """
     if _cookie_path == "/":
         return
