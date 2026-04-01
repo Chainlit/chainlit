@@ -83,6 +83,7 @@ if TYPE_CHECKING:
     from chainlit.element import CustomElement, ElementDict
 
 mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("application/javascript", ".mjs")
 mimetypes.add_type("text/css", ".css")
 
 
