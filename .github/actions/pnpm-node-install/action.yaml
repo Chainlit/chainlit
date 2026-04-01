@@ -5,7 +5,7 @@ inputs:
   node-version:
     description: Node.js version
     required: true
-    default: '24.3.0' # Switch to 'lts' as soon as Node 24 reaches LTS status.
+    default: '24.5.0' # Includes npm 11.5.1+, which is required for npm trusted publishing.
 
 runs:
   using: composite
