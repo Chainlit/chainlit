@@ -351,13 +351,13 @@ class ChainlitDataLayer(BaseDataLayer):
         )
         ON CONFLICT (id) DO UPDATE SET
             "parentId" = COALESCE(EXCLUDED."parentId", "Step"."parentId"),
-            input = COALESCE(EXCLUDED.input, "Step".input),
+            input = COALESCE(NULLIF(EXCLUDED.input, ''), "Step".input),
             metadata = CASE
                 WHEN EXCLUDED.metadata <> '{}' THEN EXCLUDED.metadata
                 ELSE "Step".metadata
             END,
             name = COALESCE(EXCLUDED.name, "Step".name),
-            output = COALESCE(EXCLUDED.output, "Step".output),
+            output = COALESCE(NULLIF(EXCLUDED.output, ''), "Step".output),
             type = CASE
                 WHEN EXCLUDED.type = 'run' THEN "Step".type
                 ELSE EXCLUDED.type
@@ -584,42 +584,52 @@ class ChainlitDataLayer(BaseDataLayer):
         if self.show_logger:
             logger.info(f"asyncpg: update_thread, thread_id={thread_id}")
 
+        has_updates = (
+            metadata is not None
+            or name is not None
+            or user_id is not None
+            or tags is not None
+        )
+
+        if metadata is None:
+            metadata = {}
+
         thread_name = truncate(
             name
             if name is not None
             else (metadata.get("name") if metadata and "name" in metadata else None)
         )
 
-        # Merge incoming metadata with existing metadata, deleting incoming keys with None values
-        merged_metadata = None
-        if metadata is not None:
-            existing = await self.execute_query(
-                'SELECT "metadata" FROM "Thread" WHERE id = $1',
-                {"thread_id": thread_id},
-            )
-            base = {}
-            if isinstance(existing, list) and existing:
-                raw = existing[0].get("metadata") or {}
-                if isinstance(raw, str):
-                    try:
-                        base = json.loads(raw)
-                    except json.JSONDecodeError:
-                        base = {}
-                elif isinstance(raw, dict):
-                    base = raw
-            to_delete = {k for k, v in metadata.items() if v is None}
-            incoming = {k: v for k, v in metadata.items() if v is not None}
-            base = {k: v for k, v in base.items() if k not in to_delete}
-            merged_metadata = {**base, **incoming}
+        existing = await self.execute_query(
+            'SELECT "metadata" FROM "Thread" WHERE id = $1',
+            {"thread_id": thread_id},
+        )
+
+        thread_exists = isinstance(existing, list) and existing
+        if thread_exists and not has_updates:
+            return
+
+        base = {}
+        if thread_exists:
+            raw = existing[0].get("metadata") or {}
+            if isinstance(raw, str):
+                try:
+                    base = json.loads(raw)
+                except json.JSONDecodeError:
+                    base = {}
+            elif isinstance(raw, dict):
+                base = raw
+        to_delete = {k for k, v in metadata.items() if v is None}
+        incoming = {k: v for k, v in metadata.items() if v is not None}
+        base = {k: v for k, v in base.items() if k not in to_delete}
+        metadata = {**base, **incoming}
 
         data = {
             "id": thread_id,
             "name": thread_name,
             "userId": user_id,
             "tags": tags,
-            "metadata": json.dumps(merged_metadata)
-            if merged_metadata is not None
-            else None,
+            "metadata": json.dumps(metadata),
             "updatedAt": datetime.now(),
         }
 

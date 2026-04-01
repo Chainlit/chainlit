@@ -7,31 +7,93 @@ from chainlit.data.chainlit_data_layer import ChainlitDataLayer
 
 
 @pytest.mark.asyncio
-async def test_update_thread_preserves_metadata_when_none():
-    """Test that update_thread does not overwrite existing metadata when metadata=None."""
-    # Create a mock data layer
+async def test_update_thread_preserves_metadata_when_none_existing_thread():
+    """Test that update_thread preserves existing metadata when metadata=None on an existing thread."""
     data_layer = ChainlitDataLayer(
         database_url="postgresql://test", storage_client=None, show_logger=False
     )
 
-    # Mock the execute_query method
-    data_layer.execute_query = AsyncMock()
+    existing_metadata = {"important": "data", "keep": "me"}
 
-    # Simulate calling update_thread with only a name, metadata=None (default)
+    async def mock_execute_query(query, params):
+        if "SELECT" in query and "metadata" in query:
+            return [{"metadata": json.dumps(existing_metadata)}]
+        return None
+
+    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+
     await data_layer.update_thread(thread_id="test-thread-123", name="Updated Name")
 
-    # Verify execute_query was called
-    assert data_layer.execute_query.called
+    assert data_layer.execute_query.call_count == 2
 
-    # Get the query and params from the call
-    call_args = data_layer.execute_query.call_args
-    query = call_args[0][0]
-    params = call_args[0][1]
+    update_call = data_layer.execute_query.call_args_list[1]
+    update_params = update_call[0][1]
 
-    # The query should NOT include metadata in the update
-    # because metadata was None and should be excluded from the data dict
-    assert "metadata" not in query.lower()
-    assert "metadata" not in str(params.values())
+    metadata_json = None
+    for value in update_params.values():
+        if isinstance(value, str) and value.startswith("{"):
+            try:
+                metadata_json = json.loads(value)
+                break
+            except json.JSONDecodeError:
+                pass
+
+    assert metadata_json == existing_metadata
+
+
+@pytest.mark.asyncio
+async def test_update_thread_noop_skips_upsert_on_existing_thread():
+    """Test that update_thread with no arguments early-returns for an existing thread."""
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test", storage_client=None, show_logger=False
+    )
+
+    async def mock_execute_query(query, params):
+        if "SELECT" in query and "metadata" in query:
+            return [{"metadata": json.dumps({"existing": "data"})}]
+        return None
+
+    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+
+    await data_layer.update_thread(thread_id="test-thread-123")
+
+    assert data_layer.execute_query.call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_update_thread_new_thread_includes_empty_metadata():
+    """Test that update_thread includes metadata='{}' for a new thread (NOT NULL safe)."""
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test", storage_client=None, show_logger=False
+    )
+
+    async def mock_execute_query(query, params):
+        if "SELECT" in query and "metadata" in query:
+            return []
+        return None
+
+    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+
+    await data_layer.update_thread(thread_id="new-thread", name="New Chat")
+
+    assert data_layer.execute_query.call_count == 2
+
+    update_call = data_layer.execute_query.call_args_list[1]
+    update_query = update_call[0][0]
+    update_params = update_call[0][1]
+
+    assert "metadata" in update_query.lower()
+
+    metadata_json = None
+    for value in update_params.values():
+        if isinstance(value, str) and value.startswith("{"):
+            try:
+                metadata_json = json.loads(value)
+                break
+            except json.JSONDecodeError:
+                pass
+
+    assert metadata_json == {}
 
 
 @pytest.mark.asyncio
@@ -139,3 +201,24 @@ async def test_update_thread_deletes_keys_with_none_values():
         # Verify "is_shared" and "keep" are preserved
         assert metadata_json.get("is_shared") is True
         assert metadata_json.get("keep") == "stays"
+
+
+@pytest.mark.asyncio
+async def test_create_step_uses_nullif_for_output_and_input():
+    """Empty-string output/input should not overwrite existing content.
+
+    Regression test for https://github.com/Chainlit/chainlit/issues/2789
+    The SQL uses NULLIF(EXCLUDED.output, '') so that an empty string from the
+    initial Step.send() is treated as NULL by COALESCE, preventing it from
+    overwriting non-empty content saved by a subsequent Step.update().
+    """
+    import inspect
+
+    source = inspect.getsource(ChainlitDataLayer.create_step)
+
+    assert "NULLIF(EXCLUDED.output, '')" in source, (
+        "output should use NULLIF to treat empty string as NULL"
+    )
+    assert "NULLIF(EXCLUDED.input, '')" in source, (
+        "input should use NULLIF to treat empty string as NULL"
+    )

@@ -1103,3 +1103,9 @@ def test_share_thread_endpoint_sets_flags(
     del _app.dependency_overrides[_get_current_user]
     data_mod._data_layer = None
     data_mod._data_layer_initialized = False
+
+
+def test_health_check(test_client: TestClient):
+    response = test_client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}

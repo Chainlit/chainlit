@@ -53,7 +53,7 @@ export default function ElementSideView() {
           <div
             id="side-view-content"
             className={cn(
-              'overflow-y-auto flex-grow flex flex-grow flex-col',
+              'overflow-auto flex-grow flex flex-col',
               isCanvas ? 'p-0' : 'gap-4 mt-4'
             )}
           >
@@ -71,13 +71,13 @@ export default function ElementSideView() {
       <ResizableHandle className="sm:hidden md:block bg-transparent" />
       <ResizablePanel
         minSize={isCanvas ? 30 : 10}
-        defaultSize={isCanvas ? 50 : 20}
+        defaultSize={isCanvas ? 50 : 40}
         className={`md:flex flex-col flex-grow sm:hidden transform transition-transform duration-300 ease-in-out ${
           isVisible ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
-        <aside className="relative flex-grow overflow-y-auto mr-4 mb-4">
-          <Card className="overflow-y-auto h-full relative flex flex-col">
+        <aside className="relative flex-grow overflow-auto mr-4 mb-4">
+          <Card className="overflow-auto h-full relative flex flex-col">
             <div
               id="side-view-title"
               className={cn(

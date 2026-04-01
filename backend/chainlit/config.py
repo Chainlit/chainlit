@@ -171,7 +171,7 @@ name = "Assistant"
 
 # layout = "wide"
 
-# default_sidebar_state = "open"
+# default_sidebar_state = "open"  # Options: "open", "closed", "hidden"
 
 # Chat settings display location: "message_composer" (default) or "sidebar" (header)
 # chat_settings_location = "message_composer"
@@ -223,6 +223,9 @@ logo_file_url = ""
 
 # Load assistant avatar image directly from URL.
 default_avatar_file_url = ""
+
+# Avatar size in pixels (default: 20).
+# avatar_size = 20
 
 # Specify a custom build directory for the frontend.
 # This can be used to customize the frontend code.
@@ -350,7 +353,7 @@ class UISettings(BaseModel):
     default_theme: Optional[Literal["light", "dark"]] = "dark"
     language: Optional[str] = None
     layout: Optional[Literal["default", "wide"]] = "default"
-    default_sidebar_state: Optional[Literal["open", "closed"]] = "open"
+    default_sidebar_state: Optional[Literal["open", "closed", "hidden"]] = "open"
     chat_settings_location: Optional[Literal["message_composer", "sidebar"]] = (
         "message_composer"
     )
@@ -371,6 +374,7 @@ class UISettings(BaseModel):
     custom_meta_image_url: Optional[str] = None
     logo_file_url: Optional[str] = None
     default_avatar_file_url: Optional[str] = None
+    avatar_size: Optional[int] = None
     custom_build: Optional[str] = None
     header_links: Optional[List[HeaderLink]] = None
 

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(tsc --noEmit)",
+      "Bash(uv run dmypy*)",
+      "Bash(uv run pytest*)",
+      "Bash(uv run ruff*)",
+      "Bash(uv run scripts/*)",
+      "Bash(pnpm install*)",
+      "Bash(pnpm run build*)",
+      "Bash(pnpm run lint*)",
+      "Bash(pnpm run format*)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm run test*)"
+    ]
+  }
+}
