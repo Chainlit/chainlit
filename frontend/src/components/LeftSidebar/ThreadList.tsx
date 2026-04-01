@@ -100,6 +100,50 @@ export function ThreadList({
     // ShareDialog handles its own internal state; we just open it
   };
 
+  const getMonthMap = (locale = navigator.language) => {
+    const map = {};
+
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(2020, i, 1);
+
+      const long = d.toLocaleDateString(locale, { month: 'long' }).toLocaleLowerCase(locale);
+      const short = d.toLocaleDateString(locale, { month: 'short' }).toLocaleLowerCase(locale);
+
+      map[long] = i;
+      map[short.replace('.', '')] = i;
+    }
+    return map;
+  };
+  const monthMap = useMemo(() => getMonthMap(), []);
+
+  const parseGroupLabel = (label) => {
+    const locale = navigator.language;
+    const parts = label.split(/\s+/);
+
+    if (parts.length < 2) return null;
+
+    const month = parts[0].toLocaleLowerCase(locale);
+    const year = Number(parts[1]);
+
+    return { month, year, raw: label };
+  };
+
+  const sortGroupsByDate = (a, b) => {
+    const aParsed = parseGroupLabel(a);
+    const bParsed = parseGroupLabel(b);
+    
+    if (!aParsed || !bParsed) return a.localeCompare(b);
+    
+    if (aParsed.year !== bParsed.year) {
+        const diff = bParsed.year - aParsed.year;
+        return diff;
+      }
+    const aMonth = monthMap[aParsed.month] ?? -1;
+    const bMonth = monthMap[bParsed.month] ?? -1;
+
+    return bMonth - aMonth;
+  }
+  
   const sortedTimeGroupKeys = useMemo(() => {
     if (!threadHistory?.timeGroupedThreads) return [];
     const fixedOrder = [
@@ -114,7 +158,7 @@ export function ThreadList({
       if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
       if (aIndex !== -1) return -1;
       if (bIndex !== -1) return 1;
-      return a.localeCompare(b);
+      return sortGroupsByDate(a, b);
     });
   }, [threadHistory?.timeGroupedThreads]);
 
