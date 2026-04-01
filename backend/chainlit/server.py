@@ -675,7 +675,7 @@ async def oauth_callback(
     try:
         validate_oauth_state_cookie(request, state)
     except Exception as e:
-        logger.exception("Unable to validate oauth state: %1", e)
+        logger.exception("Unable to validate oauth state: %s", e)
 
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
