@@ -1,5 +1,6 @@
 import { prepareContent } from '@/lib/message';
-import { forwardRef, memo } from 'react';
+import { isEqual } from 'lodash';
+import { forwardRef, memo, useMemo } from 'react';
 
 import type { IMessageElement, IStep } from '@chainlit/react-client';
 
@@ -8,16 +9,33 @@ import { Markdown } from '@/components/Markdown';
 
 import { InlinedElements } from './InlinedElements';
 
+type ContentSection = 'input' | 'output';
+
 export interface Props {
   elements: IMessageElement[];
   message: IStep;
   allowHtml?: boolean;
   latex?: boolean;
+  renderMarkdown?: boolean;
+  sections?: ContentSection[];
 }
+
+const getMessageRenderProps = (message: IStep) => ({
+  id: message.id,
+  output: message.output,
+  input: message.input,
+  language: message.language,
+  streaming: message.streaming,
+  showInput: message.showInput,
+  type: message.type
+});
 
 const MessageContent = memo(
   forwardRef<HTMLDivElement, Props>(
-    ({ message, elements, allowHtml, latex }, ref) => {
+    (
+      { message, elements, allowHtml, latex, renderMarkdown, sections },
+      ref
+    ) => {
       const outputContent =
         message.streaming && message.output
           ? message.output + CURSOR_PLACEHOLDER
@@ -34,11 +52,19 @@ const MessageContent = memo(
         language: message.language
       });
 
-      const displayInput = message.input && message.showInput;
+      const selectedSections = sections ?? ['input', 'output'];
+      const sectionsSet = useMemo(
+        () => new Set(selectedSections),
+        [selectedSections]
+      );
+
+      const displayInput =
+        sectionsSet.has('input') && message.input && message.showInput;
+      const displayOutput = sectionsSet.has('output');
 
       const isMessage = message.type.includes('message');
 
-      const outputMarkdown = (
+      const outputMarkdown = displayOutput ? (
         <>
           {!isMessage && displayInput && message.output ? (
             <div className="font-medium">Output</div>
@@ -46,12 +72,13 @@ const MessageContent = memo(
           <Markdown
             allowHtml={allowHtml}
             latex={latex}
+            renderMarkdown={renderMarkdown}
             refElements={outputRefElements}
           >
             {output}
           </Markdown>
         </>
-      );
+      ) : null;
 
       let inputMarkdown;
 
@@ -73,11 +100,10 @@ const MessageContent = memo(
 
         inputMarkdown = (
           <>
-            <div className="font-medium">Input</div>
-
             <Markdown
               allowHtml={allowHtml}
               latex={latex}
+              renderMarkdown={renderMarkdown}
               refElements={inputRefElements}
             >
               {input}
@@ -95,12 +121,30 @@ const MessageContent = memo(
 
       return (
         <div ref={ref} className="message-content w-full flex flex-col gap-2">
-          {!!inputMarkdown || output ? markdownContent : null}
-          <InlinedElements elements={outputInlinedElements} />
+          {displayInput || (displayOutput && output) ? markdownContent : null}
+          {displayOutput ? (
+            <InlinedElements elements={outputInlinedElements} />
+          ) : null}
         </div>
       );
     }
-  )
+  ),
+  (prevProps, nextProps) => {
+    return (
+      prevProps.allowHtml === nextProps.allowHtml &&
+      prevProps.latex === nextProps.latex &&
+      prevProps.renderMarkdown === nextProps.renderMarkdown &&
+      prevProps.elements === nextProps.elements &&
+      isEqual(
+        prevProps.sections ?? ['input', 'output'],
+        nextProps.sections ?? ['input', 'output']
+      ) &&
+      isEqual(
+        getMessageRenderProps(prevProps.message),
+        getMessageRenderProps(nextProps.message)
+      )
+    );
+  }
 );
 
 export { MessageContent };

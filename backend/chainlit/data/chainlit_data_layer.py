@@ -351,13 +351,13 @@ class ChainlitDataLayer(BaseDataLayer):
         )
         ON CONFLICT (id) DO UPDATE SET
             "parentId" = COALESCE(EXCLUDED."parentId", "Step"."parentId"),
-            input = COALESCE(EXCLUDED.input, "Step".input),
+            input = COALESCE(NULLIF(EXCLUDED.input, ''), "Step".input),
             metadata = CASE
                 WHEN EXCLUDED.metadata <> '{}' THEN EXCLUDED.metadata
                 ELSE "Step".metadata
             END,
             name = COALESCE(EXCLUDED.name, "Step".name),
-            output = COALESCE(EXCLUDED.output, "Step".output),
+            output = COALESCE(NULLIF(EXCLUDED.output, ''), "Step".output),
             type = CASE
                 WHEN EXCLUDED.type = 'run' THEN "Step".type
                 ELSE EXCLUDED.type
@@ -407,6 +407,21 @@ class ChainlitDataLayer(BaseDataLayer):
         await self.execute_query(
             'DELETE FROM "Step" WHERE id = $1', {"step_id": step_id}
         )
+
+    async def get_step(self, step_id: str) -> Optional[StepDict]:
+        # Get step and related feedback
+        query = """
+        SELECT  s.*,
+                f.id feedback_id,
+                f.value feedback_value,
+                f."comment" feedback_comment
+        FROM "Step" s left join "Feedback" f on s.id = f."stepId"
+        WHERE s.id = $1
+        """
+        result = await self.execute_query(query, {"step_id": step_id})
+        if not result:
+            return None
+        return self._convert_step_row_to_dict(result[0])
 
     async def get_thread_author(self, thread_id: str) -> str:
         query = """
@@ -569,18 +584,52 @@ class ChainlitDataLayer(BaseDataLayer):
         if self.show_logger:
             logger.info(f"asyncpg: update_thread, thread_id={thread_id}")
 
+        has_updates = (
+            metadata is not None
+            or name is not None
+            or user_id is not None
+            or tags is not None
+        )
+
+        if metadata is None:
+            metadata = {}
+
         thread_name = truncate(
             name
             if name is not None
             else (metadata.get("name") if metadata and "name" in metadata else None)
         )
 
+        existing = await self.execute_query(
+            'SELECT "metadata" FROM "Thread" WHERE id = $1',
+            {"thread_id": thread_id},
+        )
+
+        thread_exists = isinstance(existing, list) and existing
+        if thread_exists and not has_updates:
+            return
+
+        base = {}
+        if thread_exists:
+            raw = existing[0].get("metadata") or {}
+            if isinstance(raw, str):
+                try:
+                    base = json.loads(raw)
+                except json.JSONDecodeError:
+                    base = {}
+            elif isinstance(raw, dict):
+                base = raw
+        to_delete = {k for k, v in metadata.items() if v is None}
+        incoming = {k: v for k, v in metadata.items() if v is not None}
+        base = {k: v for k, v in base.items() if k not in to_delete}
+        metadata = {**base, **incoming}
+
         data = {
             "id": thread_id,
             "name": thread_name,
             "userId": user_id,
             "tags": tags,
-            "metadata": json.dumps(metadata or {}),
+            "metadata": json.dumps(metadata),
             "updatedAt": datetime.now(),
         }
 
@@ -610,11 +659,23 @@ class ChainlitDataLayer(BaseDataLayer):
 
         await self.execute_query(query, {str(i + 1): v for i, v in enumerate(values)})
 
+    async def get_favorite_steps(self, user_id: str) -> List[StepDict]:
+        query = """
+                SELECT s.*
+                FROM "Step" s
+                         JOIN "Thread" t ON s."threadId" = t.id
+                WHERE t."userId" = $1
+                  AND s.metadata::jsonb->>'favorite' = 'true'
+                ORDER BY s."createdAt" DESC \
+                """
+        results = await self.execute_query(query, {"user_id": user_id})
+        return [self._convert_step_row_to_dict(row) for row in results]
+
     def _extract_feedback_dict_from_step_row(self, row: Dict) -> Optional[FeedbackDict]:
-        if row["feedback_id"] is not None:
+        if row.get("feedback_id", None) is not None:
             return FeedbackDict(
-                forId=row["id"],
-                id=row["feedback_id"],
+                forId=str(row["id"]),
+                id=str(row["feedback_id"]),
                 value=row["feedback_value"],
                 comment=row["feedback_comment"],
             )

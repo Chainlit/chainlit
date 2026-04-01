@@ -70,6 +70,15 @@
       "stop": "עצור הקלטה",
       "connecting": "מתחבר"
     },
+    "favorites": {
+      "use": "השתמש בהודעה מועדפת",
+      "headline": "הודעות מועדפות",
+      "remove": "הסר מהמועדפים",
+      "empty": {
+        "title": "עדיין אין הנחיות שמורות",
+        "description": "התחל בשליחת הנחיה וסמן אותה בכוכב או סמן הנחיה משיחות קודמות"
+      }
+    },
     "commands": {
       "button": "כלים",
       "changeTool": "שנה כלי",
@@ -240,6 +249,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "בחר..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "בחר תאריך",
+        "range": "בחר טווח תאריכים"
+      }
     }
   }
 }

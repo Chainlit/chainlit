@@ -83,6 +83,15 @@
           "removeAttachment": "Verwijder bijlage"
         }
       },
+      "favorites": {
+        "use": "Gebruik een favoriet bericht",
+        "headline": "Favoriete berichten",
+        "remove": "Verwijder favoriet",
+        "empty": {
+          "title": "Nog geen opgeslagen prompts",
+          "description": "Begin door een prompt te versturen en voeg deze toe aan favorieten of voeg een prompt uit eerdere chats toe"
+        }
+      },
       "commands": {
         "button": "Hulpmiddelen",
         "changeTool": "Wijzig hulpmiddel",
@@ -240,6 +249,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "Selecteer..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "Kies een datum",
+        "range": "Kies een datumbereik"
+      }
     }
   }
 }

@@ -1,18 +1,30 @@
-import { MutableRefObject, useCallback, useRef, useState } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import {
+  MutableRefObject,
+  useCallback,
+  useEffect,
+  useRef,
+  useState
+} from 'react';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   FileSpec,
   IStep,
+  commandsState,
   useAuth,
   useChatData,
-  useChatInteract
+  useChatInteract,
+  useConfig
 } from '@chainlit/react-client';
+import type { IMode, IModeOption } from '@chainlit/react-client';
+import { modesState } from '@chainlit/react-client';
 
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from 'components/i18n/Translator';
+
+import { useQuery } from '@/hooks/query';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { chatSettingsOpenState } from '@/state/project';
@@ -25,8 +37,10 @@ import {
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
 import CommandButton from './CommandPopoverButton';
+import FavoriteButton from './FavoriteButton';
 import Input, { InputMethods } from './Input';
 import McpButton from './Mcp';
+import ModePicker from './ModePicker';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
@@ -49,7 +63,16 @@ export default function MessageComposer({
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
+  const commands = useRecoilValue(commandsState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
+
+  // Pre-select the command marked as selected by the backend
+  useEffect(() => {
+    const defaultSelected = commands.find((c) => c.selected);
+    if (defaultSelected && !selectedCommand) {
+      setSelectedCommand(defaultSelected);
+    }
+  }, [commands]);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
 
@@ -59,7 +82,56 @@ export default function MessageComposer({
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
+  const { config } = useConfig();
+  const showSettingsInComposer =
+    config?.ui?.chat_settings_location !== 'sidebar' &&
+    chatSettingsInputs.length > 0;
+
   const isMobile = useIsMobile();
+
+  // Get/set available modes from state - selections are tracked via the 'default' flag on options
+  const [modes, setModes] = useRecoilState(modesState);
+
+  const handleModeSelect = useCallback(
+    (modeId: string, optionId: string) => {
+      setModes((prevModes) =>
+        prevModes.map((mode) => {
+          if (mode.id !== modeId) return mode;
+          return {
+            ...mode,
+            options: mode.options.map((opt: IModeOption) => ({
+              ...opt,
+              default: opt.id === optionId
+            }))
+          };
+        })
+      );
+    },
+    [setModes]
+  );
+
+  // Helper to get selected option for a mode (the one with default=true, or first option)
+  const getSelectedOptionId = useCallback((mode: IMode): string | undefined => {
+    const defaultOpt = mode.options.find((opt) => opt.default);
+    return defaultOpt?.id || mode.options[0]?.id;
+  }, []);
+
+  let promptValue = '';
+  try {
+    const query = useQuery();
+    promptValue = query.get('prompt') || '';
+  } catch {
+    console.warn('Could not parse query parameters');
+  }
+
+  const [promptUsed, setPromptUsed] = useState(false);
+
+  const onFavoriteSelect = useCallback((content: string) => {
+    setValue(content);
+    if (inputRef.current) {
+      inputRef.current.setValueExtern(content);
+    }
+  }, []);
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -86,9 +158,19 @@ export default function MessageComposer({
       attachments?: IAttachment[],
       selectedCommand?: string
     ) => {
+      // Build modes dict: only include modes that have selections
+      const modesDict: Record<string, string> = {};
+      modes.forEach((mode) => {
+        const selectedId = getSelectedOptionId(mode);
+        if (selectedId) {
+          modesDict[mode.id] = selectedId;
+        }
+      });
+
       const message: IStep = {
         threadId: '',
         command: selectedCommand,
+        modes: Object.keys(modesDict).length > 0 ? modesDict : undefined,
         id: uuidv4(),
         name: user?.identifier || 'User',
         type: 'user_message',
@@ -106,7 +188,7 @@ export default function MessageComposer({
       }
       sendMessage(message, fileReferences);
     },
-    [user, sendMessage, autoScrollRef]
+    [user, sendMessage, autoScrollRef, modes, getSelectedOptionId]
   );
 
   const onReply = useCallback(
@@ -157,6 +239,20 @@ export default function MessageComposer({
     onReply
   ]);
 
+  useEffect(() => {
+    if (inputRef.current && promptValue && !promptUsed) {
+      const prompt = promptValue;
+      if (prompt) {
+        if (prompt.length > 1000) {
+          inputRef.current?.setValueExtern(prompt.slice(0, 1000));
+        } else {
+          inputRef.current?.setValueExtern(prompt);
+        }
+        setPromptUsed(true);
+      }
+    }
+  }, [promptValue, promptUsed]);
+
   return (
     <div
       id="message-composer"
@@ -187,7 +283,7 @@ export default function MessageComposer({
             onFileUploadError={onFileUploadError}
             onFileUpload={onFileUpload}
           />
-          {chatSettingsInputs.length > 0 && (
+          {showSettingsInComposer && (
             <Button
               id="chat-settings-open-modal"
               disabled={disabled}
@@ -200,6 +296,15 @@ export default function MessageComposer({
             </Button>
           )}
           <McpButton disabled={disabled} />
+          {modes.map((mode) => (
+            <ModePicker
+              key={mode.id}
+              mode={mode}
+              disabled={disabled}
+              selectedOptionId={getSelectedOptionId(mode)}
+              onOptionSelect={handleModeSelect}
+            />
+          ))}
           <CommandButton
             disabled={disabled}
             selectedCommandId={selectedCommand?.id}
@@ -210,6 +315,8 @@ export default function MessageComposer({
             selectedCommandId={selectedCommand?.id}
             onCommandSelect={setSelectedCommand}
           />
+
+          <FavoriteButton disabled={disabled} onSelect={onFavoriteSelect} />
         </div>
         <div className="flex items-center gap-1">
           <SubmitButton

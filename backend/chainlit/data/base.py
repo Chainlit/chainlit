@@ -109,3 +109,16 @@ class BaseDataLayer(ABC):
     @abstractmethod
     async def close(self) -> None:
         pass
+
+    @abstractmethod
+    async def get_favorite_steps(self, user_id: str) -> List["StepDict"]:
+        pass
+
+    async def set_step_favorite(
+        self, step_dict: "StepDict", favorite: bool
+    ) -> "StepDict":
+        metadata = step_dict.get("metadata") or {}
+        metadata["favorite"] = favorite
+        step_dict["metadata"] = metadata
+        await self.update_step(step_dict)
+        return step_dict

@@ -5,6 +5,12 @@ export interface IStarter {
   command?: string;
 }
 
+export interface IStarterCategory {
+  label: string;
+  icon?: string;
+  starters: IStarter[];
+}
+
 export interface ChatProfile {
   default: boolean;
   icon?: string;
@@ -35,7 +41,10 @@ export interface IChainlitConfig {
     description?: string;
     default_theme?: 'light' | 'dark';
     layout?: 'default' | 'wide';
-    default_sidebar_state?: 'open' | 'closed';
+    default_sidebar_state?: 'open' | 'closed' | 'hidden';
+    chat_settings_location?: 'message_composer' | 'sidebar';
+    default_chat_settings_open?: boolean;
+    confirm_new_chat?: boolean;
     cot: 'hidden' | 'tool_call' | 'full';
     github?: string;
     custom_css?: string;
@@ -48,6 +57,7 @@ export interface IChainlitConfig {
     custom_meta_image_url?: string;
     logo_file_url?: string;
     default_avatar_file_url?: string;
+    avatar_size?: number;
     header_links?: {
       name: string;
       display_name: string;
@@ -66,8 +76,11 @@ export interface IChainlitConfig {
     audio: IAudioConfig;
     unsafe_allow_html?: boolean;
     user_message_autoscroll?: boolean;
+    assistant_message_autoscroll?: boolean;
     latex?: boolean;
+    user_message_markdown?: boolean;
     edit_message?: boolean;
+    favorites?: boolean;
     mcp?: {
       enabled?: boolean;
       sse?: {
@@ -89,5 +102,7 @@ export interface IChainlitConfig {
   threadSharing?: boolean;
   chatProfiles: ChatProfile[];
   starters?: IStarter[];
+  starterCategories?: IStarterCategory[];
+
   translation: object;
 }

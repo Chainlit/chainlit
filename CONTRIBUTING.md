@@ -81,16 +81,16 @@ uv sync --extra tests --extra mypy --extra dev --extra custom-data
 
 ## Start the Chainlit server from source
 
-Start by running `backend/hello.py` as an example.
+Start by running `backend/chainlit/sample/hello.py` as an example.
 
 ```sh
 cd backend
-uv run chainlit run chainlit/hello.py
+uv run chainlit run chainlit/sample/hello.py
 ```
 
 You should now be able to access the Chainlit app you just launched on `http://127.0.0.1:8000`.
 
-If you've made it this far, you can now replace `chainlit/hello.py` by your own target. 😎
+If you've made it this far, you can now replace `chainlit/sample/hello.py` by your own target. 😎
 
 ## Start the UI from source
 

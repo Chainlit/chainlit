@@ -4,6 +4,7 @@ import { Socket } from 'socket.io-client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { ICommand } from './types/command';
+import { IMode } from './types/mode';
 
 import {
   IAction,
@@ -75,6 +76,11 @@ export const commandsState = atom<ICommand[]>({
   default: []
 });
 
+export const modesState = atom<IMode[]>({
+  key: 'Modes',
+  default: []
+});
+
 export const tokenCountState = atom<number>({
   key: 'TokenCount',
   default: 0
@@ -126,16 +132,35 @@ export const chatSettingsDefaultValueSelector = selector({
   key: 'ChatSettingsValue/Default',
   get: ({ get }) => {
     const chatSettings = get(chatSettingsInputsState);
-    return chatSettings.reduce(
-      (form: { [key: string]: any }, input: any) => (
-        (form[input.id] = input.initial), form
-      ),
-      {}
-    );
+
+    const collectInitialValues = (
+      inputs: any[],
+      acc: Record<string, any>
+    ): Record<string, any> => {
+      if (!Array.isArray(inputs)) {
+        return acc;
+      }
+
+      inputs.forEach((input) => {
+        if (!input) {
+          return;
+        }
+        if (Array.isArray(input?.inputs) && input.inputs.length > 0) {
+          // Handle tabs
+          collectInitialValues(input.inputs, acc);
+        } else if (input?.id !== undefined) {
+          acc[input.id] = input.initial;
+        }
+      });
+
+      return acc;
+    };
+
+    return collectInitialValues(chatSettings, {});
   }
 });
 
-export const chatSettingsValueState = atom({
+export const chatSettingsValueState = atom<Record<string, any>>({
   key: 'ChatSettingsValue',
   default: chatSettingsDefaultValueSelector
 });
@@ -217,32 +242,37 @@ export const currentThreadIdState = atom<string | undefined>({
 
 const localStorageEffect =
   <T>(key: string): AtomEffect<T> =>
-  ({ setSelf, onSet }) => {
-    // When the atom is first initialized, try to get its value from localStorage
-    const savedValue = localStorage.getItem(key);
-    if (savedValue != null) {
-      try {
-        setSelf(JSON.parse(savedValue));
-      } catch (error) {
-        console.error(
-          `Error parsing localStorage value for key "${key}":`,
-          error
-        );
+    ({ setSelf, onSet }) => {
+      // When the atom is first initialized, try to get its value from localStorage
+      const savedValue = localStorage.getItem(key);
+      if (savedValue != null) {
+        try {
+          setSelf(JSON.parse(savedValue));
+        } catch (error) {
+          console.error(
+            `Error parsing localStorage value for key "${key}":`,
+            error
+          );
+        }
       }
-    }
 
-    // Subscribe to state changes and update localStorage
-    onSet((newValue, _, isReset) => {
-      if (isReset) {
-        localStorage.removeItem(key);
-      } else {
-        localStorage.setItem(key, JSON.stringify(newValue));
-      }
-    });
-  };
+      // Subscribe to state changes and update localStorage
+      onSet((newValue, _, isReset) => {
+        if (isReset) {
+          localStorage.removeItem(key);
+        } else {
+          localStorage.setItem(key, JSON.stringify(newValue));
+        }
+      });
+    };
 
 export const mcpState = atom<IMcp[]>({
   key: 'Mcp',
   default: [],
   effects: [localStorageEffect<IMcp[]>('mcp_storage_key')]
+});
+
+export const favoriteMessagesState = atom<IStep[]>({
+  key: 'favoriteMessagesState',
+  default: []
 });

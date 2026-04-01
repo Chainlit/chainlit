@@ -35,6 +35,7 @@ interface Props {
 
 export interface InputMethods {
   reset: () => void;
+  setValueExtern: (value: string) => void;
 }
 
 const Input = forwardRef<InputMethods, Props>(
@@ -97,7 +98,11 @@ const Input = forwardRef<InputMethods, Props>(
     };
 
     useImperativeHandle(ref, () => ({
-      reset
+      reset,
+      setValueExtern: (value: string) => {
+        setValue(value);
+        onChange(value);
+      }
     }));
 
     useEffect(() => {
@@ -149,13 +154,13 @@ const Input = forwardRef<InputMethods, Props>(
         }
       }
 
-      // Handle regular enter only if command menu is not showing
+      // Handle regular enter only if command dropdown is actually visible
       if (
         e.key === 'Enter' &&
         !e.shiftKey &&
         onEnter &&
         !isComposing &&
-        !showCommands
+        !(showCommands && filteredCommands.length > 0)
       ) {
         e.preventDefault();
         onEnter();

@@ -1,3 +1,5 @@
+import { Markdown } from '@/components/Markdown';
+
 import { TaskStatusIcon } from './TaskStatusIcon';
 
 export interface ITask {
@@ -14,9 +16,11 @@ export interface ITaskList {
 interface TaskProps {
   index: number;
   task: ITask;
+  allowHtml?: boolean;
+  latex?: boolean;
 }
 
-export const Task = ({ index, task }: TaskProps) => {
+export const Task = ({ index, task, allowHtml, latex }: TaskProps) => {
   const statusStyles = {
     ready: '',
     running: 'font-semibold',
@@ -48,14 +52,26 @@ export const Task = ({ index, task }: TaskProps) => {
   return (
     <div className={`task task-status-${task.status}`}>
       <div
-        className={`w-full flex font-medium py-2 text-sm leading-snug ${
+        className={`w-full grid grid-cols-[auto_auto_1fr] items-start gap-1.5 font-medium py-0.5 px-1 text-sm leading-tight ${
           statusStyles[task.status]
         } ${task.forId ? 'cursor-pointer' : 'cursor-default'}`}
         onClick={handleClick}
       >
-        <span className="flex-none w-8 pr-2">{index}</span>
-        <TaskStatusIcon status={task.status} />
-        <span className="pl-2">{task.title}</span>
+        <div className="text-xs text-muted-foreground text-right pr-1 pt-[1px]">
+          {index}
+        </div>
+        <div className="flex items-start pt-[1px]">
+          <TaskStatusIcon status={task.status} />
+        </div>
+        <div className="min-w-0">
+          <Markdown
+            allowHtml={allowHtml}
+            latex={latex}
+            className="max-w-none prose-sm text-left break-words [&_p]:m-0 [&_p]:leading-snug [&_div]:leading-snug [&_div]:mt-0 [&_strong]:font-semibold"
+          >
+            {task.title}
+          </Markdown>
+        </div>
       </div>
     </div>
   );

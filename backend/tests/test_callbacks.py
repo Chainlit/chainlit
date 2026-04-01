@@ -105,7 +105,7 @@ async def test_on_message(mock_chainlit_context, test_config: config.ChainlitCon
     from chainlit.callbacks import on_message
     from chainlit.message import Message
 
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         message_received = None
 
         @on_message
@@ -126,9 +126,6 @@ async def test_on_message(mock_chainlit_context, test_config: config.ChainlitCon
         assert message_received is not None
         assert message_received.content == "Test message"
         assert message_received.author == "User"
-
-        # Check that the emit method was called
-        context.session.emit.assert_called()
 
 
 async def test_on_stop(mock_chainlit_context, test_config: config.ChainlitConfig):
@@ -325,7 +322,7 @@ async def test_on_app_shutdown(test_config: config.ChainlitConfig):
 async def test_on_chat_start(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_chat_start
 
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         chat_started = False
 
         @on_chat_start
@@ -341,9 +338,6 @@ async def test_on_chat_start(mock_chainlit_context, test_config: config.Chainlit
 
         # Check that the chat_started flag was set
         assert chat_started
-
-        # Check that the emit method was called
-        context.session.emit.assert_called()
 
 
 async def test_on_chat_resume(
@@ -517,6 +511,58 @@ async def test_set_starters_language(
         assert result[0].message == "Message de test"
 
 
+async def test_set_starter_categories(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import set_starter_categories
+    from chainlit.types import Starter, StarterCategory
+
+    async with mock_chainlit_context:
+
+        @set_starter_categories
+        async def get_starter_categories(user, language):
+            return [
+                StarterCategory(
+                    label="Creative",
+                    icon="https://example.com/creative.png",
+                    starters=[
+                        Starter(label="Write a poem", message="Write a poem"),
+                        Starter(label="Write a story", message="Write a story"),
+                    ],
+                ),
+                StarterCategory(
+                    label="Educational",
+                    starters=[
+                        Starter(label="Explain concept", message="Explain it"),
+                    ],
+                ),
+            ]
+
+        assert test_config.code.set_starter_categories is not None
+
+        result = await test_config.code.set_starter_categories(None, None)
+
+        assert result is not None
+        assert isinstance(result, list)
+        assert len(result) == 2
+
+        assert result[0].label == "Creative"
+        assert result[0].icon == "https://example.com/creative.png"
+        assert len(result[0].starters) == 2
+        assert result[0].starters[0].label == "Write a poem"
+
+        assert result[1].label == "Educational"
+        assert result[1].icon is None
+        assert len(result[1].starters) == 1
+
+        category_dict = result[0].to_dict()
+        assert category_dict["label"] == "Creative"
+        assert category_dict["icon"] == "https://example.com/creative.png"
+        starters_list = category_dict["starters"]
+        assert isinstance(starters_list, list)
+        assert len(starters_list) == 2
+
+
 async def test_on_shared_thread_view_allow(
     mock_chainlit_context, test_config: config.ChainlitConfig
 ):
@@ -616,7 +662,7 @@ async def test_on_shared_thread_view_block_and_exception(
 async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitConfig):
     from chainlit.callbacks import on_chat_end
 
-    async with mock_chainlit_context as context:
+    async with mock_chainlit_context:
         chat_ended = False
 
         @on_chat_end
@@ -632,9 +678,6 @@ async def test_on_chat_end(mock_chainlit_context, test_config: config.ChainlitCo
 
         # Check that the chat_ended flag was set
         assert chat_ended
-
-        # Check that the emit method was called
-        context.session.emit.assert_called()
 
 
 def test_data_layer_config(

@@ -28,8 +28,8 @@ thread_history = [
         "id": "test1",
         "name": "thread 1",
         "createdAt": now,
-        "userId": "test",
-        "userIdentifier": "admin",
+        "userId": "user1_id",
+        "userIdentifier": "user1",
         "steps": [
             {
                 "id": "test1",
@@ -50,8 +50,8 @@ thread_history = [
     {
         "id": "test2",
         "createdAt": now,
-        "userId": "test",
-        "userIdentifier": "admin",
+        "userId": "user1_id",
+        "userIdentifier": "user1",
         "name": "thread 2",
         "steps": [
             {
@@ -72,6 +72,7 @@ thread_history = [
     },
 ]  # type: List[ThreadDict]
 deleted_thread_ids = []  # type: List[str]
+ELEMENTS_STORAGE = []
 
 THREAD_HISTORY_PICKLE_PATH = os.path.join(
     os.path.dirname(__file__), "thread_history.pickle"
@@ -93,10 +94,22 @@ async def save_thread_history():
 
 class TestDataLayer(cl_data.BaseDataLayer):
     async def get_user(self, identifier: str):
-        return cl.PersistedUser(id="test", createdAt=now, identifier=identifier)
+        if identifier == "user1":
+            return cl.PersistedUser(id="user1_id", createdAt=now, identifier=identifier)
+        elif identifier == "user2":
+            return cl.PersistedUser(id="user2_id", createdAt=now, identifier=identifier)
+        return None
 
     async def create_user(self, user: cl.User):
-        return cl.PersistedUser(id="test", createdAt=now, identifier=user.identifier)
+        if user.identifier == "user1":
+            return cl.PersistedUser(
+                id="user1_id", createdAt=now, identifier=user.identifier
+            )
+        elif user.identifier == "user2":
+            return cl.PersistedUser(
+                id="user2_id", createdAt=now, identifier=user.identifier
+            )
+        return None
 
     async def update_thread(
         self,
@@ -123,7 +136,11 @@ class TestDataLayer(cl_data.BaseDataLayer):
                     "tags": tags,
                     "createdAt": utc_now(),
                     "userId": user_id,
-                    "userIdentifier": "admin",
+                    "userIdentifier": "user1"
+                    if user_id == "user1_id"
+                    else "user2"
+                    if user_id == "user2_id"
+                    else "unknown",
                     "steps": [],
                 }
             )
@@ -141,7 +158,8 @@ class TestDataLayer(cl_data.BaseDataLayer):
             thread["steps"].append(step_dict)
 
     async def get_thread_author(self, thread_id: str):
-        return "admin"
+        thread = await self.get_thread(thread_id)
+        return thread["userIdentifier"] if thread else None
 
     async def list_threads(
         self, pagination: Pagination, filters: ThreadFilter
@@ -175,12 +193,15 @@ class TestDataLayer(cl_data.BaseDataLayer):
 
     @queue_until_user_message()
     async def create_element(self, element: "Element"):
-        pass
+        if element.url == "http://example.org/test.txt":
+            element.url = "http://example.com/test.txt"
+
+        ELEMENTS_STORAGE.append(element.to_dict())
 
     async def get_element(
         self, thread_id: str, element_id: str
     ) -> Optional["ElementDict"]:
-        pass
+        return next((e for e in ELEMENTS_STORAGE if e["id"] == element_id), None)
 
     @queue_until_user_message()
     async def delete_element(self, element_id: str, thread_id: Optional[str] = None):
@@ -193,6 +214,9 @@ class TestDataLayer(cl_data.BaseDataLayer):
     @queue_until_user_message()
     async def delete_step(self, step_id: str):
         pass
+
+    async def get_favorite_steps(self, user_id: str) -> List["StepDict"]:
+        return []
 
     async def build_debug_url(self) -> str:
         return ""
@@ -234,8 +258,10 @@ async def handle_message():
 
 @cl.password_auth_callback
 def auth_callback(username: str, password: str) -> Optional[cl.User]:
-    if (username, password) == ("admin", "admin"):
-        return cl.User(identifier="admin")
+    if (username, password) == ("user1", "user1"):
+        return cl.User(identifier="user1")
+    elif (username, password) == ("user2", "user2"):
+        return cl.User(identifier="user2")
     else:
         return None
 
