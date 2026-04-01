@@ -411,7 +411,6 @@ class Plotly(Element):
 
         self.figure.layout.autosize = True
         self.figure.layout.width = None
-        self.figure.layout.height = None
         self.content = pio.to_json(self.figure, validate=True)
         self.mime = "application/json"
 
