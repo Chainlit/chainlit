@@ -93,17 +93,23 @@ const useChatInteract = () => {
   const toggleMessageFavorite = useCallback(
     (message: IStep) => {
       const favorite = !(message.metadata?.favorite ?? false);
-      const nextMessage: IStep = {
-        ...message,
-        metadata: {
-          ...(message.metadata || {}),
-          favorite
-        }
+      const updatedMetadata = {
+        ...(message.metadata || {}),
+        favorite
       };
 
       setMessages((oldMessages) =>
-        oldMessages.map((item) => (item.id === message.id ? nextMessage : item))
+        oldMessages.map((item) =>
+          item.id === message.id
+            ? { ...item, metadata: { ...(item.metadata || {}), favorite } }
+            : item
+        )
       );
+
+      const nextMessage: IStep = {
+        ...message,
+        metadata: updatedMetadata
+      };
 
       setFavoriteMessages((oldFavorites) => {
         if (favorite) {
