@@ -39,9 +39,32 @@ class WebSocketSessionAuth(TypedDict):
     threadId: str | None
 
 
-def restore_existing_session(sid, session_id, emit_fn, emit_call_fn, environ):
+def _session_owner_matches_user(
+    session: WebsocketSession, user: User | PersistedUser | None
+) -> bool:
+    if session.user is None and user is None:
+        return True
+
+    if session.user is None or user is None:
+        return False
+
+    return session.user.identifier == user.identifier
+
+
+def restore_existing_session(
+    sid,
+    session_id,
+    emit_fn,
+    emit_call_fn,
+    environ,
+    user: User | PersistedUser | None = None,
+):
     """Restore a session from the sessionId provided by the client."""
     if session := WebsocketSession.get_by_id(session_id):
+        if not _session_owner_matches_user(session, user):
+            logger.error("Authorization for the session failed.")
+            raise ConnectionRefusedError("authorization failed")
+
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
         session.emit_call = emit_call_fn
@@ -151,7 +174,9 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
         return sio.call(event, data, timeout=timeout, to=sid)
 
     session_id = auth["sessionId"]
-    if restore_existing_session(sid, session_id, emit_fn, emit_call_fn, environ):
+    if restore_existing_session(
+        sid, session_id, emit_fn, emit_call_fn, environ, user=user
+    ):
         return True
 
     user_env_string = auth.get("userEnv", None)
