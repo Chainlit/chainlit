@@ -58,7 +58,10 @@ class ExtendedChainlitAPI extends ChainlitAPI {
       })
     }).then(async (res) => {
       const data = await res.json();
-      return { success: res.ok, mcp: data.mcp, error: data.detail };
+      if (!res.ok) {
+        throw new Error(data.detail || 'Failed to connect MCP');
+      }
+      return { success: true, mcp: data.mcp };
     });
   }
 }
