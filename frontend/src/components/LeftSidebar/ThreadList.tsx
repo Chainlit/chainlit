@@ -141,12 +141,12 @@ export function ThreadList({
     if (!aParsed || !bParsed) return a.localeCompare(b);
     
     if (aParsed.year !== bParsed.year) {
-        return  aParsed.year - bParsed.year;
+        return  bParsed.year - aParsed.year;
       }
     const aMonth = monthMap[aParsed.month] ?? -1;
     const bMonth = monthMap[bParsed.month] ?? -1;
 
-    return aMonth - bMonth;
+    return bMonth - aMonth;
   }
   
   const sortedTimeGroupKeys = useMemo(() => {
