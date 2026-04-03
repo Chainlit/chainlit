@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint",
-    "format": "prettier 'src/**/*.{ts,tsx}'",
+    "format": "prettier .",
     "type-check": "tsc --noemit",
     "test": "echo no tests yet",
     "storybook": "storybook dev -p 6006",

@@ -8,7 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "eslint",
-    "format": "prettier 'src/**/*.{ts,tsx,css}'",
+    "format": "prettier .",
     "type-check": "tsc --noemit",
     "test": "vitest run"
   },
