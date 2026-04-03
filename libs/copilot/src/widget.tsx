@@ -15,6 +15,7 @@ import Header from './components/Header';
 
 import ChatWrapper from './chat';
 import { useSidebarResize } from './hooks';
+import { LS_DISPLAY_MODE_KEY, resolveDisplayMode } from './resolveDisplayMode';
 import {
   clearChainlitCopilotThreadId,
   getChainlitCopilotThreadId
@@ -26,16 +27,11 @@ interface Props {
   error?: string;
 }
 
-const LS_DISPLAY_MODE_KEY = 'chainlit-copilot-displayMode';
-
 const Widget = ({ config, error }: Props) => {
   const [expanded, setExpanded] = useState(config?.expanded || false);
   const [isOpen, setIsOpen] = useState(config?.opened || false);
-  const [displayMode, setDisplayMode] = useState<DisplayMode>(
-    () =>
-      (localStorage.getItem(LS_DISPLAY_MODE_KEY) as DisplayMode) ||
-      config?.displayMode ||
-      'floating'
+  const [displayMode, setDisplayMode] = useState<DisplayMode>(() =>
+    resolveDisplayMode(config?.displayMode)
   );
   const projectConfig = useConfig();
   const { sidebarWidth, handleMouseDown } = useSidebarResize({
