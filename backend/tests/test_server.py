@@ -1069,7 +1069,6 @@ def test_project_settings_forwards_chat_profile_to_starter_categories(
         _get_starter_categories
     )
 
-    # With chat_profile=creative
     response = test_client.get("/project/settings", params={"chat_profile": "creative"})
     assert response.status_code == 200
     categories = response.json()["starterCategories"]
@@ -1077,7 +1076,6 @@ def test_project_settings_forwards_chat_profile_to_starter_categories(
     assert categories[0]["label"] == "Writing"
     assert categories[0]["starters"][0]["label"] == "Write a poem"
 
-    # Without chat_profile (defaults to None)
     response = test_client.get("/project/settings")
     assert response.status_code == 200
     categories = response.json()["starterCategories"]
