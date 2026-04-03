@@ -1,3 +1,4 @@
+import builtins
 import json
 import tempfile
 import uuid
@@ -9,9 +10,17 @@ from chainlit.session import (
     BaseSession,
     HTTPSession,
     JSONEncoderIgnoreNonSerializable,
+    McpSession,
     WebsocketSession,
     clean_metadata,
 )
+
+
+def make_exception_group(message: str, exceptions: list[BaseException]):
+    base_exception_group = getattr(builtins, "BaseExceptionGroup", None)
+    if base_exception_group is None:
+        pytest.skip("BaseExceptionGroup is unavailable on this Python version")
+    return base_exception_group(message, exceptions)  # type: ignore[misc]
 
 
 class TestJSONEncoderIgnoreNonSerializable:
@@ -612,10 +621,144 @@ class TestSessionEdgeCases:
                     client_type="webapp",
                 )
 
-                # Mock MCP session with exit stack
-                mock_exit_stack = AsyncMock()
-                session.mcp_sessions["mcp1"] = (Mock(), mock_exit_stack)
+                # Create a real McpSession with a completed task
+                import asyncio
+
+                stop = asyncio.Event()
+                stop.set()  # already stopped
+
+                async def _noop():
+                    pass
+
+                task = asyncio.create_task(_noop())
+                await task  # let it finish
+
+                mcp = McpSession(
+                    name="mcp1",
+                    client=Mock(),
+                    task=task,
+                    stop_event=stop,
+                )
+                session.mcp_sessions["mcp1"] = mcp
 
                 await session.delete()
 
-                mock_exit_stack.aclose.assert_called_once()
+                assert "mcp1" not in session.mcp_sessions
+
+    @pytest.mark.asyncio
+    async def test_websocket_session_delete_with_hanging_mcp(self):
+        """Test that session delete handles a slow MCP session gracefully."""
+        import asyncio
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with patch("chainlit.config.FILES_DIRECTORY", Path(tmpdir)):
+                session = WebsocketSession(
+                    id="ws_id",
+                    socket_id="socket_123",
+                    emit=Mock(),
+                    emit_call=Mock(),
+                    user_env={},
+                    client_type="webapp",
+                )
+
+                stop = asyncio.Event()
+
+                async def _hang():
+                    await stop.wait()
+
+                task = asyncio.create_task(_hang())
+
+                mcp = McpSession(
+                    name="mcp1",
+                    client=Mock(),
+                    task=task,
+                    stop_event=stop,
+                )
+                session.mcp_sessions["mcp1"] = mcp
+
+                # delete() should close the session cleanly
+                await session.delete()
+
+                assert task.done()
+                assert "mcp1" not in session.mcp_sessions
+
+
+class TestMcpSession:
+    """Test suite for the McpSession dataclass."""
+
+    @pytest.mark.asyncio
+    async def test_close_signals_stop_and_awaits_task(self):
+        """close() sets the stop event and waits for the task."""
+        import asyncio
+
+        stop = asyncio.Event()
+
+        async def _runner():
+            await stop.wait()
+
+        task = asyncio.create_task(_runner())
+        mcp = McpSession(
+            name="test",
+            client=Mock(),
+            task=task,
+            stop_event=stop,
+        )
+
+        await mcp.close()
+
+        assert stop.is_set()
+        assert task.done()
+
+    @pytest.mark.asyncio
+    async def test_close_cancels_on_timeout(self):
+        """close() cancels a task that doesn't respond to stop_event."""
+        import asyncio
+
+        stop = asyncio.Event()
+
+        async def _stuck():
+            # Ignore stop_event entirely
+            await asyncio.sleep(3600)
+
+        task = asyncio.create_task(_stuck())
+        mcp = McpSession(
+            name="stuck",
+            client=Mock(),
+            task=task,
+            stop_event=stop,
+        )
+
+        # Temporarily reduce timeout for this test
+        import chainlit.session as session_mod
+
+        original_timeout = session_mod._CLOSE_TIMEOUT
+        session_mod._CLOSE_TIMEOUT = 0.1
+        try:
+            await mcp.close()
+        finally:
+            session_mod._CLOSE_TIMEOUT = original_timeout
+
+        assert task.done()
+
+    @pytest.mark.asyncio
+    async def test_close_idempotent(self):
+        """Calling close() twice does not raise."""
+        import asyncio
+
+        stop = asyncio.Event()
+
+        async def _runner():
+            await stop.wait()
+
+        task = asyncio.create_task(_runner())
+        mcp = McpSession(
+            name="test",
+            client=Mock(),
+            task=task,
+            stop_event=stop,
+        )
+
+        await mcp.close()
+        await mcp.close()  # second call should be safe
+
+        assert task.done()

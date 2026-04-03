@@ -10,7 +10,7 @@ const InlinedPDFList = ({ items }: Props) => (
   <div className="flex flex-col gap-2">
     {items.map((pdf, i) => {
       return (
-        <div key={i} className="h-[400px]">
+        <div key={i}>
           <PDFElement element={pdf} />
         </div>
       );

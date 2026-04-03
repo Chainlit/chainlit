@@ -12,10 +12,9 @@ const InlinedPlotlyList = ({ items }: Props) => (
       return (
         <div
           key={i}
-          className="max-w-[600px] h-[400px]"
+          className="inline-plotly-container max-w-[600px]"
           style={{
-            maxWidth: 'fit-content',
-            height: '400px'
+            maxWidth: 'fit-content'
           }}
         >
           <PlotlyElement element={element} />
