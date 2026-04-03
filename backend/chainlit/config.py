@@ -415,7 +415,8 @@ class CodeSettings(BaseModel):
     ] = None
     set_starter_categories: Optional[
         Callable[
-            [Optional["User"], Optional["str"]], Awaitable[List["StarterCategory"]]
+            [Optional["User"], Optional["str"], Optional["str"]],
+            Awaitable[List["StarterCategory"]],
         ]
     ] = None
     on_shared_thread_view: Optional[

@@ -540,7 +540,7 @@ async def test_set_starter_categories(
 
         assert test_config.code.set_starter_categories is not None
 
-        result = await test_config.code.set_starter_categories(None, None)
+        result = await test_config.code.set_starter_categories(None, None, None)
 
         assert result is not None
         assert isinstance(result, list)
@@ -561,6 +561,46 @@ async def test_set_starter_categories(
         starters_list = category_dict["starters"]
         assert isinstance(starters_list, list)
         assert len(starters_list) == 2
+
+
+async def test_set_starter_categories_with_chat_profile(
+    mock_chainlit_context, test_config: config.ChainlitConfig
+):
+    from chainlit.callbacks import set_starter_categories
+    from chainlit.types import Starter, StarterCategory
+
+    async with mock_chainlit_context:
+
+        @set_starter_categories
+        async def get_starter_categories(user, language, chat_profile):
+            return [
+                StarterCategory(
+                    label="Profile Specific",
+                    icon="https://example.com/profile.png",
+                    starters=[
+                        Starter(
+                            label=f"Starter for {chat_profile}",
+                            message=f"Message for {chat_profile}",
+                        ),
+                    ],
+                ),
+            ]
+
+        assert test_config.code.set_starter_categories is not None
+
+        result = await test_config.code.set_starter_categories(
+            None, "en", "test-profile"
+        )
+
+        assert result is not None
+        assert isinstance(result, list)
+        assert len(result) == 1
+
+        assert result[0].label == "Profile Specific"
+        assert result[0].icon == "https://example.com/profile.png"
+        assert len(result[0].starters) == 1
+        assert result[0].starters[0].label == "Starter for test-profile"
+        assert result[0].starters[0].message == "Message for test-profile"
 
 
 async def test_on_shared_thread_view_allow(
