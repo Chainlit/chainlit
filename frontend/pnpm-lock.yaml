@@ -120,6 +120,9 @@ importers:
       lucide-react:
         specifier: ^0.555.0
         version: 0.555.0(react@18.3.1)
+      pdfjs-dist:
+        specifier: 5.4.296
+        version: 5.4.296
       plotly.js:
         specifier: ^2.27.0
         version: 2.30.1(mapbox-gl@1.13.3)
