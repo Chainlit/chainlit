@@ -144,9 +144,9 @@ class BaseSession:
 
     @property
     def files_dir(self):
-        from chainlit.config import FILES_DIRECTORY
+        from chainlit.config import get_files_directory
 
-        return FILES_DIRECTORY / self.id
+        return get_files_directory() / self.id
 
     async def persist_file(
         self,
@@ -160,7 +160,7 @@ class BaseSession:
                 "Either path or content must be provided to persist a file"
             )
 
-        self.files_dir.mkdir(exist_ok=True)
+        self.files_dir.mkdir(parents=True, exist_ok=True)
 
         file_id = str(uuid.uuid4())
 
