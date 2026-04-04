@@ -64,6 +64,7 @@ class ElementDict(TypedDict, total=False):
     playerConfig: Optional[dict]
     forId: Optional[str]
     mime: Optional[str]
+    downloadName: Optional[str]
 
 
 @dataclass
@@ -96,6 +97,8 @@ class Element:
     language: Optional[str] = None
     # Mime type, inferred based on content if not provided
     mime: Optional[str] = None
+    # Custom download filename. If set, this name is used when the file is downloaded.
+    download_name: Optional[str] = None
 
     def __post_init__(self) -> None:
         self.persisted = False
@@ -123,6 +126,7 @@ class Element:
                 "language": getattr(self, "language", None),
                 "forId": getattr(self, "for_id", None),
                 "mime": getattr(self, "mime", None),
+                "downloadName": getattr(self, "download_name", None),
             }
         )
         return _dict
@@ -149,6 +153,7 @@ class Element:
         chainlit_key = e_dict.get("chainlitKey")
         display = e_dict.get("display", "inline")
         mime_type = e_dict.get("mime", "")
+        download_name = e_dict.get("downloadName")
 
         # Common parameters for all element types
         common_params = {
@@ -162,6 +167,7 @@ class Element:
             "chainlit_key": chainlit_key,
             "display": display,
             "mime": mime_type,
+            "download_name": download_name,
         }
 
         if type == "image":
@@ -218,6 +224,7 @@ class Element:
                 path=self.path,
                 content=self.content,
                 mime=self.mime or "",
+                download_name=self.download_name,
             )
             self.chainlit_key = file_dict["id"]
 

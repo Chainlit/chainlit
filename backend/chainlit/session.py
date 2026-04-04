@@ -154,6 +154,7 @@ class BaseSession:
         mime: str,
         path: Optional[str] = None,
         content: Optional[Union[bytes, str]] = None,
+        download_name: Optional[str] = None,
     ) -> FileReference:
         if not path and not content:
             raise ValueError(
@@ -194,6 +195,7 @@ class BaseSession:
             "name": name,
             "type": mime,
             "size": file_size,
+            "download_name": download_name,
         }
 
         return {"id": file_id}
