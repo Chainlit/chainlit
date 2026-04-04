@@ -524,3 +524,6 @@ class TestSocketEdgeCases:
                 # Should propagate the exception
                 with pytest.raises(Exception, match="Auth error"):
                     await _authenticate_connection(environ)
+
+
+
