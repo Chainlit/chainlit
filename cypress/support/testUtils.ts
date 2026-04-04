@@ -84,11 +84,14 @@ export function openCopilot() {
   copilotShouldBeOpen();
 }
 
-export function getCopilotThreadId() {
-  return cy.window().then((win) => {
-    // @ts-expect-error is not a valid prop
-    return win.getChainlitCopilotThreadId();
-  });
+export function getCopilotThreadId(
+  assertion?: (threadId: string | null) => void
+) {
+  // @ts-expect-error getChainlitCopilotThreadId is not a standard Window prop
+  const read = (window: Window) => window.getChainlitCopilotThreadId();
+  return assertion
+    ? cy.window().should((window) => assertion(read(window)))
+    : cy.window().then(read);
 }
 
 export function clearCopilotThreadId(newThreadId?: string) {

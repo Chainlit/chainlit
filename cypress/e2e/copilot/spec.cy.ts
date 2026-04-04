@@ -1,11 +1,11 @@
 import {
-  copilotShouldBeOpen,
   clearCopilotThreadId,
+  copilotShouldBeOpen,
   getCopilotThreadId,
   loadCopilotScript,
   mountCopilotWidget,
   openCopilot,
-  submitMessage,
+  submitMessage
 } from '../../support/testUtils';
 
 describe('Copilot', { includeShadowDom: true }, () => {
@@ -80,9 +80,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
 
     clearCopilotThreadId();
 
-    cy.wait(1000); // Wait for the thread ID to be cleared
-
-    getCopilotThreadId().then((threadId) => {
+    getCopilotThreadId((threadId) => {
       expect(threadId).to.not.equal(null);
       expect(threadId).to.not.equal(firstThreadId);
     });
@@ -103,9 +101,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
     const newThreadId = crypto.randomUUID();
     clearCopilotThreadId(newThreadId);
 
-    cy.wait(1000); // Wait for the thread ID to be cleared
-
-    getCopilotThreadId().then((threadId) => {
+    getCopilotThreadId((threadId) => {
       expect(threadId).to.equal(newThreadId);
     });
 
@@ -120,9 +116,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
       cy.get('#confirm').click();
     });
 
-    cy.wait(1000); // Wait for the new chat to be created
-
-    getCopilotThreadId().then((threadId) => {
+    getCopilotThreadId((threadId) => {
       expect(threadId).to.not.equal(null);
       expect(threadId).to.not.equal(newThreadId);
     });
@@ -148,11 +142,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
         openCopilot();
 
         cy.step('Check input placeholder');
-        cy.get('#chat-input').should(
-          'have.attr',
-          'placeholder',
-          placeholder
-        );
+        cy.get('#chat-input').should('have.attr', 'placeholder', placeholder);
       });
     });
   });

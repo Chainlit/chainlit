@@ -39,8 +39,8 @@ const QuiltedGrid = <T extends IImageElement | IVideoElement>({
           size === 1
             ? 'max-w-[150px]'
             : size === 2
-            ? 'max-w-[300px]'
-            : 'max-w-[600px]',
+              ? 'max-w-[300px]'
+              : 'max-w-[600px]',
           className
         )}
       >
@@ -69,13 +69,13 @@ const QuiltedGrid = <T extends IImageElement | IVideoElement>({
               cols === 1
                 ? 'col-span-1'
                 : cols === 2
-                ? 'col-span-2'
-                : 'col-span-4',
+                  ? 'col-span-2'
+                  : 'col-span-4',
               rows === 1
                 ? 'row-span-1'
                 : rows === 2
-                ? 'row-span-2'
-                : 'row-span-4'
+                  ? 'row-span-2'
+                  : 'row-span-4'
             )}
           >
             <Renderer element={element} />

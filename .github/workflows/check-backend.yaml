@@ -20,17 +20,17 @@ jobs:
         name: Install Python, uv and Python dependencies
         with:
           uv-args: --no-install-workspace --all-extras --dev
-          
+
       - uses: ./.github/actions/check-run
         with:
           check_name: 'Linting: backend'
           command: uv run --no-project scripts/lint.py
-          
+
       - uses: ./.github/actions/check-run
         with:
           check_name: 'Formatting: backend'
           command: uv run --no-project scripts/format.py --check
-          
+
       - uses: ./.github/actions/check-run
         with:
           check_name: 'Type checking: backend'

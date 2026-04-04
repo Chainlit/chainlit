@@ -18,17 +18,17 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
-        
+
       - uses: ./.github/actions/check-run
         with:
           check_name: 'Linting: frontend'
           command: pnpm lint
-          
+
       - uses: ./.github/actions/check-run
         with:
           check_name: 'Formatting: frontend'
           command: pnpm format
-          
+
       - uses: ./.github/actions/check-run
         with:
           check_name: 'Type checking: frontend'

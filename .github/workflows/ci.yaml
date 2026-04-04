@@ -43,7 +43,7 @@ jobs:
   ci:
     runs-on: ubuntu-latest
     name: Run CI
-    if: always()  # This ensures the job always runs
+    if: always() # This ensures the job always runs
     needs: [check-backend, check-frontend, tests, e2e-tests]
     steps:
       # Propagate failure

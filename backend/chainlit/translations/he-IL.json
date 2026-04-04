@@ -156,10 +156,10 @@
     "thread": {
       "untitled": "שיחה ללא כותרת",
       "menu": {
-          "rename": "שינוי שם",
-          "share": "שיתוף",
-          "delete": "Delete"
-        },
+        "rename": "שינוי שם",
+        "share": "שיתוף",
+        "delete": "Delete"
+      },
       "actions": {
         "share": {
           "title": "שיתוף קישור לשיחה",

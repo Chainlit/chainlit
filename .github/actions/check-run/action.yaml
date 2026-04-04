@@ -8,7 +8,7 @@ inputs:
   command:
     description: Command to run
     required: true
-    
+
 runs:
   using: composite
   steps:
@@ -40,4 +40,3 @@ runs:
             status: 'completed',
             conclusion: conclusion
           });
-

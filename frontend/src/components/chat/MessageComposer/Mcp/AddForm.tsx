@@ -44,10 +44,10 @@ export const McpAddForm = ({
   const defaultType: 'stdio' | 'sse' | 'streamable-http' = allowStdio
     ? 'stdio'
     : allowSse
-    ? 'sse'
-    : allowHttp
-    ? 'streamable-http'
-    : 'stdio';
+      ? 'sse'
+      : allowHttp
+        ? 'streamable-http'
+        : 'stdio';
 
   const [serverType, setServerType] = useState<
     'stdio' | 'sse' | 'streamable-http'

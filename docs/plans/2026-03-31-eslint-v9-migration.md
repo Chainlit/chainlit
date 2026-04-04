@@ -9,6 +9,7 @@
 **Tech Stack:** ESLint 9, typescript-eslint (unified package), @eslint/js, eslint-plugin-cypress 6, eslint-plugin-chai-friendly
 
 **Key behavior (verified empirically on this repo):**
+
 - ESLint v9 flat config: `eslint` (no args) = lints `.` (current directory)
 - ESLint v9 flat config: `eslint file1.ts file2.ts` = lints **only** those files
 - ESLint v8: no such behavior exists (no args = 0 files, silent exit 0)
@@ -17,23 +18,24 @@
 
 ## File Map
 
-| Action | File | Responsibility |
-|--------|------|---------------|
-| Create | `eslint.config.mjs` | Single flat config replacing `.eslintrc`, `.eslintignore`, `cypress/.eslintrc` |
-| Delete | `.eslintrc` | Replaced by `eslint.config.mjs` |
-| Delete | `.eslintignore` | Merged into `ignores` array in `eslint.config.mjs` |
-| Delete | `cypress/.eslintrc` | Merged into `eslint.config.mjs` with `files: ['cypress/**/*.ts']` |
-| Modify | `package.json` | Update ESLint deps |
-| Modify | `frontend/package.json` | Remove `--ext` and `./src` from lint script |
-| Modify | `libs/react-client/package.json` | Remove `--ext` and `./src` from lint script |
-| Modify | `libs/copilot/package.json` | Remove `--ext` and `./src` from lint script |
-| Modify | `lint-staged.config.js` | Package-scoped globs with `pnpm --filter` |
+| Action | File                             | Responsibility                                                                 |
+| ------ | -------------------------------- | ------------------------------------------------------------------------------ |
+| Create | `eslint.config.mjs`              | Single flat config replacing `.eslintrc`, `.eslintignore`, `cypress/.eslintrc` |
+| Delete | `.eslintrc`                      | Replaced by `eslint.config.mjs`                                                |
+| Delete | `.eslintignore`                  | Merged into `ignores` array in `eslint.config.mjs`                             |
+| Delete | `cypress/.eslintrc`              | Merged into `eslint.config.mjs` with `files: ['cypress/**/*.ts']`              |
+| Modify | `package.json`                   | Update ESLint deps                                                             |
+| Modify | `frontend/package.json`          | Remove `--ext` and `./src` from lint script                                    |
+| Modify | `libs/react-client/package.json` | Remove `--ext` and `./src` from lint script                                    |
+| Modify | `libs/copilot/package.json`      | Remove `--ext` and `./src` from lint script                                    |
+| Modify | `lint-staged.config.js`          | Package-scoped globs with `pnpm --filter`                                      |
 
 ---
 
 ## Task 1: Update Dependencies
 
 **Files:**
+
 - Modify: `package.json` (devDependencies)
 
 - [ ] **Step 1: Remove old ESLint packages and add new ones**
@@ -70,6 +72,7 @@ git commit -m "chore: upgrade eslint to v9, add typescript-eslint unified packag
 ## Task 2: Create Flat Config
 
 **Files:**
+
 - Create: `eslint.config.mjs`
 
 This replaces three files: `.eslintrc`, `.eslintignore`, `cypress/.eslintrc`.
@@ -78,14 +81,14 @@ This replaces three files: `.eslintrc`, `.eslintignore`, `cypress/.eslintrc`.
 
 ```js
 import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import cypressPlugin from 'eslint-plugin-cypress/flat';
 import chaiFriendly from 'eslint-plugin-chai-friendly';
+import cypressPlugin from 'eslint-plugin-cypress/flat';
+import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   // Global ignores (replaces .eslintignore + ignorePatterns)
   {
-    ignores: ['**/node_modules/', '**/dist/', '**/*.jsx'],
+    ignores: ['**/node_modules/', '**/dist/', '**/*.jsx']
   },
 
   // Base configs (replaces "extends" in .eslintrc)
@@ -95,7 +98,7 @@ export default tseslint.config(
   // Project rules (replaces "rules" in .eslintrc)
   {
     linterOptions: {
-      reportUnusedDisableDirectives: true,
+      reportUnusedDisableDirectives: true
     },
     rules: {
       '@typescript-eslint/no-non-null-assertion': 'off',
@@ -107,10 +110,10 @@ export default tseslint.config(
           argsIgnorePattern: '^_',
           varsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-        },
-      ],
-    },
+          ignoreRestSiblings: true
+        }
+      ]
+    }
   },
 
   // Cypress overrides (replaces cypress/.eslintrc)
@@ -118,18 +121,19 @@ export default tseslint.config(
     files: ['cypress/**/*.ts'],
     ...cypressPlugin.configs.recommended,
     plugins: {
-      'chai-friendly': chaiFriendly,
+      'chai-friendly': chaiFriendly
     },
     rules: {
-      ...chaiFriendly.configs.recommendedFlat.rules,
-    },
-  },
+      ...chaiFriendly.configs.recommendedFlat.rules
+    }
+  }
 );
 ```
 
 > **Why `.mjs`:** Root `package.json` has no `"type": "module"`, so ESM requires the `.mjs` extension.
 >
 > **What's gone:**
+>
 > - `"root": true` — flat config doesn't cascade from parent dirs
 > - `"parser"` — `tseslint.configs.recommended` sets the parser automatically
 > - `--ext .ts,.tsx` — flat config uses `files` patterns in config objects
@@ -156,6 +160,7 @@ git commit -m "chore: add eslint v9 flat config"
 ## Task 3: Delete Old Config Files
 
 **Files:**
+
 - Delete: `.eslintrc`
 - Delete: `.eslintignore`
 - Delete: `cypress/.eslintrc`
@@ -186,6 +191,7 @@ git commit -m "chore: remove legacy eslintrc config files"
 ## Task 4: Update Package Lint Scripts
 
 **Files:**
+
 - Modify: `frontend/package.json:10` — `"lint"` script
 - Modify: `libs/react-client/package.json:9` — `"lint"` script
 - Modify: `libs/copilot/package.json:10` — `"lint"` script
@@ -195,6 +201,7 @@ In flat config, `eslint` with no args defaults to `.` and file type matching is 
 - [ ] **Step 1: Update frontend lint script**
 
 In `frontend/package.json`, change:
+
 ```diff
 -    "lint": "eslint ./src --ext .ts,.tsx",
 +    "lint": "eslint",
@@ -203,6 +210,7 @@ In `frontend/package.json`, change:
 - [ ] **Step 2: Update react-client lint script**
 
 In `libs/react-client/package.json`, change:
+
 ```diff
 -    "lint": "eslint ./src --ext .ts,.tsx",
 +    "lint": "eslint",
@@ -211,6 +219,7 @@ In `libs/react-client/package.json`, change:
 - [ ] **Step 3: Update copilot lint script**
 
 In `libs/copilot/package.json`, change:
+
 ```diff
 -    "lint": "eslint ./src --ext .ts,.tsx",
 +    "lint": "eslint",
@@ -248,6 +257,7 @@ git commit -m "chore: simplify package lint scripts for eslint v9 flat config"
 ## Task 5: Update lint-staged Config
 
 **Files:**
+
 - Modify: `lint-staged.config.js`
 
 This is the payoff: package-scoped globs with `pnpm --filter` for ESLint. Prettier stays as direct invocation (it already uses the root `.prettierrc` and lint-staged passes staged files directly).
@@ -260,21 +270,21 @@ export default {
   'frontend/**/*.{ts,tsx}': [
     'pnpm --filter @chainlit/app lint -- --fix',
     'prettier --write',
-    () => 'pnpm --filter @chainlit/app type-check',
+    () => 'pnpm --filter @chainlit/app type-check'
   ],
 
   // ── React Client ──────────────────────────────────
   'libs/react-client/**/*.{ts,tsx}': [
     'pnpm --filter @chainlit/react-client lint -- --fix',
     'prettier --write',
-    () => 'pnpm --filter @chainlit/react-client type-check',
+    () => 'pnpm --filter @chainlit/react-client type-check'
   ],
 
   // ── Copilot ───────────────────────────────────────
   'libs/copilot/**/*.{ts,tsx}': [
     'pnpm --filter @chainlit/copilot lint -- --fix',
     'prettier --write',
-    () => 'pnpm --filter @chainlit/copilot type-check',
+    () => 'pnpm --filter @chainlit/copilot type-check'
   ],
 
   // ── Cypress (not a workspace package) ─────────────
@@ -287,15 +297,16 @@ export default {
   'backend/**/*.py': [
     'uv run ruff check',
     'uv run ruff format --check',
-    () => 'uv run dmypy run -- backend/',
+    () => 'uv run dmypy run -- backend/'
   ],
 
   // ── GitHub Actions ────────────────────────────────
-  '.github/workflows/**': ['actionlint'],
+  '.github/workflows/**': ['actionlint']
 };
 ```
 
 > **How `pnpm --filter @chainlit/app lint -- --fix` works with lint-staged:**
+>
 > 1. lint-staged matches staged files against the glob (e.g. `frontend/**/*.{ts,tsx}`)
 > 2. For string commands, lint-staged appends matched file paths as arguments
 > 3. Command becomes: `pnpm --filter @chainlit/app lint -- --fix /abs/path/to/file1.tsx /abs/path/to/file2.tsx`
@@ -305,7 +316,7 @@ export default {
 >
 > **Why prettier stays as direct invocation:** Prettier doesn't have a "default to `.`" mode. The root `.prettierrc` is already the single source of config. lint-staged passes staged files directly — no benefit from `pnpm --filter` indirection.
 >
-> **Why `backend/**/*.py` instead of `**/*.py`:** Scopes Python linting to backend only, consistent with the package-scoped approach for JS/TS.
+> **Why `backend/**/_.py`instead of`\*\*/_.py`:\*\* Scopes Python linting to backend only, consistent with the package-scoped approach for JS/TS.
 
 - [ ] **Step 2: Verify lint-staged config is valid**
 
@@ -338,6 +349,7 @@ git commit -m "chore: scope lint-staged to packages with pnpm --filter"
 ESLint now covers files outside `src/` (config files, tests, storybook). Some may have pre-existing lint issues.
 
 **Files:**
+
 - Varies — depends on what ESLint reports
 
 - [ ] **Step 1: Run full lint to find new errors**
@@ -349,6 +361,7 @@ pnpm lint 2>&1
 - [ ] **Step 2: Fix any errors**
 
 Most likely candidates:
+
 - `vite.config.ts` files — may use `require()` or have unused imports
 - `frontend/tests/*.spec.tsx` — may have unused variables in test helpers
 - `libs/copilot/.storybook/*.ts` — may have `any` types (but rule is off)
@@ -392,6 +405,7 @@ npx lint-staged --verbose
 ```
 
 Verify:
+
 - Frontend file change triggers only `@chainlit/app` lint + type-check
 - react-client file change triggers only `@chainlit/react-client` lint + type-check
 - A Python file change triggers only ruff + dmypy
@@ -408,9 +422,9 @@ git commit -m "chore: complete eslint v9 migration and lint-staged unification"
 
 ## Risk Checklist
 
-| Risk | Mitigation |
-|------|-----------|
-| `eslint-plugin-chai-friendly` doesn't work in flat config | It exports `configs.recommendedFlat` (verified at runtime). If it fails, wrap with `FlatCompat` from `@eslint/eslintrc`. |
-| `eslint-plugin-cypress` v6 breaking changes | The v6 `/flat` export is documented. The plugin only adds 2 rules (`no-assigning-return-values`, `no-unnecessary-waiting`). Verify they still trigger. |
-| New lint errors in previously unlinted files | Task 6 handles this. Scope is small: ~10 files outside `src/` across all packages. |
-| `pnpm --filter` + lint-staged file passing | Verified empirically: lint-staged appends absolute paths, pnpm passes them after `--`, ESLint v9 lints only those files. |
+| Risk                                                      | Mitigation                                                                                                                                             |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `eslint-plugin-chai-friendly` doesn't work in flat config | It exports `configs.recommendedFlat` (verified at runtime). If it fails, wrap with `FlatCompat` from `@eslint/eslintrc`.                               |
+| `eslint-plugin-cypress` v6 breaking changes               | The v6 `/flat` export is documented. The plugin only adds 2 rules (`no-assigning-return-values`, `no-unnecessary-waiting`). Verify they still trigger. |
+| New lint errors in previously unlinted files              | Task 6 handles this. Scope is small: ~10 files outside `src/` across all packages.                                                                     |
+| `pnpm --filter` + lint-staged file passing                | Verified empirically: lint-staged appends absolute paths, pnpm passes them after `--`, ESLint v9 lints only those files.                               |
