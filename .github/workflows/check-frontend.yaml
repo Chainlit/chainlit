@@ -27,7 +27,7 @@ jobs:
       - uses: ./.github/actions/check-run
         with:
           check_name: 'Formatting: frontend'
-          command: pnpm format
+          command: pnpm format-check
 
       - uses: ./.github/actions/check-run
         with:

@@ -98,17 +98,17 @@ Pre-resolved library IDs for [Context7 MCP](https://context7.com). Use these whe
 
 ## Testing
 
-| Library/Framework | Context7 Library ID                | Notes                     |
-| ----------------- | ---------------------------------- | ------------------------- |
-| pytest            | /websites/pytest_en_stable         | Python test framework     |
-| Cypress           | /cypress-io/cypress-documentation  | E2E testing framework     |
+| Library/Framework | Context7 Library ID               | Notes                 |
+| ----------------- | --------------------------------- | --------------------- |
+| pytest            | /websites/pytest_en_stable        | Python test framework |
+| Cypress           | /cypress-io/cypress-documentation | E2E testing framework |
 
 ## Lint & format
 
-| Library/Framework | Context7 Library ID    | Notes                    |
-| ----------------- | ---------------------- | ------------------------ |
-| ESLint            | /websites/eslint       | JS/TS linter             |
-| Prettier          | /websites/prettier_io  | Code formatter           |
+| Library/Framework | Context7 Library ID   | Notes          |
+| ----------------- | --------------------- | -------------- |
+| ESLint            | /websites/eslint      | JS/TS linter   |
+| Prettier          | /websites/prettier_io | Code formatter |
 
 ## Infra
 

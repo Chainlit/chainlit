@@ -28,11 +28,11 @@ Chainlit is a Python framework for building production-ready conversational AI a
 
 ### Build
 
-|                      | Command               | Directory  | What it does                                                                                                                               |
-| -------------------- | --------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Backend              | `uv build`            | `backend/` | Build Python package — runs `pnpm buildUi`, then copies assets into `backend/chainlit/frontend/dist/` and `backend/chainlit/copilot/dist/` |
-| Frontend             | `pnpm run buildUi`    | repo root  | Build libs + frontend JS assets                                                                                                            |
-| Frontend (libs only) | `pnpm run build:libs` | repo root  | Build only `react-client` and `copilot` libs                                                                                               |
+|                   | Command                                      | Directory  | What it does                                                                              |
+| ----------------- | -------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------- |
+| All JS packages   | `pnpm build`                                 | repo root  | Build all workspace packages (frontend, react-client, copilot) via `pnpm run --recursive` |
+| Backend (PyPI)    | `uv build`                                   | `backend/` | Build Python package — builds JS assets first, then bundles into the Python distribution  |
+| Single JS package | `pnpm --filter @chainlit/react-client build` | repo root  | Build one package (useful for publishing)                                                 |
 
 ### Dev servers
 
@@ -52,21 +52,29 @@ Chainlit is a Python framework for building production-ready conversational AI a
 
 ### Lint & Format
 
-|                    | Command                               | Directory  |
-| ------------------ | ------------------------------------- | ---------- |
-| Lint all           | `pnpm run lint`                       | repo root  |
-| Lint frontend only | `pnpm run lintUi`                     | repo root  |
-| Format Python      | `uv run ruff format chainlit/ tests/` | `backend/` |
-| Format JS/TS       | `pnpm run formatUi`                   | repo root  |
+|                     | Command                            | Directory |
+| ------------------- | ---------------------------------- | --------- |
+| Lint JS/TS          | `pnpm lint`                        | repo root |
+| Lint fix JS/TS      | `pnpm lint:fix`                    | repo root |
+| Format check JS/TS  | `pnpm format-check`                | repo root |
+| Format fix JS/TS    | `pnpm format`                      | repo root |
+| Lint Python         | `uv run scripts/lint.py`           | repo root |
+| Lint fix Python     | `uv run scripts/lint.py --fix`     | repo root |
+| Format check Python | `uv run scripts/format.py --check` | repo root |
+| Format fix Python   | `uv run scripts/format.py`         | repo root |
+
+JS/TS lint and format commands accept file/directory arguments: `pnpm lint frontend/`, `pnpm format-check:files frontend/src/App.tsx`. Python scripts also accept file arguments: `uv run scripts/lint.py backend/chainlit/server.py`.
 
 ### Type checking
 
-|               | Command                                | Directory   |
-| ------------- | -------------------------------------- | ----------- |
-| Python (mypy) | `uv run dmypy run -- chainlit/ tests/` | `backend/`  |
-| TypeScript    | `tsc --noemit`                         | `frontend/` |
+|               | Command                        | Directory |
+| ------------- | ------------------------------ | --------- |
+| Python (mypy) | `uv run scripts/type_check.py` | repo root |
+| TypeScript    | `pnpm type-check`              | repo root |
 
-Run `pnpm run lint` before committing — CI enforces this.
+Type checking runs on whole projects (no per-file mode).
+
+Run `pnpm lint:fix` and `pnpm format` before committing — CI enforces checks on both.
 
 ### Commits
 

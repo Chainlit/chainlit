@@ -66,20 +66,20 @@ cypress run --record --parallel
 
 ### Cypress vs Playwright
 
-| Feature | Cypress | Playwright |
-|---|---|---|
-| Local parallelism | Not supported | Built-in (`--workers=4`) |
-| CI sharding | Via Cypress Cloud (paid) | Built-in (`--shard=1/4`) |
-| Orchestration | Dynamic, based on history | Manual split |
+| Feature           | Cypress                   | Playwright               |
+| ----------------- | ------------------------- | ------------------------ |
+| Local parallelism | Not supported             | Built-in (`--workers=4`) |
+| CI sharding       | Via Cypress Cloud (paid)  | Built-in (`--shard=1/4`) |
+| Orchestration     | Dynamic, based on history | Manual split             |
 
 ### Free Alternatives for Cypress Parallelization
 
-| Tool | Description |
-|---|---|
-| **Manual CI matrix sharding** | Split spec files across GitHub Actions matrix jobs using `--spec` |
-| **[sorry-cypress](https://sorry-cypress.dev/)** | Open-source, self-hosted drop-in replacement for Cypress Cloud; supports `--parallel` |
-| **[cypress-split](https://github.com/bahmutov/cypress-split)** | Plugin that splits specs across CI machines using `SPLIT`/`SPLIT_INDEX` env vars |
-| **[currents.dev](https://currents.dev/)** | Cypress Cloud alternative with a free tier |
+| Tool                                                           | Description                                                                           |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Manual CI matrix sharding**                                  | Split spec files across GitHub Actions matrix jobs using `--spec`                     |
+| **[sorry-cypress](https://sorry-cypress.dev/)**                | Open-source, self-hosted drop-in replacement for Cypress Cloud; supports `--parallel` |
+| **[cypress-split](https://github.com/bahmutov/cypress-split)** | Plugin that splits specs across CI machines using `SPLIT`/`SPLIT_INDEX` env vars      |
+| **[currents.dev](https://currents.dev/)**                      | Cypress Cloud alternative with a free tier                                            |
 
 ---
 
@@ -87,11 +87,11 @@ cypress run --record --parallel
 
 ### Bottlenecks and Solutions
 
-| Bottleneck | Solution |
-|---|---|
-| Hardcoded port `8000` | Assign a unique port per worker (e.g. `8000 + workerIndex`). Pass `--port` to `chainlit run` and configure `baseUrl` dynamically. |
-| Port-based kill (`fkill(:8000)`) | Switch to PID-based process management — store the child PID from `spawn()` and kill it directly. |
-| Single Cypress browser | Use Cypress Cloud `--parallel`, sorry-cypress, cypress-split, or shard tests across CI matrix jobs. |
+| Bottleneck                            | Solution                                                                                                                                      |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hardcoded port `8000`                 | Assign a unique port per worker (e.g. `8000 + workerIndex`). Pass `--port` to `chainlit run` and configure `baseUrl` dynamically.             |
+| Port-based kill (`fkill(:8000)`)      | Switch to PID-based process management — store the child PID from `spawn()` and kill it directly.                                             |
+| Single Cypress browser                | Use Cypress Cloud `--parallel`, sorry-cypress, cypress-split, or shard tests across CI matrix jobs.                                           |
 | Shared filesystem (`.chainlit/` dirs) | Already isolated per test. Some tests (e.g. `data_layer`) write temp files like `thread_history.pickle` that must remain isolated per worker. |
 
 ### Strategy A: CI Matrix Sharding (Simplest)

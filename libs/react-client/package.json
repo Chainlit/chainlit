@@ -6,8 +6,6 @@
     "preinstall": "npx only-allow pnpm",
     "dev": "tsup src/index.ts --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
     "build": "tsup src/index.ts --tsconfig tsconfig.build.json --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
-    "lint": "eslint",
-    "format": "prettier .",
     "type-check": "tsc --noemit",
     "test": "echo no tests yet"
   },

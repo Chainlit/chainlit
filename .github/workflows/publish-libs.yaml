@@ -44,8 +44,8 @@ jobs:
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
 
-      - name: Build libs
-        run: pnpm build:libs
+      - name: Build react-client
+        run: pnpm --filter @chainlit/react-client build
 
       - name: Publish packages to npm
         # --no-git-checks allows testing from non-main branches and publishing from release tags

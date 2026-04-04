@@ -17,6 +17,7 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
     - [Install dependencies](#install-dependencies)
   - [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
   - [Start the UI from source](#start-the-ui-from-source)
+  - [Lint \& Format](#lint--format)
   - [Run the tests](#run-the-tests)
     - [Backend unit tests](#backend-unit-tests)
     - [Frontend unit tests](#frontend-unit-tests)
@@ -32,7 +33,7 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
 4. Pnpm ([See how to install](https://pnpm.io/installation))
 
 > **Note**
-> If you are on windows, some pnpm commands like `pnpm run formatPython` won't work. You can fix this by changing the pnpm script-shell to bash: `pnpm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"` (default x64 install location, [Info](https://pnpm.io/cli/run#script-shell))
+> If you are on Windows, some pnpm commands won't work out of the box. You can fix this by changing the pnpm script-shell to bash: `pnpm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"` (default x64 install location, [Info](https://pnpm.io/cli/run#script-shell))
 
 ### Set up the repo
 
@@ -103,6 +104,45 @@ pnpm run dev
 ```
 
 If you visit `http://localhost:5173/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
+
+## Lint & Format
+
+Linting and formatting run from the **repo root** (not from individual packages). This ensures CI, lint-staged, and local commands all use the same tool invocation.
+
+```sh
+# Lint (CI uses this)
+pnpm lint
+
+# Lint and auto-fix
+pnpm lint:fix
+
+# Check formatting (CI uses this)
+pnpm format-check
+
+# Fix formatting
+pnpm format
+
+# Type check (TypeScript)
+pnpm type-check
+
+# Scope to specific files or directories
+pnpm lint frontend/src/App.tsx
+pnpm lint:fix frontend/
+pnpm format-check:files frontend/
+pnpm format:files frontend/src/App.tsx
+
+# Python (uses scripts/ wrappers around ruff and mypy)
+uv run scripts/lint.py                             # ruff check (all)
+uv run scripts/lint.py backend/chainlit/server.py  # single file
+uv run scripts/lint.py --fix                       # ruff check --fix
+uv run scripts/format.py                           # ruff format (all)
+uv run scripts/format.py backend/chainlit/server.py # single file
+uv run scripts/format.py --check                   # ruff format --check
+uv run scripts/type_check.py                       # dmypy (whole project, no per-file mode)
+```
+
+> **Note**
+> Linting and formatting scripts are defined only at the workspace root. Running `pnpm lint` from a sub-package directory won't work — always run from the repo root, passing a path argument to scope: `pnpm lint frontend/`.
 
 ## Run the tests
 
