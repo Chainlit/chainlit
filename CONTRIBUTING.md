@@ -132,11 +132,11 @@ This will run end to end tests, assessing both the frontend, the backend and the
 ```sh
 // from root
 pnpm test:e2e // will do cypress run
-pnpm test:e2e -- --spec cypress/e2e/copilot // will run single test with the name copilot
-pnpm test:e2e -- --spec "cypress/e2e/copilot,cypress/e2e/data_layer" // will run two tests with the names copilot and data_layer
-pnpm test:e2e -- --spec "cypress/e2e/**/async-*" // will run all async tests
-pnpm test:e2e -- --spec "cypress/e2e/**/sync-*" // will run all sync tests
-pnpm test:e2e -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
+pnpm test:e2e --spec cypress/e2e/copilot // will run single test with the name copilot
+pnpm test:e2e --spec "cypress/e2e/copilot,cypress/e2e/data_layer" // will run two tests with the names copilot and data_layer
+pnpm test:e2e --spec "cypress/e2e/**/async-*" // will run all async tests
+pnpm test:e2e --spec "cypress/e2e/**/sync-*" // will run all sync tests
+pnpm test:e2e --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
 ```
 
 (Go grab a cup of something, this will take a while.)
