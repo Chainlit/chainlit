@@ -255,6 +255,18 @@
         "single": "തീയതി തിരഞ്ഞെടുക്കുക",
         "range": "തീയതി ശ്രേണി തിരഞ്ഞെടുക്കുക"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "എല്ലാം തിരഞ്ഞെടുക്കുക",
+      "deselectAll": "എല്ലാം നീക്കുക",
+      "rowsCount": "{{total}} ല്മിന്‍ {{filtered}} വരികല്‍",
+      "rowsPerPage": "{{count}} വരികല്‍",
+      "filterPlaceholder": "ഫില്റ്റർ...",
+      "columns": "നിരകള്‍",
+      "pageSizePlaceholder": "പേജ് വലിപ്പ്",
+      "exportExcel": "Excel ക്ക് കയററ്റുമതി ചെയ്യുക",
+      "clearFilters": "ഫില്റ്റർ മായ്ക്കുക",
+      "noResults": "ഫലങ്ങള്‍ ഒന്നുമില്ല."
     }
   }
 }

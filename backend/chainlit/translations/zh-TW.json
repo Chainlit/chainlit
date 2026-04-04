@@ -255,6 +255,18 @@
         "single": "選擇日期",
         "range": "選擇日期範圍"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "全選",
+      "deselectAll": "取消全選",
+      "rowsCount": "{{filtered}} / {{total}} 行",
+      "rowsPerPage": "{{count}} 行",
+      "filterPlaceholder": "篩選...",
+      "columns": "欄位",
+      "pageSizePlaceholder": "每頁行數",
+      "exportExcel": "匯出 Excel",
+      "clearFilters": "清除篩選",
+      "noResults": "無結果。"
     }
   }
 }

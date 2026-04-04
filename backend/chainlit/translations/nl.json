@@ -255,6 +255,18 @@
         "single": "Kies een datum",
         "range": "Kies een datumbereik"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "Alles selecteren",
+      "deselectAll": "Alles deselecteren",
+      "rowsCount": "{{filtered}} van {{total}} rijen",
+      "rowsPerPage": "{{count}} rijen",
+      "filterPlaceholder": "Filteren...",
+      "columns": "Kolommen",
+      "pageSizePlaceholder": "Paginagrootte",
+      "exportExcel": "Excel exporteren",
+      "clearFilters": "Filters wissen",
+      "noResults": "Geen resultaten."
     }
   }
 }

@@ -137,6 +137,7 @@ path = "chainlit/version.py"
 
 [tool.mypy]
 python_version = "3.10"
+files = ["chainlit", "tests"]
 
 [[tool.mypy.overrides]]
 module = [

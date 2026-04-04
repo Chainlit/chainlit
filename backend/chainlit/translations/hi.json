@@ -255,6 +255,18 @@
         "single": "एक तारीख चुनें",
         "range": "तारीख सीमा चुनें"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "सभी चुनें",
+      "deselectAll": "सभी हटाएं",
+      "rowsCount": "{{total}} में से {{filtered}} पंक्तियाँ",
+      "rowsPerPage": "{{count}} पंक्तियाँ",
+      "filterPlaceholder": "फ़िल्टर...",
+      "columns": "कॉलम",
+      "pageSizePlaceholder": "पेज आकार",
+      "exportExcel": "Excel निर्यात करें",
+      "clearFilters": "फ़िल्टर हटाएं",
+      "noResults": "कोई परिणाम नहीं।"
     }
   }
 }
