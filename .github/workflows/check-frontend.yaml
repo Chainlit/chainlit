@@ -12,34 +12,20 @@ permissions:
 jobs:
   check-frontend:
     runs-on: ubuntu-latest
-    name: run checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 'Linting: frontend'
+            command: pnpm lint
+          - name: 'Formatting: frontend'
+            command: pnpm format-check
+          - name: 'Type checking: frontend'
+            command: pnpm type-check
+    name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
-
-      - name: 'Linting: frontend'
-        id: lint
-        continue-on-error: true
-        run: pnpm lint
-
-      - name: 'Formatting: frontend'
-        id: format
-        continue-on-error: true
-        run: pnpm format-check
-
-      - name: 'Type checking: frontend'
-        id: type_check
-        continue-on-error: true
-        run: pnpm type-check
-
-      - name: Fail if any check failed
-        if: >-
-          always() && (
-            steps.lint.outcome != 'success' ||
-            steps.format.outcome != 'success' ||
-            steps.type_check.outcome != 'success'
-          )
-        run: |
-          echo "One or more checks failed"
-          exit 1
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.command }}

@@ -12,36 +12,22 @@ permissions:
 jobs:
   check-backend:
     runs-on: ubuntu-latest
-    name: run checks
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 'Linting: backend'
+            command: uv run --no-project scripts/lint.py
+          - name: 'Formatting: backend'
+            command: uv run --no-project scripts/format.py --check
+          - name: 'Type checking: backend'
+            command: uv run --no-project scripts/type_check.py
+    name: ${{ matrix.name }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python dependencies
         with:
           uv-args: --no-install-workspace --all-extras --dev
-
-      - name: 'Linting: backend'
-        id: lint
-        continue-on-error: true
-        run: uv run --no-project scripts/lint.py
-
-      - name: 'Formatting: backend'
-        id: format
-        continue-on-error: true
-        run: uv run --no-project scripts/format.py --check
-
-      - name: 'Type checking: backend'
-        id: type_check
-        continue-on-error: true
-        run: uv run --no-project scripts/type_check.py
-
-      - name: Fail if any check failed
-        if: >-
-          always() && (
-            steps.lint.outcome != 'success' ||
-            steps.format.outcome != 'success' ||
-            steps.type_check.outcome != 'success'
-          )
-        run: |
-          echo "One or more checks failed"
-          exit 1
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.command }}
