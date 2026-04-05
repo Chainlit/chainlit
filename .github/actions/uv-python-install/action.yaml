@@ -10,13 +10,13 @@ inputs:
     description: uv version
     required: true
     default: 'latest'
+  uv-args:
+    description: Extra uv args, for example dependencies to install, e.g. --extra tests --extra dev.
+    required: false
   working-directory:
     description: Working directory for uv command.
     required: false
     default: .
-  extra-dependencies:
-    description: Extra dependencies to install, e.g. --extra tests --extra dev.
-    required: false
 
 runs:
   using: composite
@@ -32,6 +32,6 @@ runs:
       with:
         python-version: ${{ inputs.python-version }}
     - name: Install Python dependencies
-      run: uv sync --no-install-project --no-editable ${{ inputs.extra-dependencies }}
+      run: uv sync --all-packages ${{ inputs.uv-args }}
       shell: bash
       working-directory: ${{ inputs.working-directory }}

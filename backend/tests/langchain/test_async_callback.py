@@ -5,10 +5,9 @@ from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
 import pytest
-from langchain_core.outputs import GenerationChunk
-
 from chainlit.langchain.callbacks import LangchainTracer
 from chainlit.step import Step
+from langchain_core.outputs import GenerationChunk
 
 
 def create_mock_run(**kwargs):

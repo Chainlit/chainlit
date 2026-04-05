@@ -1,0 +1,33 @@
+name: Check frontend & libs
+
+on: [workflow_call]
+
+concurrency:
+  group: check-frontend-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  check-frontend:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 'Linting: frontend'
+            command: pnpm lint
+          - name: 'Formatting: frontend'
+            command: pnpm format-check
+          - name: 'Type checking: frontend'
+            command: pnpm type-check
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-node-install
+        name: Install Node, pnpm and dependencies.
+      - name: Build @chainlit/react-client
+        run: pnpm --filter @chainlit/react-client build
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.command }}

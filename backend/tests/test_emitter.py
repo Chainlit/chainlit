@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock
 
 import pytest
-
 from chainlit.element import ElementDict
 from chainlit.emitter import ChainlitEmitter
 from chainlit.step import StepDict

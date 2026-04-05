@@ -1,5 +1,4 @@
 import pytest
-
 from chainlit.element import File, Image, Text
 from chainlit.sidebar import ElementSidebar
 

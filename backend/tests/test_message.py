@@ -4,7 +4,6 @@ from contextlib import contextmanager
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
 from chainlit.action import Action
 from chainlit.context import ChainlitContext, context_var
 from chainlit.message import (

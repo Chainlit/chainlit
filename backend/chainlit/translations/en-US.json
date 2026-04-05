@@ -156,10 +156,10 @@
     "thread": {
       "untitled": "Untitled Conversation",
       "menu": {
-          "rename": "Rename",
-          "share": "Share",
-          "delete": "Delete"
-        },
+        "rename": "Rename",
+        "share": "Share",
+        "delete": "Delete"
+      },
       "actions": {
         "share": {
           "title": "Share link to chat",

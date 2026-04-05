@@ -36,7 +36,6 @@
 
 https://github.com/user-attachments/assets/b3738aba-55c0-42fa-ac00-6efd1ee0d148
 
-
 ## Installation
 
 Open a terminal and run:

@@ -7,10 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ./src --ext .ts,.tsx && tsc --noemit",
-    "format": "prettier 'src/**/*.{ts,tsx,css}' --write",
-    "test": "vitest run",
-    "prepublishOnly": "pnpm run build && pnpm test"
+    "type-check": "tsc --noemit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@chainlit/react-client": "workspace:^",
@@ -55,6 +53,7 @@
     "react-hotkeys-hook": "^4.4.1",
     "react-i18next": "^14.0.0",
     "react-markdown": "^9.0.1",
+    "pdfjs-dist": "5.4.296",
     "react-pdf": "^10.4.1",
     "react-player": "^2.16.0",
     "react-plotly.js": "^2.6.0",

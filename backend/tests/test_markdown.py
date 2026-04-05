@@ -3,7 +3,6 @@ import tempfile
 from unittest.mock import patch
 
 import pytest
-
 from chainlit.markdown import DEFAULT_MARKDOWN_STR, get_markdown_str, init_markdown
 
 

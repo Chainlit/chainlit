@@ -2,7 +2,7 @@
   "compilerOptions": {
     "lib": ["ESNext", "dom"],
     "types": ["cypress", "cypress-plugin-steps", "node"],
-    "baseUrl": ".",
+    "baseUrl": "."
   },
   "include": ["cypress/**/*.ts"]
 }

@@ -2,7 +2,6 @@ import json
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
-
 from chainlit.session import WebsocketSession
 from chainlit.socket import (
     _authenticate_connection,
