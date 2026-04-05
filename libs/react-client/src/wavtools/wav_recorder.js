@@ -317,8 +317,8 @@ export class WavRecorder {
         config.audio = { deviceId: { exact: deviceId } };
       }
       this.stream = await navigator.mediaDevices.getUserMedia(config);
-    } catch (_err) {
-      throw new Error('Could not start media stream');
+    } catch (err) {
+      throw new Error('Could not start media stream', { cause: err });
     }
 
     const context = new AudioContext({ sampleRate: this.sampleRate });
@@ -328,7 +328,9 @@ export class WavRecorder {
       await context.audioWorklet.addModule(this.scriptSrc);
     } catch (e) {
       console.error(e);
-      throw new Error(`Could not add audioWorklet module: ${this.scriptSrc}`);
+      throw new Error(`Could not add audioWorklet module: ${this.scriptSrc}`, {
+        cause: e
+      });
     }
     const processor = new AudioWorkletNode(context, 'audio_processor');
     processor.port.onmessage = (e) => {
