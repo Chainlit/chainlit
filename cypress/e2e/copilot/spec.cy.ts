@@ -170,7 +170,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
       cy.get('#chainlit-copilot-button').click();
 
       cy.get('#chainlit-copilot-chat').should('exist');
-      cy.document().then((doc) => {
+      cy.document().should((doc) => {
         expect(doc.body.style.marginRight).to.equal('400px');
       });
     });
@@ -184,7 +184,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
       cy.get('#close-sidebar-button').click();
 
       cy.get('#chainlit-copilot-chat').should('not.exist');
-      cy.document().then((doc) => {
+      cy.document().should((doc) => {
         expect(doc.body.style.marginRight).to.not.equal('400px');
       });
     });
@@ -209,15 +209,15 @@ describe('Copilot', { includeShadowDom: true }, () => {
             const startY = handleRect.top + handleRect.height / 2;
             const targetX = startX - 200;
 
-            cy.wrap($handle)
-              .trigger('mousedown', { clientX: startX, clientY: startY })
-              .then(() => {
-                cy.document().trigger('mousemove', {
-                  clientX: targetX,
-                  clientY: startY
-                });
-                cy.document().trigger('mouseup');
-              });
+            cy.wrap($handle).trigger('mousedown', {
+              clientX: startX,
+              clientY: startY
+            });
+            cy.document().trigger('mousemove', {
+              clientX: targetX,
+              clientY: startY
+            });
+            cy.document().trigger('mouseup');
           });
 
           cy.step('Verify sidebar width changed');
@@ -233,7 +233,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
             .first()
             .invoke('width')
             .then((newWidth) => {
-              cy.document().then((doc) => {
+              cy.document().should((doc) => {
                 const margin = parseFloat(doc.body.style.marginRight);
                 expect(margin).to.be.closeTo(newWidth, 2);
               });
@@ -251,7 +251,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
 
       cy.contains('[role="menuitemradio"]', 'Floating').click();
 
-      cy.document().then((doc) => {
+      cy.document().should((doc) => {
         expect(doc.body.style.marginRight).to.not.equal('400px');
       });
     });
@@ -265,7 +265,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
       mountCopilotWidget({ displayMode: 'sidebar', opened: true });
 
       cy.get('#chainlit-copilot-chat').should('exist');
-      cy.document().then((doc) => {
+      cy.document().should((doc) => {
         expect(doc.body.style.marginRight).to.equal('400px');
       });
 
@@ -275,7 +275,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
         win.unmountChainlitWidget();
       });
 
-      cy.document().then((doc) => {
+      cy.document().should((doc) => {
         expect(doc.body.style.marginRight).to.equal('20px');
       });
     });
@@ -296,7 +296,7 @@ describe('Copilot', { includeShadowDom: true }, () => {
         .should('be.closeTo', 500, 5);
 
       cy.step('Verify body margin matches persisted width');
-      cy.document().then((doc) => {
+      cy.document().should((doc) => {
         const margin = parseFloat(doc.body.style.marginRight);
         expect(margin).to.be.closeTo(500, 2);
       });
