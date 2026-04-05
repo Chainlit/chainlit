@@ -8,7 +8,6 @@ concurrency:
 
 permissions:
   contents: read
-  checks: write
 
 jobs:
   check-backend:
@@ -21,17 +20,28 @@ jobs:
         with:
           uv-args: --no-install-workspace --all-extras --dev
 
-      - uses: ./.github/actions/check-run
-        with:
-          check_name: 'Linting: backend'
-          command: uv run --no-project scripts/lint.py
+      - name: 'Linting: backend'
+        id: lint
+        continue-on-error: true
+        run: uv run --no-project scripts/lint.py
 
-      - uses: ./.github/actions/check-run
-        with:
-          check_name: 'Formatting: backend'
-          command: uv run --no-project scripts/format.py --check
+      - name: 'Formatting: backend'
+        id: format
+        continue-on-error: true
+        run: uv run --no-project scripts/format.py --check
 
-      - uses: ./.github/actions/check-run
-        with:
-          check_name: 'Type checking: backend'
-          command: uv run --no-project scripts/type_check.py
+      - name: 'Type checking: backend'
+        id: type_check
+        continue-on-error: true
+        run: uv run --no-project scripts/type_check.py
+
+      - name: Fail if any check failed
+        if: >-
+          always() && (
+            steps.lint.outcome != 'success' ||
+            steps.format.outcome != 'success' ||
+            steps.type_check.outcome != 'success'
+          )
+        run: |
+          echo "One or more checks failed"
+          exit 1

@@ -24,15 +24,9 @@ permissions: read-all
 jobs:
   check-backend:
     uses: ./.github/workflows/check-backend.yaml
-    permissions:
-      contents: read
-      checks: write
     secrets: inherit
   check-frontend:
     uses: ./.github/workflows/check-frontend.yaml
-    permissions:
-      contents: read
-      checks: write
     secrets: inherit
   tests:
     uses: ./.github/workflows/tests.yaml

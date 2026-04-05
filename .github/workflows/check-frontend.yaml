@@ -8,7 +8,6 @@ concurrency:
 
 permissions:
   contents: read
-  checks: write
 
 jobs:
   check-frontend:
@@ -19,17 +18,28 @@ jobs:
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
 
-      - uses: ./.github/actions/check-run
-        with:
-          check_name: 'Linting: frontend'
-          command: pnpm lint
+      - name: 'Linting: frontend'
+        id: lint
+        continue-on-error: true
+        run: pnpm lint
 
-      - uses: ./.github/actions/check-run
-        with:
-          check_name: 'Formatting: frontend'
-          command: pnpm format-check
+      - name: 'Formatting: frontend'
+        id: format
+        continue-on-error: true
+        run: pnpm format-check
 
-      - uses: ./.github/actions/check-run
-        with:
-          check_name: 'Type checking: frontend'
-          command: pnpm type-check
+      - name: 'Type checking: frontend'
+        id: type_check
+        continue-on-error: true
+        run: pnpm type-check
+
+      - name: Fail if any check failed
+        if: >-
+          always() && (
+            steps.lint.outcome != 'success' ||
+            steps.format.outcome != 'success' ||
+            steps.type_check.outcome != 'success'
+          )
+        run: |
+          echo "One or more checks failed"
+          exit 1
