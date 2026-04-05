@@ -1,14 +1,14 @@
 {
   "devDependencies": {
     "@eslint/compat": "^2.0.3",
-    "@eslint/js": "^9.39.4",
+    "@eslint/js": "^10.0.0",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "cypress": "^14.5.3",
     "cypress-plugin-steps": "1.2.1",
     "dotenv": "^16.3.1",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-plugin-chai-friendly": "^1.1.1",
     "eslint-plugin-cypress": "^6",
     "fkill": "^9.0.0",
