@@ -27,5 +27,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
+      - name: Build @chainlit/react-client
+        run: pnpm --filter @chainlit/react-client build
       - name: ${{ matrix.name }}
         run: ${{ matrix.command }}
