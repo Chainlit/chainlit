@@ -147,6 +147,57 @@ def test_state_cookie_lifetime_custom(monkeypatch):
     assert cookie_module._state_cookie_lifetime == 600
 
 
+def test_cookie_path_defaults_to_root(monkeypatch):
+    """When neither CHAINLIT_ROOT_PATH nor CHAINLIT_AUTH_COOKIE_PATH is set, _cookie_path defaults to '/'."""
+    monkeypatch.delenv("CHAINLIT_ROOT_PATH", raising=False)
+    monkeypatch.delenv("CHAINLIT_AUTH_COOKIE_PATH", raising=False)
+    importlib.reload(cookie_module)
+    assert cookie_module._cookie_path == "/"
+
+
+def test_cookie_path_uses_root_path(monkeypatch):
+    """When CHAINLIT_ROOT_PATH is set, _cookie_path uses its value."""
+    monkeypatch.setenv("CHAINLIT_ROOT_PATH", "/app1")
+    monkeypatch.delenv("CHAINLIT_AUTH_COOKIE_PATH", raising=False)
+    importlib.reload(cookie_module)
+    assert cookie_module._cookie_path == "/app1"
+
+
+def test_cookie_path_explicit_overrides_root_path(monkeypatch):
+    """CHAINLIT_AUTH_COOKIE_PATH takes precedence over CHAINLIT_ROOT_PATH."""
+    monkeypatch.setenv("CHAINLIT_ROOT_PATH", "/app1")
+    monkeypatch.setenv("CHAINLIT_AUTH_COOKIE_PATH", "/custom")
+    importlib.reload(cookie_module)
+    assert cookie_module._cookie_path == "/custom"
+
+
+def test_delete_legacy_cookies_skips_when_path_is_root(monkeypatch):
+    """_delete_legacy_cookies is a no-op when _cookie_path == '/'."""
+    monkeypatch.delenv("CHAINLIT_ROOT_PATH", raising=False)
+    monkeypatch.delenv("CHAINLIT_AUTH_COOKIE_PATH", raising=False)
+    importlib.reload(cookie_module)
+
+    response = Response()
+    cookie_module._delete_legacy_cookies(response, "access_token")
+    # Response should have no Set-Cookie headers (no delete issued)
+    assert "set-cookie" not in response.headers
+
+
+def test_delete_legacy_cookies_deletes_at_root_when_scoped(monkeypatch):
+    """_delete_legacy_cookies issues a delete at path='/' when _cookie_path != '/'."""
+    monkeypatch.setenv("CHAINLIT_ROOT_PATH", "/app1")
+    monkeypatch.delenv("CHAINLIT_AUTH_COOKIE_PATH", raising=False)
+    importlib.reload(cookie_module)
+
+    response = Response()
+    cookie_module._delete_legacy_cookies(response, "access_token")
+    set_cookie_header = response.headers.get("set-cookie", "")
+    assert "access_token" in set_cookie_header
+    parts = [part.strip() for part in set_cookie_header.split(";")]
+    assert "Path=/" in parts
+    assert 'Max-Age=0' in set_cookie_header
+
+
 def test_clear_auth_cookie(client):
     """Test cookie clearing removes all chunks."""
     # Set initial token
