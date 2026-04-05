@@ -27,7 +27,7 @@
     "build": "pnpm run --recursive build",
     "lint": "eslint",
     "lint:fix": "pnpm lint --fix",
-    "format-check:files": "prettier --check",
+    "format-check:files": "prettier --check --ignore-unknown",
     "format-check": "pnpm format-check:files .",
     "format:files": "pnpm format-check:files --write",
     "format": "pnpm format-check --write",
