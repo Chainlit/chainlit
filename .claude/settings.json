@@ -13,5 +13,8 @@
       "Bash(pnpm test*)",
       "Bash(pnpm run test*)"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
   }
 }
