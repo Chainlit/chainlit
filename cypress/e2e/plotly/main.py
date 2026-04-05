@@ -1,6 +1,5 @@
-import plotly.graph_objects as go
-
 import chainlit as cl
+import plotly.graph_objects as go
 
 
 @cl.on_chat_start
