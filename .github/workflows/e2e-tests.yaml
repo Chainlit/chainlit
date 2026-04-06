@@ -15,9 +15,11 @@ concurrency:
 permissions: read-all
 
 jobs:
-  validate:
-    name: Validate inputs
+  prepare:
+    name: Validate inputs and compute shard matrix
     runs-on: ubuntu-slim
+    outputs:
+      indexes: ${{ steps.shard-indexes.outputs.indexes }}
     steps:
       - name: Validate e2e_parallel_shards
         run: |
@@ -27,14 +29,8 @@ jobs:
             exit 1
           fi
           echo "✅ Validation passed"
-
-  prepare:
-    needs: validate
-    runs-on: ubuntu-slim
-    outputs:
-      indexes: ${{ steps.shard-indexes.outputs.indexes }}
-    steps:
       - id: shard-indexes
+        name: Compute shard indexes
         run: |
           json=$(jq -nc --argjson n "${{ inputs.e2e_parallel_shards }}" '[range(1; $n + 1)]')
           echo "indexes=$json" >> "$GITHUB_OUTPUT"
