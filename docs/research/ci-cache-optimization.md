@@ -41,16 +41,14 @@ e2e-tests / windows-latest-2 (13m 12s) ← CRITICAL PATH
 
 ### Redundant Work
 
-The UI build is **not an explicit workflow step** — it's a Hatch build hook (`backend/build.py`) triggered by `uv sync --all-packages`. The hook runs `pnpm build` then copies `frontend/dist` and `libs/copilot/dist` into the backend package. This runs independently in **14 jobs**:
+`pnpm run buildUi` (builds `libs/react-client` → `libs/copilot` → `frontend`) runs independently in **7 jobs**:
 
-- 5 Ubuntu E2E shards × 1m 07s = 5m 35s
-- 5 Windows E2E shards × 1m 22s = 6m 50s
-- 4 pytest jobs × 1m 07s = 4m 28s
-- **Total: ~17 min of cumulative runner time** rebuilding the same output
+- 2 E2E jobs (ubuntu + windows) × ~1m 10s = ~2m 20s
+- 4 pytest jobs × ~1m 07s = ~4m 28s
+- 1 lint-ui job × ~1m 07s = ~1m 07s
+- **Total: ~8 min of cumulative runner time** rebuilding identical, OS-independent output
 
-The build hook itself provides a skip hint (line 76–77 of `build.py`):
-
-> _"If you don't need to build the frontend and just want dependencies installed, use `uv sync --no-install-project --no-editable`"_
+Note: On `feat/refactor-scripts`, the Hatch build hook is already bypassed — `uv-python-install` uses `--no-install-project --no-editable`, and `pnpm run buildUi` is an explicit step. The `lint-backend` workflow does **not** need the build.
 
 ---
 
@@ -194,53 +192,91 @@ The README's [`install: false` pattern](https://github.com/cypress-io/github-act
 
 **Expected critical-path saving**: ~1m 30s per Windows shard (eliminates the redundant action step AND speeds up postinstall via cache hit on warm cache).
 
-### P2: Build UI once, share via artifacts (E2E)
+### P2: Build UI once at CI startup, share via cache
 
-**Status**: Primary optimization — eliminates ~1m build per shard (×10 E2E jobs).
+**Status**: Primary optimization — eliminates ~1m build per downstream job (×7 jobs).
 
-**Problem**: The UI build is a Hatch build hook (`backend/build.py`) triggered by `uv sync --all-packages`. Every E2E shard independently runs `pnpm build` (~1m) to produce identical output. When all 5 Windows shards start in parallel on a cold cache, they ALL rebuild from scratch — `actions/cache` doesn't help here because no shard finishes and saves before the others start.
+**Problem**: `pnpm run buildUi` runs independently in 7 jobs, producing identical OS-independent output each time. Without a dedicated build job, all parallel jobs miss the cache simultaneously on the first run and all rebuild.
+
+**Build command**: `pnpm run buildUi` = `pnpm build:libs && cd frontend && pnpm run build`
 
 **Build output directories**:
 
-- `frontend/dist/` → copied to `backend/chainlit/frontend/dist/`
-- `libs/copilot/dist/` → copied to `backend/chainlit/copilot/dist/`
+- `libs/react-client/dist/`
+- `libs/copilot/dist/`
+- `frontend/dist/`
 
-**Approach**: Add a `build-ui` job that runs once, then share output with E2E shards via `actions/upload-artifact` + `actions/download-artifact`:
+**Approach**: Add a `build-ui` job in `ci.yaml` that builds once and saves to `actions/cache`. Downstream workflows restore from cache and skip the build.
 
-1. **`build-ui` job**: `pnpm install` → `pnpm build` → upload `frontend/dist` + `libs/copilot/dist` as artifact
-2. **E2E shards** (`needs: [prepare, build-ui]`):
-   - Download artifact → place in correct paths
-   - Copy into `backend/chainlit/{frontend,copilot}/dist/`
-   - Use `uv sync --no-install-project --no-editable` (skips Hatch build hook) to install Python deps only
-   - Install chainlit separately: `uv pip install -e backend/ --no-build-isolation --no-deps`
+**Cache key**: `ui-build-${{ github.sha }}`
 
-**Skipping the build hook**: `build.py` line 76–77 documents the `--no-install-project` flag for this purpose. The hook only runs when Hatch builds the project; `--no-install-project` tells uv to skip that entirely.
+Using the commit SHA is the simplest correct key. Enumerating source files in `hashFiles()` would be fragile — the build depends on `package.json`, `pnpm-lock.yaml`, `vite.config.*`, `tsconfig.*`, `index.html`, plus all source in `frontend/src/`, `libs/react-client/src/`, `libs/copilot/src/`. Too many inputs to track reliably. The trade-off: `github.sha` rebuilds on every new commit even if only backend files changed. But on cache hit the `build-ui` job is ~15s (restore only), so the wasted work is minimal. `github.run_id` would NOT work — it's unique per run, so the cache would never hit across runs (e.g. retries).
 
-**Trade-off**: Adds `build-ui` as a sequential dependency (~1m 30s on Ubuntu). But each shard saves ~1m of build time. Net saving is positive even with a single shard; with 10 shards the gain is ~8m 30s of cumulative runner time.
+```yaml
+# ci.yaml
+jobs:
+  build-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/pnpm-node-install
+      - uses: actions/cache@v4
+        id: ui-cache
+        with:
+          path: |
+            frontend/dist
+            libs/react-client/dist
+            libs/copilot/dist
+          key: ui-build-${{ github.sha }}
+      - name: Build UI
+        if: steps.ui-cache.outputs.cache-hit != 'true'
+        run: pnpm run buildUi
 
-**Expected critical-path saving**: ~1m 20s per Windows shard (build time eliminated, minus small artifact download overhead). The `build-ui` job itself runs in parallel with `prepare` and doesn't extend the critical path if it completes before the shards' other setup steps.
+  pytest:
+    needs: build-ui # wait for build
+    uses: ./.github/workflows/pytest.yaml
+  e2e-tests:
+    needs: build-ui # wait for build
+    uses: ./.github/workflows/e2e-tests.yaml
+  lint-ui:
+    needs: build-ui # wait for build
+    uses: ./.github/workflows/lint-ui.yaml
+  lint-backend: # no build needed — runs in parallel with build-ui
+    uses: ./.github/workflows/lint-backend.yaml
+```
 
-### P3: Cache UI build output (pytest jobs)
+Downstream workflows restore from cache and skip `pnpm run buildUi`:
 
-**Approach**: For the 4 pytest jobs (which can't easily use artifact sharing since they're in a separate workflow), use `actions/cache` keyed on frontend/libs source file hashes. Skip the Hatch build hook on cache hit.
+```yaml
+# In pytest.yaml, e2e-tests.yaml, lint-ui.yaml — replace the buildUi step:
+- uses: actions/cache@v4
+  with:
+    path: |
+      frontend/dist
+      libs/react-client/dist
+      libs/copilot/dist
+    key: ui-build-${{ github.sha }}
+    fail-on-cache-miss: true # build-ui already ran, cache must exist
+```
 
-**Cache key**: `ui-build-${{ runner.os }}-${{ hashFiles('frontend/src/**', 'libs/react-client/src/**', 'libs/copilot/src/**', 'pnpm-lock.yaml') }}`
+**Why cache over artifacts?**:
 
-**Steps**:
+- **Artifacts**: free for public repos (no storage cap), but re-upload every run even when nothing changed. Each run pays upload+download overhead.
+- **Cache**: 10 GB per repo (shared with pnpm/uv/Cypress caches), but on repeat runs with the same SHA (retries, re-triggered workflows) the `build-ui` job itself becomes ~15s (cache hit, skip build). Build output is ~50-100 MB, well within limits alongside other caches.
 
-1. Add `actions/cache` targeting `backend/chainlit/frontend/dist` and `backend/chainlit/copilot/dist`
-2. On cache hit, use `uv sync --no-install-project` + separate editable install (same pattern as P2)
-3. On cache miss, fall through to normal `uv sync --all-packages` (which triggers the build hook)
+**Why `build-ui` is still needed**: Without it, all parallel downstream jobs would miss the cache simultaneously on the first run and all build independently. `needs: build-ui` guarantees the cache is populated before they start.
 
-**Expected saving**: ~1m per pytest job (on cache hit).
+**Trade-off**: `build-ui` adds a sequential dependency. On cache miss: ~1m 30s (pnpm install ~30s + build ~1m). On cache hit: ~15s. `lint-backend` runs in parallel and takes ~1m 20s, so `build-ui` doesn't extend the critical path.
 
-### P4: Merge `validate` + `prepare` e2e jobs
+**Expected saving**: ~1m per downstream job × 7 jobs = **~7 min cumulative runner time**. Critical path saving: ~1m per Windows E2E job (build eliminated, ~5s cache restore).
+
+### P3: Merge `validate` + `prepare` e2e jobs
 
 **Approach**: Combine the two trivial `ubuntu-slim` jobs into one to eliminate a job startup cycle.
 
 **Expected saving**: ~10-15s.
 
-### ~~P5: Add `cache-python: true` to setup-uv~~ (dropped)
+### ~~P4: Add `cache-python: true` to setup-uv~~ (dropped)
 
 **Reason**: Verified from logs that the Python 3.13 outlier was caused by a transient GitHub cache service outage, not a config issue. `cache-python: true` caches the Python installation binary, which is irrelevant — the slowness came from source-building wheels. The existing `enable-cache: true` already caches built wheels correctly. No change needed.
 
@@ -248,20 +284,18 @@ The README's [`install: false` pattern](https://github.com/cypress-io/github-act
 
 ## Estimated Impact on Critical Path
 
-| Change                              | Current (win shard 2)                | After                   | Saving      |
-| ----------------------------------- | ------------------------------------ | ----------------------- | ----------- |
-| P1: Cypress cache + remove action   | 1m 33s (action) + ~30s (postinstall) | ~5s                     | ~2m         |
-| P2: Build UI once + artifacts (E2E) | ~1m 22s (build per shard)            | ~5s (artifact download) | ~1m 17s     |
-| P3: UI build cache (pytest)         | ~1m 07s (build per job)              | ~5s (cache hit)         | ~1m 02s     |
-| P4: merge validate+prepare          | ~15s overhead                        | 0s                      | ~15s        |
-| **Cumulative (critical path)**      | **13m 12s**                          | **~9m 55s**             | **~3m 17s** |
+| Change                            | Current (win E2E)                    | After               | Saving      |
+| --------------------------------- | ------------------------------------ | ------------------- | ----------- |
+| P1: Cypress cache + remove action | 1m 33s (action) + ~30s (postinstall) | ~5s                 | ~2m         |
+| P2: Build UI once + cache         | ~1m 22s (build per job)              | ~5s (cache restore) | ~1m 17s     |
+| P3: merge validate+prepare        | ~15s overhead                        | 0s                  | ~15s        |
+| **Cumulative (critical path)**    | **13m 12s**                          | **~9m 40s**         | **~3m 32s** |
 
 Notes:
 
-- P1 and P2 are the most reliable wins. P2 is especially important for Windows where all 5 shards start cold in parallel — `actions/cache` alone doesn't help because no shard finishes before the others start.
-- P2's `build-ui` job adds a sequential dependency (~1m 30s on Ubuntu) but runs in parallel with other setup, so it doesn't extend the critical path unless it's slower than the other pre-shard steps.
-- P3 helps pytest jobs which are in a separate workflow and can't use P2's artifact sharing easily.
-- Cumulative runner time saved (not just critical path): ~14m across all 14 jobs.
+- P1 and P2 are the most reliable wins. P2 eliminates redundant builds across all 7 consuming jobs (E2E, pytest, lint-ui) with a single approach.
+- P2's `build-ui` job adds a sequential dependency (~1m 30s on Ubuntu) but `lint-backend` runs in parallel and takes ~1m 20s, so `build-ui` doesn't extend the critical path.
+- Cumulative runner time saved (not just critical path): ~9m across all 7 jobs that currently build UI.
 
 ---
 
