@@ -1,11 +1,16 @@
-import { loadCopilotScript, mountCopilotWidget, openCopilot, submitMessage } from '../../support/testUtils';
+import {
+  loadCopilotScript,
+  mountCopilotWidget,
+  openCopilot,
+  submitMessage
+} from '../../support/testUtils';
 
 function login() {
   return cy.request({
     method: 'GET',
     url: '/auth/custom',
     followRedirect: false
-  })
+  });
 }
 
 function getToken() {
@@ -13,7 +18,7 @@ function getToken() {
     method: 'GET',
     url: '/auth/token',
     followRedirect: false
-  })
+  });
 }
 
 function shouldShowGreetingMessage() {
@@ -26,14 +31,13 @@ function shouldShowGreetingMessage() {
 function shouldSendMessageAndRecieveAnswer() {
   it('should send message and receive answer', () => {
     cy.get('.step').should('contain', 'Hello');
-    
+
     const testMessage = 'Test message from custom auth';
     submitMessage(testMessage);
 
     cy.get('.step').should('contain', 'Echo:');
     cy.get('.step').should('contain', testMessage);
   });
-
 }
 
 describe('Custom Auth', () => {
@@ -106,7 +110,10 @@ describe('Copilot Token', { includeShadowDom: true }, () => {
     it('should throw error about missing authentication token', () => {
       mountCopilotWidget();
       openCopilot();
-      cy.get('#chainlit-copilot-chat').should('contain', 'No authentication token provided.');
+      cy.get('#chainlit-copilot-chat').should(
+        'contain',
+        'No authentication token provided.'
+      );
     });
   });
 
@@ -115,13 +122,13 @@ describe('Copilot Token', { includeShadowDom: true }, () => {
       getToken().then((response) => {
         expect(response.status).to.equal(200);
 
-        const accessToken = response.body
+        const accessToken = response.body;
         expect(accessToken).to.not.be.null;
 
         mountCopilotWidget({ accessToken });
         openCopilot();
       });
-    })
+    });
 
     shouldShowGreetingMessage();
 

@@ -8,11 +8,8 @@ describe('Edit Message', () => {
     cy.get('.step').should('have.length', 4);
     cy.get('.step').eq(3).should('contain', 'Chat context length: 3');
 
-    cy.get('.step')
-      .eq(0)
-      .trigger('mouseover')
-      .find('.edit-message')
-      .click({ force: true });
+    cy.get('.step').eq(0).trigger('mouseover');
+    cy.get('.step').eq(0).find('.edit-message').click({ force: true });
     cy.get('#edit-chat-input').type('Hello 3');
     cy.get('.step').eq(0).find('.confirm-edit').click({ force: true });
 
