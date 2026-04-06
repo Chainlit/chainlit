@@ -1,15 +1,33 @@
 name: E2ETests
 
-on: [workflow_call]
+on:
+  workflow_call:
+    inputs:
+      e2e_parallel_shards:
+        description: Number of parallel E2E shards per OS.
+        type: number
+        default: 5
 
 permissions: read-all
 
 jobs:
+  prepare:
+    runs-on: ubuntu-slim
+    outputs:
+      indexes: ${{ steps.shard-indexes.outputs.indexes }}
+    steps:
+      - id: shard-indexes
+        run: |
+          json=$(jq -nc --argjson n "${{ inputs.e2e_parallel_shards }}" '[range(1; $n + 1)]')
+          echo "indexes=$json" >> "$GITHUB_OUTPUT"
+
   ci:
+    needs: prepare
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        containers: ${{ fromJSON(needs.prepare.outputs.indexes) }}
     env:
       BACKEND_DIR: ./backend
     steps:
@@ -31,11 +49,13 @@ jobs:
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          SPLIT: ${{ inputs.e2e_parallel_shards }}
+          SPLIT_INDEX1: ${{ matrix.containers }}
         run: pnpm test
         shell: bash
       - name: Upload screenshots
         uses: actions/upload-artifact@v4
         if: always() && hashFiles('cypress/screenshots/**') != ''
         with:
-          name: cypress-screenshots-${{ matrix.os }}
+          name: cypress-screenshots-${{ matrix.os }}-${{ matrix.containers }}
           path: cypress/screenshots
