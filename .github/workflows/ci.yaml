@@ -35,7 +35,7 @@ jobs:
     uses: ./.github/workflows/e2e-tests.yaml
     secrets: inherit
   ci:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     name: Run CI
     if: always() # This ensures the job always runs
     needs: [check-backend, check-frontend, tests, e2e-tests]

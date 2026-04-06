@@ -50,11 +50,11 @@ jobs:
     env:
       BACKEND_DIR: ./backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
       - name: Install Cypress
-        uses: cypress-io/github-action@v6
+        uses: cypress-io/github-action@v7.1.9
         with:
           runTests: false
       - uses: ./.github/actions/uv-python-install
@@ -70,7 +70,7 @@ jobs:
         run: pnpm test:e2e
         shell: bash
       - name: Upload screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always() && hashFiles('cypress/screenshots/**') != ''
         with:
           name: cypress-screenshots-${{ matrix.os }}-${{ matrix.containers }}

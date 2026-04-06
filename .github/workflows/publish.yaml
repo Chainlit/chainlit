@@ -20,7 +20,7 @@ permissions: read-all
 jobs:
   validate:
     name: Validate inputs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Validate publishing branch and destination package index
         run: |
@@ -48,7 +48,7 @@ jobs:
       contents: read
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
       - uses: ./.github/actions/uv-python-install

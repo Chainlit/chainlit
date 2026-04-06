@@ -24,7 +24,7 @@ jobs:
             command: uv run --no-project scripts/type_check.py
     name: ${{ matrix.name }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python dependencies
         with:

@@ -28,7 +28,7 @@ jobs:
     # If you do not check out your code, Copilot will do this for you.
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Node.js, pnpm and dependencies
         uses: ./.github/actions/pnpm-node-install

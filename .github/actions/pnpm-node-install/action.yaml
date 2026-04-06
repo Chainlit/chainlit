@@ -10,12 +10,12 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v5.0.0
       name: Install pnpm
       with:
         run_install: false
     - name: Use Node.js
-      uses: actions/setup-node@v6
+      uses: actions/setup-node@v6.3.0
       with:
         node-version: ${{ inputs.node-version }}
         registry-url: 'https://registry.npmjs.org'
