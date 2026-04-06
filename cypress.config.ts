@@ -1,5 +1,5 @@
 import { defineConfig } from 'cypress';
-import { default as cypressSplit } from 'cypress-split';
+import cypressSplit from 'cypress-split';
 import fkill from 'fkill';
 
 import { runChainlit } from './cypress/support/run';
