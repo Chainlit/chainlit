@@ -21,5 +21,5 @@ module.exports = {
     () => 'uv run scripts/type_check.py'
   ],
 
-  '.github/workflows/**': ['actionlint']
+  '.github/workflows/**': ['uv run actionlint']
 };

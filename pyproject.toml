@@ -1,4 +1,5 @@
 [dependency-groups]
+dev = ["actionlint-py>=1.7.12.24"]
 backend = ["chainlit"]
 
 [tool.mypy]
