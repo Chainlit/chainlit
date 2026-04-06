@@ -1,5 +1,7 @@
 module.exports = {
-  '**/*': ['pnpm format:files'],
+  // Prettier: globs only — skip nested `.(cursor|claude)/**` and symlink names (see `.shared/`).
+  '!(.(cursor|claude))/**': ['pnpm format:files'],
+  '.(cursor|claude)/!(agents|commands|rules|skills)': ['pnpm format:files'],
 
   '**/*.{ts,tsx,js,cjs,mjs}': ['pnpm lint:fix'],
 
