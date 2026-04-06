@@ -7,6 +7,7 @@
     "@types/react-dom": "^18.2.7",
     "cypress": "^14.5.3",
     "cypress-plugin-steps": "1.2.1",
+    "cypress-split": "^1.24.31",
     "dotenv": "^16.3.1",
     "eslint": "^10",
     "eslint-plugin-chai-friendly": "^1.1.1",
