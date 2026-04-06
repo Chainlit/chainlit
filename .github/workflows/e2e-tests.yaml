@@ -45,14 +45,17 @@ jobs:
     name: ${{ matrix.os }}-${{ matrix.containers }}
     env:
       BACKEND_DIR: ./backend
+      # Single path for actions/cache on Linux + Windows (default Cypress dirs differ by OS).
+      CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/.cypress-cache
     steps:
       - uses: actions/checkout@v6
+      - name: Cache Cypress binary
+        uses: actions/cache@v5
+        with:
+          path: .cypress-cache
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
-      - name: Install Cypress
-        uses: cypress-io/github-action@v7.1.9
-        with:
-          runTests: false
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python & pnpm (uv does it automatically) dependencies
         with:
