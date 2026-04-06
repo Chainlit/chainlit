@@ -4,7 +4,11 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Backward Compatibility (CRITICAL)
 
-All changes MUST be backward-compatible. If a refactor or breaking change is unavoidable, notify the user and stop — do not proceed without explicit approval. When approved, prefer adding a compatibility layer over keeping legacy code in place.
+All changes **MUST** be backward-compatible. If a refactor or breaking change is unavoidable, notify the user and stop — do not proceed without explicit approval. When approved, prefer adding a compatibility layer over keeping legacy code in place.
+
+## MCP-First Approach (CRITICAL)
+
+When available, **ALWAYS** prefer MCP servers over manual alternatives. Use **Context7** for docs/API references, **Serena** for code navigation/refactoring/memory, and **GitHub MCP** for issues/PRs/actions/commits/releases/code search. Fall back to CLI tools, direct file reads, or web searches **ONLY IF** the corresponding MCP is unavailable or cannot fulfill the request.
 
 ## Overview
 
