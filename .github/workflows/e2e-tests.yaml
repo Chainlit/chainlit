@@ -11,7 +11,21 @@ on:
 permissions: read-all
 
 jobs:
+  validate:
+    name: Validate inputs
+    runs-on: ubuntu-slim
+    steps:
+      - name: Validate e2e_parallel_shards
+        run: |
+          n="${{ inputs.e2e_parallel_shards }}"
+          if ! [[ "$n" =~ ^[0-9]+$ ]] || [[ "$n" -lt 1 ]]; then
+            echo "❌ Error: e2e_parallel_shards must be at least 1, got: $n"
+            exit 1
+          fi
+          echo "✅ Validation passed"
+
   prepare:
+    needs: validate
     runs-on: ubuntu-slim
     outputs:
       indexes: ${{ steps.shard-indexes.outputs.indexes }}
