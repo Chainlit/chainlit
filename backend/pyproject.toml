@@ -90,6 +90,7 @@ tests = [
     "botbuilder-core>=4.15.0,<5.0.0",
     "aiosqlite>=0.20.0,<1.0.0",
     "pandas>=2.2.2,<3.0.0",
+    "polars>=1.0.0,<2.0.0",
     "moto>=5.0.14,<6.0.0",
 ]
 mypy = [
