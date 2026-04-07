@@ -100,9 +100,15 @@ export function ThreadList({
     // ShareDialog handles its own internal state; we just open it
   };
 
-  const getMonthMap = (locale = navigator.language) => {
-    const map = {};
-    const monthNames = [];
+  type ParsedGroupLabel = {
+    month: string;
+    year: number;
+    raw: string;
+  };
+
+  const getMonthMap = (locale = navigator.language): { map: Record<string, number>; monthRegex: RegExp } => {
+    const map: Record<string, number> = {};
+    const monthNames: string[] = [];
 
     for (let i = 0; i < 12; i++) {
       const d = new Date(2020, i, 1);
@@ -116,9 +122,12 @@ export function ThreadList({
     return { map, monthRegex };
   };
   
-  const { map: monthMap, monthRegex } = useMemo(() => getMonthMap(), []);
+  const { map: monthMap, monthRegex } = useMemo<{
+    map: Record<string, number>;
+    monthRegex: RegExp;
+  }>(() => getMonthMap(), []);
 
-  const parseGroupLabel = (label) => {
+  const parseGroupLabel = (label: string): ParsedGroupLabel | null => {
     const locale = navigator.language;
     
     const matchMonth = label.toLocaleLowerCase(locale).match(monthRegex);
@@ -134,7 +143,7 @@ export function ThreadList({
     return { month, year, raw: label };
   };
 
-  const sortGroupsByDate = (a, b) => {
+  const sortGroupsByDate = (a: string, b: string): number => {
     const aParsed = parseGroupLabel(a);
     const bParsed = parseGroupLabel(b);
     
