@@ -9,7 +9,7 @@ from chainlit.langchain.callbacks import (
     GenerationHelper,
     LangchainTracer,
 )
-from langchain.schema import AIMessage, HumanMessage
+from langchain_core.messages import AIMessage, HumanMessage
 
 
 def create_mock_run(**kwargs):
