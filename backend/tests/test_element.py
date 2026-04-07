@@ -1,3 +1,4 @@
+import json
 import uuid
 from unittest.mock import AsyncMock
 
@@ -6,6 +7,7 @@ import pytest
 from chainlit.element import (
     Audio,
     CustomElement,
+    Dataframe,
     Element,
     ElementDict,
     File,
@@ -495,3 +497,88 @@ class TestElementEdgeCases:
 
             ids = {element1.id, element2.id, element3.id}
             assert len(ids) == 3  # All unique
+
+
+@pytest.mark.asyncio
+class TestDataframeElement:
+    """Test suite for Dataframe element."""
+
+    async def test_dataframe_with_pandas(self, mock_chainlit_context):
+        """Test Dataframe element with a pandas DataFrame."""
+        import pandas as pd
+
+        async with mock_chainlit_context:
+            df = pd.DataFrame({"a": [4, 2, 0], "b": ["foo", "bar", "baz"]})
+            element = Dataframe(name="test_df", data=df)
+
+            assert element.type == "dataframe"
+            assert element.size == "large"
+
+            parsed = json.loads(element.content)
+            assert parsed["columns"] == ["a", "b"]
+            assert parsed["data"] == [[4, "foo"], [2, "bar"], [0, "baz"]]
+            assert parsed["index"] == [0, 1, 2]
+
+    async def test_dataframe_with_polars(self, mock_chainlit_context):
+        """Test Dataframe element with a polars DataFrame."""
+        import polars as pl
+
+        async with mock_chainlit_context:
+            df = pl.DataFrame({"a": [4, 2, 0], "b": ["foo", "bar", "baz"]})
+            element = Dataframe(name="test_df", data=df)
+
+            assert element.type == "dataframe"
+            assert element.size == "large"
+
+            parsed = json.loads(element.content)
+            assert parsed["columns"] == ["a", "b"]
+            assert parsed["data"] == [[4, "foo"], [2, "bar"], [0, "baz"]]
+            assert parsed["index"] == [0, 1, 2]
+
+    async def test_dataframe_with_invalid_data(self, mock_chainlit_context):
+        """Test Dataframe element rejects non-DataFrame data."""
+        async with mock_chainlit_context:
+            with pytest.raises(
+                TypeError,
+                match=r"data must be a pandas\.DataFrame or polars\.DataFrame",
+            ):
+                Dataframe(name="test_df", data={"a": [1, 2]})
+
+    async def test_dataframe_polars_and_pandas_produce_equal_outputs(
+        self, mock_chainlit_context
+    ):
+        """Test that pandas and polars DataFrames produce the same JSON."""
+        import pandas as pd
+        import polars as pl
+
+        async with mock_chainlit_context:
+            pd_df = pd.DataFrame({"a": [4, 2, 0], "b": ["foo", "bar", "baz"]})
+            pl_df = pl.DataFrame({"a": [4, 2, 0], "b": ["foo", "bar", "baz"]})
+
+            pd_element = Dataframe(name="pd_df", data=pd_df)
+            pl_element = Dataframe(name="pl_df", data=pl_df)
+
+            pd_parsed = json.loads(pd_element.content)
+            pl_parsed = json.loads(pl_element.content)
+
+            assert pd_parsed["columns"] == pl_parsed["columns"]
+            assert pd_parsed["index"] == pl_parsed["index"]
+            assert pd_parsed["data"] == pl_parsed["data"]
+
+    async def test_dataframe_polars_with_dates(self, mock_chainlit_context):
+        """Test Dataframe element with polars date columns serializes correctly."""
+        from datetime import date
+
+        import polars as pl
+
+        async with mock_chainlit_context:
+            df = pl.DataFrame(
+                {"date": [date(2026, 1, 1), date(2025, 12, 31)], "val": [1, 2]}
+            )
+            element = Dataframe(name="test_df", data=df)
+
+            parsed = json.loads(element.content)
+            assert parsed["columns"] == ["date", "val"]
+            assert len(parsed["data"]) == 2
+            assert parsed["data"][0][0] == "2026-01-01"
+            assert parsed["data"][1][0] == "2025-12-31"
