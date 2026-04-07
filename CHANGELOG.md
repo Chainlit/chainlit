@@ -4,6 +4,41 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.11.0] - 2026-04-07
+
+### Added
+
+- Add copilot sidebar mode with drag-to-resize and persisted display preferences
+- Add `polars.DataFrame` support for `Dataframe` elements
+- Replace the iframe PDF preview with an improved built-in PDF viewer
+- Allow `Step` messages to use Lucide icons instead of the default avatar
+- Make the stop icon and loading cursor customizable via CSS variables
+- Add Portuguese (`pt-PT`) translations
+- Make Azure AD OAuth scopes configurable via environment variables
+- Add `ChatSettings.refresh()` so `on_settings_edit` can refresh widgets without committing session settings
+
+### Fixed
+
+- Sort thread history month categories by actual date and locale
+- Clear pending attachments when switching chat profiles
+- Handle Slack workflow and bot `app_mention` events correctly
+- Show error toasts when Streamable HTTP MCP connections fail
+- Harden MCP cleanup to avoid cross-task cancel-scope errors during connect, disconnect, and reconnect
+- Respect disabled state for date picker, multiselect, tags, and radio chat settings widgets
+- Restore chat settings values and schema correctly after live edits, reset, or cancel
+- Send slash-command input on Enter when no registered command matches
+- Preserve live favorite message state and fix accordion closing behavior
+- Respect explicit Plotly figure heights in rendered elements
+- Make `send_toast()` asynchronous and improve LangChain 1.x cache compatibility
+- Prevent thread metadata `NULL` violations while preserving metadata merges in built-in data layers
+- Treat an empty `custom_fonts` array as removing default fonts
+- Use the correct logging format specifier during OAuth state validation
+
+### Changed
+
+- Widen dependency compatibility for OpenAI 2.x, LangChain 1.x, Transformers 5.x, Plotly 6.x, and related packages
+- Upgrade repo linting to ESLint 10 and make `pdfjs-dist` an explicit frontend dependency
+
 ## [2.10.1] - 2026-03-27
 
 ### Fixed
