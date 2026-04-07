@@ -1,4 +1,4 @@
-import importlib.util
+import importlib
 import os
 import threading
 from typing import Any
@@ -12,13 +12,22 @@ def init_lc_cache():
 
     if use_cache and importlib.util.find_spec("langchain") is not None:
         try:
-            from langchain_core.globals import set_llm_cache
+            try:
+                set_llm_cache = importlib.import_module(
+                    "langchain_core.globals"
+                ).set_llm_cache
+            except ImportError:
+                set_llm_cache = importlib.import_module(
+                    "langchain.globals"
+                ).set_llm_cache
 
             try:
-                from langchain_community.cache import SQLiteCache  # type: ignore[import-not-found]
+                SQLiteCache = importlib.import_module(
+                    "langchain_community.cache"
+                ).SQLiteCache
             except ImportError:
-                from langchain.cache import SQLiteCache  # type: ignore[import-not-found]
-        except ImportError:
+                SQLiteCache = importlib.import_module("langchain.cache").SQLiteCache
+        except (AttributeError, ImportError):
             return
 
         if config.project.lc_cache_path is not None:
