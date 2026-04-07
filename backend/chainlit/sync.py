@@ -1,7 +1,6 @@
-from typing import Any, Coroutine, ParamSpec, TypeVar
-
 import asyncio
 import threading
+from typing import Any, Coroutine, ParamSpec, TypeVar
 
 from asyncer import asyncify
 from syncer import sync
