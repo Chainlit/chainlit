@@ -31,8 +31,9 @@ async def test_password_auth_callback(test_config: config.ChainlitConfig):
 
 
 async def test_header_auth_callback(test_config: config.ChainlitConfig):
-    from chainlit.callbacks import header_auth_callback
     from starlette.datastructures import Headers
+
+    from chainlit.callbacks import header_auth_callback
 
     @header_auth_callback
     async def auth_func(headers: Headers) -> User | None:

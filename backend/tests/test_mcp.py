@@ -2,13 +2,14 @@ import sys
 from unittest.mock import patch
 
 import pytest
+from pydantic import ValidationError
+
 from chainlit.mcp import (
     HttpMcpConnection,
     SseMcpConnection,
     StdioMcpConnection,
     validate_mcp_command,
 )
-from pydantic import ValidationError
 
 
 class TestStdioMcpConnection:

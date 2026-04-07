@@ -67,6 +67,7 @@ ignore = [
 
 [tool.ruff.lint.isort]
 combine-as-imports = true
+known-first-party = ["chainlit"]
 
 [tool.uv]
 default-groups = ["backend"]

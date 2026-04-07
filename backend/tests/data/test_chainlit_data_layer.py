@@ -2,6 +2,7 @@ import json
 from unittest.mock import AsyncMock
 
 import pytest
+
 from chainlit.data.chainlit_data_layer import ChainlitDataLayer
 
 

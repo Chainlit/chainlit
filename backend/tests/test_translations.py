@@ -2,6 +2,7 @@ from io import StringIO
 from unittest.mock import patch
 
 import pytest
+
 from chainlit.translations import compare_json_structures, lint_translation_json
 
 

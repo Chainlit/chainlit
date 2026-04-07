@@ -2,8 +2,9 @@
 
 from unittest.mock import MagicMock, patch
 
-import chainlit as cl
 import pytest
+
+import chainlit as cl
 from chainlit.emitter import ChainlitEmitter
 from chainlit.mode import Mode, ModeOption
 

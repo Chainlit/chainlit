@@ -6,6 +6,8 @@ from typing import Callable
 from unittest.mock import AsyncMock, Mock, create_autospec, mock_open
 
 import pytest
+from fastapi.testclient import TestClient
+
 from chainlit.auth import get_current_user
 from chainlit.config import (
     APP_ROOT,
@@ -15,7 +17,6 @@ from chainlit.config import (
 from chainlit.server import app
 from chainlit.types import AskFileSpec
 from chainlit.user import PersistedUser
-from fastapi.testclient import TestClient
 
 
 @pytest.fixture

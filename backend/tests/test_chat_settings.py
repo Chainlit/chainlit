@@ -1,4 +1,5 @@
 import pytest
+
 from chainlit.chat_settings import ChatSettings
 from chainlit.input_widget import (
     Checkbox,

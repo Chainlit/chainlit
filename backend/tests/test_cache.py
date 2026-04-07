@@ -3,6 +3,7 @@ import threading
 from unittest.mock import Mock, patch
 
 import pytest
+
 from chainlit.cache import cache, init_lc_cache
 
 # Import the actual cache module to access _cache dict

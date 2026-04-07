@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+
 from chainlit.session import (
     BaseSession,
     HTTPSession,

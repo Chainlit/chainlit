@@ -1,4 +1,5 @@
 import pytest
+
 from chainlit.input_widget import (
     Checkbox,
     MultiSelect,
