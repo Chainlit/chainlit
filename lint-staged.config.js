@@ -18,8 +18,8 @@ module.exports = {
   // ],
 
   'backend/**/*.py': [
-    'uv run scripts/lint.py',
-    'uv run scripts/format.py --check',
+    'uv run scripts/lint.py --fix',
+    'uv run scripts/format.py',
     () => 'uv run scripts/type_check.py'
   ],
 
