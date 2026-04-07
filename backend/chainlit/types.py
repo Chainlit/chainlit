@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from chainlit.element import ElementDict
     from chainlit.step import StepDict
 
+from dataclasses import field
+
 from dataclasses_json import DataClassJsonMixin
 from pydantic import BaseModel
 from pydantic.dataclasses import dataclass
@@ -299,6 +301,15 @@ class Starter(DataClassJsonMixin):
 
 
 @dataclass
+class StarterCategory(DataClassJsonMixin):
+    """A category/group of starters with an optional icon."""
+
+    label: str
+    icon: Optional[str] = None
+    starters: List[Starter] = field(default_factory=list)
+
+
+@dataclass
 class ChatProfile(DataClassJsonMixin):
     """Specification for a chat profile that can be chosen by the user at the thread start."""
 
@@ -325,6 +336,8 @@ class CommandDict(TypedDict):
     button: Optional[bool]
     # Whether the command will be persistent unless the user toggles it
     persistent: Optional[bool]
+    # Whether the command should be pre-selected when loaded
+    selected: Optional[bool]
 
 
 class FeedbackDict(TypedDict):

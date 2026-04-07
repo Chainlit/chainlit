@@ -26,11 +26,8 @@ describe('Element Sidebar', () => {
       .first()
       .should('have.text', 'Text changed!');
 
-    // Wait for the sidebar to close
-    cy.wait(2500);
-
-    // Check that the sidebar is closed
-    cy.get('#side-view-content').should('not.exist');
-    cy.get('#side-view-title').should('not.exist');
+    // Sidebar closes after a delay; wait until it is gone
+    cy.get('#side-view-content', { timeout: 10000 }).should('not.exist');
+    cy.get('#side-view-title', { timeout: 10000 }).should('not.exist');
   });
 });

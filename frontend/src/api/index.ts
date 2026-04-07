@@ -3,7 +3,9 @@ import { toast } from 'sonner';
 
 import { ChainlitAPI, ClientError } from '@chainlit/react-client';
 
-const devServer = 'http://localhost:8000' + getRouterBasename();
+const devServer =
+  (import.meta.env.VITE_API_URL || 'http://localhost:8000') +
+  getRouterBasename();
 const url = import.meta.env.DEV
   ? devServer
   : window.origin + getRouterBasename();
@@ -56,7 +58,10 @@ class ExtendedChainlitAPI extends ChainlitAPI {
       })
     }).then(async (res) => {
       const data = await res.json();
-      return { success: res.ok, mcp: data.mcp, error: data.detail };
+      if (!res.ok) {
+        throw new Error(data.detail || 'Failed to connect MCP');
+      }
+      return { success: true, mcp: data.mcp };
     });
   }
 }

@@ -1,9 +1,11 @@
+import cloneDeep from 'lodash/cloneDeep';
 import mapValues from 'lodash/mapValues';
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useRecoilState, useSetRecoilState } from 'recoil';
 
 import {
+  chatSettingsInputsState,
   chatSettingsValueState,
   useChatData,
   useChatInteract
@@ -24,20 +26,32 @@ import { Translator } from 'components/i18n';
 import { chatSettingsOpenState } from 'state/project';
 
 import { FormInput, TFormInputValue } from './FormInput';
+import { useChatSettingsSnapshotAtOpen } from './useChatSettingsSnapshotAtOpen';
 
 export default function ChatSettingsModal() {
-  const { chatSettingsValue, chatSettingsInputs, chatSettingsDefaultValue } =
-    useChatData();
+  const { chatSettingsValue, chatSettingsInputs } = useChatData();
 
-  const { updateChatSettings } = useChatInteract();
+  const { updateChatSettings, editChatSettings } = useChatInteract();
   const [chatSettingsOpen, setChatSettingsOpen] = useRecoilState(
     chatSettingsOpenState
   );
 
-  const { handleSubmit, setValue, reset, watch } = useForm({
+  const { valuesAtOpen, inputsAtOpen } = useChatSettingsSnapshotAtOpen(
+    chatSettingsOpen,
+    chatSettingsValue,
+    chatSettingsInputs
+  );
+
+  const { handleSubmit, setValue, reset, watch, getValues } = useForm({
     defaultValues: chatSettingsValue
   });
   const setChatSettingsValue = useSetRecoilState(chatSettingsValueState);
+  const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
+
+  const restoreSnapshot = useCallback(() => {
+    setChatSettingsInputs(cloneDeep(inputsAtOpen));
+    setChatSettingsValue(cloneDeep(valuesAtOpen));
+  }, [inputsAtOpen, setChatSettingsInputs, setChatSettingsValue, valuesAtOpen]);
 
   // Reset form when default values change
   useEffect(() => {
@@ -46,7 +60,7 @@ export default function ChatSettingsModal() {
 
   const handleClose = (open: boolean) => {
     if (!open) {
-      reset(chatSettingsValue);
+      restoreSnapshot();
       setChatSettingsOpen(false);
     }
   };
@@ -61,7 +75,7 @@ export default function ChatSettingsModal() {
   });
 
   const handleReset = () => {
-    reset(chatSettingsDefaultValue);
+    restoreSnapshot();
   };
 
   // Legacy setField compatibility layer
@@ -69,9 +83,11 @@ export default function ChatSettingsModal() {
 
   const setFieldValue = (field: string, value: any) => {
     setValue(field, value);
+    editChatSettings(getValues());
   };
 
   const values = watch();
+
   const tabInputs = chatSettingsInputs.filter(
     (input: any) => Array.isArray(input?.inputs) && input.inputs.length > 0
   );

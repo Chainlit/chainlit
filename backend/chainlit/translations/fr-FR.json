@@ -68,6 +68,7 @@
         "favorites": {
           "use": "Utiliser un message favori",
           "headline": "Messages favoris",
+          "remove": "Supprimer des favoris",
           "empty": {
             "title": "Aucun prompt enregistré pour le moment",
             "description": "Commencez par envoyer un prompt et ajoutez-le aux favoris ou ajoutez un prompt de discussions précédentes aux favoris"

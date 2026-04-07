@@ -57,7 +57,8 @@ describe('Command', () => {
     cy.get('#command-button').should('exist').and('be.visible');
 
     cy.step('Open command menu and filter to Picture');
-    cy.get('#chat-input').click().clear();
+    cy.get('#chat-input').click();
+    cy.get('#chat-input').clear();
     cy.get('#chat-input').type('/');
     cy.get('[data-index]').should('have.length.at.least', 3);
 
@@ -84,7 +85,8 @@ describe('Command', () => {
     cy.get('#chat-input').should('exist');
 
     cy.step('Open command menu');
-    cy.get('#chat-input').click().clear();
+    cy.get('#chat-input').click();
+    cy.get('#chat-input').clear();
     cy.get('#chat-input').type('/');
     cy.get('[data-index]').should('have.length.at.least', 3);
 
@@ -178,9 +180,11 @@ describe('Command', () => {
     cy.get('#chat-input').should('exist');
 
     cy.step('Open command menu');
-    cy.get('#chat-input').click().clear();
+    cy.get('#chat-input').click();
+    cy.get('#chat-input').clear();
     cy.get('#chat-input').type('/');
-    cy.get('[data-index]').should('exist').and('have.length.at.least', 3);
+    cy.get('[data-index]').should('exist');
+    cy.get('[data-index]').should('have.length.at.least', 3);
 
     cy.step('Close menu with Escape key');
     cy.get('#chat-input').type('{esc}');
@@ -193,7 +197,8 @@ describe('Command', () => {
     cy.get('#chat-input').should('exist');
 
     cy.step('Type partial command');
-    cy.get('#chat-input').click().clear();
+    cy.get('#chat-input').click();
+    cy.get('#chat-input').clear();
     cy.get('#chat-input').type('/can');
 
     cy.step('Select Canvas from filtered results');
@@ -230,7 +235,8 @@ describe('Command', () => {
     cy.get('#chat-input').should('exist');
 
     cy.step('Open command menu');
-    cy.get('#chat-input').click().clear();
+    cy.get('#chat-input').click();
+    cy.get('#chat-input').clear();
     cy.get('#chat-input').type('/');
 
     // Make sure the menu itself is visible
@@ -242,16 +248,14 @@ describe('Command', () => {
       return $el.hasClass('bg-accent') || $el.attr('aria-selected') === 'true';
     });
 
-    cy.get('[data-index="1"]')
-      .scrollIntoView()
-      .trigger('mousemove', { force: true });
+    cy.get('[data-index="1"]').scrollIntoView();
+    cy.get('[data-index="1"]').trigger('mousemove', { force: true });
     cy.get('[data-index="1"]').should('satisfy', ($el) => {
       return $el.hasClass('bg-accent') || $el.attr('aria-selected') === 'true';
     });
 
     cy.step('Verify selection persists after mouse leave');
     cy.get('[data-index="1"]').trigger('mouseleave', { force: true });
-    cy.wait(100);
     cy.get('[data-index="1"]').should('satisfy', ($el) => {
       return $el.hasClass('bg-accent') || $el.attr('aria-selected') === 'true';
     });
@@ -262,18 +266,21 @@ describe('Command', () => {
     cy.get('#chat-input').should('exist');
 
     cy.step('Filter for Picture command');
-    cy.get('#chat-input').click().clear();
+    cy.get('#chat-input').click();
+    cy.get('#chat-input').clear();
     cy.get('#chat-input').type('/pic');
     cy.get('[data-index]').should('have.length', 1);
     cy.get('[data-index="0"]').should('contain', 'Picture');
 
     cy.step('Filter for Canvas command');
-    cy.get('#chat-input').clear().type('/can');
+    cy.get('#chat-input').clear();
+    cy.get('#chat-input').type('/can');
     cy.get('[data-index]').should('have.length', 1);
     cy.get('[data-index="0"]').should('contain', 'Canvas');
 
     cy.step('Filter with non-matching text');
-    cy.get('#chat-input').clear().type('/xyz');
+    cy.get('#chat-input').clear();
+    cy.get('#chat-input').type('/xyz');
     cy.get('[data-index]').should('not.exist');
   });
 
@@ -330,7 +337,9 @@ describe('Command', () => {
     cy.get('#chat-input').should('exist');
 
     cy.step('Select persistent Sticky command');
-    cy.get('#chat-input').click().clear().type('/sti');
+    cy.get('#chat-input').click();
+    cy.get('#chat-input').clear();
+    cy.get('#chat-input').type('/sti');
     cy.get('[data-index]').should('have.length.at.least', 1);
     cy.get('[data-index]').contains('Sticky').click();
 
@@ -399,7 +408,7 @@ describe('Command', () => {
     });
 
     cy.get('body').click(0, 0);
-    cy.wait(200);
+    cy.get('[data-popover-content]').should('not.exist');
 
     cy.step('Verify inline menu contains all commands');
     cy.get('#chat-input').type('/');
@@ -441,7 +450,8 @@ describe('Command', () => {
     cy.get('[data-index]').should('not.exist');
 
     cy.step('Send regular message without commands');
-    cy.get('#chat-input').clear().type('Regular message{enter}');
+    cy.get('#chat-input').clear();
+    cy.get('#chat-input').type('Regular message{enter}');
     cy.get('.step').last().should('contain', 'Command:');
   });
 });

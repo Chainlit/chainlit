@@ -421,4 +421,5 @@ class DatePicker(InputWidget):
             "max_date": DatePicker._format_date(self.max_date),
             "format": self.format,
             "placeholder": self.placeholder,
+            "disabled": self.disabled,
         }

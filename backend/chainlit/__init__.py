@@ -51,7 +51,13 @@ from chainlit.mode import Mode, ModeOption
 from chainlit.sidebar import ElementSidebar
 from chainlit.step import Step, step
 from chainlit.sync import make_async, run_sync
-from chainlit.types import ChatProfile, InputAudioChunk, OutputAudioChunk, Starter
+from chainlit.types import (
+    ChatProfile,
+    InputAudioChunk,
+    OutputAudioChunk,
+    Starter,
+    StarterCategory,
+)
 from chainlit.user import PersistedUser, User
 from chainlit.user_session import user_session
 from chainlit.utils import make_module_getattr
@@ -76,6 +82,7 @@ from .callbacks import (
     on_mcp_connect,
     on_mcp_disconnect,
     on_message,
+    on_settings_edit,
     on_settings_update,
     on_shared_thread_view,
     on_slack_reaction_added,
@@ -84,6 +91,7 @@ from .callbacks import (
     password_auth_callback,
     send_window_message,
     set_chat_profiles,
+    set_starter_categories,
     set_starters,
 )
 
@@ -161,6 +169,7 @@ __all__ = [
     "Pyplot",
     "SemanticKernelFilter",
     "Starter",
+    "StarterCategory",
     "Step",
     "Task",
     "TaskList",
@@ -194,6 +203,7 @@ __all__ = [
     "on_mcp_connect",
     "on_mcp_disconnect",
     "on_message",
+    "on_settings_edit",
     "on_settings_update",
     "on_shared_thread_view",
     "on_slack_reaction_added",
@@ -203,6 +213,7 @@ __all__ = [
     "run_sync",
     "send_window_message",
     "set_chat_profiles",
+    "set_starter_categories",
     "set_starters",
     "sleep",
     "step",

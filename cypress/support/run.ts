@@ -18,8 +18,8 @@ export const runChainlit = async (
       ? spec.name.startsWith('async')
         ? 'main_async.py'
         : spec.name.startsWith('sync')
-        ? 'main_sync.py'
-        : 'main.py'
+          ? 'main_sync.py'
+          : 'main.py'
       : 'hello.py';
 
     const entryPointPath = join(testDir, entryPointFileName);

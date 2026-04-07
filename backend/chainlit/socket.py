@@ -38,9 +38,32 @@ class WebSocketSessionAuth(TypedDict):
     threadId: str | None
 
 
-def restore_existing_session(sid, session_id, emit_fn, emit_call_fn, environ):
+def _session_owner_matches_user(
+    session: WebsocketSession, user: User | PersistedUser | None
+) -> bool:
+    if session.user is None and user is None:
+        return True
+
+    if session.user is None or user is None:
+        return False
+
+    return session.user.identifier == user.identifier
+
+
+def restore_existing_session(
+    sid,
+    session_id,
+    emit_fn,
+    emit_call_fn,
+    environ,
+    user: User | PersistedUser | None = None,
+):
     """Restore a session from the sessionId provided by the client."""
     if session := WebsocketSession.get_by_id(session_id):
+        if not _session_owner_matches_user(session, user):
+            logger.error("Authorization for the session failed.")
+            raise ConnectionRefusedError("authorization failed")
+
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
         session.emit_call = emit_call_fn
@@ -150,7 +173,9 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
         return sio.call(event, data, timeout=timeout, to=sid)
 
     session_id = auth["sessionId"]
-    if restore_existing_session(sid, session_id, emit_fn, emit_call_fn, environ):
+    if restore_existing_session(
+        sid, session_id, emit_fn, emit_call_fn, environ, user=user
+    ):
         return True
 
     user_env_string = auth.get("userEnv", None)
@@ -326,20 +351,45 @@ async def edit_message(sid, payload: MessagePayload):
 async def message_favorite(sid, payload: MessagePayload):
     """Handle a message favorite toggle."""
     session = WebsocketSession.require(sid)
-    init_ws_context(session)
-    messages = chat_context.get()
-    if config.features.favorites:
-        for message in messages:
-            if message.id == payload["message"]["id"]:
-                if message.metadata is None:
-                    message.metadata = {}
+    context = init_ws_context(session)
+    data_layer = get_data_layer()
 
-                message.metadata["favorite"] = not message.metadata.get(
-                    "favorite", False
-                )
-                await message.update()
-                await fetch_favorites(sid)
+    if not config.features.favorites or not session.user:
+        return
+
+    payload_message = payload["message"]
+    payload_metadata = payload_message.get("metadata") or {}
+    favorite = bool(payload_metadata.get("favorite", False))
+
+    step_dict = None
+
+    if favorite:
+        for message in chat_context.get():
+            if message.id == payload_message["id"]:
+                message.metadata = message.metadata or {}
+                message.metadata["favorite"] = favorite
+                step_dict = message.to_dict()
                 break
+    elif data_layer:
+        favorites = await data_layer.get_favorite_steps(session.user.id)
+        for fav in favorites:
+            if fav["id"] == payload_message["id"]:
+                step_dict = fav
+                break
+
+    if step_dict is None:
+        logger.error("Could not find step to update favorite status.")
+        return
+
+    created_at = step_dict.get("createdAt")
+    if created_at and not created_at.endswith("Z"):
+        step_dict["createdAt"] = f"{created_at}Z"
+
+    if data_layer:
+        step_dict = await data_layer.set_step_favorite(step_dict, favorite)
+
+    await context.emitter.update_step(step_dict)
+    await fetch_favorites(sid)
 
 
 @sio.on("fetch_favorites")  # pyright: ignore [reportOptionalCall]
@@ -444,3 +494,12 @@ async def change_settings(sid, settings: Dict[str, Any]):
 
     if config.code.on_settings_update:
         await config.code.on_settings_update(settings)
+
+
+@sio.on("chat_settings_edit")
+async def edit_settings(sid, settings: Dict[str, Any]):
+    """Handle change settings edit from the UI (on the fly)."""
+    init_ws_context(sid)
+
+    if config.code.on_settings_edit:
+        await config.code.on_settings_edit(settings)
