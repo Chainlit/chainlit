@@ -11,8 +11,15 @@ def init_lc_cache():
     use_cache = config.project.cache is True and config.run.no_cache is False
 
     if use_cache and importlib.util.find_spec("langchain") is not None:
-        from langchain.cache import SQLiteCache
-        from langchain.globals import set_llm_cache
+        try:
+            from langchain_core.globals import set_llm_cache
+
+            try:
+                from langchain_community.cache import SQLiteCache  # type: ignore[import-not-found]
+            except ImportError:
+                from langchain.cache import SQLiteCache  # type: ignore[import-not-found]
+        except ImportError:
+            return
 
         if config.project.lc_cache_path is not None:
             set_llm_cache(SQLiteCache(database_path=config.project.lc_cache_path))
