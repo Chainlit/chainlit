@@ -122,8 +122,8 @@ const McpItem = ({ mcp, onDelete, isLoading }: McpItemProps) => {
           {mcp.clientType === 'stdio'
             ? 'Command'
             : mcp.clientType === 'streamable-http'
-            ? 'HTTP URL'
-            : 'URL'}
+              ? 'HTTP URL'
+              : 'URL'}
         </div>
         <div className="flex items-center w-full bg-accent px-3 py-1 rounded gap-2">
           <pre className="text-sm font-mono flex-grow truncate">

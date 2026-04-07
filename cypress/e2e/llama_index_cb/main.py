@@ -1,7 +1,8 @@
-import chainlit as cl
 from llama_index.core.callbacks.schema import CBEventType, EventPayload
 from llama_index.core.llms import ChatMessage, ChatResponse
 from llama_index.core.schema import NodeWithScore, TextNode
+
+import chainlit as cl
 
 
 @cl.on_chat_start

@@ -6,8 +6,7 @@ import { IInput } from 'types/Input';
 import { InputStateHandler } from './InputStateHandler';
 
 interface TextInputProps
-  extends IInput,
-    Omit<React.InputHTMLAttributes<any>, 'id' | 'size'> {
+  extends IInput, Omit<React.InputHTMLAttributes<any>, 'id' | 'size'> {
   setField?: (field: string, value: string, shouldValidate?: boolean) => void;
   value?: string;
   placeholder?: string;

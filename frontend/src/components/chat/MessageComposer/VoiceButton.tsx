@@ -90,8 +90,8 @@ const VoiceButton = ({ disabled }: Props) => {
                 audioConnection === 'on'
                   ? endConversation
                   : audioConnection === 'off'
-                  ? startConversation
-                  : undefined
+                    ? startConversation
+                    : undefined
               }
             >
               {audioConnection === 'on' ? <X className="!size-5" /> : null}
@@ -110,8 +110,8 @@ const VoiceButton = ({ disabled }: Props) => {
                   audioConnection === 'on'
                     ? 'chat.speech.stop'
                     : audioConnection === 'off'
-                    ? 'chat.speech.start'
-                    : 'chat.speech.connecting'
+                      ? 'chat.speech.start'
+                      : 'chat.speech.connecting'
                 }
                 suffix=" (P)"
               />

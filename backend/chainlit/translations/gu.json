@@ -156,10 +156,10 @@
     "thread": {
       "untitled": "શીર્ષક વગરની વાતચીત",
       "menu": {
-          "rename": "નામ બદલો",
-          "share": "શેર કરો",
-          "delete": "Delete"
-        },
+        "rename": "નામ બદલો",
+        "share": "શેર કરો",
+        "delete": "Delete"
+      },
       "actions": {
         "share": {
           "title": "ચેટની લિંક શેર કરો",

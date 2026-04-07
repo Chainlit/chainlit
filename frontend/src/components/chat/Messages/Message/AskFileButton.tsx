@@ -119,7 +119,7 @@ const _AskFileButton = ({
         onError(
           `${t('chat.fileUpload.errors.failed')}: ${
             typeof error === 'object' && error !== null
-              ? error.message ?? error
+              ? (error.message ?? error)
               : error
           }`
         );

@@ -106,14 +106,18 @@ export function ThreadList({
     raw: string;
   };
 
-  const getMonthMap = (locale = navigator.language): { map: Record<string, number>; monthRegex: RegExp } => {
+  const getMonthMap = (
+    locale = navigator.language
+  ): { map: Record<string, number>; monthRegex: RegExp } => {
     const map: Record<string, number> = {};
     const monthNames: string[] = [];
 
     for (let i = 0; i < 12; i++) {
       const d = new Date(2020, i, 1);
 
-      const long = d.toLocaleDateString(locale, { month: 'long' }).toLocaleLowerCase(locale);
+      const long = d
+        .toLocaleDateString(locale, { month: 'long' })
+        .toLocaleLowerCase(locale);
 
       map[long] = i;
       monthNames.push(long);
@@ -121,7 +125,7 @@ export function ThreadList({
     const monthRegex = new RegExp(`\\b(${monthNames.join('|')})\\b`, 'i');
     return { map, monthRegex };
   };
-  
+
   const { map: monthMap, monthRegex } = useMemo<{
     map: Record<string, number>;
     monthRegex: RegExp;
@@ -129,7 +133,7 @@ export function ThreadList({
 
   const parseGroupLabel = (label: string): ParsedGroupLabel | null => {
     const locale = navigator.language;
-    
+
     const matchMonth = label.toLocaleLowerCase(locale).match(monthRegex);
     if (!matchMonth) return null;
     const month = matchMonth[0];
@@ -137,7 +141,7 @@ export function ThreadList({
     const matchYear = label.match(/\d{4}/);
     if (!matchYear) return null;
     const year = Number(matchYear[0]);
-    
+
     if (isNaN(year)) return null;
 
     return { month, year, raw: label };
@@ -146,18 +150,18 @@ export function ThreadList({
   const sortGroupsByDate = (a: string, b: string): number => {
     const aParsed = parseGroupLabel(a);
     const bParsed = parseGroupLabel(b);
-    
+
     if (!aParsed || !bParsed) return a.localeCompare(b);
-    
+
     if (aParsed.year !== bParsed.year) {
-        return  bParsed.year - aParsed.year;
-      }
+      return bParsed.year - aParsed.year;
+    }
     const aMonth = monthMap[aParsed.month] ?? -1;
     const bMonth = monthMap[bParsed.month] ?? -1;
 
     return bMonth - aMonth;
-  }
-  
+  };
+
   const sortedTimeGroupKeys = useMemo(() => {
     if (!threadHistory?.timeGroupedThreads) return [];
     const fixedOrder = [

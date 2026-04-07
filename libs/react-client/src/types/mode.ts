@@ -2,11 +2,11 @@
  * Represents a single selectable option within a mode.
  */
 export interface IModeOption {
-    id: string;
-    name: string;
-    description?: string;
-    icon?: string;
-    default?: boolean;
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  default?: boolean;
 }
 
 /**
@@ -14,7 +14,7 @@ export interface IModeOption {
  * Examples: Model selection, Reasoning Effort, Approach preference, etc.
  */
 export interface IMode {
-    id: string;
-    name: string;
-    options: IModeOption[];
+  id: string;
+  name: string;
+  options: IModeOption[];
 }

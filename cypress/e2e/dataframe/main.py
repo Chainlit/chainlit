@@ -1,5 +1,6 @@
-import chainlit as cl
 import pandas as pd
+
+import chainlit as cl
 
 
 @cl.on_chat_start

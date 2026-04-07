@@ -20,7 +20,7 @@ importers:
         version: 10.0.1(eslint@10.2.0)
       '@trivago/prettier-plugin-sort-imports':
         specifier: ^4.3.0
-        version: 4.3.0(prettier@2.8.8)
+        version: 4.3.0(prettier@3.8.1)
       '@types/react':
         specifier: ^18.2.15
         version: 18.2.15
@@ -58,8 +58,8 @@ importers:
         specifier: ^13.3.0
         version: 13.3.0(enquirer@2.4.1)
       prettier:
-        specifier: ^2.8.8
-        version: 2.8.8
+        specifier: ^3.8.1
+        version: 3.8.1
       shell-exec:
         specifier: ^1.1.2
         version: 1.1.2
@@ -1278,9 +1278,9 @@ packages:
     resolution: {integrity: sha512-vkcDPrRZo1QZLbn5RLGPpg/WmIQ65qoWWhcGKf/b5eplkkarX0m9z8ppCat4mlOqUsWpyNuYgO3VRyrYHSzX5g==}
     engines: {node: '>= 0.8.0'}
 
-  prettier@2.8.8:
-    resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
-    engines: {node: '>=10.13.0'}
+  prettier@3.8.1:
+    resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
+    engines: {node: '>=14'}
     hasBin: true
 
   pretty-bytes@5.6.0:
@@ -1801,7 +1801,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.1
       '@jridgewell/sourcemap-codec': 1.4.15
 
-  '@trivago/prettier-plugin-sort-imports@4.3.0(prettier@2.8.8)':
+  '@trivago/prettier-plugin-sort-imports@4.3.0(prettier@3.8.1)':
     dependencies:
       '@babel/generator': 7.17.7
       '@babel/parser': 7.23.0
@@ -1809,7 +1809,7 @@ snapshots:
       '@babel/types': 7.17.0
       javascript-natural-sort: 0.7.1
       lodash: 4.17.21
-      prettier: 2.8.8
+      prettier: 3.8.1
     transitivePeerDependencies:
       - supports-color
 
@@ -2836,7 +2836,7 @@ snapshots:
 
   prelude-ls@1.2.1: {}
 
-  prettier@2.8.8: {}
+  prettier@3.8.1: {}
 
   pretty-bytes@5.6.0: {}
 
