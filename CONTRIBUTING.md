@@ -131,14 +131,14 @@ pnpm lint:fix frontend/
 pnpm format-check:files frontend/
 pnpm format:files frontend/src/App.tsx
 
-# Python (uses scripts/ wrappers around ruff and mypy)
-uv run scripts/lint.py                             # ruff check (all)
-uv run scripts/lint.py backend/chainlit/server.py  # single file
-uv run scripts/lint.py --fix                       # ruff check --fix
-uv run scripts/format.py                           # ruff format (all)
-uv run scripts/format.py backend/chainlit/server.py # single file
-uv run scripts/format.py --check                   # ruff format --check
-uv run scripts/type_check.py                       # dmypy (whole project, no per-file mode)
+# Python (wrapper scripts for linting, formatting, and type checking)
+uv run scripts/lint.py                              # lint all
+uv run scripts/lint.py backend/chainlit/server.py   # lint single file
+uv run scripts/lint.py --fix                        # automatically fix linting issues
+uv run scripts/format.py                            # format all
+uv run scripts/format.py backend/chainlit/server.py # format single file
+uv run scripts/format.py --check                    # check formatting
+uv run scripts/type_check.py                        # check types (whole project, no per-file mode)
 ```
 
 > **Note**

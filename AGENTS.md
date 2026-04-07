@@ -71,10 +71,10 @@ JS/TS lint and format commands accept file/directory arguments: `pnpm lint front
 
 ### Type checking
 
-|               | Command                        | Directory |
-| ------------- | ------------------------------ | --------- |
-| Python (mypy) | `uv run scripts/type_check.py` | repo root |
-| TypeScript    | `pnpm type-check`              | repo root |
+|            | Command                        | Directory |
+| ---------- | ------------------------------ | --------- |
+| Python     | `uv run scripts/type_check.py` | repo root |
+| TypeScript | `pnpm type-check`              | repo root |
 
 Type checking runs on whole projects (no per-file mode).
 
@@ -108,7 +108,7 @@ Examples:
 | **Backend**                    | Python 3.13, FastAPI, Starlette, Uvicorn, python-socketio, Pydantic 2, PyJWT, httpx                                       |
 | **LLM integrations**           | MCP, LangChain, LlamaIndex, OpenAI SDK, Semantic Kernel, MistralAI                                                        |
 | **Infra / persistence**        | SQLAlchemy (PostgreSQL/SQLite), DynamoDB + S3 (boto3), Azure Blob / Data Lake, Google Cloud Storage, LiteralAI            |
-| **DX**                         | Husky (pre-commit), ESLint, Prettier, ruff, mypy (dmypy), pytest, Cypress                                                 |
+| **DX**                         | pre-commit hooks, linting, formatting, type checking, unit testing, E2E testing                                           |
 
 ## Architecture
 
