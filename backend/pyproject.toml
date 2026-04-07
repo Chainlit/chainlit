@@ -39,7 +39,7 @@ dependencies = [
     "starlette>=0.47.2",
     "uvicorn>=0.35.0",
     "python-socketio>=5.11.0,<6.0.0",
-    "aiofiles>=23.1.0,<25.0.0",
+    "aiofiles>=23.1.0",
     "syncer>=2.0.3,<3.0.0",
     "asyncer>=0.0.8,<0.1.0",
     "mcp>=1.11.0,<2.0.0",
@@ -68,22 +68,22 @@ chainlit = "chainlit.cli:cli"
 
 [project.optional-dependencies]
 tests = [
-    "pytest>=8.3.2,<9.0.0",
-    "pytest-asyncio>=0.23.8,<1.0.0",
-    "pytest-cov>=5.0.0,<6.0.0",
-    "openai>=1.11.1,<2.0.0",
-    "langchain>=0.2.4,<0.3.0",
+    "pytest>=8.3.2,<10.0.0",
+    "pytest-asyncio>=1.0.0,<2.0.0",
+    "pytest-cov>=6.0.0,<7.0.0",
+    "openai>=2.0.0,<3.0.0",
+    "langchain>=1.0.0",
     "llama-index>=0.13.0,<1.0.0",
     "semantic-kernel>=1.24.0,<2.0.0",
-    "tenacity>=8.4.1,<9.0.0",
-    "transformers>=4.38,<5.0",
+    "tenacity>=9.0.0,<10.0.0",
+    "transformers>=5.0,<6.0",
     "matplotlib>=3.7.1,<4.0.0",
-    "plotly>=5.18.0,<6.0.0",
+    "plotly>=5.3.0,<7.0.0",
     "slack_bolt>=1.18.1,<2.0.0",
     "discord>=2.3.2,<3.0.0",
     "botbuilder-core>=4.15.0,<5.0.0",
     "aiosqlite>=0.20.0,<1.0.0",
-    "pandas>=2.2.2,<3.0.0",
+    "pandas>=2.2.2,<4.0.0",
     "polars>=1.0.0,<2.0.0",
     "moto>=5.0.14,<6.0.0",
 ]
@@ -93,9 +93,9 @@ dev = [
 mypy = [
     "mypy>=1.13,<2.0.0",
     "types-requests>=2.31.0.2,<3.0.0",
-    "types-aiofiles>=23.1.0.5,<24.0.0",
+    "types-aiofiles>=23.1.0.5,<26.0.0",
     "mypy-boto3-dynamodb>=1.34.113,<2.0.0",
-    "pandas-stubs>=2.2.2,<3.0.0; python_version>='3.9'",
+    "pandas-stubs>=2.2.2,<4.0.0; python_version>='3.9'",
 ]
 custom-data = [
     "asyncpg>=0.30.0,<1.0.0",
@@ -104,7 +104,7 @@ custom-data = [
     "azure-identity>=1.14.1,<2.0.0",
     "azure-storage-file-datalake>=12.14.0,<13.0.0",
     "azure-storage-blob>=12.24.0,<13.0.0",
-    "google-cloud-storage>=2.19.0,<3.0.0",
+    "google-cloud-storage>=2.19.0,<4.0.0",
 ]
 
 [build-system]

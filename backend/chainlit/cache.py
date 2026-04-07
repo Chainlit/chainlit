@@ -1,3 +1,4 @@
+import importlib
 import importlib.util
 import os
 import threading
@@ -11,8 +12,24 @@ def init_lc_cache():
     use_cache = config.project.cache is True and config.run.no_cache is False
 
     if use_cache and importlib.util.find_spec("langchain") is not None:
-        from langchain.cache import SQLiteCache
-        from langchain.globals import set_llm_cache
+        try:
+            try:
+                set_llm_cache = importlib.import_module(
+                    "langchain_core.globals"
+                ).set_llm_cache
+            except ImportError:
+                set_llm_cache = importlib.import_module(
+                    "langchain.globals"
+                ).set_llm_cache
+
+            try:
+                SQLiteCache = importlib.import_module(
+                    "langchain_community.cache"
+                ).SQLiteCache
+            except ImportError:
+                SQLiteCache = importlib.import_module("langchain.cache").SQLiteCache
+        except (AttributeError, ImportError):
+            return
 
         if config.project.lc_cache_path is not None:
             set_llm_cache(SQLiteCache(database_path=config.project.lc_cache_path))
