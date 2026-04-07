@@ -34,17 +34,13 @@ if (typeof globalThis.DOMMatrix === 'undefined') {
     m44 = 1;
     is2D = true;
     isIdentity = true;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(_init?: any) {}
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static fromMatrix(_other?: any): DOMMatrix {
       return new DOMMatrix();
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static fromFloat32Array(_array32: any): DOMMatrix {
       return new DOMMatrix();
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static fromFloat64Array(_array64: any): DOMMatrix {
       return new DOMMatrix();
     }
