@@ -1,5 +1,6 @@
 import os
 import tempfile
+from typing import Any, cast
 from unittest.mock import patch
 
 import pytest
@@ -194,6 +195,7 @@ class TestGetMarkdownStr:
 
             result = get_markdown_str(tmpdir, "en")
             assert result == large_content
+            assert result is not None
             assert len(result) > 10000
 
 
@@ -262,7 +264,7 @@ class TestMarkdownEdgeCases:
                 result = get_markdown_str(link_dir, "en")
                 assert result == content
             except OSError:
-                pytest.skip("Symlink creation not supported")
+                cast(Any, pytest.skip)("Symlink creation not supported")
 
     def test_get_markdown_str_with_relative_path(self):
         """Test get_markdown_str with relative path."""

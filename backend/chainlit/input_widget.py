@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from collections.abc import Sequence
 from datetime import date
 from typing import Any, Dict, List, Literal, Optional
 
@@ -307,7 +308,7 @@ class RadioGroup(InputWidget):
 class Tab:
     id: str
     label: str
-    inputs: list[InputWidget] = Field(default_factory=list, exclude=True)
+    inputs: Sequence[InputWidget] = Field(default_factory=list, exclude=True)
 
     def to_dict(self) -> dict[str, Any]:
         return {

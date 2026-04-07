@@ -192,9 +192,9 @@ class GenerationHelper:
                 if tool_calls:
                     msg["tool_calls"] = tool_calls
                 if content_parts:
-                    msg["content"] = content_parts  # type: ignore
+                    msg["content"] = content_parts
             else:
-                msg["content"] = content  # type: ignore
+                msg["content"] = content
 
         return msg
 
@@ -247,9 +247,9 @@ class GenerationHelper:
                 if tool_calls:
                     msg["tool_calls"] = tool_calls
                 if content_parts:
-                    msg["content"] = content_parts  # type: ignore
+                    msg["content"] = content_parts
             else:
-                msg["content"] = message.content  # type: ignore
+                msg["content"] = message.content
 
         return msg
 
@@ -316,7 +316,7 @@ DEFAULT_TO_KEEP = ["retriever", "llm", "agent", "chain", "tool"]
 
 class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
     steps: Dict[str, Step]
-    parent_id_map: Dict[str, str]
+    parent_id_map: Dict[str, Optional[str]]
     ignored_runs: set
 
     def __init__(
@@ -441,7 +441,7 @@ class LangchainTracer(AsyncBaseTracer, GenerationHelper, FinalStreamHelper):
         if isinstance(chunk, ChatGenerationChunk):
             start = self.chat_generations[str(run_id)]
         else:
-            start = self.completion_generations[str(run_id)]  # type: ignore
+            start = self.completion_generations[str(run_id)]
         start["token_count"] += 1
         if start["tt_first_token"] is None:
             start["tt_first_token"] = (time.time() - start["start"]) * 1000

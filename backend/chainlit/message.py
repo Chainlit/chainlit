@@ -3,7 +3,8 @@ import json
 import time
 import uuid
 from abc import ABC
-from typing import Dict, List, Optional, Union, cast
+from collections.abc import Mapping
+from typing import Any, Dict, List, Optional, Union, cast
 
 from literalai.observability.step import MessageStepType
 
@@ -32,7 +33,7 @@ class MessageBase(ABC):
     id: str
     thread_id: str
     author: str
-    content: str = ""
+    content: str | None = ""
     type: MessageStepType = "assistant_message"
     streaming = False
     created_at: Union[str, None] = None
@@ -59,8 +60,8 @@ class MessageBase(ABC):
             self.id = str(uuid.uuid4())
 
     @classmethod
-    def from_dict(self, _dict: StepDict):
-        type = _dict.get("type", "assistant_message")
+    def from_dict(cls, _dict: Mapping[str, Any]):
+        message_type = cast(MessageStepType, _dict.get("type", "assistant_message"))
         return Message(
             id=_dict["id"],
             parent_id=_dict.get("parentId"),
@@ -69,7 +70,7 @@ class MessageBase(ABC):
             author=_dict.get("name", config.ui.name),
             command=_dict.get("command"),
             modes=_dict.get("modes"),
-            type=type,  # type: ignore
+            type=message_type,
             language=_dict.get("language"),
             metadata=_dict.get("metadata", {}),
         )
@@ -84,7 +85,7 @@ class MessageBase(ABC):
             "modes": self.modes,
             "start": self.created_at,
             "end": self.created_at,
-            "output": self.content,
+            "output": self.content or "",
             "name": self.author,
             "type": self.type,
             "language": self.language,
@@ -108,7 +109,7 @@ class MessageBase(ABC):
             self.streaming = False
 
         step_dict = self.to_dict()
-        chat_context.add(self)
+        chat_context.add(cast(Any, self))
 
         data_layer = get_data_layer()
         if data_layer:
@@ -127,7 +128,7 @@ class MessageBase(ABC):
         """
         Remove a message already sent to the UI.
         """
-        chat_context.remove(self)
+        chat_context.remove(cast(Any, self))
         step_dict = self.to_dict()
         data_layer = get_data_layer()
         if data_layer:
@@ -169,7 +170,7 @@ class MessageBase(ABC):
             self.streaming = False
 
         step_dict = await self._create()
-        chat_context.add(self)
+        chat_context.add(cast(Any, self))
         await context.emitter.send_step(step_dict)
 
         return self
@@ -185,7 +186,7 @@ class MessageBase(ABC):
         if is_sequence:
             self.content = token
         else:
-            self.content += token
+            self.content = (self.content or "") + token
 
         assert self.id
 
@@ -204,7 +205,7 @@ class Message(MessageBase):
     Send a message to the UI
 
     Args:
-        content (Union[str, Dict]): The content of the message.
+        content (Any): The content of the message.
         author (str, optional): The author of the message, this will be used in the UI. Defaults to the assistant name (see config).
         language (str, optional): Language of the code is the content is code. See https://react-code-blocks-rajinwonderland.vercel.app/?path=/story/codeblock--supported-languages for a list of supported languages.
         actions (List[Action], optional): A list of actions to send with the message.
@@ -213,7 +214,7 @@ class Message(MessageBase):
 
     def __init__(
         self,
-        content: Union[str, Dict],
+        content: Any,
         author: Optional[str] = None,
         language: Optional[str] = None,
         actions: Optional[List[Action]] = None,

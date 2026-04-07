@@ -1,7 +1,7 @@
 import asyncio
 import uuid
 from contextvars import ContextVar
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 from lazify import LazyProxy
 
@@ -56,9 +56,7 @@ class ChainlitContext:
 
 
 context_var: ContextVar[ChainlitContext] = ContextVar("chainlit")
-local_steps: ContextVar[Optional[List["Step"]]] = ContextVar(
-    "local_steps", default=None
-)
+local_steps: ContextVar[List["Step"]] = ContextVar("local_steps", default=[])
 
 
 def init_ws_context(session_or_sid: Union[WebsocketSession, str]) -> ChainlitContext:
@@ -109,4 +107,6 @@ def get_context() -> ChainlitContext:
         raise ChainlitContextException from e
 
 
-context: ChainlitContext = LazyProxy(get_context, enable_cache=False)
+context: ChainlitContext = cast(
+    ChainlitContext, LazyProxy(get_context, enable_cache=False)
+)

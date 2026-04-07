@@ -3,14 +3,17 @@ import ssl
 import uuid
 from dataclasses import asdict
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import aiofiles
 import aiohttp
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
@@ -58,9 +61,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         self.engine: AsyncEngine = create_async_engine(
             self._conninfo, connect_args=connect_args
         )
-        self.async_session = sessionmaker(
-            bind=self.engine, expire_on_commit=False, class_=AsyncSession
-        )  # type: ignore
+        self.async_session = async_sessionmaker(
+            bind=self.engine, expire_on_commit=False
+        )
         if storage_provider:
             self.storage_provider: Optional[BaseStorageClient] = storage_provider
             if self.show_logger:
@@ -82,7 +85,9 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         async with self.async_session() as session:
             try:
                 await session.begin()
-                result = await session.execute(parameterized_query, parameters)
+                result = cast(
+                    Any, await session.execute(parameterized_query, parameters)
+                )
                 await session.commit()
                 if result.returns_rows:
                     json_result = [dict(row._mapping) for row in result.fetchall()]
@@ -865,7 +870,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
                         forId=element.get("element_forid"),
                         mime=element.get("element_mime"),
                     )
-                    thread_dicts[thread_id]["elements"].append(element_dict)  # type: ignore
+                    thread_dicts[thread_id]["elements"].append(element_dict)
 
         return list(thread_dicts.values())
 

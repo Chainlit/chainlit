@@ -103,14 +103,14 @@ class BaseSession:
     """Base object."""
 
     thread_id_to_resume: Optional[str] = None
-    client_type: ClientType
+    client_type: ClientType | str
     current_task: Optional[asyncio.Task] = None
 
     def __init__(
         self,
         # Id of the session
         id: str,
-        client_type: ClientType,
+        client_type: ClientType | str,
         # Thread id
         thread_id: Optional[str],
         # Logged-in user information
@@ -224,7 +224,7 @@ class HTTPSession(BaseSession):
         self,
         # Id of the session
         id: str,
-        client_type: ClientType,
+        client_type: ClientType | str,
         # Thread id
         thread_id: Optional[str] = None,
         # Logged-in user information
@@ -282,7 +282,7 @@ class WebsocketSession(BaseSession):
         emit_call: Callable[[Literal["ask", "call_fn"], Any, Optional[int]], Any],
         # User specific environment variables. Empty if no user environment variables are required.
         user_env: Dict[str, str],
-        client_type: ClientType,
+        client_type: ClientType | str,
         # WSGI environment variables for the connection request
         environ: Optional[dict[str, Any]] = None,
         # Thread id

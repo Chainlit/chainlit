@@ -8,7 +8,7 @@ from .utils import (
 )
 
 _data_layer: Optional[BaseDataLayer] = None
-_data_layer_initialized = False
+_data_layer_initialized: bool = False
 
 
 def get_data_layer():
@@ -67,7 +67,7 @@ def get_data_layer():
                     from chainlit.data.storage_clients.s3 import S3StorageClient
 
                     storage_client = S3StorageClient(
-                        bucket=bucket_name,
+                        bucket=bucket_name or "",
                         region_name=aws_region,
                         aws_access_key_id=aws_access_key,
                         aws_secret_access_key=aws_secret_key,
@@ -80,7 +80,7 @@ def get_data_layer():
                         project_id=gcs_project_id,
                         client_email=gcs_client_email,
                         private_key=gcs_private_key,
-                        bucket_name=bucket_name,
+                        bucket_name=bucket_name or "",
                     )
                 elif is_using_azure:
                     from chainlit.data.storage_clients.azure_blob import (
@@ -88,9 +88,9 @@ def get_data_layer():
                     )
 
                     storage_client = AzureBlobStorageClient(
-                        container_name=bucket_name,
-                        storage_account=azure_storage_account,
-                        storage_key=azure_storage_key,
+                        container_name=bucket_name or "",
+                        storage_account=azure_storage_account or "",
+                        storage_key=azure_storage_key or "",
                     )
 
                 _data_layer = ChainlitDataLayer(

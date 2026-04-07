@@ -3,6 +3,7 @@ import json
 import tempfile
 import uuid
 from pathlib import Path
+from typing import Any, cast
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
@@ -20,8 +21,11 @@ from chainlit.session import (
 def make_exception_group(message: str, exceptions: list[BaseException]):
     base_exception_group = getattr(builtins, "BaseExceptionGroup", None)
     if base_exception_group is None:
-        pytest.skip("BaseExceptionGroup is unavailable on this Python version")
-    return base_exception_group(message, exceptions)  # type: ignore[misc]
+        cast(Any, pytest.skip)(
+            "BaseExceptionGroup is unavailable on this Python version"
+        )
+        raise AssertionError("pytest.skip should have interrupted execution")
+    return base_exception_group(message, exceptions)
 
 
 class TestJSONEncoderIgnoreNonSerializable:

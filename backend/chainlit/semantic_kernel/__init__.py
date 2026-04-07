@@ -1,5 +1,5 @@
 from collections.abc import Awaitable, Callable
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 
 from pydantic import BaseModel
 
@@ -64,7 +64,9 @@ class SemanticKernelFilter(BaseModel):
         Args:
             kernel: the Kernel to add the filter to.
         """
-        kernel.add_filter("function_invocation", self._function_invocation_filter)  # type: ignore[arg-type]
+        kernel.add_filter(
+            cast(Any, "function_invocation"), self._function_invocation_filter
+        )
 
     def parse_arguments(self, arguments: "KernelArguments") -> dict[str, Any] | str:
         """Parse the KernelArguments used for the function.

@@ -514,6 +514,7 @@ class TestDataframeElement:
             assert element.type == "dataframe"
             assert element.size == "large"
 
+            assert element.content is not None
             parsed = json.loads(element.content)
             assert parsed["columns"] == ["a", "b"]
             assert parsed["data"] == [[4, "foo"], [2, "bar"], [0, "baz"]]
@@ -530,6 +531,7 @@ class TestDataframeElement:
             assert element.type == "dataframe"
             assert element.size == "large"
 
+            assert element.content is not None
             parsed = json.loads(element.content)
             assert parsed["columns"] == ["a", "b"]
             assert parsed["data"] == [[4, "foo"], [2, "bar"], [0, "baz"]]
@@ -558,6 +560,8 @@ class TestDataframeElement:
             pd_element = Dataframe(name="pd_df", data=pd_df)
             pl_element = Dataframe(name="pl_df", data=pl_df)
 
+            assert pd_element.content is not None
+            assert pl_element.content is not None
             pd_parsed = json.loads(pd_element.content)
             pl_parsed = json.loads(pl_element.content)
 
@@ -577,6 +581,7 @@ class TestDataframeElement:
             )
             element = Dataframe(name="test_df", data=df)
 
+            assert element.content is not None
             parsed = json.loads(element.content)
             assert parsed["columns"] == ["date", "val"]
             assert len(parsed["data"]) == 2

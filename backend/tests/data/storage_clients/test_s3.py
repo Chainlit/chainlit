@@ -1,6 +1,6 @@
 import os
 
-import boto3  # type: ignore
+import boto3
 import pytest
 from moto import mock_aws
 

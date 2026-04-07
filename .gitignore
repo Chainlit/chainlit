@@ -24,8 +24,6 @@ __pycache__
 
 *.db
 
-.mypy_cache
-
 chat_files
 
 .chroma
@@ -60,6 +58,4 @@ dist-ssr
 .coverage
 
 backend/README.md
-backend/.dmypy.json
-
 .history

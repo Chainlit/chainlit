@@ -5,10 +5,10 @@ import time
 import uuid
 from copy import deepcopy
 from functools import wraps
-from typing import Callable, Dict, List, Optional, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, TypedDict, Union
 
 from literalai import BaseGeneration
-from literalai.observability.step import StepType, TrueStepType
+from literalai.observability.step import StepType
 
 from chainlit.config import config
 from chainlit.context import CL_RUN_NAMES, context, local_steps
@@ -80,9 +80,10 @@ def step(
     original_function: Optional[Callable] = None,
     *,
     name: Optional[str] = "",
-    type: TrueStepType = "undefined",
+    type: StepType = "undefined",
     id: Optional[str] = None,
     parent_id: Optional[str] = None,
+    thread_id: Optional[str] = None,
     tags: Optional[List[str]] = None,
     metadata: Optional[Dict] = None,
     language: Optional[str] = None,
@@ -93,10 +94,10 @@ def step(
 ):
     """Step decorator for async and sync functions."""
 
-    def wrapper(func: Callable):
+    def wrapper(func: Callable[..., Any]):
         nonlocal name
         if not name:
-            name = func.__name__
+            name = getattr(func, "__name__", "")
 
         # Handle async decorator
 
@@ -109,6 +110,7 @@ def step(
                     name=name,
                     id=id,
                     parent_id=parent_id,
+                    thread_id=thread_id,
                     tags=tags,
                     language=language,
                     icon=icon,
@@ -140,6 +142,7 @@ def step(
                     name=name,
                     id=id,
                     parent_id=parent_id,
+                    thread_id=thread_id,
                     tags=tags,
                     language=language,
                     icon=icon,
@@ -173,7 +176,7 @@ def step(
 class Step:
     # Constructor
     name: str
-    type: TrueStepType
+    type: StepType
     id: str
     parent_id: Optional[str]
 
@@ -194,13 +197,13 @@ class Step:
     icon: Optional[str]
     default_open: Optional[bool]
     auto_collapse: Optional[bool]
-    elements: Optional[List[Element]]
+    elements: List[Element]
     fail_on_persist_error: bool
 
     def __init__(
         self,
         name: Optional[str] = config.ui.name,
-        type: TrueStepType = "undefined",
+        type: StepType = "undefined",
         id: Optional[str] = None,
         parent_id: Optional[str] = None,
         elements: Optional[List[Element]] = None,
@@ -241,7 +244,7 @@ class Step:
         self.persisted = False
         self.fail_on_persist_error = False
 
-    def _clean_content(self, content):
+    def _clean_content(self, content: Any):
         """
         Recursively checks and converts bytes objects in content.
         """
@@ -259,7 +262,7 @@ class Step:
 
         return handle_bytes(content)
 
-    def _process_content(self, content, set_language=False):
+    def _process_content(self, content: Any, set_language=False):
         if content is None:
             return ""
         content = self._clean_content(content)
@@ -290,7 +293,7 @@ class Step:
         return self._input
 
     @input.setter
-    def input(self, content: Union[Dict, str]):
+    def input(self, content: Any):
         self._input = self._process_content(content, set_language=False)
 
     @property
@@ -298,7 +301,7 @@ class Step:
         return self._output
 
     @output.setter
-    def output(self, content: Union[Dict, str]):
+    def output(self, content: Any):
         self._output = self._process_content(content, set_language=True)
 
     def to_dict(self) -> StepDict:
@@ -475,8 +478,8 @@ class Step:
             self.output = str(exc_val)
             self.is_error = True
 
-        current_steps = local_steps.get()
-        if current_steps and self in current_steps:
+        current_steps = local_steps.get() or []
+        if self in current_steps:
             current_steps.remove(self)
             local_steps.set(current_steps)
 
@@ -503,8 +506,8 @@ class Step:
             self.output = str(exc_val)
             self.is_error = True
 
-        current_steps = local_steps.get()
-        if current_steps and self in current_steps:
+        current_steps = local_steps.get() or []
+        if self in current_steps:
             current_steps.remove(self)
             local_steps.set(current_steps)
 

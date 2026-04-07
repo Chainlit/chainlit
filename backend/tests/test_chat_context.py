@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import contextmanager
+from typing import Any, cast
 from unittest.mock import Mock, patch
 
 from chainlit.chat_context import chat_context, chat_contexts
@@ -13,7 +14,7 @@ def mock_chainlit_context(session=None):
     mock_loop = Mock(spec=asyncio.AbstractEventLoop)
 
     with patch("asyncio.get_running_loop", return_value=mock_loop):
-        mock_context = ChainlitContext(session=session)
+        mock_context = ChainlitContext(session=cast(Any, session))
         token = context_var.set(mock_context)
         try:
             yield mock_context
@@ -430,7 +431,7 @@ class TestChatContextEdgeCases:
             Mock(type="other_type", content="Other message"),
         ]
 
-        chat_contexts["session_123"] = messages
+        chat_contexts["session_123"] = cast(Any, messages)
 
         with mock_chainlit_context(session=mock_session):
             result = chat_context.to_openai()

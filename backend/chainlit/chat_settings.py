@@ -1,3 +1,5 @@
+import inspect
+from collections.abc import Sequence
 from typing import Any, List
 
 from pydantic import Field
@@ -11,17 +13,19 @@ from chainlit.input_widget import InputWidget, Tab
 class ChatSettings:
     """Useful to create chat settings that the user can change."""
 
-    inputs: List[InputWidget] | List[Tab] = Field(default_factory=list, exclude=True)
+    inputs: Sequence[InputWidget] | Sequence[Tab] = Field(
+        default_factory=list, exclude=True
+    )
 
     def __init__(
         self,
-        inputs: List[InputWidget] | List[Tab],
+        inputs: Sequence[InputWidget] | Sequence[Tab],
     ) -> None:
-        self.inputs = inputs
+        self.inputs = list(inputs)
 
     def settings(self):
         def collect_settings(
-            values: dict[str, Any], inputs: List[InputWidget] | List[Tab]
+            values: dict[str, Any], inputs: Sequence[InputWidget] | Sequence[Tab]
         ) -> None:
             for input in inputs:
                 if isinstance(input, Tab):
@@ -44,6 +48,8 @@ class ChatSettings:
 
     async def send(self):
         settings = self.settings()
-        context.emitter.set_chat_settings(settings)
+        result = context.emitter.set_chat_settings(settings)
+        if inspect.isawaitable(result):
+            await result
         await context.emitter.emit("chat_settings", self._inputs_as_dicts())
         return settings

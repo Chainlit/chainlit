@@ -215,6 +215,7 @@ class TestMessage:
             msg = Message(content=content_dict)
 
             assert msg.language == "text"
+            assert msg.content is not None
             assert "NonSerializable" in msg.content
 
     def test_message_with_non_string_content(self):

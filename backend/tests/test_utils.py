@@ -125,7 +125,7 @@ class TestWrapUserFunction:
             def user_func(a, b):
                 return a + b
 
-            wrapped = wrap_user_function(user_func)
+            wrapped = cast(Any, wrap_user_function(user_func))
             result = await wrapped(5, 3)
 
             assert result == 8
@@ -137,7 +137,7 @@ class TestWrapUserFunction:
             async def user_func(x, y):
                 return x * y
 
-            wrapped = wrap_user_function(user_func)
+            wrapped = cast(Any, wrap_user_function(user_func))
             result = await wrapped(4, 7)
 
             assert result == 28
@@ -149,7 +149,7 @@ class TestWrapUserFunction:
             def user_func():
                 return "hello"
 
-            wrapped = wrap_user_function(user_func)
+            wrapped = cast(Any, wrap_user_function(user_func))
             result = await wrapped()
 
             assert result == "hello"
@@ -163,7 +163,7 @@ class TestWrapUserFunction:
             def user_func(value):
                 return value * 2
 
-            wrapped = wrap_user_function(user_func, with_task=True)
+            wrapped = cast(Any, wrap_user_function(user_func, with_task=True))
             result = await wrapped(10)
 
             assert result == 20
@@ -177,7 +177,7 @@ class TestWrapUserFunction:
             def user_func():
                 raise ValueError("Test error")
 
-            wrapped = wrap_user_function(user_func)
+            wrapped = cast(Any, wrap_user_function(user_func))
             result = await wrapped()
 
             # Should return None when exception occurs
@@ -195,7 +195,7 @@ class TestWrapUserFunction:
                 raise ValueError("Test error")
 
             with patch("chainlit.utils.logger") as mock_logger:
-                wrapped = wrap_user_function(user_func, with_task=True)
+                wrapped = cast(Any, wrap_user_function(user_func, with_task=True))
                 result = await wrapped()
 
                 assert result is None
@@ -213,7 +213,7 @@ class TestWrapUserFunction:
                 """Test function docstring."""
                 return a + b
 
-            wrapped = wrap_user_function(user_func)
+            wrapped = cast(Any, wrap_user_function(user_func))
 
             assert wrapped.__name__ == "user_func"
             assert wrapped.__doc__ == "Test function docstring."
@@ -225,7 +225,7 @@ class TestWrapUserFunction:
             def user_func(x, y, z):
                 return x + y + z
 
-            wrapped = wrap_user_function(user_func)
+            wrapped = cast(Any, wrap_user_function(user_func))
             result = await wrapped(1, 2, 3)
 
             assert result == 6
@@ -399,7 +399,7 @@ class TestUtilsEdgeCases:
                     raise exc
 
                 with patch("chainlit.utils.logger"):
-                    wrapped = wrap_user_function(user_func)
+                    wrapped = cast(Any, wrap_user_function(user_func))
                     result = await wrapped()
                     assert result is None
 
@@ -442,8 +442,11 @@ class TestUtilsEdgeCases:
             def user_func(a, b=10):
                 return a + b
 
-            wrapped = wrap_user_function(user_func)
+            wrapped = cast(Any, wrap_user_function(user_func))
 
             # Call with only required arg
             result = await wrapped(5)
             assert result == 15
+
+
+from typing import Any, cast

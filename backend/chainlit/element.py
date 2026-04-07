@@ -13,6 +13,7 @@ from typing import (
     TypedDict,
     TypeVar,
     Union,
+    cast,
 )
 
 import filetype
@@ -141,49 +142,105 @@ class Element:
         element_id = e_dict.get("id", str(uuid.uuid4()))
         for_id = e_dict.get("forId")
         name = e_dict.get("name", "")
-        type = e_dict.get("type", "file")
+        element_type = e_dict.get("type", "file")
         path = str(e_dict.get("path")) if e_dict.get("path") else None
         url = str(e_dict.get("url")) if e_dict.get("url") else None
         content = str(e_dict.get("content")) if e_dict.get("content") else None
         object_key = e_dict.get("objectKey")
         chainlit_key = e_dict.get("chainlitKey")
         display = e_dict.get("display", "inline")
-        mime_type = e_dict.get("mime", "")
+        mime_type = e_dict.get("mime")
+        size = e_dict.get("size")
+        normalized_size = size if size in ("small", "medium", "large") else "medium"
 
-        # Common parameters for all element types
-        common_params = {
-            "id": element_id,
-            "for_id": for_id,
-            "name": name,
-            "content": content,
-            "path": path,
-            "url": url,
-            "object_key": object_key,
-            "chainlit_key": chainlit_key,
-            "display": display,
-            "mime": mime_type,
-        }
-
-        if type == "image":
-            return Image(size="medium", **common_params)  # type: ignore[arg-type]
-
-        elif type == "audio":
-            return Audio(auto_play=e_dict.get("autoPlay", False), **common_params)  # type: ignore[arg-type]
-
-        elif type == "video":
-            return Video(
-                player_config=e_dict.get("playerConfig"),
-                **common_params,  # type: ignore[arg-type]
+        if element_type == "image":
+            return Image(
+                id=element_id,
+                for_id=for_id,
+                name=name,
+                content=content,
+                path=path,
+                url=url,
+                object_key=object_key,
+                chainlit_key=chainlit_key,
+                display=display,
+                mime=mime_type,
+                size="medium",
             )
 
-        elif type == "plotly":
-            return Plotly(size=e_dict.get("size", "medium"), **common_params)  # type: ignore[arg-type]
+        elif element_type == "audio":
+            return Audio(
+                id=element_id,
+                for_id=for_id,
+                name=name,
+                content=content,
+                path=path,
+                url=url,
+                object_key=object_key,
+                chainlit_key=chainlit_key,
+                display=display,
+                mime=mime_type,
+                auto_play=bool(e_dict.get("autoPlay", False)),
+            )
 
-        elif type == "custom":
-            return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
+        elif element_type == "video":
+            return Video(
+                id=element_id,
+                for_id=for_id,
+                name=name,
+                content=content,
+                path=path,
+                url=url,
+                object_key=object_key,
+                chainlit_key=chainlit_key,
+                display=display,
+                mime=mime_type,
+                player_config=e_dict.get("playerConfig") or None,
+            )
+
+        elif element_type == "plotly":
+            return Plotly(
+                id=element_id,
+                for_id=for_id,
+                name=name,
+                content=content or "",
+                path=path,
+                url=url,
+                object_key=object_key,
+                chainlit_key=chainlit_key,
+                display=display,
+                mime=mime_type,
+                size=normalized_size,
+            )
+
+        elif element_type == "custom":
+            return CustomElement(
+                id=element_id,
+                for_id=for_id,
+                name=name,
+                content=content or "",
+                path=path,
+                url=url,
+                object_key=object_key,
+                chainlit_key=chainlit_key,
+                display=display,
+                mime=mime_type or "application/json",
+                props=cast(Dict, e_dict.get("props") or {}),
+            )
         else:
             # Default to File for any other type
-            return File(**common_params)  # type: ignore[arg-type]
+            return File(
+                id=element_id,
+                for_id=for_id,
+                name=name,
+                content=content,
+                path=path,
+                url=url,
+                object_key=object_key,
+                chainlit_key=chainlit_key,
+                display=display,
+                mime=mime_type,
+            )
 
     @classmethod
     def infer_type_from_mime(cls, mime_type: str):
@@ -348,9 +405,9 @@ class TaskList(Element):
     async def update(self):
         await self.send()
 
-    async def send(self):
+    async def send(self, for_id: str = "", persist=True):
         await self.preprocess_content()
-        await super().send(for_id="")
+        await super().send(for_id=for_id, persist=persist)
 
     async def preprocess_content(self):
         # serialize enum
@@ -478,4 +535,4 @@ class CustomElement(Element):
         self.updatable = True
 
     async def update(self):
-        await super().send(self.for_id)
+        await super().send(self.for_id or "")

@@ -1,6 +1,6 @@
 import os
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, cast
 
 import jwt as pyjwt
 
@@ -13,14 +13,11 @@ def get_jwt_secret() -> Optional[str]:
 
 
 def create_jwt(data: User) -> str:
-    to_encode: Dict[str, Any] = data.to_dict()
-    to_encode.update(
-        {
-            "exp": datetime.now(timezone.utc)
-            + timedelta(seconds=config.project.user_session_timeout),
-            "iat": datetime.now(timezone.utc),  # Add issued at time
-        }
+    to_encode = cast(Dict[str, Any], data.to_dict().copy())
+    to_encode["exp"] = datetime.now(timezone.utc) + timedelta(
+        seconds=config.project.user_session_timeout
     )
+    to_encode["iat"] = datetime.now(timezone.utc)
 
     secret = get_jwt_secret()
     assert secret
@@ -32,11 +29,11 @@ def decode_jwt(token: str) -> User:
     secret = get_jwt_secret()
     assert secret
 
-    dict = pyjwt.decode(
+    payload = pyjwt.decode(
         token,
         secret,
         algorithms=["HS256"],
         options={"verify_signature": True},
     )
-    del dict["exp"]
-    return User(**dict)
+    del payload["exp"]
+    return User(**payload)

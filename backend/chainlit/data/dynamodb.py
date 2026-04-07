@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import aiofiles
 import aiohttp
-import boto3  # type: ignore
+import boto3
 from boto3.dynamodb.types import TypeDeserializer, TypeSerializer
 
 from chainlit.context import context
@@ -52,7 +52,9 @@ class DynamoDBDataLayer(BaseDataLayer):
             self.client = client
         else:
             region_name = os.environ.get("AWS_REGION", "us-east-1")
-            self.client = boto3.client("dynamodb", region_name=region_name)  # type: ignore
+            self.client = cast(
+                "DynamoDBClient", boto3.client("dynamodb", region_name=region_name)
+            )
 
         self.table_name = table_name
         self.storage_provider = storage_provider
@@ -149,7 +151,7 @@ class DynamoDBDataLayer(BaseDataLayer):
         _logger.info("DynamoDB: create_user user.identifier=%s", user.identifier)
 
         ts = self._get_current_timestamp()
-        metadata: Dict[Any, Any] = user.metadata  # type: ignore
+        metadata: Dict[Any, Any] = user.metadata
 
         item = {
             "PK": f"USER#{user.identifier}",
@@ -344,12 +346,16 @@ class DynamoDBDataLayer(BaseDataLayer):
         )
         _logger.debug("DynamoDB: create_step: %s", step_dict)
 
+        thread_id = step_dict.get("threadId")
+        step_id = step_dict.get("id")
+        if not thread_id or not step_id:
+            raise ValueError("threadId and id are required to create a step")
+
         item = dict(step_dict)
         item.update(
             {
-                # ignore type, dynamo needs these so we want to fail if not set
-                "PK": f"THREAD#{step_dict['threadId']}",  # type: ignore
-                "SK": f"STEP#{step_dict['id']}",  # type: ignore
+                "PK": f"THREAD#{thread_id}",
+                "SK": f"STEP#{step_id}",
             }
         )
 
@@ -367,13 +373,17 @@ class DynamoDBDataLayer(BaseDataLayer):
         )
         _logger.debug("DynamoDB: update_step: %s", step_dict)
 
+        thread_id = step_dict.get("threadId")
+        step_id = step_dict.get("id")
+        if not thread_id or not step_id:
+            raise ValueError("threadId and id are required to update a step")
+
         self._update_item(
             key={
-                # ignore type, dynamo needs these so we want to fail if not set
-                "PK": f"THREAD#{step_dict['threadId']}",  # type: ignore
-                "SK": f"STEP#{step_dict['id']}",  # type: ignore
+                "PK": f"THREAD#{thread_id}",
+                "SK": f"STEP#{step_id}",
             },
-            updates=step_dict,  # type: ignore
+            updates=cast(Dict[str, Any], step_dict.copy()),
         )
 
     @queue_until_user_message()
@@ -414,9 +424,13 @@ class DynamoDBDataLayer(BaseDataLayer):
         if not thread:
             return
 
-        items: List[Any] = thread["steps"]
+        items: List[Dict[str, Any]] = [
+            cast(Dict[str, Any], item.copy()) for item in thread["steps"]
+        ]
         if thread["elements"]:
-            items.extend(thread["elements"])
+            items.extend(
+                cast(Dict[str, Any], item.copy()) for item in thread["elements"]
+            )
 
         delete_requests = []
         for item in items:
@@ -428,9 +442,7 @@ class DynamoDBDataLayer(BaseDataLayer):
         for i in range(0, len(delete_requests), BATCH_ITEM_SIZE):
             chunk = delete_requests[i : i + BATCH_ITEM_SIZE]
             response = self.client.batch_write_item(
-                RequestItems={
-                    self.table_name: chunk,  # type: ignore
-                }
+                RequestItems={self.table_name: chunk}
             )
 
             backoff_time = 1
@@ -489,7 +501,7 @@ class DynamoDBDataLayer(BaseDataLayer):
             query_args["ExpressionAttributeNames"]["#name"] = "name"
             query_args["ExpressionAttributeValues"][":search"] = {"S": filters.search}
 
-        response = self.client.query(**query_args)  # type: ignore
+        response = self.client.query(**query_args)
 
         if "LastEvaluatedKey" in response:
             paginated_response.pageInfo.hasNextPage = True
@@ -628,7 +640,7 @@ class DynamoDBDataLayer(BaseDataLayer):
         }
 
         while True:
-            response = self.client.query(**query_args)  # type: ignore
+            response = self.client.query(**query_args)
             for item in response.get("Items", []):
                 pk = item.get("PK", {}).get("S")
                 if pk:
@@ -659,7 +671,7 @@ class DynamoDBDataLayer(BaseDataLayer):
             }
 
             while True:
-                response = self.client.query(**t_query_args)  # type: ignore
+                response = self.client.query(**t_query_args)
                 for item in response.get("Items", []):
                     step = self._deserialize_item(item)
                     if "PK" in step:

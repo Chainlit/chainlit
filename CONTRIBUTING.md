@@ -15,7 +15,6 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
     - [Requirements](#requirements)
     - [Set up the repo](#set-up-the-repo)
     - [Install dependencies](#install-dependencies)
-    - [Build Frontend](#build-frontend)
   - [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
   - [Start the UI from source](#start-the-ui-from-source)
   - [Run the tests](#run-the-tests)
@@ -75,8 +74,10 @@ $ git remote -v
 The following command will install Python dependencies, Node (pnpm) dependencies and build the frontend.
 
 ```sh
+pnpm install
+
 cd backend
-uv sync --extra tests --extra mypy --extra dev --extra custom-data
+uv sync --all-extras
 ```
 
 ## Start the Chainlit server from source

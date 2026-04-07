@@ -1,7 +1,7 @@
 import os
 from typing import Any, Dict, Union
 
-import boto3  # type: ignore
+import boto3
 
 from chainlit import make_async
 from chainlit.data.storage_clients.base import BaseStorageClient, storage_expiry_time

@@ -1,3 +1,4 @@
+from typing import Any, cast
 from unittest.mock import MagicMock
 
 import pytest
@@ -208,4 +209,4 @@ async def test_send_toast_with_type(
 async def test_send_toast_invalid_type(emitter: ChainlitEmitter) -> None:
     message = "This is a test message"
     with pytest.raises(ValueError, match="Invalid toast type: invalid"):
-        await emitter.send_toast(message, type="invalid")  # type: ignore[arg-type]
+        await emitter.send_toast(message, type=cast(Any, "invalid"))

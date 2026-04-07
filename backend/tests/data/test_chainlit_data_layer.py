@@ -1,4 +1,5 @@
 import json
+from typing import Any, cast
 from unittest.mock import AsyncMock
 
 import pytest
@@ -20,13 +21,14 @@ async def test_update_thread_preserves_metadata_when_none_existing_thread():
             return [{"metadata": json.dumps(existing_metadata)}]
         return None
 
-    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+    execute_query_mock = AsyncMock(side_effect=mock_execute_query)
+    cast(Any, data_layer).execute_query = execute_query_mock
 
     await data_layer.update_thread(thread_id="test-thread-123", name="Updated Name")
 
-    assert data_layer.execute_query.call_count == 2
+    assert execute_query_mock.call_count == 2
 
-    update_call = data_layer.execute_query.call_args_list[1]
+    update_call = execute_query_mock.call_args_list[1]
     update_params = update_call[0][1]
 
     metadata_json = None
@@ -53,11 +55,12 @@ async def test_update_thread_noop_skips_upsert_on_existing_thread():
             return [{"metadata": json.dumps({"existing": "data"})}]
         return None
 
-    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+    execute_query_mock = AsyncMock(side_effect=mock_execute_query)
+    cast(Any, data_layer).execute_query = execute_query_mock
 
     await data_layer.update_thread(thread_id="test-thread-123")
 
-    assert data_layer.execute_query.call_count == 1
+    assert execute_query_mock.call_count == 1
 
 
 @pytest.mark.asyncio
@@ -72,13 +75,14 @@ async def test_update_thread_new_thread_includes_empty_metadata():
             return []
         return None
 
-    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+    execute_query_mock = AsyncMock(side_effect=mock_execute_query)
+    cast(Any, data_layer).execute_query = execute_query_mock
 
     await data_layer.update_thread(thread_id="new-thread", name="New Chat")
 
-    assert data_layer.execute_query.call_count == 2
+    assert execute_query_mock.call_count == 2
 
-    update_call = data_layer.execute_query.call_args_list[1]
+    update_call = execute_query_mock.call_args_list[1]
     update_query = update_call[0][0]
     update_params = update_call[0][1]
 
@@ -114,7 +118,8 @@ async def test_update_thread_merges_metadata_when_provided():
         # For the UPDATE/INSERT, return None
         return None
 
-    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+    execute_query_mock = AsyncMock(side_effect=mock_execute_query)
+    cast(Any, data_layer).execute_query = execute_query_mock
 
     # Call update_thread with partial metadata update
     new_metadata = {"custom_field": "updated", "new_field": "added"}
@@ -123,10 +128,10 @@ async def test_update_thread_merges_metadata_when_provided():
     )
 
     # Verify execute_query was called twice (once for SELECT, once for UPDATE)
-    assert data_layer.execute_query.call_count == 2
+    assert execute_query_mock.call_count == 2
 
     # Get the UPDATE call
-    update_call = data_layer.execute_query.call_args_list[1]
+    update_call = execute_query_mock.call_args_list[1]
     update_params = update_call[0][1]
 
     # The metadata should be merged
@@ -169,17 +174,18 @@ async def test_update_thread_deletes_keys_with_none_values():
         # For the UPDATE/INSERT, return None
         return None
 
-    data_layer.execute_query = AsyncMock(side_effect=mock_execute_query)
+    execute_query_mock = AsyncMock(side_effect=mock_execute_query)
+    cast(Any, data_layer).execute_query = execute_query_mock
 
     # Call update_thread with None value to delete a key
     new_metadata = {"to_delete": None, "new_field": "added"}
     await data_layer.update_thread(thread_id="test-thread-123", metadata=new_metadata)
 
     # Verify execute_query was called twice
-    assert data_layer.execute_query.call_count == 2
+    assert execute_query_mock.call_count == 2
 
     # Get the UPDATE call
-    update_call = data_layer.execute_query.call_args_list[1]
+    update_call = execute_query_mock.call_args_list[1]
     update_params = update_call[0][1]
 
     # The metadata should have deleted "to_delete" key and added "new_field"

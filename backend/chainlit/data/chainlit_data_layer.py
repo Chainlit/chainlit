@@ -1,10 +1,10 @@
 import json
 import uuid
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import aiofiles
-import asyncpg  # type: ignore
+import asyncpg
 
 from chainlit.data.base import BaseDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
@@ -25,12 +25,13 @@ from chainlit.user import PersistedUser, User
 
 # Import for runtime usage (isinstance checks)
 try:
-    from chainlit.data.storage_clients.gcs import GCSStorageClient
+    from chainlit.data.storage_clients.gcs import (
+        GCSStorageClient as RuntimeGCSStorageClient,
+    )
 except ImportError:
-    GCSStorageClient = None  # type: ignore[assignment,misc]
+    RuntimeGCSStorageClient = cast(Any, None)
 
 if TYPE_CHECKING:
-    from chainlit.data.storage_clients.gcs import GCSStorageClient
     from chainlit.element import Element, ElementDict
     from chainlit.step import StepDict
 
@@ -198,8 +199,8 @@ class ChainlitDataLayer(BaseDataLayer):
                 content_disposition = (
                     f'attachment; filename="{element.name}"'
                     if not (
-                        GCSStorageClient is not None
-                        and isinstance(self.storage_client, GCSStorageClient)
+                        RuntimeGCSStorageClient is not None
+                        and isinstance(self.storage_client, RuntimeGCSStorageClient)
                     )
                     else None
                 )

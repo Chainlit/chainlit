@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from contextlib import AsyncExitStack, asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, List, Optional, Union, cast
 
 import socketio
 from fastapi import (
@@ -64,6 +64,9 @@ from chainlit.types import (
     AskFileSpec,
     CallActionRequest,
     ConnectMCPRequest,
+    ConnectSseMCPRequest,
+    ConnectStdioMCPRequest,
+    ConnectStreamableHttpMCPRequest,
     DeleteFeedbackRequest,
     DeleteThreadRequest,
     DisconnectMCPRequest,
@@ -236,7 +239,7 @@ SOCKET_IO_PATH = f"{config.run.root_path}/ws/socket.io"
 app.mount(SOCKET_IO_PATH, asgi_app)
 
 app.add_middleware(
-    CORSMiddleware,
+    cast(Any, CORSMiddleware),
     allow_origins=config.project.allow_origins,
     allow_credentials=True,
     allow_methods=["*"],
@@ -256,7 +259,7 @@ class SafariWebSocketsCompatibleGZipMiddleware(GZipMiddleware):
             await super().__call__(scope, receive, send)
 
 
-app.add_middleware(SafariWebSocketsCompatibleGZipMiddleware)
+app.add_middleware(cast(Any, SafariWebSocketsCompatibleGZipMiddleware))
 
 # config.run.root_path is only set when started with --root-path. Not on submounts.
 router = APIRouter(prefix=config.run.root_path)
@@ -1355,7 +1358,7 @@ async def connect_mcp(
     # ── Validate config before launching the background task ──
     mcp_connection: McpConnection
 
-    if payload.clientType == "sse":
+    if isinstance(payload, ConnectSseMCPRequest):
         if not config.features.mcp.sse.enabled:
             raise HTTPException(
                 status_code=400,
@@ -1366,7 +1369,7 @@ async def connect_mcp(
             name=payload.name,
             headers=getattr(payload, "headers", None),
         )
-    elif payload.clientType == "stdio":
+    elif isinstance(payload, ConnectStdioMCPRequest):
         if not config.features.mcp.stdio.enabled:
             raise HTTPException(
                 status_code=400,
@@ -1376,7 +1379,7 @@ async def connect_mcp(
         mcp_connection = StdioMcpConnection(
             command=command, args=args, name=payload.name
         )
-    elif payload.clientType == "streamable-http":
+    elif isinstance(payload, ConnectStreamableHttpMCPRequest):
         if not config.features.mcp.streamable_http.enabled:
             raise HTTPException(
                 status_code=400,
@@ -1533,14 +1536,18 @@ async def connect_mcp(
                 "tools": [{"name": t.name} for t in tool_list.tools],
                 "clientType": payload.clientType,
                 "command": payload.fullCommand
-                if payload.clientType == "stdio"
+                if isinstance(payload, ConnectStdioMCPRequest)
                 else None,
-                "url": getattr(payload, "url", None)
-                if payload.clientType in ["sse", "streamable-http"]
+                "url": payload.url
+                if isinstance(
+                    payload, (ConnectSseMCPRequest, ConnectStreamableHttpMCPRequest)
+                )
                 else None,
                 # Include optional headers for SSE and streamable-http connections
                 "headers": getattr(payload, "headers", None)
-                if payload.clientType in ["sse", "streamable-http"]
+                if isinstance(
+                    payload, (ConnectSseMCPRequest, ConnectStreamableHttpMCPRequest)
+                )
                 else None,
             },
         }

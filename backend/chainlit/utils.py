@@ -4,7 +4,7 @@ import inspect
 import os
 from asyncio import CancelledError
 from datetime import datetime, timezone
-from typing import Callable
+from typing import Any, Callable, cast
 
 import click
 from fastapi import FastAPI, Request
@@ -168,6 +168,6 @@ def mount_chainlit(app: FastAPI, target: str, path="/chainlit"):
 
             return await call_next(request)
 
-    chainlit_app.add_middleware(ChainlitMiddleware)
+    chainlit_app.add_middleware(cast(Any, ChainlitMiddleware))
 
     app.mount(path, chainlit_app)

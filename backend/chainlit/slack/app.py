@@ -447,7 +447,9 @@ async def handle_reaction_added(event):
         )
 
         if result.get("ok"):
-            messages = result.get("messages")
+            messages = result.get("messages") or []
+            if not messages:
+                return
             message = messages[0]
             message_user = message.get("user")
             message_bot_id = message.get("bot_id")

@@ -1,7 +1,7 @@
 from typing import Any, Dict, Optional, Union
 
 from google.auth import default
-from google.cloud import storage  # type: ignore
+from google.cloud import storage
 from google.oauth2 import service_account
 
 from chainlit import make_async

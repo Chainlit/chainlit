@@ -36,17 +36,19 @@ class TestStdioMcpConnection:
     def test_stdio_connection_requires_name(self):
         """Test that StdioMcpConnection requires name."""
         with pytest.raises(ValidationError):
-            StdioMcpConnection(command="python", args=[])
+            StdioMcpConnection.model_validate({"command": "python", "args": []})
 
     def test_stdio_connection_requires_command(self):
         """Test that StdioMcpConnection requires command."""
         with pytest.raises(ValidationError):
-            StdioMcpConnection(name="test_server", args=[])
+            StdioMcpConnection.model_validate({"name": "test_server", "args": []})
 
     def test_stdio_connection_requires_args(self):
         """Test that StdioMcpConnection requires args."""
         with pytest.raises(ValidationError):
-            StdioMcpConnection(name="test_server", command="python")
+            StdioMcpConnection.model_validate(
+                {"name": "test_server", "command": "python"}
+            )
 
     def test_stdio_connection_client_type_is_literal(self):
         """Test that clientType is always 'stdio'."""
@@ -92,12 +94,12 @@ class TestSseMcpConnection:
     def test_sse_connection_requires_name(self):
         """Test that SseMcpConnection requires name."""
         with pytest.raises(ValidationError):
-            SseMcpConnection(url="https://example.com/mcp")
+            SseMcpConnection.model_validate({"url": "https://example.com/mcp"})
 
     def test_sse_connection_requires_url(self):
         """Test that SseMcpConnection requires url."""
         with pytest.raises(ValidationError):
-            SseMcpConnection(name="test_server")
+            SseMcpConnection.model_validate({"name": "test_server"})
 
     def test_sse_connection_client_type_is_literal(self):
         """Test that clientType is always 'sse'."""
@@ -149,12 +151,12 @@ class TestHttpMcpConnection:
     def test_http_connection_requires_name(self):
         """Test that HttpMcpConnection requires name."""
         with pytest.raises(ValidationError):
-            HttpMcpConnection(url="https://example.com/mcp")
+            HttpMcpConnection.model_validate({"url": "https://example.com/mcp"})
 
     def test_http_connection_requires_url(self):
         """Test that HttpMcpConnection requires url."""
         with pytest.raises(ValidationError):
-            HttpMcpConnection(name="test_server")
+            HttpMcpConnection.model_validate({"name": "test_server"})
 
     def test_http_connection_client_type_is_literal(self):
         """Test that clientType is always 'streamable-http'."""
@@ -404,6 +406,7 @@ class TestMcpConnectionEdgeCases:
             name="multi_header_server", url="https://api.example.com", headers=headers
         )
 
+        assert connection.headers is not None
         assert len(connection.headers) == 4
         assert connection.headers["Authorization"] == "Bearer token"
         assert connection.headers["X-API-Key"] == "key123"

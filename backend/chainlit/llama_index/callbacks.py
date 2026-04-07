@@ -151,7 +151,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
             if formatted_messages:
                 messages = [
                     GenerationMessage(
-                        role=m.role.value,  # type: ignore
+                        role=m.role.value,
                         content=m.content or "",
                     )
                     for m in formatted_messages
@@ -178,7 +178,7 @@ class LlamaIndexCallbackHandler(TokenCountingHandler):
                     model=model,
                     messages=messages,
                     message_completion=GenerationMessage(
-                        role=msg.role.value,  # type: ignore
+                        role=msg.role.value,
                         content=content,
                     ),
                     token_count=token_count,

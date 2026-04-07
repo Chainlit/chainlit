@@ -25,7 +25,6 @@ from chainlit.step import (
     Step,
     StepDict,
     StepType,
-    TrueStepType,
     check_add_step_in_cot,
     stub_step,
 )
@@ -54,8 +53,8 @@ _show_deprecation_warning()
 
 class LiteralToChainlitConverter:
     @classmethod
-    def steptype_to_steptype(cls, step_type: Optional[StepType]) -> TrueStepType:
-        return cast(TrueStepType, step_type or "undefined")
+    def steptype_to_steptype(cls, step_type: Optional[StepType]) -> StepType:
+        return step_type or "undefined"
 
     @classmethod
     def score_to_feedbackdict(
@@ -141,27 +140,86 @@ class LiteralToChainlitConverter:
     ) -> Element:
         metadata = attachment.metadata or {}
         element_type = metadata.get("type", "file")
-
-        element_class = {
-            "file": File,
-            "image": Image,
-            "audio": Audio,
-            "video": Video,
-            "text": Text,
-            "pdf": Pdf,
-        }.get(element_type, Element)
-
-        assert thread_id or attachment.thread_id
-
-        element = element_class(
-            name=attachment.name or "",
-            display=metadata.get("display", "side"),
-            language=metadata.get("language"),
-            size=metadata.get("size"),
-            url=attachment.url,
-            mime=attachment.mime,
-            thread_id=thread_id or attachment.thread_id,
+        size = metadata.get("size")
+        normalized_size = (
+            cast(Literal["small", "medium", "large"], size)
+            if size in {"small", "medium", "large"}
+            else None
         )
+        display = (
+            cast(Literal["inline", "side", "page"], metadata.get("display"))
+            if metadata.get("display") in {"inline", "side", "page"}
+            else "side"
+        )
+        language = metadata.get("language")
+        language_str = language if isinstance(language, str) else None
+        effective_thread_id = thread_id or attachment.thread_id
+        if not effective_thread_id:
+            raise ValueError("Attachment thread ID is required")
+
+        name = attachment.name or ""
+        url = attachment.url
+        mime = attachment.mime
+        if element_type == "image":
+            element = Image(
+                name=name,
+                display=display,
+                language=language_str,
+                url=url,
+                mime=mime,
+                thread_id=effective_thread_id,
+                size=normalized_size or "medium",
+            )
+        elif element_type == "audio":
+            element = Audio(
+                name=name,
+                display=display,
+                language=language_str,
+                url=url,
+                mime=mime,
+                thread_id=effective_thread_id,
+                size=normalized_size,
+            )
+        elif element_type == "video":
+            element = Video(
+                name=name,
+                display=display,
+                language=language_str,
+                url=url,
+                mime=mime,
+                thread_id=effective_thread_id,
+                size=normalized_size or "medium",
+            )
+        elif element_type == "text":
+            element = Text(
+                name=name,
+                display=display,
+                language=language_str,
+                url=url,
+                mime=mime,
+                thread_id=effective_thread_id,
+                size=normalized_size,
+            )
+        elif element_type == "pdf":
+            element = Pdf(
+                name=name,
+                display=display,
+                language=language_str,
+                url=url,
+                mime=mime or "application/pdf",
+                thread_id=effective_thread_id,
+                size=normalized_size,
+            )
+        else:
+            element = File(
+                name=name,
+                display=display,
+                language=language_str,
+                url=url,
+                mime=mime,
+                thread_id=effective_thread_id,
+                size=normalized_size,
+            )
         element.id = attachment.id or ""
         element.for_id = attachment.step_id
         element.object_key = attachment.object_key

@@ -63,7 +63,7 @@ Chainlit is a Python framework for building production-ready conversational AI a
 
 | | Command | Directory |
 |---|---|---|
-| Python (mypy) | `uv run dmypy run -- chainlit/ tests/` | `backend/` |
+| Python (ty) | `uv run ty check chainlit tests` | `backend/` |
 | TypeScript | `tsc --noemit` | `frontend/` |
 
 Run `pnpm run lint` before committing — CI enforces this.
@@ -95,7 +95,7 @@ Examples:
 | **Backend** | Python 3.13, FastAPI, Starlette, Uvicorn, python-socketio, Pydantic 2, PyJWT, httpx |
 | **LLM integrations** | MCP, LangChain, LlamaIndex, OpenAI SDK, Semantic Kernel, MistralAI |
 | **Infra / persistence** | SQLAlchemy (PostgreSQL/SQLite), DynamoDB + S3 (boto3), Azure Blob / Data Lake, Google Cloud Storage, LiteralAI |
-| **DX** | Husky (pre-commit), ESLint, Prettier, ruff, mypy (dmypy), pytest, Cypress |
+| **DX** | Husky (pre-commit), ESLint, Prettier, ruff, ty, pytest, Cypress |
 
 ## Architecture
 

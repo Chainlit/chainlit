@@ -1,5 +1,5 @@
 import asyncio
-from typing import Union
+from typing import Any, Union, cast
 
 from literalai import ChatGeneration, CompletionGeneration
 
@@ -42,12 +42,12 @@ def instrument_openai():
         )
 
         if isinstance(generation, ChatGeneration):
-            step.input = generation.messages  # type: ignore
-            step.output = generation.message_completion  # type: ignore
+            step.input = generation.messages
+            step.output = generation.message_completion
         else:
-            step.input = generation.prompt  # type: ignore
-            step.output = generation.completion  # type: ignore
+            step.input = generation.prompt
+            step.output = generation.completion
 
         asyncio.create_task(step.send())
 
-    instrument_openai(None, on_new_generation)
+    instrument_openai(cast(Any, None), on_new_generation)

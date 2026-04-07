@@ -207,21 +207,24 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
 @sio.on("connection_successful")  # pyright: ignore [reportOptionalCall]
 async def connection_successful(sid):
     context = init_ws_context(sid)
+    session = context.session
+    if not isinstance(session, WebsocketSession):
+        return
 
     await context.emitter.task_end()
     await context.emitter.clear("clear_ask")
     await context.emitter.clear("clear_call_fn")
 
-    if context.session.restored and not context.session.has_first_interaction:
+    if session.restored and not session.has_first_interaction:
         if config.code.on_chat_start:
             task = asyncio.create_task(config.code.on_chat_start())
-            context.session.current_task = task
+            session.current_task = task
         return
 
-    if context.session.thread_id_to_resume and config.code.on_chat_resume:
-        thread = await resume_thread(context.session)
+    if session.thread_id_to_resume and config.code.on_chat_resume:
+        thread = await resume_thread(session)
         if thread:
-            context.session.has_first_interaction = True
+            session.has_first_interaction = True
             await context.emitter.emit(
                 "first_interaction",
                 {"interaction": "resume", "thread_id": thread.get("id")},
@@ -430,7 +433,7 @@ async def audio_start(sid):
     session = WebsocketSession.require(sid)
 
     context = init_ws_context(session)
-    config: ChainlitConfig = session.get_config()  # type: ignore
+    config: ChainlitConfig = session.get_config()
 
     if config.features.audio and config.features.audio.enabled:
         connected = bool(await config.code.on_audio_start())
@@ -468,7 +471,7 @@ async def audio_end(sid):
             session.has_first_interaction = True
             asyncio.create_task(context.emitter.init_thread("audio"))
 
-        config: ChainlitConfig = session.get_config()  # type: ignore
+        config: ChainlitConfig = session.get_config()
 
         if config.features.audio and config.features.audio.enabled:
             await config.code.on_audio_end()

@@ -100,12 +100,14 @@ class PaginatedResponse(Generic[T]):
     data: List[T]
 
     def to_dict(self):
+        serialized_data: list[Any] = []
+        for item in self.data:
+            to_dict = getattr(item, "to_dict", None)
+            serialized_data.append(to_dict() if callable(to_dict) else item)
+
         return {
             "pageInfo": self.pageInfo.to_dict(),
-            "data": [
-                (d.to_dict() if hasattr(d, "to_dict") and callable(d.to_dict) else d)
-                for d in self.data
-            ],
+            "data": serialized_data,
         }
 
     @classmethod
