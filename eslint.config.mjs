@@ -1,14 +1,16 @@
+import { includeIgnoreFile } from '@eslint/compat';
 import eslint from '@eslint/js';
 import chaiFriendly from 'eslint-plugin-chai-friendly';
 import cypressPlugin from 'eslint-plugin-cypress';
 import { defineConfig } from 'eslint/config';
 import globals from 'globals';
+import { fileURLToPath } from 'node:url';
 import tseslint from 'typescript-eslint';
 
+const gitignorePath = fileURLToPath(new URL('.gitignore', import.meta.url));
+
 export default defineConfig([
-  {
-    ignores: ['**/node_modules/', '**/dist/', '**/*.jsx']
-  },
+  includeIgnoreFile(gitignorePath),
 
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
@@ -30,6 +32,13 @@ export default defineConfig([
           ignoreRestSiblings: true
         }
       ]
+    }
+  },
+
+  {
+    files: ['*.config.{js,mjs,cjs,ts}', 'scripts/**/*.{js,mjs,cjs}'],
+    languageOptions: {
+      globals: globals.node
     }
   },
 
