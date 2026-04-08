@@ -156,10 +156,10 @@
     "thread": {
       "untitled": "Unbenannter Thread",
       "menu": {
-          "rename": "Umbenennen",
-          "share": "Teilen",
-          "delete": "Löschen"
-        },
+        "rename": "Umbenennen",
+        "share": "Teilen",
+        "delete": "Löschen"
+      },
       "actions": {
         "share": {
           "title": "Thread löschen bestätigen",

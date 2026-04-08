@@ -52,6 +52,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.10.0] - 2026-03-05
 
 ### Added
+
 - Add starter categories for grouped starters
 - Always show the favorite messages button with an empty state
 - Add option to disable rendering markdown in user messages
@@ -68,6 +69,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Make avatar size configurable via `config.toml`
 
 ### Fixed
+
 - Reorder chat history sidebar after messages in existing chats
 - Use login error detail for credential failures
 - Convert UUID fields to strings in feedback extraction
@@ -80,39 +82,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.9.6] - 2026-01-20
 
 ### Added
+
 - Allow skip new chat creation
 - Add data picker input widget
 - Toggle chat settings in sidebar instead of composer
 
 ### Fixed
+
 - Fix: Starters now correctly use the selected/default mode if configured
 
 ## [2.9.5] - 2026-01-08
 
 ### Added
+
 - Add favorite messages (prompt templates)
 
 ### Fixed
+
 - Fix: Starters now correctly use the selected/default mode if configured
 
 ## [2.9.4] - 2025-12-24
 
 ### Added
+
 - Add an icon for shared thread
 - New option to allow disabling auto scroll of assistant messages
 - Add modes: you may allow users to select an LLM model, a mode (for example, planning), allow to enable reasoning etc.
   - Breaking change: you need to run `ALTER TABLE steps ADD COLUMN IF NOT EXISTS modes JSONB;` for migration
 
 ### Fixed
+
 - Fix tiny avatar for long messages
 - Security vulnerability in Chainlit: added missed sanitization to custom elements update endpoint
 
 ### Changed
+
 - Bumped watchfiles version
 
 ## [2.9.3] - 2025-12-04
 
 ### Added
+
 - Add tests for oauth providers and messages
 - Merge metadata in chainlit data layer
 - Add native video support in markdown rendering
@@ -122,6 +132,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Improve icon name formatting issues
 
 ### Fixed
+
 - Fixed page blinking issue with header_auth
 - Set environ when restoring websocket session
 - Move hello.py to avoid import issues
@@ -131,74 +142,84 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.9.2] - 2025-11-22
 
 ### Added
+
 - Add tests for socket, chat context, cache, translations & oauth providers
 
 ### Fixed
+
 - Fix copilot breaking change introduced in 2.8.5
 
 ## [2.9.1] - 2025-11-20
 
 ### Added
+
 - Add support for tabs in chat settings
 - Support markdown in watermark
 - Add italian translation to translations folder
 - Add query param prefill for chat
 - Add tests for utils, markdown, sidebar, chat settings, mcp, input widget, langchain, elements, steps, and actions
 
-
 ## [2.9.0] - 2025-11-06
 
 ### Added
+
 - Add better support for Multi-Agent implementations
   - Nested steps are now step.input -> child step -> step.output
   - Improved formatting and styling of Tasklist
 
-
 ## [2.8.5] - 2025-11-07
 
 ### Added
+
 - Add display_name to ChatProfile
 - Add slack reaction event callback
 - Add raw response from OAuth providers
 
 ### Fixed
+
 - Security vulnerability in Chainlint: added missed ACL check for session initialization
 
 ### Changed
+
 - Remove FastAPI version restrictions
 
 ## [2.8.4] - 2025-10-29
 
 ### Added
+
 - Add support for GitHub Enterprise OAuth provider
 - Explicit disable on input widgets
 
-
 ### Fixed
+
 - Tasklist tasks are now properly reconnected to their steps/messages
 - ci: fix pnpm publish checks
 - fix: missing / in url with base path when connecting Streamable HTTP MCP
 - fix - persist custom_elements to data layer without cloud storage
 - fix: propagate IME composition events in AutoResizeTextarea
 - fix: confirm when enter
-- Fix(translation): correct French translation of chat watermark 
+- Fix(translation): correct French translation of chat watermark
 - fix(ui): add fallback logo if custom logo is missing
 
 ## [2.8.3] - 2025-10-06
 
 ### Added
+
 - Support for the `target` attribute in header links, which can be configured through the configuration options
 
 ### Changed
+
 - `@chainlit/react-client` automatic publishing
 
 ## [2.8.2] - 2025-10-01
 
 ### Changed
+
 - Remove autofocus in mobile message composer
 - Improve error handling in sqlalchemy data layer `get_read_url()`
 
 ### Fixed
+
 - Fix voice hotkey (P) triggering when typing in chat input
 - Properly finalize data layers
 - Fix `on_chat_start` not always firing
@@ -206,19 +227,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.8.1] - 2025-09-24
 
 ### Added
+
 - Add German and Korean translations
 - Add support for custom_meta_url in config.toml
 
 ### Changed
+
 - `cl.on_thread_share_view` will allow shared thread viewing if it returns `True` to enable custom/admin viewing.
 
 ### Fixed
+
 - Removed redundant message sending in Slack when images are present.
 - Generate signed url when loading elements using SQLAlchemy data layer.
 
 ## [2.8.0] - 2025-09-12
 
 ### Added
+
 - Add ability to share threads. See documentation for how to enable it.
   - https://docs.chainlit.io/api-reference/lifecycle-hooks/on-shared-thread-view
 - Add new chat settings: multi-select, radio-group, and checkbox
@@ -227,9 +252,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Allow sending commands from custom elements
 
 ### Changed
+
 - Reordered message composer elements
 
 ### Fixed
+
 - Default to plaintext code blocks for unsupported languages like CSV
 - Sort threads by updated_at field
 - Replace hardcoded strings with translation keys
@@ -241,6 +268,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.7.2] - 2025-08-26
 
 ### Added
+
 - Added LiteralAI data layer deprecation warning
 - Added context to `@cl.on_feedback` callback
 - Added Traditional Chinese (Taiwan) translations
@@ -250,6 +278,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added CODEOWNERS
 
 ### Fixed
+
 - Improved dynamic config overrides for chat profiles
 - Import GCSStorageClient only when needed to avoid requiring optional dependencies
 - Updated CONTRIBUTING.md for `uv` usage
@@ -265,6 +294,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.7.0] - 2025-08-20
 
 ### Added
+
 - New ChatGPT-style command selection and improve message input handling
 - Added the ability to override certain config.toml settings for Chat Profiles, so some profiles can have MCP and some can't for example. [Documentation Updated](https://docs.chainlit.io/api-reference/chat-profiles#dynamic-configuration).
   - You must now explicity enable audio and MCP as these are no longer inferred by the presence of `on_audio_start` or `on_mcp_connect` callbacks
@@ -276,6 +306,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Migrated from poetry to uv
 
 ### Fixed
+
 - Changed thread sorting to use updated time instead of creation time
 - Add missing headers when connecting Streamable HTTP MCP
 - Remove undocumented `CHAINLIT_CUSTOM_AUTH` environment variable used in Copilot
@@ -283,11 +314,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.6.9] - 2025-08-14
 
 ### Added
+
 - Add GitHub Copilot instructions for automated PRs
 - (Slack) Add threadId for user feedback
 - (Copilot) Add new optional opened property has been added to the widget config
 
 ### Fixed
+
 - Fix blinking cursor indicator
 - (Copilot) Rename copilot inner div id `chainlit-copilot` to `chainlit-copilot-chat` due to naming conflict with the outer div
 - Disable gzip for websocket-relaed http endpoint (Safari compatibility)
@@ -303,11 +336,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.6.7] - 2025-08-07
 
 ### Fixed
+
 - Formatting when pasting HTML code and newlines in received messages
 
 ## [2.6.6] - 2025-08-05
 
 ### Added
+
 - Add support for emoji reaction on message received in Slack
 - Add Greek translation
 - Copy both plain text and rich text to clipboard, if available (rich text pasting to editors like Word)
@@ -315,12 +350,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Add language parameter to Copilot widget configuration
 
 ### Fixed
+
 - Prevent HTML code in user message to be rendered as HTML instead of displaying as code
 - Properly parse `user_env` when `config.project.user_env` is empty
 
 ## [2.6.5] - 2025-08-02
 
 ### Fixed
+
 - Properly escape HTML on paste
 - Enable gzip compression for frontend
 - Address security vulnerabilities in dependencies by upgrading them to the closest safe versions
@@ -329,22 +366,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2.6.4] - 2025-08-01
 
 ### Added
+
 - Add streamable HTTP MCP support
 - Improve e2e test stability and performance
 - Add configuration for expanded copilot mode
 - Add French translation
 
 ### Fixed
+
 - Fix inputs/outputs for langchain callbacks
 - Fix blinking indicator for in-progress steps
 - Avoid unnecessary logo fetching when supplied in config.toml
 
 ### Other
+
 - Bump dependencies
 
 ## [2.6.3] - 2025-07-25
 
 ### Added
+
 - Ability to send empty commands
 - Wider element view in copilot and improved styling
 - Support signed urls for elements using dynamoDB persistence
@@ -352,15 +393,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added `CHAINLIT_COOKIE_PATH` environment variable to set the cookie path
 
 ### Fixed
+
 - Message inputs formatting
 - Language pattern to allow `tzm-Latn-DZ`
 - Properly encode parentheses in markdown links
 - Fix chainlit data layer metadata upserts
 - Improve database connection handling
-- Fixed cookie path 
+- Fixed cookie path
 - Improve lanchain callbacks
 
 ### Other
+
 - Improve robustness of E2E tests
 - Removed watermark "Built with Chainlit"
 
@@ -371,10 +414,12 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 ## [2.6.1] - 2025-07-15
 
 ### Added
+
 - New `on_feedback` callback
 - Relaxed restriction on number of starters (now more than 4 can be displayed)
 
 ### Fixed
+
 - Command persistence when `"button": True` is missing from command definition
 - `openai` and `mistralai` sub-modules fail due to incorrect `timestamp_utc` import
 - Temporarily reverted fix caused the following issues with Chainlit data layer:
@@ -384,12 +429,14 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - Portals (popups, dialogs, etc.) now render correctly inside Copilot's shadow DOM
 
 ### Other
+
 - Removed telemetry
 - Updated versions for Node.js, Poetry, and pnpm; added Corepack support
 
 ## [2.6.0] - 2025-07-01
 
 ### Added
+
 - Add commands to starters
 - Collapse command buttons to icons for small screens
 - Add timegated custom elements
@@ -402,6 +449,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - Add python 3.13 support
 
 ### Fixed
+
 - Fix chat input double-spacing issue
 - Resolve python deprecation warning for utc_now() and logger.warn
 - Fixed an issue where the portal for the ChatProfiles selector was being rendered outside the Copilot shadow DOM
@@ -411,6 +459,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - Only update thread metadata when not empty
 
 ### Breaking
+
 - **LiteralAI** is being sunset and will be removed in one of the next releases. Please migrate to the official data layer instead.
 - Telemetry is now opt-in by default and will be removed in the next release.
 
@@ -428,7 +477,6 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - CopilotFunction is now usable in custom JS
 - Header link now have an optional `display_name` to display text next to the icon
 - The default .env file loaded by chainlit is now configurable with `CHAINLIT_ENV_FILE`
-
 
 ### Changed
 
@@ -542,6 +590,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - `default_open` parameter to the step decorator/class
 
 ### Fixed
+
 - Input should not replace <,>,&
 - Starters should be disabled if no ws connection
 - Prevent orphaned thread record when deleting active conversation
@@ -561,6 +610,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 ## [2.1.2] - 2025-02-05
 
 ### Fixed
+
 - The default loader should now be displayed if the chat is running and no response is yet sent
 - Pasting HTML in the chat input show now work
 - React warnings and accessibility issues
@@ -590,7 +640,6 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 
 - Mounting Chainlit as a sub app should no longer break the parent's app endpoints
 - Pasting text in the chat input should now remove extra formatting and preserve new lines
-
 
 ## [2.0.603] - 2025-01-28
 
@@ -622,6 +671,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - The element sidebar is now controllable from the python code
 
 ### Fixed
+
 - The auth cookie no longer has a maximal size
 - Pasting text in the chat input should now work
 - Long text in AskAction buttons are now gracefully displayed
@@ -642,13 +692,14 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 ## [2.0.4] - 2025-01-17
 
 ### Added
+
 - Overhaul element reference link styling
 - Japanese translations
 - Improved Chinese translations
 - Translations for feedback buttons
 
-
 ### Fixed
+
 - Cookie max age should now correctly use the config `user_session_timeout` field
 - Thread grouping in the chat history should now correctly handle timezones
 - File from `AskFileMessage` should now share ID with the data layer
@@ -663,6 +714,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - Translation for the copy button
 
 ### Fixed
+
 - The official data layer should not overwrite elements anymore
 - A bug where resuming a thread would not load the thread
 - Prevent authentication before the app is fully loaded
@@ -676,6 +728,7 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - `http_cookie` is now available in the user session and websocket session
 
 ### Fixed
+
 - Chat profile description on the welcome screen now supports custom html and latex
 - Thread history batch size has been increased to 35 to ensure scroll on a taller screens
 - Chat settings modal should now scroll if too tall
@@ -688,9 +741,11 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 ## [2.0.1] - 2025-01-09
 
 ### Added
+
 - `window.toggleChainlitCopilot()` to toggle the copilot
 
 ### Fixed
+
 - Chat profiles icon and description should now be displayed on the welcome screen
 - Action should be able to trigger the first interaction
 - Raw code blocks should now be displayed correctly
@@ -698,15 +753,16 @@ Technical release due to missed `frontend` and `copilot` folders in previous one
 - Upload attachement button should not be displayed when upload is disabled
 - Removed unused numpy dependency
 
-
 ## [2.0.0] - 2025-01-06
 
 The Chainlit UI (including the copilot) has been completely re-written with Shadcn/Tailwind. This brings several advantages:
+
 1. The codebase is simpler and more contribution friendly.
 2. It enabled the new custom element feature.
 3. The theme customisation is more powerful.
 
 ### Added
+
 - Custom Elements (code your own elements)
 - `Cmd+k` thread search
 - Thread rename
@@ -714,6 +770,7 @@ The Chainlit UI (including the copilot) has been completely re-written with Shad
 - New `@data_layer` decorator for configuring custom data layers declaratively
 
 ### Changed
+
 - Authentication is now based on cookies. Cross Origins are disallowed unless added in `allow_origins` in the `config.toml` file
 - No longer need to click on `resume` to resume a thread
 - **[breaking]**: Theme customisation is now handled in `public/theme.json` instead of `config.toml`.
@@ -736,26 +793,32 @@ The Chainlit UI (including the copilot) has been completely re-written with Shad
 Pre-release: developer preview.
 
 ### Added
+
 - New `@data_layer` decorator for configuring custom data layers declaratively
 - Unit tests for `get_data_layer()` and `@data_layer` functionality
 
 ### Changed
+
 - Data layer configuration system now prioritizes `@data_layer` decorator over environment variables
 - Data layer initialization is now more explicit and testable through the decorator pattern
 - Updated example code in `/cypress/e2e/custom_data_layer` and `/cypress/e2e/data_layer` to use the new decorator
 
 ### Developer Experience
+
 - Improved test infrastructure with new fixtures for data layer mocking
 - Added comprehensive tests for data layer configuration scenarios
 
 ## [1.3.2] - 2024-11-08
 
 ### Security Advisory
+
 **IMPORTANT**:
+
 - This release drops support for FastAPI versions before 0.115.3 and Starlette versions before 0.41.2 due to a severe security vulnerability (CVE-2024-47874). We strongly encourage all downstream dependencies to upgrade as well.
 - This release still contains a known security vulnerability in the element feature that could allow unauthorized file access. We strongly recommend against using elements in production environments until a comprehensive fix is implemented in an upcoming release.
 
 ### Security
+
 - **[breaking]** Updated dependencies to address critical issues (#1493):
   - Upgraded fastapi to 0.115.3 to address CVE-2024-47874 in Starlette
   - Upgraded starlette to 0.41.2 (required for security fix)
@@ -765,15 +828,19 @@ Note: This is a breaking change as older FastAPI versions are no longer supporte
 To prioritize security, we opted to break with semver on this particular occasion.
 
 ### Fixed
+
 - Resolved incorrect message ordering in UI (#1501)
 
 ## [2.0rc0] - 2024-11-08
 
 ### Security Advisory
+
 **IMPORTANT**:
+
 - The element feature currently contains a known security vulnerability that could allow unauthorized file access. We strongly recommend against using elements in production environments until a comprehensive fix is implemented in an upcoming release.
 
 ### Changed
+
 - **[breaking]**: Completely revamped audio implementation (#1401, #1410):
   - Replaced `AudioChunk` with `InputAudioChunk` and `OutputAudioChunk`
   - Changed default audio sampling rate from 44100 to 24000
@@ -782,6 +849,7 @@ To prioritize security, we opted to break with semver on this particular occasio
 - Factored storage clients into separate modules (#1363)
 
 ### Added
+
 - Realtime audio streaming and processing (#1401, #1406, #1410):
   - New `AudioPresence` component for visual representation
   - Implemented `WavRecorder` and `WavStreamPlayer` classes
@@ -795,6 +863,7 @@ To prioritize security, we opted to break with semver on this particular occasio
 - Allow empty chat input when submitting attachments (#1261)
 
 ### Fixes
+
 - Various backend fixes and cleanup (#1432):
   - Use importlib.util.find_spec to check if a package is installed
   - Use `raise... from` to wrap exceptions
@@ -802,6 +871,7 @@ To prioritize security, we opted to break with semver on this particular occasio
   - Several minor fixups/cleanup
 
 ### Development
+
 - Implemented ruff for linting and formatting (#1495)
 - Added mypy daemon for faster type-checking (#1495)
 - Added GitHub Actions linting (#1445)
@@ -836,7 +906,7 @@ To prioritize security, we opted to break with semver on this particular occasio
 - SQLite support in SQLAlchemy integration (#1319)
 - Support for IETF BCP 47 language tags, enabling localized languages like es-419 (#1399)
 - Environment variables `OAUTH_<PROVIDER>_PROMPT` and `OAUTH_PROMPT` to
-override oauth prompt parameter. Enabling users to explicitly enable login/consent prompts for oauth, e.g. `OAUTH_PROMPT=consent` to prevent automatic re-login. (#1362, #1456).
+  override oauth prompt parameter. Enabling users to explicitly enable login/consent prompts for oauth, e.g. `OAUTH_PROMPT=consent` to prevent automatic re-login. (#1362, #1456).
 - Added `get_element()` method to SQLAlchemyDataLayer (#1346)
 
 ### Changed

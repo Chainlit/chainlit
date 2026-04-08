@@ -21,50 +21,50 @@ Chainlit is a Python framework for building production-ready conversational AI a
 
 ### Install
 
-| | Command | Directory |
-|---|---|---|
+|          | Command                | Directory  |
+| -------- | ---------------------- | ---------- |
 | Backend  | `uv sync --all-extras` | `backend/` |
-| Frontend | `pnpm install` | repo root |
+| Frontend | `pnpm install`         | repo root  |
 
 ### Build
 
-| | Command | Directory | What it does |
-|---|---|---|---|
-| Backend | `uv build` | `backend/` | Build Python package — runs `pnpm buildUi`, then copies assets into `backend/chainlit/frontend/dist/` and `backend/chainlit/copilot/dist/` |
-| Frontend | `pnpm run buildUi` | repo root | Build libs + frontend JS assets |
-| Frontend (libs only) | `pnpm run build:libs` | repo root | Build only `react-client` and `copilot` libs |
+|                      | Command               | Directory  | What it does                                                                                                                               |
+| -------------------- | --------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Backend              | `uv build`            | `backend/` | Build Python package — runs `pnpm buildUi`, then copies assets into `backend/chainlit/frontend/dist/` and `backend/chainlit/copilot/dist/` |
+| Frontend             | `pnpm run buildUi`    | repo root  | Build libs + frontend JS assets                                                                                                            |
+| Frontend (libs only) | `pnpm run build:libs` | repo root  | Build only `react-client` and `copilot` libs                                                                                               |
 
 ### Dev servers
 
-| | Command | Directory | URL |
-|---|---|---|---|
-| Backend | `uv run chainlit run chainlit/sample/hello.py -h` | `backend/` | http://localhost:8000 |
-| Frontend | `pnpm run dev` | `frontend/` | http://localhost:5173 (proxies to :8000) |
+|          | Command                                           | Directory   | URL                                      |
+| -------- | ------------------------------------------------- | ----------- | ---------------------------------------- |
+| Backend  | `uv run chainlit run chainlit/sample/hello.py -h` | `backend/`  | http://localhost:8000                    |
+| Frontend | `pnpm run dev`                                    | `frontend/` | http://localhost:5173 (proxies to :8000) |
 
 ### Tests
 
-| | Command | Directory |
-|---|---|---|
-| Backend (all) | `uv run pytest --cov=chainlit/` | `backend/` |
-| Backend (single file) | `uv run pytest tests/test_file.py` | `backend/` |
-| Frontend unit | `pnpm test` | `frontend/` |
-| E2E (Cypress) | `pnpm test` | repo root |
+|                       | Command                            | Directory   |
+| --------------------- | ---------------------------------- | ----------- |
+| Backend (all)         | `uv run pytest --cov=chainlit/`    | `backend/`  |
+| Backend (single file) | `uv run pytest tests/test_file.py` | `backend/`  |
+| Frontend unit         | `pnpm test`                        | `frontend/` |
+| E2E (Cypress)         | `pnpm test`                        | repo root   |
 
 ### Lint & Format
 
-| | Command | Directory |
-|---|---|---|
-| Lint all | `pnpm run lint` | repo root |
-| Lint frontend only | `pnpm run lintUi` | repo root |
-| Format Python | `uv run ruff format chainlit/ tests/` | `backend/` |
-| Format JS/TS | `pnpm run formatUi` | repo root |
+|                    | Command                               | Directory  |
+| ------------------ | ------------------------------------- | ---------- |
+| Lint all           | `pnpm run lint`                       | repo root  |
+| Lint frontend only | `pnpm run lintUi`                     | repo root  |
+| Format Python      | `uv run ruff format chainlit/ tests/` | `backend/` |
+| Format JS/TS       | `pnpm run formatUi`                   | repo root  |
 
 ### Type checking
 
-| | Command | Directory |
-|---|---|---|
-| Python (mypy) | `uv run dmypy run -- chainlit/ tests/` | `backend/` |
-| TypeScript | `tsc --noemit` | `frontend/` |
+|               | Command                                | Directory   |
+| ------------- | -------------------------------------- | ----------- |
+| Python (mypy) | `uv run dmypy run -- chainlit/ tests/` | `backend/`  |
+| TypeScript    | `tsc --noemit`                         | `frontend/` |
 
 Run `pnpm run lint` before committing — CI enforces this.
 
@@ -81,21 +81,22 @@ Co-Authored-By: <Agent Name> <agent-email-or-noreply>
 ```
 
 Examples:
+
 - `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>`
 - `Co-Authored-By: GitHub Copilot <noreply@github.com>`
 - `Co-Authored-By: Gemini CLI <noreply@google.com>`
 
 ## Tech Stack
 
-| Layer | Stack |
-|---|---|
-| **Frontend** | React 18, TypeScript 5.2, Vite 5, Tailwind CSS 3, Vitest, Zod 3 |
-| **Frontend (state & routing)** | Recoil, React Router 6, react-hook-form, socket.io-client, SWR |
-| **Frontend (rendering)** | react-markdown + remark-gfm/math + rehype-katex/raw, highlight.js, lucide-react (icons), Radix UI (primitives), Plotly.js |
-| **Backend** | Python 3.13, FastAPI, Starlette, Uvicorn, python-socketio, Pydantic 2, PyJWT, httpx |
-| **LLM integrations** | MCP, LangChain, LlamaIndex, OpenAI SDK, Semantic Kernel, MistralAI |
-| **Infra / persistence** | SQLAlchemy (PostgreSQL/SQLite), DynamoDB + S3 (boto3), Azure Blob / Data Lake, Google Cloud Storage, LiteralAI |
-| **DX** | Husky (pre-commit), ESLint, Prettier, ruff, mypy (dmypy), pytest, Cypress |
+| Layer                          | Stack                                                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**                   | React 18, TypeScript 5.2, Vite 5, Tailwind CSS 3, Vitest, Zod 3                                                           |
+| **Frontend (state & routing)** | Recoil, React Router 6, react-hook-form, socket.io-client, SWR                                                            |
+| **Frontend (rendering)**       | react-markdown + remark-gfm/math + rehype-katex/raw, highlight.js, lucide-react (icons), Radix UI (primitives), Plotly.js |
+| **Backend**                    | Python 3.13, FastAPI, Starlette, Uvicorn, python-socketio, Pydantic 2, PyJWT, httpx                                       |
+| **LLM integrations**           | MCP, LangChain, LlamaIndex, OpenAI SDK, Semantic Kernel, MistralAI                                                        |
+| **Infra / persistence**        | SQLAlchemy (PostgreSQL/SQLite), DynamoDB + S3 (boto3), Azure Blob / Data Lake, Google Cloud Storage, LiteralAI            |
+| **DX**                         | Husky (pre-commit), ESLint, Prettier, ruff, mypy (dmypy), pytest, Cypress                                                 |
 
 ## Architecture
 
@@ -117,6 +118,7 @@ The pnpm workspace includes `frontend/`, `libs/react-client/`, and `libs/copilot
 **Entry point for user apps**: `__init__.py` re-exports all public API decorators and classes.
 
 **Key files:**
+
 - `server.py` — FastAPI app, all REST routes (auth, elements, threads, file upload), serves the built frontend SPA, mounts the SocketIO app
 - `socket.py` — SocketIO event handlers for real-time WebSocket communication (connect, message, audio, etc.)
 - `callbacks.py` — Decorator functions registered via `@cl.on_message`, `@cl.on_chat_start`, `@cl.on_audio_chunk`, etc. These store functions on `config.code.*`

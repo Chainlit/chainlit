@@ -20,13 +20,13 @@ jobs:
         uses: astral-sh/ruff-action@v1
         with:
           src: ${{ env.BACKEND_DIR }}
-          changed-files: "true"
+          changed-files: 'true'
       - name: Check formatting with ruff
         uses: astral-sh/ruff-action@v1
         with:
           src: ${{ env.BACKEND_DIR }}
-          changed-files: "true"
-          args: "format --check"
+          changed-files: 'true'
+          args: 'format --check'
       - name: Run Mypy
         run: uv run --no-project mypy chainlit/ tests/
         working-directory: ${{ env.BACKEND_DIR }}

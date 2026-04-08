@@ -1,4 +1,4 @@
-name: "Copilot Setup Steps"
+name: 'Copilot Setup Steps'
 
 # Automatically run the setup steps when they are changed to allow for easy validation, and
 # allow manual testing through the repository's "Actions" tab
@@ -36,10 +36,10 @@ jobs:
       - name: Install Python, uv and dependencies
         uses: ./.github/actions/uv-python-install
         with:
-          python-version: "3.10"
-          uv-version: "latest"
-          working-directory: "./backend"
-          extra-dependencies: "--extra tests --extra mypy --extra dev --extra custom-data"
+          python-version: '3.10'
+          uv-version: 'latest'
+          working-directory: './backend'
+          extra-dependencies: '--extra tests --extra mypy --extra dev --extra custom-data'
 
       - name: Build UI components
         run: pnpm run buildUi
