@@ -33,14 +33,7 @@ Always reference these instructions first and fallback to search or bash command
    # NOTE: Cypress download may fail due to network restrictions - this is expected in CI environments
    ```
 
-2. **Build the Frontend - takes ~1 minute, NEVER CANCEL**:
-
-   ```bash
-   pnpm run buildUi
-   # Timeout: Use 300+ seconds (5+ minutes)
-   ```
-
-3. **Run Tests**:
+2. **Run Tests**:
 
    ```bash
    # Backend tests - takes ~17 seconds, NEVER CANCEL
@@ -55,10 +48,10 @@ Always reference these instructions first and fallback to search or bash command
    # Timeout: Use 60 seconds
 
    # E2E tests require Cypress download - may not work in restricted environments
-   # If available: pnpm test (takes variable time depending on tests)
+   # If available: pnpm test:e2e (takes variable time depending on tests)
    ```
 
-4. **Run Development Servers**:
+3. **Run Development Servers**:
 
    ```bash
    # Start backend (in one terminal)
@@ -85,25 +78,28 @@ Always reference these instructions first and fallback to search or bash command
 ### Linting and Formatting - takes ~2 minutes, NEVER CANCEL
 
 ```bash
-# Run all linting (UI + Python)
-pnpm run lint
+# Lint (check)
+pnpm lint
 # Timeout: Use 300+ seconds (5+ minutes)
 
-# Format UI code - takes ~5 seconds
-pnpm run formatUi
+# Lint (auto-fix)
+pnpm lint:fix
 
-# Format Python code using ruff (preferred)
-cd backend
-export PATH="$HOME/.local/bin:$PATH"
-uv run ruff format chainlit/ tests/
+# Check formatting
+pnpm format-check
 
-# NOTE: pnpm run formatPython may fail if black is not installed
-# Use ruff format instead as shown above
+# Fix formatting
+pnpm format
+
+# Python (scripts/ wrappers around ruff and mypy)
+uv run scripts/lint.py
+uv run scripts/format.py
+uv run scripts/format.py --check
 ```
 
 ### CI Requirements
 
-- **ALWAYS** run `pnpm run lint` before committing or the CI (.github/workflows/ci.yaml) will fail.
+- **ALWAYS** run `pnpm lint` and `pnpm format-check` before committing or the CI (.github/workflows/ci.yaml) will fail.
 - The CI runs: pytest, lint-backend, lint-ui, and e2e-tests.
 - **NEVER CANCEL** any CI commands - they take time but must complete.
 
@@ -163,11 +159,12 @@ uv run chainlit run app.py -w
 
 - **pnpm install**: ~3 minutes (may fail on Cypress - this is normal)
 - **uv install**: ~2 minutes
-- **pnpm run buildUi**: ~1 minute
+- **pnpm build**: ~1 minute
 - **pnpm run lint**: ~2 minutes
 - **Backend tests**: ~17 seconds
 - **Frontend tests**: ~4 seconds
-- **pnpm run formatUi**: ~5 seconds
+- **pnpm format-check**: ~12 seconds
+- **pnpm format**: ~12 seconds
 
 ### Common Gotchas
 
@@ -175,7 +172,7 @@ uv run chainlit run app.py -w
 - Cypress download often fails in CI environments - this is expected.
 - Use `uv run` prefix for all Python commands in backend.
 - Use `export PATH="$HOME/.local/bin:$PATH"` to ensure uv is available.
-- The `pnpm run formatPython` command may fail - use `uv run ruff format` instead.
+- Python lint/format/type-check: use `uv run scripts/lint.py`, `uv run scripts/format.py`, `uv run scripts/type_check.py` from repo root.
 - Frontend dev server connects to backend at localhost:8000.
 - Always start backend before frontend for development.
 

@@ -1,41 +1,72 @@
-name: E2ETests
+name: E2E tests
 
-on: [workflow_call]
+on:
+  workflow_call:
+    inputs:
+      e2e_parallel_shards:
+        description: Number of parallel E2E shards per OS.
+        type: number
+        default: 5
 
 permissions: read-all
 
 jobs:
-  ci:
+  prepare:
+    name: Validate inputs and compute shard matrix
+    runs-on: ubuntu-slim
+    outputs:
+      indexes: ${{ steps.shard-indexes.outputs.indexes }}
+    steps:
+      - name: Validate e2e_parallel_shards
+        run: |
+          n="${{ inputs.e2e_parallel_shards }}"
+          if ! [[ "$n" =~ ^[0-9]+$ ]] || [[ "$n" -lt 1 ]]; then
+            echo "❌ Error: e2e_parallel_shards must be at least 1, got: $n"
+            exit 1
+          fi
+          echo "✅ Validation passed"
+      - id: shard-indexes
+        name: Compute shard indexes
+        run: |
+          json=$(jq -nc --argjson n "${{ inputs.e2e_parallel_shards }}" '[range(1; $n + 1)]')
+          echo "indexes=$json" >> "$GITHUB_OUTPUT"
+
+  e2e-tests:
+    needs: prepare
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
+        containers: ${{ fromJSON(needs.prepare.outputs.indexes) }}
+    name: ${{ matrix.os }}-${{ matrix.containers }}
     env:
       BACKEND_DIR: ./backend
+      # Single path for actions/cache on Linux + Windows (default Cypress dirs differ by OS).
+      CYPRESS_CACHE_FOLDER: ${{ github.workspace }}/.cypress-cache
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+      - name: Cache Cypress binary
+        uses: actions/cache@v5
+        with:
+          path: .cypress-cache
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
-      - name: Install Cypress
-        uses: cypress-io/github-action@v6
-        with:
-          runTests: false
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python & pnpm (uv does it automatically) dependencies
         with:
           working-directory: ${{ env.BACKEND_DIR }}
-          extra-dependencies: --extra tests
-      - name: Build UI components
-        run: pnpm run buildUi
-        timeout-minutes: 5
+          uv-args: --extra tests
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-        run: pnpm test
+          SPLIT: ${{ inputs.e2e_parallel_shards }}
+          SPLIT_INDEX1: ${{ matrix.containers }}
+        run: pnpm test:e2e
         shell: bash
       - name: Upload screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always() && hashFiles('cypress/screenshots/**') != ''
         with:
-          name: cypress-screenshots-${{ matrix.os }}
+          name: cypress-screenshots-${{ matrix.os }}-${{ matrix.containers }}
           path: cypress/screenshots

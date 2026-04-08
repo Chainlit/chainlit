@@ -4,7 +4,11 @@ This file provides guidance to AI agents when working with code in this reposito
 
 ## Backward Compatibility (CRITICAL)
 
-All changes MUST be backward-compatible. If a refactor or breaking change is unavoidable, notify the user and stop — do not proceed without explicit approval. When approved, prefer adding a compatibility layer over keeping legacy code in place.
+All changes **MUST** be backward-compatible. If a refactor or breaking change is unavoidable, notify the user and stop — do not proceed without explicit approval. When approved, prefer adding a compatibility layer over keeping legacy code in place.
+
+## MCP-First Approach (CRITICAL)
+
+When available, **ALWAYS** prefer MCP servers over manual alternatives. Use **Context7** for docs/API references, **Serena** for code navigation/refactoring/memory, and **GitHub MCP** for issues/PRs/actions/commits/releases/code search. Fall back to CLI tools, direct file reads, or web searches **ONLY IF** the corresponding MCP is unavailable or cannot fulfill the request.
 
 ## Overview
 
@@ -28,11 +32,11 @@ Chainlit is a Python framework for building production-ready conversational AI a
 
 ### Build
 
-|                      | Command               | Directory  | What it does                                                                                                                               |
-| -------------------- | --------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Backend              | `uv build`            | `backend/` | Build Python package — runs `pnpm buildUi`, then copies assets into `backend/chainlit/frontend/dist/` and `backend/chainlit/copilot/dist/` |
-| Frontend             | `pnpm run buildUi`    | repo root  | Build libs + frontend JS assets                                                                                                            |
-| Frontend (libs only) | `pnpm run build:libs` | repo root  | Build only `react-client` and `copilot` libs                                                                                               |
+|                   | Command                                      | Directory  | What it does                                                                              |
+| ----------------- | -------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------- |
+| All JS packages   | `pnpm build`                                 | repo root  | Build all workspace packages (frontend, react-client, copilot) via `pnpm run --recursive` |
+| Backend (PyPI)    | `uv build`                                   | `backend/` | Build Python package — builds JS assets first, then bundles into the Python distribution  |
+| Single JS package | `pnpm --filter @chainlit/react-client build` | repo root  | Build one package (useful for publishing)                                                 |
 
 ### Dev servers
 
@@ -52,21 +56,29 @@ Chainlit is a Python framework for building production-ready conversational AI a
 
 ### Lint & Format
 
-|                    | Command                               | Directory  |
-| ------------------ | ------------------------------------- | ---------- |
-| Lint all           | `pnpm run lint`                       | repo root  |
-| Lint frontend only | `pnpm run lintUi`                     | repo root  |
-| Format Python      | `uv run ruff format chainlit/ tests/` | `backend/` |
-| Format JS/TS       | `pnpm run formatUi`                   | repo root  |
+|                     | Command                            | Directory |
+| ------------------- | ---------------------------------- | --------- |
+| Lint JS/TS          | `pnpm lint`                        | repo root |
+| Lint fix JS/TS      | `pnpm lint:fix`                    | repo root |
+| Format check JS/TS  | `pnpm format-check`                | repo root |
+| Format fix JS/TS    | `pnpm format`                      | repo root |
+| Lint Python         | `uv run scripts/lint.py`           | repo root |
+| Lint fix Python     | `uv run scripts/lint.py --fix`     | repo root |
+| Format check Python | `uv run scripts/format.py --check` | repo root |
+| Format fix Python   | `uv run scripts/format.py`         | repo root |
+
+JS/TS lint and format commands accept file/directory arguments: `pnpm lint frontend/`, `pnpm format-check:files frontend/src/App.tsx`. Python scripts also accept file arguments: `uv run scripts/lint.py backend/chainlit/server.py`.
 
 ### Type checking
 
-|               | Command                                | Directory   |
-| ------------- | -------------------------------------- | ----------- |
-| Python (mypy) | `uv run dmypy run -- chainlit/ tests/` | `backend/`  |
-| TypeScript    | `tsc --noemit`                         | `frontend/` |
+|            | Command                        | Directory |
+| ---------- | ------------------------------ | --------- |
+| Python     | `uv run scripts/type_check.py` | repo root |
+| TypeScript | `pnpm type-check`              | repo root |
 
-Run `pnpm run lint` before committing — CI enforces this.
+Type checking runs on whole projects (no per-file mode).
+
+Run `pnpm lint:fix` and `pnpm format` before committing — CI enforces checks on both.
 
 ### Commits
 
@@ -96,7 +108,7 @@ Examples:
 | **Backend**                    | Python 3.13, FastAPI, Starlette, Uvicorn, python-socketio, Pydantic 2, PyJWT, httpx                                       |
 | **LLM integrations**           | MCP, LangChain, LlamaIndex, OpenAI SDK, Semantic Kernel, MistralAI                                                        |
 | **Infra / persistence**        | SQLAlchemy (PostgreSQL/SQLite), DynamoDB + S3 (boto3), Azure Blob / Data Lake, Google Cloud Storage, LiteralAI            |
-| **DX**                         | Husky (pre-commit), ESLint, Prettier, ruff, mypy (dmypy), pytest, Cypress                                                 |
+| **DX**                         | pre-commit hooks, linting, formatting, type checking, unit testing, E2E testing                                           |
 
 ## Architecture
 

@@ -1,30 +1,28 @@
-name: Pytest
+name: Unit & integration tests
 
 on: [workflow_call]
 
 permissions: read-all
 
 jobs:
-  pytest:
+  tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12', '3.13']
+    name: python ${{ matrix.python-version }}
     env:
       BACKEND_DIR: ./backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python dependencies
         with:
           python-version: ${{ matrix.python-version }}
-          extra-dependencies: --extra tests --extra mypy --extra custom-data
-          working-directory: ${{ env.BACKEND_DIR }}
-      - name: Build UI components
-        run: pnpm run buildUi
-        timeout-minutes: 5
-      - name: Run Pytest
+          uv-args: --extra tests --extra custom-data
+      - name: Run backend tests
         run: uv run --no-project pytest --cov=chainlit/
-        working-directory: ${{ env.BACKEND_DIR }}
+      - name: Run frontend tests
+        run: pnpm run test

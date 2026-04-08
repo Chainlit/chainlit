@@ -5,17 +5,17 @@ inputs:
   node-version:
     description: Node.js version
     required: true
-    default: '24.5.0' # Includes npm 11.5.1+, which is required for npm trusted publishing.
+    default: 'lts/*'
 
 runs:
   using: composite
   steps:
-    - uses: pnpm/action-setup@v4
+    - uses: pnpm/action-setup@v5.0.0
       name: Install pnpm
       with:
         run_install: false
     - name: Use Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6.3.0
       with:
         node-version: ${{ inputs.node-version }}
         registry-url: 'https://registry.npmjs.org'

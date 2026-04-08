@@ -16,7 +16,7 @@ permissions: read-all
 jobs:
   validate:
     name: Validate inputs
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Validate publishing branch and destination package index
         run: |
@@ -44,7 +44,7 @@ jobs:
       contents: read
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
       - uses: ./.github/actions/uv-python-install
@@ -62,13 +62,12 @@ jobs:
           python -m wheel unpack dist/chainlit-*.whl -d unpacked
           ls unpacked/chainlit-*/chainlit/frontend/dist
           ls unpacked/chainlit-*/chainlit/copilot/dist
-        working-directory: ${{ env.BACKEND_DIR }}
 
       - name: Publish package distributions to TestPyPI
         if: inputs.use_testpypi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: backend/dist
+          packages-dir: dist
           repository-url: https://test.pypi.org/legacy/
           password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           verbose: true
@@ -77,5 +76,5 @@ jobs:
         if: ${{ !inputs.use_testpypi }}
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: backend/dist
+          packages-dir: dist
           password: ${{ secrets.PYPI_API_TOKEN }}
