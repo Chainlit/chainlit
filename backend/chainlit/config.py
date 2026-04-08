@@ -480,17 +480,12 @@ class ChainlitConfig(BaseSettings):
     def load_translation(self, language: str):
         translation = {}
         default_language = "en-US"
-        # fallback to root language (ex: `de` when `de-DE` is not found)
         parent_language = language.split("-")[0]
 
         translation_dir = Path(config_translation_dir)
 
+        # 1. Exact match (e.g. "da-DK.json" or "da.json")
         translation_lib_file_path = translation_dir / f"{language}.json"
-        translation_lib_parent_language_file_path = (
-            translation_dir / f"{parent_language}.json"
-        )
-        default_translation_lib_file_path = translation_dir / f"{default_language}.json"
-
         if (
             is_path_inside(translation_lib_file_path, translation_dir)
             and translation_lib_file_path.is_file()
@@ -498,7 +493,13 @@ class ChainlitConfig(BaseSettings):
             translation = json.loads(
                 translation_lib_file_path.read_text(encoding="utf-8")
             )
-        elif (
+            return translation
+
+        # 2. Parent/base language fallback (e.g. "de-DE" → "de.json")
+        translation_lib_parent_language_file_path = (
+            translation_dir / f"{parent_language}.json"
+        )
+        if (
             is_path_inside(translation_lib_parent_language_file_path, translation_dir)
             and translation_lib_parent_language_file_path.is_file()
         ):
@@ -508,7 +509,22 @@ class ChainlitConfig(BaseSettings):
             translation = json.loads(
                 translation_lib_parent_language_file_path.read_text(encoding="utf-8")
             )
-        elif (
+            return translation
+
+        # 3. Regional variant lookup (e.g. "da" → "da-DK.json")
+        if language == parent_language:
+            for candidate in sorted(translation_dir.glob(f"{parent_language}-*.json")):
+                if is_path_inside(candidate, translation_dir) and candidate.is_file():
+                    variant = candidate.stem
+                    logger.info(
+                        f"Translation file for {language} not found. Using regional variant {variant}."
+                    )
+                    translation = json.loads(candidate.read_text(encoding="utf-8"))
+                    return translation
+
+        # 4. Default fallback
+        default_translation_lib_file_path = translation_dir / f"{default_language}.json"
+        if (
             is_path_inside(default_translation_lib_file_path, translation_dir)
             and default_translation_lib_file_path.is_file()
         ):

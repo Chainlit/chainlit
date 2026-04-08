@@ -159,7 +159,9 @@ export const CommandPopoverButton = ({
                     'hover:bg-muted hover:dark:bg-muted transition-all duration-200 transition-width-padding',
                     'focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0',
                     open && 'bg-muted/50',
-                    hasSelectedNonButtonCommand ? 'min-w-[36px] px-0 gap-0' : 'px-3 gap-1.5'
+                    hasSelectedNonButtonCommand
+                      ? 'min-w-[36px] px-0 gap-0'
+                      : 'px-3 gap-1.5'
                   )}
                   disabled={disabled}
                   onMouseEnter={scheduleTooltipOpen}

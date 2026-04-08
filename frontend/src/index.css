@@ -17,8 +17,8 @@ code {
 @layer base {
   :root {
     --font-sans: 'Inter', sans-serif;
-    --font-mono: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-      monospace;
+    --font-mono:
+      source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
     --background: 0 0% 100%;
     --foreground: 0 0% 5%;
     --card: 0 0% 100%;
@@ -125,7 +125,14 @@ code {
       color-stop(0.5, hsl(var(--foreground))),
       to(hsl(var(--muted)))
     );
-  background: hsl(var(--muted)) -webkit-gradient(linear, 100% 0, 0 0, from(hsl(var(--muted))), color-stop(0.5, hsl(var(--foreground))), to(hsl(var(--muted))));
+  background: hsl(var(--muted)) -webkit-gradient(
+      linear,
+      100% 0,
+      0 0,
+      from(hsl(var(--muted))),
+      color-stop(0.5, hsl(var(--foreground))),
+      to(hsl(var(--muted)))
+    );
   background-clip: text;
   -webkit-background-clip: text;
   background-repeat: no-repeat;
@@ -157,8 +164,14 @@ code {
    Override in theme.json or custom CSS to change shape, color, or animation. */
 .stop-icon {
   background-color: var(--stop-icon-color, currentColor);
-  -webkit-mask-image: var(--stop-icon-mask, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect x='7' y='7' width='10' height='10' rx='1.25' fill='white'/%3E%3C/svg%3E"));
-  mask-image: var(--stop-icon-mask, url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect x='7' y='7' width='10' height='10' rx='1.25' fill='white'/%3E%3C/svg%3E"));
+  -webkit-mask-image: var(
+    --stop-icon-mask,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect x='7' y='7' width='10' height='10' rx='1.25' fill='white'/%3E%3C/svg%3E")
+  );
+  mask-image: var(
+    --stop-icon-mask,
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Crect x='7' y='7' width='10' height='10' rx='1.25' fill='white'/%3E%3C/svg%3E")
+  );
   -webkit-mask-size: contain;
   mask-size: contain;
   -webkit-mask-repeat: no-repeat;
@@ -185,16 +198,23 @@ code {
   mask-repeat: no-repeat;
   -webkit-mask-position: center;
   mask-position: center;
-  animation: var(--loading-cursor-animation, loading-cursor-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite);
+  animation: var(
+    --loading-cursor-animation,
+    loading-cursor-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite
+  );
 }
 
 @keyframes loading-cursor-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* Task highlight animation */
-
 
 .task-highlight {
   animation: task-highlight-blink 0.6s linear 0s 2;

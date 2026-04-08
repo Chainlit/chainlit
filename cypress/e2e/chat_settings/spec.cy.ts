@@ -16,22 +16,26 @@ describe('Customize chat settings', () => {
     cy.contains('gpt-4').click();
     cy.get('#Model').should('contain.text', 'gpt-4');
 
+    cy.get('#Temperature').find('[role="slider"]').focus();
     cy.get('#Temperature')
       .find('[role="slider"]')
-      .focus()
-      .type('{leftarrow}'.repeat(6))
+      .type('{leftarrow}'.repeat(6));
+    cy.get('#Temperature')
+      .find('[role="slider"]')
       .should('have.attr', 'aria-valuenow', '0.4');
 
+    cy.get('#SAI_Steps').find('[role="slider"]').focus();
+    cy.get('#SAI_Steps').find('[role="slider"]').type('{rightarrow}'.repeat(6));
     cy.get('#SAI_Steps')
       .find('[role="slider"]')
-      .focus()
-      .type('{rightarrow}'.repeat(6))
       .should('have.attr', 'aria-valuenow', '36');
 
+    cy.get('#SAI_Cfg_Scale').find('[role="slider"]').focus();
     cy.get('#SAI_Cfg_Scale')
       .find('[role="slider"]')
-      .focus()
-      .type('{rightarrow}'.repeat(6))
+      .type('{rightarrow}'.repeat(6));
+    cy.get('#SAI_Cfg_Scale')
+      .find('[role="slider"]')
       .should('have.attr', 'aria-valuenow', '7.6');
 
     cy.contains('Confirm').click();
