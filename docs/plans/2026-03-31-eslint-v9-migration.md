@@ -38,13 +38,14 @@
 
 - Modify: `package.json` (devDependencies)
 
-- [ ] **Step 1: Remove old ESLint packages and add new ones**
+- Modify: `package.json` (devDependencies)
+- **Step 1: Remove old ESLint packages and add new ones**
 
 ```bash
 pnpm remove @typescript-eslint/eslint-plugin @typescript-eslint/parser eslint eslint-plugin-cypress
 ```
 
-- [ ] **Step 2: Install ESLint v9 and new packages**
+- **Step 2: Install ESLint v9 and new packages**
 
 ```bash
 pnpm add -Dw eslint@^9 @eslint/js typescript-eslint eslint-plugin-cypress@^6
@@ -52,7 +53,7 @@ pnpm add -Dw eslint@^9 @eslint/js typescript-eslint eslint-plugin-cypress@^6
 
 > `eslint-plugin-chai-friendly@^1.1.1` stays — its peer dep is `eslint>=3.0.0` and it exports `configs.recommendedFlat` (verified at runtime).
 
-- [ ] **Step 3: Verify installation**
+- **Step 3: Verify installation**
 
 ```bash
 npx eslint --version
@@ -60,7 +61,7 @@ npx eslint --version
 
 Expected: `v9.x.x`
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add package.json pnpm-lock.yaml
@@ -77,7 +78,7 @@ git commit -m "chore: upgrade eslint to v9, add typescript-eslint unified packag
 
 This replaces three files: `.eslintrc`, `.eslintignore`, `cypress/.eslintrc`.
 
-- [ ] **Step 1: Create `eslint.config.mjs`**
+- **Step 1: Create `eslint.config.mjs`**
 
 ```js
 import eslint from '@eslint/js';
@@ -140,7 +141,7 @@ export default tseslint.config(
 > - `.eslintignore` — replaced by `ignores` array
 > - `cypress/.eslintrc` — merged with `files: ['cypress/**/*.ts']`
 
-- [ ] **Step 2: Verify the config loads**
+- **Step 2: Verify the config loads**
 
 ```bash
 npx eslint --print-config frontend/src/App.tsx
@@ -148,7 +149,7 @@ npx eslint --print-config frontend/src/App.tsx
 
 Expected: JSON output showing merged config with `@typescript-eslint/*` rules.
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add eslint.config.mjs
@@ -164,14 +165,13 @@ git commit -m "chore: add eslint v9 flat config"
 - Delete: `.eslintrc`
 - Delete: `.eslintignore`
 - Delete: `cypress/.eslintrc`
-
-- [ ] **Step 1: Delete the old files**
+- **Step 1: Delete the old files**
 
 ```bash
 rm .eslintrc .eslintignore cypress/.eslintrc
 ```
 
-- [ ] **Step 2: Verify ESLint still works with flat config only**
+- **Step 2: Verify ESLint still works with flat config only**
 
 ```bash
 npx eslint frontend/src/App.tsx
@@ -179,7 +179,7 @@ npx eslint frontend/src/App.tsx
 
 Expected: no errors (or only pre-existing lint errors, not config errors).
 
-- [ ] **Step 3: Commit**
+- **Step 3: Commit**
 
 ```bash
 git add .eslintrc .eslintignore cypress/.eslintrc
@@ -198,7 +198,7 @@ git commit -m "chore: remove legacy eslintrc config files"
 
 In flat config, `eslint` with no args defaults to `.` and file type matching is handled by config objects (no `--ext` needed).
 
-- [ ] **Step 1: Update frontend lint script**
+- **Step 1: Update frontend lint script**
 
 In `frontend/package.json`, change:
 
@@ -207,7 +207,7 @@ In `frontend/package.json`, change:
 +    "lint": "eslint",
 ```
 
-- [ ] **Step 2: Update react-client lint script**
+- **Step 2: Update react-client lint script**
 
 In `libs/react-client/package.json`, change:
 
@@ -216,7 +216,7 @@ In `libs/react-client/package.json`, change:
 +    "lint": "eslint",
 ```
 
-- [ ] **Step 3: Update copilot lint script**
+- **Step 3: Update copilot lint script**
 
 In `libs/copilot/package.json`, change:
 
@@ -225,7 +225,7 @@ In `libs/copilot/package.json`, change:
 +    "lint": "eslint",
 ```
 
-- [ ] **Step 4: Verify each package lints correctly**
+- **Step 4: Verify each package lints correctly**
 
 ```bash
 pnpm --filter @chainlit/app lint
@@ -237,7 +237,7 @@ Expected: each lints its own directory (`.` = package root). No config errors.
 
 > **Note:** This now also lints files outside `src/` (e.g. `vite.config.ts`, test files, storybook files). This is intentional and improves coverage. If any new lint errors surface in those files, fix them before proceeding.
 
-- [ ] **Step 5: Verify root lint script still works**
+- **Step 5: Verify root lint script still works**
 
 ```bash
 pnpm lint
@@ -245,7 +245,7 @@ pnpm lint
 
 Expected: runs all three packages' lint in parallel, same as before.
 
-- [ ] **Step 6: Commit**
+- **Step 6: Commit**
 
 ```bash
 git add frontend/package.json libs/react-client/package.json libs/copilot/package.json
@@ -262,7 +262,7 @@ git commit -m "chore: simplify package lint scripts for eslint v9 flat config"
 
 This is the payoff: package-scoped globs with `pnpm --filter` for ESLint. Prettier stays as direct invocation (it already uses the root `.prettierrc` and lint-staged passes staged files directly).
 
-- [ ] **Step 1: Replace `lint-staged.config.js` contents**
+- **Step 1: Replace `lint-staged.config.js` contents**
 
 ```js
 export default {
@@ -318,7 +318,7 @@ export default {
 >
 > **Why `backend/**/_.py`instead of`\*\*/_.py`:\*\* Scopes Python linting to backend only, consistent with the package-scoped approach for JS/TS.
 
-- [ ] **Step 2: Verify lint-staged config is valid**
+- **Step 2: Verify lint-staged config is valid**
 
 ```bash
 npx lint-staged --debug 2>&1 | head -20
@@ -326,7 +326,7 @@ npx lint-staged --debug 2>&1 | head -20
 
 Expected: no syntax/parse errors.
 
-- [ ] **Step 3: Test with a staged file**
+- **Step 3: Test with a staged file**
 
 ```bash
 # Stage a minor whitespace change in a frontend file, then:
@@ -335,7 +335,7 @@ npx lint-staged --verbose
 
 Expected: runs `pnpm --filter @chainlit/app lint -- --fix` with only the staged file, NOT the entire package.
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add lint-staged.config.js
@@ -352,13 +352,14 @@ ESLint now covers files outside `src/` (config files, tests, storybook). Some ma
 
 - Varies — depends on what ESLint reports
 
-- [ ] **Step 1: Run full lint to find new errors**
+- Varies — depends on what ESLint reports
+- **Step 1: Run full lint to find new errors**
 
 ```bash
 pnpm lint 2>&1
 ```
 
-- [ ] **Step 2: Fix any errors**
+- **Step 2: Fix any errors**
 
 Most likely candidates:
 
@@ -369,7 +370,7 @@ Most likely candidates:
 
 Fix each file. If a file genuinely shouldn't be linted (e.g. auto-generated), add it to the `ignores` array in `eslint.config.mjs`.
 
-- [ ] **Step 3: Verify clean lint**
+- **Step 3: Verify clean lint**
 
 ```bash
 pnpm lint
@@ -377,7 +378,7 @@ pnpm lint
 
 Expected: exit 0, no errors.
 
-- [ ] **Step 4: Commit**
+- **Step 4: Commit**
 
 ```bash
 git add -A
@@ -388,7 +389,7 @@ git commit -m "fix: resolve lint errors in newly covered files"
 
 ## Task 7: Final Verification
 
-- [ ] **Step 1: Run full CI-equivalent checks**
+- **Step 1: Run full CI-equivalent checks**
 
 ```bash
 pnpm lint && pnpm type-check && pnpm --filter @chainlit/app test
@@ -396,7 +397,7 @@ pnpm lint && pnpm type-check && pnpm --filter @chainlit/app test
 
 Expected: all pass.
 
-- [ ] **Step 2: Test lint-staged end-to-end**
+- **Step 2: Test lint-staged end-to-end**
 
 Make a trivial change to a file in each package, stage it, and run:
 
@@ -410,8 +411,7 @@ Verify:
 - react-client file change triggers only `@chainlit/react-client` lint + type-check
 - A Python file change triggers only ruff + dmypy
 - No cross-package lint runs
-
-- [ ] **Step 3: Commit any remaining changes**
+- **Step 3: Commit any remaining changes**
 
 ```bash
 git add -A
