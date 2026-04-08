@@ -8,10 +8,6 @@ on:
         type: number
         default: 5
 
-concurrency:
-  group: e2e-tests-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref_name != 'main' }}
-
 permissions: read-all
 
 jobs:
