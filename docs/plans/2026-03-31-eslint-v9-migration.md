@@ -361,7 +361,7 @@ Most likely candidates:
 
 - `vite.config.ts` files — may use `require()` or have unused imports
 - `frontend/tests/*.spec.tsx` — may have unused variables in test helpers
-- `libs/copilot/.storybook/*.ts` — may have `any` types (but rule is off)why
+- `libs/copilot/.storybook/*.ts` — may have `any` types (but rule is off)
 - `libs/copilot/stories/*.ts` — storybook conventions
 
 Fix each file. If a file genuinely shouldn't be linted (e.g. auto-generated), add it to the `ignores` array in `eslint.config.mjs`.
