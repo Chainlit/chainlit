@@ -75,7 +75,6 @@ $ git remote -v
 The following command will install Python dependencies, Node (pnpm) dependencies and build the frontend.
 
 ```sh
-cd backend
 uv sync --all-packages --all-extras --dev
 ```
 
@@ -84,8 +83,7 @@ uv sync --all-packages --all-extras --dev
 Start by running `backend/chainlit/sample/hello.py` as an example.
 
 ```sh
-cd backend
-uv run chainlit run chainlit/sample/hello.py
+uv run chainlit run backend/chainlit/sample/hello.py
 ```
 
 You should now be able to access the Chainlit app you just launched on `http://127.0.0.1:8000`.
