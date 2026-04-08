@@ -6,7 +6,7 @@ import sys
 
 
 def main():
-    """Run mypy on the backend package."""
+    """Runs type checking on backend."""
     cmd = ["mypy", "backend/"] + sys.argv[1:]
     result = subprocess.run(cmd)
     return result.returncode

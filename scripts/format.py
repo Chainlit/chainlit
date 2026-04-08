@@ -6,7 +6,7 @@ import sys
 
 
 def main():
-    """Run pytest on the test suite."""
+    """Runs formatting on backend."""
     cmd = ["ruff", "format"] + sys.argv[1:]
     result = subprocess.run(cmd)
     return result.returncode
