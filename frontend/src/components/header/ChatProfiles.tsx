@@ -41,21 +41,20 @@ export default function ChatProfiles({ navigate }: Props) {
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
-  // Early return check to prevent unnecessary renders and resource waste
-  if (!config?.chatProfiles?.length || config.chatProfiles.length <= 1) {
-    return null;
-  }
-
   // Handle case when no profile is selected
   useEffect(() => {
-    if (!chatProfile) {
+    if (
+      !chatProfile &&
+      config?.chatProfiles &&
+      config.chatProfiles.length > 1
+    ) {
       setChatProfile(config.chatProfiles[0].name);
     }
-  }, [chatProfile, config.chatProfiles, setChatProfile]);
+  }, [chatProfile, config?.chatProfiles, setChatProfile]);
 
   // Handle case when selected profile becomes invalid
   useEffect(() => {
-    if (chatProfile) {
+    if (chatProfile && config?.chatProfiles && config.chatProfiles.length > 1) {
       const profileExists = config.chatProfiles.some(
         (profile) => profile.name === chatProfile
       );
@@ -63,7 +62,11 @@ export default function ChatProfiles({ navigate }: Props) {
         setChatProfile(config.chatProfiles[0].name);
       }
     }
-  }, [chatProfile, config.chatProfiles, setChatProfile]);
+  }, [chatProfile, config?.chatProfiles, setChatProfile]);
+
+  if (!config?.chatProfiles?.length || config.chatProfiles.length <= 1) {
+    return null;
+  }
 
   const handleClose = () => {
     setOpenDialog(false);
