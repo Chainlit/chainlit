@@ -1,4 +1,5 @@
 import asyncio
+from concurrent.futures import thread
 import json
 from typing import Any, Dict, Literal, Optional, Tuple, TypedDict, Union
 from urllib.parse import unquote
@@ -334,6 +335,7 @@ async def edit_message(sid, payload: MessagePayload):
         if message.id == payload["message"]["id"]:
             message.content = payload["message"]["output"]
             await message.update()
+            await message.remove_children()
             orig_message = message
 
     await context.emitter.task_start()
@@ -345,7 +347,6 @@ async def edit_message(sid, payload: MessagePayload):
             pass
         finally:
             await context.emitter.task_end()
-
 
 @sio.on("message_favorite")  # pyright: ignore [reportOptionalCall]
 async def message_favorite(sid, payload: MessagePayload):
