@@ -105,6 +105,7 @@ class BaseSession:
     thread_id_to_resume: Optional[str] = None
     client_type: ClientType
     current_task: Optional[asyncio.Task] = None
+    chat_started: bool = False
 
     def __init__(
         self,
@@ -131,6 +132,7 @@ class BaseSession:
         self.client_type = client_type
         self.token = token
         self.has_first_interaction = False
+        self.chat_started = False
         self.user_env = user_env or {}
         self.environ = environ or {}
         self.chat_profile = chat_profile

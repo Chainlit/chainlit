@@ -9,6 +9,7 @@ from chainlit.socket import (
     _get_token,
     _get_token_from_cookie,
     clean_session,
+    connection_successful,
     load_user_env,
     persist_user_session,
     restore_existing_session,
@@ -524,3 +525,108 @@ class TestSocketEdgeCases:
                 # Should propagate the exception
                 with pytest.raises(Exception, match="Auth error"):
                     await _authenticate_connection(environ)
+
+
+class TestConnectionSuccessfulIdempotency:
+    """Regression tests: on_chat_start must fire exactly once per
+    WebsocketSession, even when connection_successful is dispatched multiple
+    times (Socket.IO reconnect, React StrictMode double-mount, reverse-proxy
+    WS 101 retry).
+
+    Refs chainlit#2535, chainlit#2549, chainlit#2228.
+    """
+
+    @pytest.mark.asyncio
+    async def test_on_chat_start_not_duplicated_on_reconnect(
+        self, mock_session_factory
+    ):
+        """Reconnect path (session.restored=True): on_chat_start scheduled once."""
+        on_chat_start = AsyncMock()
+
+        session = mock_session_factory(has_first_interaction=False)
+        session.restored = True
+        session.chat_started = False
+        session.current_task = None
+        session.thread_id_to_resume = None
+
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.code.on_chat_start = on_chat_start
+        mock_config.code.on_chat_resume = None
+
+        with (
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+        ):
+            await connection_successful("sid-1")
+            # Simulate reconnect: same session object, chat_started now True.
+            await connection_successful("sid-1")
+
+        assert on_chat_start.call_count == 1, (
+            "on_chat_start must be scheduled exactly once per WebsocketSession"
+        )
+        assert session.chat_started is True
+
+    @pytest.mark.asyncio
+    async def test_on_chat_start_fires_once_on_fresh_session(
+        self, mock_session_factory
+    ):
+        """Normal one-connect path still greets exactly once."""
+        on_chat_start = AsyncMock()
+
+        session = mock_session_factory(has_first_interaction=False)
+        session.restored = False
+        session.chat_started = False
+        session.current_task = None
+        session.thread_id_to_resume = None
+
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.code.on_chat_start = on_chat_start
+        mock_config.code.on_chat_resume = None
+
+        with (
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+        ):
+            await connection_successful("sid-1")
+
+        assert on_chat_start.call_count == 1
+        assert session.chat_started is True
+
+    @pytest.mark.asyncio
+    async def test_on_chat_start_not_duplicated_on_fresh_then_reconnect(
+        self, mock_session_factory
+    ):
+        """Fresh connect followed by a reconnect still fires exactly once."""
+        on_chat_start = AsyncMock()
+
+        session = mock_session_factory(has_first_interaction=False)
+        session.restored = False
+        session.chat_started = False
+        session.current_task = None
+        session.thread_id_to_resume = None
+
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.code.on_chat_start = on_chat_start
+        mock_config.code.on_chat_resume = None
+
+        with (
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+        ):
+            await connection_successful("sid-1")
+            session.restored = True
+            await connection_successful("sid-1")
+
+        assert on_chat_start.call_count == 1
