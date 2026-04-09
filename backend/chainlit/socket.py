@@ -213,7 +213,8 @@ async def connection_successful(sid):
     await context.emitter.clear("clear_call_fn")
 
     if context.session.restored and not context.session.has_first_interaction:
-        if config.code.on_chat_start:
+        if config.code.on_chat_start and not context.session.chat_started:
+            context.session.chat_started = True
             task = asyncio.create_task(config.code.on_chat_start())
             context.session.current_task = task
         return
@@ -237,7 +238,8 @@ async def connection_successful(sid):
         else:
             await context.emitter.send_resume_thread_error("Thread not found.")
 
-    if config.code.on_chat_start:
+    if config.code.on_chat_start and not context.session.chat_started:
+        context.session.chat_started = True
         task = asyncio.create_task(config.code.on_chat_start())
         context.session.current_task = task
 
