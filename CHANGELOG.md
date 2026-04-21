@@ -4,6 +4,23 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.11.1] - 2026-04-22
+
+### Added
+
+- Pass `chat_profile` to `set_starter_categories` callback so starters can vary by profile
+
+### Fixed
+
+- Guard `on_chat_start` against duplicate dispatch on WebSocket reconnect
+- Check `langchain-core` version instead of `langchain` for callback compatibility
+- Resolve base locale codes to regional translation files (e.g. `da` → `da-DK`)
+
+### Changed
+
+- Refactor dev scripts for streamlined local development
+- Upgrade Prettier and Ruff and auto-format missed files
+
 ## [2.11.0] - 2026-04-07
 
 ### Added
