@@ -34,12 +34,13 @@ interface Props {
 export default function ChatProfiles({ navigate }: Props) {
   const apiClient = useContext(ChainlitContext);
   const { config } = useConfig();
-  const { chatProfile, setChatProfile } = useChatSession();
+  const { chatProfile, setChatProfile, hotSwapChatProfile } = useChatSession();
   const { firstInteraction } = useChatMessages();
   const { clear } = useChatInteract();
   const setAttachments = useSetRecoilState<IAttachment[]>(attachmentsState);
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const hotSwapEnabled = !!config?.features?.hot_swap_chat_profile;
 
   // Early return check to prevent unnecessary renders and resource waste
   if (!config?.chatProfiles?.length || config.chatProfiles.length <= 1) {
@@ -72,6 +73,13 @@ export default function ChatProfiles({ navigate }: Props) {
   };
 
   const handleConfirm = (profile: string) => {
+    if (hotSwapEnabled) {
+      hotSwapChatProfile(profile);
+      setNewChatProfile(null);
+      setOpenDialog(false);
+      return;
+    }
+
     setChatProfile(profile);
     setNewChatProfile(null);
     setAttachments([]);
@@ -88,7 +96,7 @@ export default function ChatProfiles({ navigate }: Props) {
         value={chatProfile || ''}
         onValueChange={(value) => {
           setNewChatProfile(value);
-          if (firstInteraction) {
+          if (firstInteraction && !hotSwapEnabled) {
             setOpenDialog(true);
           } else {
             handleConfirm(value);

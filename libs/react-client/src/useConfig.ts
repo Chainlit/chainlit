@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
-
 import { useApi, useAuth } from './api';
 import { chatProfileState, configState } from './state';
 import { IChainlitConfig } from './types';
@@ -17,12 +16,7 @@ const useConfig = () => {
     ? `/project/settings?language=${language}${chatProfile ? `&chat_profile=${encodeURIComponent(chatProfile)}` : ''}`
     : null;
 
-  // Always fetch if we don't have config and we're authenticated
-  const shouldFetch = isAuthenticated && !config;
-
-  const { data, error, isLoading } = useApi<IChainlitConfig>(
-    shouldFetch ? apiUrl : null
-  );
+  const { data, error, isLoading } = useApi<IChainlitConfig>(apiUrl);
 
   useEffect(() => {
     if (!data) return;

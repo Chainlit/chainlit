@@ -337,6 +337,7 @@ class FeaturesSettings(BaseModel):
     edit_message: bool = True
     allow_thread_sharing: bool = False
     favorites: bool = False
+    hot_swap_chat_profile: bool = False
 
 
 class HeaderLink(BaseModel):

@@ -61,8 +61,12 @@ def restore_existing_session(
     """Restore a session from the sessionId provided by the client."""
     if session := WebsocketSession.get_by_id(session_id):
         if not _session_owner_matches_user(session, user):
-            logger.error("Authorization for the session failed.")
-            raise ConnectionRefusedError("authorization failed")
+            # Clean up in-memory bookkeeping; on-disk / DB state is untouched.
+            from chainlit.session import ws_sessions_id, ws_sessions_sid
+
+            ws_sessions_id.pop(session.id, None)
+            ws_sessions_sid.pop(session.socket_id, None)
+            return False
 
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
@@ -250,6 +254,65 @@ async def clean_session(sid):
     if session:
         session.to_clear = True
 
+
+@sio.on("set_chat_profile")  # pyright: ignore [reportOptionalCall]
+async def set_chat_profile(sid, payload: Dict[str, Any]):
+    """Hot-swap the chat profile of an existing session.
+
+    Only active when `features.hot_swap_chat_profile` is enabled. When the
+    feature is disabled we simply ignore the event so a misconfigured client
+    cannot bypass the legacy reconnect flow. Invalid profile names trigger a
+    toast and leave the current profile unchanged.
+    """
+    session = WebsocketSession.get(sid)
+    if not session:
+        return
+
+    context = init_ws_context(session)
+
+    if not config.features.hot_swap_chat_profile:
+        # Feature is opt-in; legacy clients that accidentally emit this event
+        # should not affect the session.
+        return
+
+    new_profile: Optional[str] = payload.get("chatProfile") if payload else None
+
+    ok = await session.set_chat_profile(new_profile)
+    if not ok:
+        await context.emitter.send_toast(
+            f"Unknown chat profile: {new_profile}", type="error"
+        )
+        await context.emitter.emit(
+            "chat_profile_updated",
+            {"chatProfile": session.chat_profile, "ok": False},
+        )
+        return
+
+    # Persist the new profile at the thread level so that a later resume picks
+    # it up via the existing `resume_thread` path (socket.py:96). Only persist
+    # once a thread actually exists (i.e. after the first interaction); before
+    # that, the next `flush_thread_queues` will write the correct profile as
+    # part of the thread creation.
+    data_layer = get_data_layer()
+    if (
+        data_layer
+        and session.has_first_interaction
+        and session.thread_id
+    ):
+        try:
+            await persist_user_session(session.thread_id, session.to_persistable())
+            if config.features.auto_tag_thread and new_profile:
+                await data_layer.update_thread(
+                    thread_id=session.thread_id,
+                    tags=[new_profile],
+                )
+        except Exception as e:
+            logger.warning(f"Failed to persist hot-swapped chat profile: {e}")
+
+    await context.emitter.emit(
+        "chat_profile_updated",
+        {"chatProfile": session.chat_profile, "ok": True},
+    )
 
 @sio.on("disconnect")  # pyright: ignore [reportOptionalCall]
 async def disconnect(sid):

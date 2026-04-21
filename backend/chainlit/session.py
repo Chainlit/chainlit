@@ -363,6 +363,48 @@ class WebsocketSession(BaseSession):
         self.config = cfg
         return cfg
 
+    async def set_chat_profile(self, new_profile: Optional[str]) -> bool:
+        """
+        Update the chat profile of this session in place (hot-swap).
+        """
+        from chainlit.config import config as global_config
+        from chainlit.user_session import user_sessions
+
+        profiles = None
+        if new_profile and global_config.code.set_chat_profiles:
+            try:
+                profiles = await global_config.code.set_chat_profiles(
+                    self.user, self.language
+                )
+            except Exception:
+                profiles = None
+            if profiles is not None and not any(
+                p.name == new_profile for p in profiles
+            ):
+                return False
+
+        if new_profile == self.chat_profile:
+            return True
+
+        self.chat_profile = new_profile
+
+        # Recompute the per-session config with the new profile's overrides (if any).
+        cfg = global_config
+        if new_profile and profiles:
+            current_profile = next(
+                (p for p in profiles if p.name == new_profile), None
+            )
+            if current_profile and getattr(current_profile, "config_overrides", None):
+                cfg = global_config.with_overrides(current_profile.config_overrides)
+        self.config = cfg
+
+        # Keep the user_session view in sync for callbacks that read
+        # `cl.user_session["chat_profile"]`.
+        if self.id in user_sessions:
+            user_sessions[self.id]["chat_profile"] = new_profile
+
+        return True
+
     def restore(self, new_socket_id: str):
         """Associate a new socket id to the session."""
         ws_sessions_sid.pop(self.socket_id, None)
