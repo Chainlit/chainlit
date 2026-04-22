@@ -24,7 +24,7 @@ assert _cookie_samesite in [
 )
 _cookie_secure = _cookie_samesite == "none"
 if _cookie_root_path := os.environ.get("CHAINLIT_ROOT_PATH", None):
-    _cookie_path = os.environ.get(_cookie_root_path, "/")
+    _cookie_path = os.environ.get("CHAINLIT_AUTH_COOKIE_PATH", _cookie_root_path)
 else:
     _cookie_path = os.environ.get("CHAINLIT_AUTH_COOKIE_PATH", "/")
 _state_cookie_lifetime = int(
@@ -32,6 +32,22 @@ _state_cookie_lifetime = int(
 )
 _auth_cookie_name = os.environ.get("CHAINLIT_AUTH_COOKIE_NAME", "access_token")
 _state_cookie_name = "oauth_state"
+
+
+def _delete_legacy_cookies(response: Response, *names: str):
+    """Delete cookies at path='/' left over from pre-scoped versions.
+
+    Only acts when _cookie_path != '/' to avoid no-op deletes in
+    single-app deployments.
+
+    TODO: Remove this function in the next major release.
+    """
+    if _cookie_path == "/":
+        return
+    for name in names:
+        response.delete_cookie(
+            key=name, path="/", secure=_cookie_secure, samesite=_cookie_samesite
+        )
 
 
 class OAuth2PasswordBearerWithCookie(SecurityBase):
@@ -132,11 +148,13 @@ def set_auth_cookie(request: Request, response: Response, token: str):
             response.set_cookie(
                 key=k,
                 value=chunk,
+                path=_cookie_path,
                 httponly=True,
                 secure=_cookie_secure,
                 samesite=_cookie_samesite,
                 max_age=config.project.user_session_timeout,
             )
+            _delete_legacy_cookies(response, k)
 
             existing_cookies.discard(k)
     else:
@@ -144,11 +162,13 @@ def set_auth_cookie(request: Request, response: Response, token: str):
         response.set_cookie(
             key=_auth_cookie_name,
             value=token,
+            path=_cookie_path,
             httponly=True,
             secure=_cookie_secure,
             samesite=_cookie_samesite,
             max_age=config.project.user_session_timeout,
         )
+        _delete_legacy_cookies(response, _auth_cookie_name)
 
         existing_cookies.discard(_auth_cookie_name)
 
@@ -157,6 +177,7 @@ def set_auth_cookie(request: Request, response: Response, token: str):
         response.delete_cookie(
             key=k, path=_cookie_path, secure=_cookie_secure, samesite=_cookie_samesite
         )
+        _delete_legacy_cookies(response, k)
 
 
 def clear_auth_cookie(request: Request, response: Response):
@@ -172,17 +193,20 @@ def clear_auth_cookie(request: Request, response: Response):
         response.delete_cookie(
             key=k, path=_cookie_path, secure=_cookie_secure, samesite=_cookie_samesite
         )
+        _delete_legacy_cookies(response, k)
 
 
 def set_oauth_state_cookie(response: Response, token: str):
     response.set_cookie(
         _state_cookie_name,
         token,
+        path=_cookie_path,
         httponly=True,
         samesite=_cookie_samesite,
         secure=_cookie_secure,
         max_age=_state_cookie_lifetime,
     )
+    _delete_legacy_cookies(response, _state_cookie_name)
 
 
 def validate_oauth_state_cookie(request: Request, state: str):
@@ -196,4 +220,5 @@ def validate_oauth_state_cookie(request: Request, state: str):
 
 def clear_oauth_state_cookie(response: Response):
     """Oauth complete, delete state token."""
-    response.delete_cookie(_state_cookie_name)  # Do we set path here?
+    response.delete_cookie(_state_cookie_name, path=_cookie_path)
+    _delete_legacy_cookies(response, _state_cookie_name)
