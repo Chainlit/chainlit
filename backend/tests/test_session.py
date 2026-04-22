@@ -188,7 +188,9 @@ class TestBaseSession:
 
     def test_base_session_files_dir(self):
         """Test BaseSession files_dir property."""
-        with patch("chainlit.config.FILES_DIRECTORY", Path("/tmp/files")):
+        with patch(
+            "chainlit.config.get_files_directory", return_value=Path("/tmp/files")
+        ):
             session = BaseSession(
                 id="test_id",
                 client_type="webapp",
@@ -204,7 +206,9 @@ class TestBaseSession:
     async def test_base_session_persist_file_with_content(self):
         """Test persisting a file with content."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("chainlit.config.FILES_DIRECTORY", Path(tmpdir)):
+            with patch(
+                "chainlit.config.get_files_directory", return_value=Path(tmpdir)
+            ):
                 session = BaseSession(
                     id="test_id",
                     client_type="webapp",
@@ -230,7 +234,9 @@ class TestBaseSession:
     async def test_base_session_persist_file_with_string_content(self):
         """Test persisting a file with string content."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("chainlit.config.FILES_DIRECTORY", Path(tmpdir)):
+            with patch(
+                "chainlit.config.get_files_directory", return_value=Path(tmpdir)
+            ):
                 session = BaseSession(
                     id="test_id",
                     client_type="webapp",
@@ -347,7 +353,9 @@ class TestHTTPSession:
     async def test_http_session_delete(self):
         """Test HTTPSession delete method."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("chainlit.config.FILES_DIRECTORY", Path(tmpdir)):
+            with patch(
+                "chainlit.config.get_files_directory", return_value=Path(tmpdir)
+            ):
                 session = HTTPSession(
                     id="http_id",
                     client_type="copilot",
@@ -445,7 +453,9 @@ class TestWebsocketSession:
         from chainlit.session import ws_sessions_id, ws_sessions_sid
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("chainlit.config.FILES_DIRECTORY", Path(tmpdir)):
+            with patch(
+                "chainlit.config.get_files_directory", return_value=Path(tmpdir)
+            ):
                 session = WebsocketSession(
                     id="ws_id",
                     socket_id="socket_123",
@@ -567,7 +577,9 @@ class TestSessionEdgeCases:
     async def test_persist_file_with_mime_extension(self):
         """Test that persist_file adds correct file extension based on MIME type."""
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("chainlit.config.FILES_DIRECTORY", Path(tmpdir)):
+            with patch(
+                "chainlit.config.get_files_directory", return_value=Path(tmpdir)
+            ):
                 session = BaseSession(
                     id="test_id",
                     client_type="webapp",
@@ -612,7 +624,9 @@ class TestSessionEdgeCases:
         """Test WebsocketSession delete with MCP sessions."""
 
         with tempfile.TemporaryDirectory() as tmpdir:
-            with patch("chainlit.config.FILES_DIRECTORY", Path(tmpdir)):
+            with patch(
+                "chainlit.config.get_files_directory", return_value=Path(tmpdir)
+            ):
                 session = WebsocketSession(
                     id="ws_id",
                     socket_id="socket_123",
