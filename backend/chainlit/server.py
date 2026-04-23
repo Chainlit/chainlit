@@ -510,7 +510,7 @@ async def _authenticate_user(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="credentialssignin",
+            detail="credentialsSignin",
         )
 
     # If a data layer is defined, attempt to persist user.

@@ -29,7 +29,7 @@ describe('Password Auth', () => {
           cy.get("input[name='email']").type('user');
           cy.get("input[name='password']").type('user');
           cy.get("button[type='submit']").click();
-          cy.get('body').should('contain', 'Unauthorized');
+          cy.get('body').should('contain', 'Sign in failed');
         });
       });
 

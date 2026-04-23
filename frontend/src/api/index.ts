@@ -21,6 +21,9 @@ const on401 = () => {
 };
 
 const onError = (error: ClientError) => {
+  // Don't toast 401 errors — they're handled by the login form (inline Alert)
+  // and the on401 redirect for other pages.
+  if (error.status === 401) return;
   toast.error(error.toString());
 };
 
