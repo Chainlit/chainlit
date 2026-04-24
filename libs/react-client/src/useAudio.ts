@@ -35,8 +35,11 @@ const useAudio = () => {
   }, [stopRecording, endAudioStream]);
 
   const discardConversation = useCallback(async () => {
-    await stopRecording();
-    await discardAudioStream();
+    try {
+      await stopRecording();
+    } finally {
+      await discardAudioStream();
+    }
   }, [stopRecording, discardAudioStream]);
 
   return {

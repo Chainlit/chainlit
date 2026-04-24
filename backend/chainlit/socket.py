@@ -473,12 +473,13 @@ async def audio_discard(sid):
         ):
             await config.code.on_audio_discard()
 
-        await context.emitter.update_audio_connection("off")
-
     except asyncio.CancelledError:
         pass
     except Exception as e:
         logger.exception(e)
+    finally:
+        context = init_ws_context(session)
+        await context.emitter.update_audio_connection("off")
 
 
 @sio.on("audio_end")
