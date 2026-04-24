@@ -6,14 +6,8 @@ on:
   merge_group:
   pull_request:
     branches: [main, dev, 'release/**']
-    paths-ignore:
-      - '*.md'
-      - LICENSE
   push:
     branches: [main, dev, 'release/**']
-    paths-ignore:
-      - '*.md'
-      - LICENSE
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
