@@ -68,7 +68,9 @@
     "speech": {
       "start": "Start opname",
       "stop": "Stop opname",
-      "connecting": "Verbinden"
+      "connecting": "Verbinden",
+      "accept": "Opname verzenden",
+      "discard": "Opname verwijderen"
     },
     "fileUpload": {
       "dragDrop": "Sleep bestanden hierheen",

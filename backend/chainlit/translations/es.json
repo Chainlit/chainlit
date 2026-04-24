@@ -82,7 +82,9 @@
     "speech": {
       "start": "Comenzar grabación",
       "stop": "Detener grabación",
-      "connecting": "Conectando"
+      "connecting": "Conectando",
+      "accept": "Enviar grabación",
+      "discard": "Descartar grabación"
     },
     "fileUpload": {
       "dragDrop": "Arrastra y suelta archivos aquí",

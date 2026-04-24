@@ -82,7 +82,9 @@
     "speech": {
       "start": "Start recording",
       "stop": "Stop recording",
-      "connecting": "Connecting"
+      "connecting": "Connecting",
+      "accept": "Send recording",
+      "discard": "Discard recording"
     },
     "fileUpload": {
       "dragDrop": "Drag and drop files here",

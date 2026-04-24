@@ -68,7 +68,9 @@
     "speech": {
       "start": "התחל הקלטה",
       "stop": "עצור הקלטה",
-      "connecting": "מתחבר"
+      "connecting": "מתחבר",
+      "accept": "שלח הקלטה",
+      "discard": "מחק הקלטה"
     },
     "favorites": {
       "use": "השתמש בהודעה מועדפת",

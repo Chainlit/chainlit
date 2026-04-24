@@ -158,6 +158,10 @@ const useChatInteract = () => {
     session?.socket.emit('audio_end');
   }, [session?.socket]);
 
+  const discardAudioStream = useCallback(() => {
+    session?.socket.emit('audio_discard');
+  }, [session?.socket]);
+
   const replyMessage = useCallback(
     (message: IStep) => {
       if (askUser) {
@@ -213,6 +217,7 @@ const useChatInteract = () => {
     startAudioStream,
     sendAudioChunk,
     endAudioStream,
+    discardAudioStream,
     stopTask,
     setIdToResume,
     updateChatSettings,

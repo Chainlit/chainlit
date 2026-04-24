@@ -68,7 +68,9 @@
     "speech": {
       "start": "开始录音",
       "stop": "停止录音",
-      "connecting": "连接中"
+      "connecting": "连接中",
+      "accept": "发送录音",
+      "discard": "丢弃录音"
     },
     "fileUpload": {
       "dragDrop": "将文件拖放到这里",

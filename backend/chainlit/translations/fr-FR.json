@@ -82,7 +82,9 @@
     "speech": {
       "start": "Démarrer l'enregistrement",
       "stop": "Arrêter l'enregistrement",
-      "connecting": "Connexion en cours"
+      "connecting": "Connexion en cours",
+      "accept": "Envoyer l'enregistrement",
+      "discard": "Supprimer l'enregistrement"
     },
     "fileUpload": {
       "dragDrop": "Glissez et déposez des fichiers ici",

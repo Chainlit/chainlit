@@ -16,23 +16,36 @@ const useAudio = () => {
   const wavStreamPlayer = useRecoilValue(wavStreamPlayerState);
   const isAiSpeaking = useRecoilValue(isAiSpeakingState);
 
-  const { startAudioStream, endAudioStream } = useChatInteract();
+  const { startAudioStream, endAudioStream, discardAudioStream } =
+    useChatInteract();
 
   const startConversation = useCallback(async () => {
     setAudioConnection('connecting');
     await startAudioStream();
   }, [startAudioStream]);
 
-  const endConversation = useCallback(async () => {
+  const stopRecording = useCallback(async () => {
     setAudioConnection('off');
-    await wavRecorder.end();
-    await wavStreamPlayer.interrupt();
+    await Promise.all([wavRecorder.end(), wavStreamPlayer.interrupt()]);
+  }, [wavRecorder, wavStreamPlayer]);
+
+  const endConversation = useCallback(async () => {
+    await stopRecording();
     await endAudioStream();
-  }, [endAudioStream, wavRecorder, wavStreamPlayer]);
+  }, [stopRecording, endAudioStream]);
+
+  const discardConversation = useCallback(async () => {
+    try {
+      await stopRecording();
+    } finally {
+      await discardAudioStream();
+    }
+  }, [stopRecording, discardAudioStream]);
 
   return {
     startConversation,
     endConversation,
+    discardConversation,
     audioConnection,
     isAiSpeaking,
     wavRecorder,
