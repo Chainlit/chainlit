@@ -109,10 +109,17 @@ def instrument_litellm() -> None:
             end_time: float,
         ) -> None:
             try:
-                start_ts = (
-                    start_time if isinstance(start_time, (int, float)) else time.time()
-                )
-                end_ts = end_time if isinstance(end_time, (int, float)) else time.time()
+                import datetime
+
+                def _to_epoch(t: Any) -> float:
+                    if isinstance(t, (int, float)):
+                        return float(t)
+                    if isinstance(t, datetime.datetime):
+                        return t.timestamp()
+                    return time.time()
+
+                start_ts = _to_epoch(start_time)
+                end_ts = _to_epoch(end_time)
 
                 generation = _build_generation(kwargs, response_obj, start_ts, end_ts)
                 context = get_context()
