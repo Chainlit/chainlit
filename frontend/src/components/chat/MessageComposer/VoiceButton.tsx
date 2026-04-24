@@ -67,6 +67,7 @@ const VoiceButton = ({ disabled }: Props) => {
     () => {
       if (!isEnabled) return;
 
+      // Double-check at execution time that we're not in a form field
       const getDeepActiveElement = (): Element | null => {
         let activeElement = document.activeElement;
         while (
@@ -87,7 +88,7 @@ const VoiceButton = ({ disabled }: Props) => {
           activeElement.getAttribute('contenteditable') === 'true';
 
         if (isFormField || isContentEditable) {
-          return;
+          return; // Don't execute the hotkey
         }
       }
 
@@ -96,7 +97,7 @@ const VoiceButton = ({ disabled }: Props) => {
     },
     {
       enableOnFormTags: false,
-      preventDefault: false
+      preventDefault: false // Don't prevent default - let letters be typed
     },
     [isEnabled, audioConnection, startConversation, endConversation]
   );
