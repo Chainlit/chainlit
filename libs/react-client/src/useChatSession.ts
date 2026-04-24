@@ -411,6 +411,41 @@ const useChatSession = () => {
         }
       );
 
+      // Atomic sidebar update: title + elements + key in one payload.
+      // Avoids the set_sidebar_title -> set_sidebar_elements coordination
+      // race where the second handler observes the Recoil atom as still
+      // undefined (under React 18 + Recoil batching) and falls back to
+      // title: '' -- rendering a headerless sidebar.
+      socket.on(
+        'set_sidebar',
+        ({
+          title,
+          elements,
+          key
+        }: {
+          title: string;
+          elements: IMessageElement[];
+          key?: string;
+        }) => {
+          if (!elements.length) {
+            setSideView(undefined);
+            return;
+          }
+          elements.forEach((element) => {
+            if (!element.url && element.chainlitKey) {
+              element.url = client.getElementUrl(
+                element.chainlitKey,
+                sessionId
+              );
+            }
+          });
+          setSideView((prev) => {
+            if (prev?.key === key && prev?.title === title) return prev;
+            return { title, elements, key };
+          });
+        }
+      );
+
       socket.on('element', (element: IElement) => {
         if (!element.url && element.chainlitKey) {
           element.url = client.getElementUrl(element.chainlitKey, sessionId);
