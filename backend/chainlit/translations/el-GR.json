@@ -83,8 +83,8 @@
       "start": "Έναρξη εγγραφής",
       "stop": "Διακοπή εγγραφής",
       "connecting": "Σύνδεση",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "Αποστολή εγγραφής",
+      "discard": "Απόρριψη εγγραφής"
     },
     "fileUpload": {
       "dragDrop": "Σύρετε αρχεία εδώ",

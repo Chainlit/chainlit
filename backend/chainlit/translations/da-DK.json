@@ -82,8 +82,8 @@
       "start": "Start optagelse",
       "stop": "Stop optagelse",
       "connecting": "Forbinder",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "Send optagelse",
+      "discard": "Kassér optagelse"
     },
     "fileUpload": {
       "dragDrop": "Træk og slip filer her",

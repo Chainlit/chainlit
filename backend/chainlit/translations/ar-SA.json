@@ -82,8 +82,8 @@
       "start": "بدء التسجيل",
       "stop": "إيقاف التسجيل",
       "connecting": "جاري الاتصال",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "إرسال التسجيل",
+      "discard": "تجاهل التسجيل"
     },
     "fileUpload": {
       "dragDrop": "اسحب وأفلت الملفات هنا",

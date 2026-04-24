@@ -69,8 +69,8 @@
       "start": "開始錄音",
       "stop": "停止錄音",
       "connecting": "連線中",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "傳送錄音",
+      "discard": "捨棄錄音"
     },
     "fileUpload": {
       "dragDrop": "拖曳檔案到這裡",

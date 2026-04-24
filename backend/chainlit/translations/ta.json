@@ -83,8 +83,8 @@
       "start": "பதிவு தொடங்கு",
       "stop": "பதிவை நிறுத்து",
       "connecting": "இணைக்கிறது",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "பதிவை அனுப்பு",
+      "discard": "பதிவை நிராகரி"
     },
     "fileUpload": {
       "dragDrop": "கோப்புகளை இங்கே இழுத்து விடவும்",

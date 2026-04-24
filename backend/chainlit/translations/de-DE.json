@@ -83,8 +83,8 @@
       "start": "Aufnahme starten",
       "stop": "Aufnahme stoppen",
       "connecting": "Verbinde",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "Aufnahme senden",
+      "discard": "Aufnahme verwerfen"
     },
     "fileUpload": {
       "dragDrop": "Ziehe deine Dateien hierher",

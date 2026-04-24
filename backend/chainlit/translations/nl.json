@@ -69,8 +69,8 @@
       "start": "Start opname",
       "stop": "Stop opname",
       "connecting": "Verbinden",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "Opname verzenden",
+      "discard": "Opname verwijderen"
     },
     "fileUpload": {
       "dragDrop": "Sleep bestanden hierheen",

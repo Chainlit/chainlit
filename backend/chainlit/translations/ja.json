@@ -69,8 +69,8 @@
       "start": "録音開始",
       "stop": "録音停止",
       "connecting": "接続中",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "録音を送信",
+      "discard": "録音を破棄"
     },
     "favorites": {
       "use": "お気に入りのメッセージを使用",

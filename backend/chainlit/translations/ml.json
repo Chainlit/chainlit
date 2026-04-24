@@ -83,8 +83,8 @@
       "start": "റെക്കോർഡിംഗ് ആരംഭിക്കുക",
       "stop": "റെക്കോർഡിംഗ് നിർത്തുക",
       "connecting": "ബന്ധിപ്പിക്കുന്നു",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "റെക്കോർഡിംഗ് അയയ്ക്കുക",
+      "discard": "റെക്കോർഡിംഗ് നിരസിക്കുക"
     },
     "fileUpload": {
       "dragDrop": "ഫയലുകൾ ഇവിടെ വലിച്ചിടുക",

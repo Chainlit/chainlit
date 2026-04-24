@@ -69,8 +69,8 @@
       "start": "রেকর্ডিং শুরু করুন",
       "stop": "রেকর্ডিং বন্ধ করুন",
       "connecting": "সংযোগ করা হচ্ছে",
-      "accept": "Send recording",
-      "discard": "Discard recording"
+      "accept": "রেকর্ডিং পাঠান",
+      "discard": "রেকর্ডিং বাতিল করুন"
     },
     "favorites": {
       "use": "একটি পছন্দের মেসেজ ব্যবহার করুন",
