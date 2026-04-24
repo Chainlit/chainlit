@@ -82,7 +82,9 @@
     "speech": {
       "start": "Έναρξη εγγραφής",
       "stop": "Διακοπή εγγραφής",
-      "connecting": "Σύνδεση"
+      "connecting": "Σύνδεση",
+      "accept": "Send recording",
+      "discard": "Discard recording"
     },
     "fileUpload": {
       "dragDrop": "Σύρετε αρχεία εδώ",

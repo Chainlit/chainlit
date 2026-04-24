@@ -81,7 +81,9 @@
     "speech": {
       "start": "بدء التسجيل",
       "stop": "إيقاف التسجيل",
-      "connecting": "جاري الاتصال"
+      "connecting": "جاري الاتصال",
+      "accept": "Send recording",
+      "discard": "Discard recording"
     },
     "fileUpload": {
       "dragDrop": "اسحب وأفلت الملفات هنا",

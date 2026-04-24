@@ -82,7 +82,9 @@
     "speech": {
       "start": "ರೆಕಾರ್ಡಿಂಗ್ ಪ್ರಾರಂಭಿಸಿ",
       "stop": "ರೆಕಾರ್ಡಿಂಗ್ ನಿಲ್ಲಿಸಿ",
-      "connecting": "ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ"
+      "connecting": "ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ",
+      "accept": "Send recording",
+      "discard": "Discard recording"
     },
     "fileUpload": {
       "dragDrop": "ಫೈಲ್‌ಗಳನ್ನು ಇಲ್ಲಿ ಎಳೆದು ಬಿಡಿ",

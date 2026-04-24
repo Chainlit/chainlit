@@ -82,7 +82,9 @@
     "speech": {
       "start": "녹음 시작",
       "stop": "녹음 중지",
-      "connecting": "연결 중"
+      "connecting": "연결 중",
+      "accept": "Send recording",
+      "discard": "Discard recording"
     },
     "fileUpload": {
       "dragDrop": "여기에 파일을 드래그 앤 드롭하세요",

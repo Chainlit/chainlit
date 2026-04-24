@@ -82,7 +82,9 @@
     "speech": {
       "start": "Iniciar grava\u00e7\u00e3o",
       "stop": "Parar grava\u00e7\u00e3o",
-      "connecting": "A ligar"
+      "connecting": "A ligar",
+      "accept": "Send recording",
+      "discard": "Discard recording"
     },
     "fileUpload": {
       "dragDrop": "Arraste e largue ficheiros aqui",

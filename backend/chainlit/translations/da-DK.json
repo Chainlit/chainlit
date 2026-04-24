@@ -81,7 +81,9 @@
     "speech": {
       "start": "Start optagelse",
       "stop": "Stop optagelse",
-      "connecting": "Forbinder"
+      "connecting": "Forbinder",
+      "accept": "Send recording",
+      "discard": "Discard recording"
     },
     "fileUpload": {
       "dragDrop": "Træk og slip filer her",
