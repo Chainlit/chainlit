@@ -78,6 +78,7 @@ tests = [
     "pytest-asyncio>=1.0.0,<2.0.0",
     "pytest-cov>=6.0.0,<7.0.0",
     "openai>=2.0.0,<3.0.0",
+    "litellm>=1.55,<2.0",
     "langchain>=1.0.0",
     "llama-index>=0.13.0,<1.0.0",
     "semantic-kernel>=1.24.0,<2.0.0",
