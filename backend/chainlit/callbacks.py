@@ -376,6 +376,13 @@ def on_audio_end(func: Callable) -> Callable:
     return func
 
 
+def on_audio_discard(func: Callable) -> Callable:
+    """Hook to react to audio being discarded by the user."""
+
+    config.code.on_audio_discard = wrap_user_function(func, with_task=False)
+    return func
+
+
 def author_rename(
     func: Callable[[str], Awaitable[str]],
 ) -> Callable[[str], Awaitable[str]]:

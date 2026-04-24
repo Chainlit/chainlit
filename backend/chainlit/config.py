@@ -403,6 +403,7 @@ class CodeSettings(BaseModel):
     on_audio_start: Optional[Callable[[], Any]] = None
     on_audio_chunk: Optional[Callable[["InputAudioChunk"], Any]] = None
     on_audio_end: Optional[Callable[[], Any]] = None
+    on_audio_discard: Optional[Callable[[], Any]] = None
     on_mcp_connect: Optional[Callable] = None
     on_mcp_disconnect: Optional[Callable] = None
     on_settings_edit: Optional[Callable[[Dict[str, Any]], Any]] = None

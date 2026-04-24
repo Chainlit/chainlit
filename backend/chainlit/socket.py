@@ -457,6 +457,30 @@ async def audio_chunk(sid, payload: InputAudioChunkPayload):
         asyncio.create_task(config.code.on_audio_chunk(InputAudioChunk(**payload)))
 
 
+@sio.on("audio_discard")
+async def audio_discard(sid):
+    """Handle the user discarding the audio stream."""
+    session = WebsocketSession.require(sid)
+
+    try:
+        context = init_ws_context(session)
+        config: ChainlitConfig = session.get_config()  # type: ignore
+
+        if (
+            config.features.audio
+            and config.features.audio.enabled
+            and config.code.on_audio_discard
+        ):
+            await config.code.on_audio_discard()
+
+        await context.emitter.update_audio_connection("off")
+
+    except asyncio.CancelledError:
+        pass
+    except Exception as e:
+        logger.exception(e)
+
+
 @sio.on("audio_end")
 async def audio_end(sid):
     """Handle the end of the audio stream."""
