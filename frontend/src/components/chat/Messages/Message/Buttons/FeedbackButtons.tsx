@@ -47,10 +47,6 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
   const firstInteraction = useRecoilValue(firstUserInteraction);
   const { idToResume } = useChatSession();
 
-  if (!showFeedbackButtons) {
-    return null;
-  }
-
   const handleFeedbackChange = useCallback(
     (newFeedback?: number, newComment?: string) => {
       if (newFeedback === undefined) {
@@ -96,6 +92,10 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
   );
 
   const isDisabled = message.streaming || !(firstInteraction || idToResume);
+
+  if (!showFeedbackButtons) {
+    return null;
+  }
 
   return (
     <div className="flex items-center">
