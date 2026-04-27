@@ -51,7 +51,8 @@ describe('ChatProfiles', () => {
     // the chat profile changes, so `config?.chatProfiles?.length` flips
     // between truthy and falsy across consecutive renders. If any hooks live
     // below the guard, the hook count differs between renders and React
-    // throws "Rendered fewer/more hooks than during the previous render".
+    // throws "Rendered fewer hooks than expected" (invariant 300) or
+    // "Rendered more hooks than during the previous render" (invariant 310).
     const twoProfiles = {
       chatProfiles: [
         { name: 'GPT-3.5', markdown_description: 'a', icon: '' },
@@ -77,9 +78,9 @@ describe('ChatProfiles', () => {
       .map((call) => String(call[0]))
       .find(
         (msg) =>
-          /Rendered (fewer|more) hooks than during the previous render/.test(
-            msg
-          ) || /change in the order of Hooks/.test(msg)
+          /Rendered fewer hooks than expected/.test(msg) ||
+          /Rendered more hooks than during the previous render/.test(msg) ||
+          /change in the order of Hooks/.test(msg)
       );
 
     expect(hooksOrderError).toBeUndefined();

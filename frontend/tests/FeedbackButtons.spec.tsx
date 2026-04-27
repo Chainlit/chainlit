@@ -83,9 +83,9 @@ describe('FeedbackButtons', () => {
       .map((call) => String(call[0]))
       .find(
         (msg) =>
-          /Rendered (fewer|more) hooks than during the previous render/.test(
-            msg
-          ) || /change in the order of Hooks/.test(msg)
+          /Rendered fewer hooks than expected/.test(msg) ||
+          /Rendered more hooks than during the previous render/.test(msg) ||
+          /change in the order of Hooks/.test(msg)
       );
 
     expect(hooksOrderError).toBeUndefined();
