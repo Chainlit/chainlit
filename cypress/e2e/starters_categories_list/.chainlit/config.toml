@@ -1,0 +1,7 @@
+[project]
+allow_origins = ["*"]
+
+[UI]
+name = "Assistant"
+cot = "full"
+starters_layout = "list"
