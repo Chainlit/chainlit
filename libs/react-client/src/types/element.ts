@@ -2,6 +2,7 @@ export type IElement =
   | IImageElement
   | ITextElement
   | IPdfElement
+  | IPdfjsElement
   | ITasklistElement
   | IAudioElement
   | IVideoElement
@@ -14,6 +15,7 @@ export type IMessageElement =
   | IImageElement
   | ITextElement
   | IPdfElement
+  | IPdfjsElement
   | IAudioElement
   | IVideoElement
   | IFileElement
@@ -48,6 +50,10 @@ export interface ITextElement extends TMessageElement<'text'> {
 }
 
 export interface IPdfElement extends TMessageElement<'pdf'> {
+  page?: number;
+}
+
+export interface IPdfjsElement extends TMessageElement<'pdfjs'> {
   page?: number;
 }
 

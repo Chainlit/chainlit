@@ -6,6 +6,7 @@ import { FileElement } from './File';
 import { ImageElement } from './Image';
 import { LazyDataframe } from './LazyDataframe';
 import { PDFElement } from './PDF';
+import { PDFjsElement } from './PDFjs';
 import { PlotlyElement } from './Plotly';
 import { TextElement } from './Text';
 import { VideoElement } from './Video';
@@ -24,6 +25,8 @@ const Element = ({ element }: ElementProps): JSX.Element | null => {
       return <TextElement element={element} />;
     case 'pdf':
       return <PDFElement element={element} />;
+    case 'pdfjs':
+      return <PDFjsElement element={element} />;
     case 'audio':
       return <AudioElement element={element} />;
     case 'video':
