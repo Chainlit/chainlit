@@ -138,9 +138,60 @@ class MessageBase(ABC):
                     raise e
                 logger.error(f"Failed to persist message deletion: {e!s}")
 
+        try:
+            await self.remove_children()
+        except Exception as e:
+            if self.fail_on_persist_error:
+                raise e
+            logger.error(f"Failed to persist message children deletion: {e!s}")
+
         await context.emitter.delete_step(step_dict)
 
         return True
+
+    async def remove_children(self):
+        data_layer = get_data_layer()
+        if not data_layer:
+            return
+
+        thread = await data_layer.get_thread(self.thread_id)
+        if thread is None:
+            return
+
+        steps = thread.get("steps", [])
+
+        def collect_descendants(parent_id: str, visited: Optional[set] = None) -> list:
+            """Return descendant IDs in post-order (leaves first, parents last)."""
+            if visited is None:
+                visited = set()
+            if parent_id in visited:
+                return []
+            visited.add(parent_id)
+            result = []
+            for step in steps:
+                if step.get("parentId") == parent_id:
+                    result.extend(collect_descendants(step["id"], visited))
+                    result.append(step["id"])
+            return result
+
+        # Ordered leaves-first so that referential integrity constraints are respected.
+        ordered_descendant_ids = collect_descendants(self.id)
+        descendant_set = set(ordered_descendant_ids)
+
+        for step in steps:
+            step_id = step.get("id")
+            feedback_id = (step.get("feedback") or {}).get("id")
+            if step_id in descendant_set and feedback_id:
+                await data_layer.delete_feedback(feedback_id)
+
+        for element in thread.get("elements", []):
+            for_id = element.get("forId")
+            element_id = element.get("id")
+            if for_id in descendant_set and element_id:
+                await data_layer.delete_element(element_id, self.thread_id)
+
+        for step_id in ordered_descendant_ids:
+            await data_layer.delete_step(step_id)
 
     async def _create(self):
         step_dict = self.to_dict()
