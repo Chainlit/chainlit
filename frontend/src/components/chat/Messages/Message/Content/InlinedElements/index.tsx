@@ -8,6 +8,7 @@ import { InlinedDataframeList } from './InlinedDataframeList';
 import { InlinedFileList } from './InlinedFileList';
 import { InlinedImageList } from './InlinedImageList';
 import { InlinedPDFList } from './InlinedPDFList';
+import { InlinedPDFjsList } from './InlinedPDFjsList';
 import { InlinedPlotlyList } from './InlinedPlotlyList';
 import { InlinedTextList } from './InlinedTextList';
 import { InlinedVideoList } from './InlinedVideoList';
@@ -57,6 +58,9 @@ const InlinedElements = ({ elements, className }: Props) => {
       ) : null}
       {elementsByType.pdf?.length ? (
         <InlinedPDFList items={elementsByType.pdf} />
+      ) : null}
+      {elementsByType.pdfjs?.length ? (
+        <InlinedPDFjsList items={elementsByType.pdfjs} />
       ) : null}
       {elementsByType.audio?.length ? (
         <InlinedAudioList items={elementsByType.audio} />

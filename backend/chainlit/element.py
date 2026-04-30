@@ -34,6 +34,7 @@ ElementType = Literal[
     "image",
     "text",
     "pdf",
+    "pdfjs",
     "tasklist",
     "audio",
     "video",
@@ -277,6 +278,15 @@ class Pdf(Element):
     mime: str = "application/pdf"
     page: Optional[int] = None
     type: ClassVar[ElementType] = "pdf"
+
+
+@dataclass
+class Pdfjs(Element):
+    """Useful to send a pdf to the UI rendered with the PDF.js-based viewer."""
+
+    mime: str = "application/pdf"
+    page: Optional[int] = None
+    type: ClassVar[ElementType] = "pdfjs"
 
 
 @dataclass
