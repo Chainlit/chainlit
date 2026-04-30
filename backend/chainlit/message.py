@@ -176,6 +176,19 @@ class MessageBase(ABC):
 
         # Ordered leaves-first so that referential integrity constraints are respected.
         ordered_descendant_ids = collect_descendants(self.id)
+        descendant_set = set(ordered_descendant_ids)
+
+        for step in steps:
+            step_id = step.get("id")
+            feedback_id = (step.get("feedback") or {}).get("id")
+            if step_id in descendant_set and feedback_id:
+                await data_layer.delete_feedback(feedback_id)
+
+        for element in thread.get("elements", []):
+            for_id = element.get("forId")
+            element_id = element.get("id")
+            if for_id in descendant_set and element_id:
+                await data_layer.delete_element(element_id, self.thread_id)
 
         for step_id in ordered_descendant_ids:
             await data_layer.delete_step(step_id)
