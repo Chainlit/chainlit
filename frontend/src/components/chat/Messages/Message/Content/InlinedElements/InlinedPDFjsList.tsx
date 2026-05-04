@@ -8,9 +8,9 @@ interface Props {
 
 const InlinedPDFjsList = ({ items }: Props) => (
   <div className="flex flex-col gap-2">
-    {items.map((pdf, i) => {
+    {items.map((pdf) => {
       return (
-        <div key={i}>
+        <div key={pdf.id}>
           <PDFjsElement element={pdf} />
         </div>
       );
