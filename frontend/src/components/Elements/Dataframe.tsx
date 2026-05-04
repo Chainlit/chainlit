@@ -90,8 +90,8 @@ interface DataframeElementProps {
 
 const _DataframeElement = ({
   data,
-  showColumnVisibility = true,
-  showColumnFilters = true
+  showColumnVisibility = false,
+  showColumnFilters = false
 }: DataframeElementProps) => {
   const { index, columns, data: rowData } = data;
   const { t } = useTranslation();
