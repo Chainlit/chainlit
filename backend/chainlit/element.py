@@ -467,19 +467,20 @@ class Dataframe(Element):
 
     def __post_init__(self) -> None:
         """Ensures the data is a pandas or polars DataFrame and converts it to JSON."""
-        if self._is_pandas_dataframe(self.data):
-            self.content = self.data.to_json(orient="split", date_format="iso")
-        elif self._is_polars_dataframe(self.data):
-            self.content = json.dumps(
-                {
-                    "columns": self.data.columns,
-                    "index": list(range(len(self.data))),
-                    "data": self.data.rows(),
-                },
-                default=str,
-            )
-        else:
-            raise TypeError("data must be a pandas.DataFrame or polars.DataFrame")
+        if self.data is not None:
+            if self._is_pandas_dataframe(self.data):
+                self.content = self.data.to_json(orient="split", date_format="iso")
+            elif self._is_polars_dataframe(self.data):
+                self.content = json.dumps(
+                    {
+                        "columns": self.data.columns,
+                        "index": list(range(len(self.data))),
+                        "data": self.data.rows(),
+                    },
+                    default=str,
+                )
+            else:
+                raise TypeError("data must be a pandas.DataFrame or polars.DataFrame")
 
         super().__post_init__()
 
