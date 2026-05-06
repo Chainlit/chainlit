@@ -142,7 +142,11 @@ def instrument_litellm() -> None:
                 if generation.message_completion:
                     step.output = generation.message_completion  # type: ignore
 
-                asyncio.create_task(step.send())
+                try:
+                    loop = asyncio.get_running_loop()
+                    loop.create_task(step.send())
+                except RuntimeError:
+                    asyncio.run(step.send())
             except Exception:
                 pass
 
