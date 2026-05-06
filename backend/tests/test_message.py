@@ -1,7 +1,7 @@
 import asyncio
 import json
 from contextlib import contextmanager
-from unittest.mock import AsyncMock, Mock, call, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 
@@ -767,6 +767,33 @@ class TestRemoveChildren:
         msg.thread_id = thread_id
         return msg
 
+    def _tracked_data_layer(self, get_thread_result):
+        """
+        Data layer mock whose delete_* / get_thread record only when awaited
+        (misses missing-await bugs). ``events`` is the strict call sequence.
+        """
+        events: list[tuple] = []
+
+        async def get_thread(thread_id):
+            events.append(("get_thread", thread_id))
+            return get_thread_result
+
+        async def delete_feedback(feedback_id):
+            events.append(("delete_feedback", feedback_id))
+
+        async def delete_element(element_id, thread_id=None):
+            events.append(("delete_element", element_id, thread_id))
+
+        async def delete_step(step_id):
+            events.append(("delete_step", step_id))
+
+        mock_layer = AsyncMock()
+        mock_layer.get_thread = AsyncMock(side_effect=get_thread)
+        mock_layer.delete_feedback = AsyncMock(side_effect=delete_feedback)
+        mock_layer.delete_element = AsyncMock(side_effect=delete_element)
+        mock_layer.delete_step = AsyncMock(side_effect=delete_step)
+        return mock_layer, events
+
     @pytest.mark.asyncio
     async def test_no_data_layer(self):
         """Does nothing when there is no data layer."""
@@ -778,15 +805,12 @@ class TestRemoveChildren:
     async def test_thread_not_found(self):
         """Does nothing when the thread does not exist."""
         msg = self._make_message()
-        mock_data_layer = AsyncMock()
-        mock_data_layer.get_thread.return_value = None
+        mock_data_layer, events = self._tracked_data_layer(None)
 
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        mock_data_layer.delete_step.assert_not_called()
-        mock_data_layer.delete_element.assert_not_called()
-        mock_data_layer.delete_feedback.assert_not_called()
+        assert events == [("get_thread", "thread_1")]
 
     @pytest.mark.asyncio
     async def test_no_children(self):
@@ -799,15 +823,12 @@ class TestRemoveChildren:
             ],
             "elements": [],
         }
-        mock_data_layer = AsyncMock()
-        mock_data_layer.get_thread.return_value = thread
+        mock_data_layer, events = self._tracked_data_layer(thread)
 
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        mock_data_layer.delete_step.assert_not_called()
-        mock_data_layer.delete_element.assert_not_called()
-        mock_data_layer.delete_feedback.assert_not_called()
+        assert events == [("get_thread", "thread_1")]
 
     @pytest.mark.asyncio
     async def test_direct_children_deleted(self):
@@ -821,18 +842,16 @@ class TestRemoveChildren:
             ],
             "elements": [],
         }
-        mock_data_layer = AsyncMock()
-        mock_data_layer.get_thread.return_value = thread
+        mock_data_layer, events = self._tracked_data_layer(thread)
 
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        deleted_ids = [
-            call.args[0] for call in mock_data_layer.delete_step.call_args_list
+        assert events == [
+            ("get_thread", "thread_1"),
+            ("delete_step", "child_1"),
+            ("delete_step", "child_2"),
         ]
-        assert deleted_ids == ["child_1", "child_2"]
-        mock_data_layer.delete_element.assert_not_called()
-        mock_data_layer.delete_feedback.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_nested_descendants_deleted(self):
@@ -848,20 +867,17 @@ class TestRemoveChildren:
             ],
             "elements": [],
         }
-        mock_data_layer = AsyncMock()
-        mock_data_layer.get_thread.return_value = thread
+        mock_data_layer, events = self._tracked_data_layer(thread)
 
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        deleted_ids = [
-            call.args[0] for call in mock_data_layer.delete_step.call_args_list
+        assert events == [
+            ("get_thread", "thread_1"),
+            ("delete_step", "great_grandchild_1"),
+            ("delete_step", "grandchild_1"),
+            ("delete_step", "child_1"),
         ]
-        assert deleted_ids == ["great_grandchild_1", "grandchild_1", "child_1"]
-        assert "msg_1" not in deleted_ids
-        assert "unrelated" not in deleted_ids
-        mock_data_layer.delete_feedback.assert_not_called()
-        mock_data_layer.delete_element.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_feedback_and_elements_deleted_before_steps(self):
@@ -888,22 +904,18 @@ class TestRemoveChildren:
                 {"id": "el_unrelated", "forId": "other_root", "threadId": "thread_1"},
             ],
         }
-        mock_data_layer = AsyncMock()
-        mock_data_layer.get_thread.return_value = thread
+        mock_data_layer, events = self._tracked_data_layer(thread)
 
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        mock_data_layer.assert_has_calls(
-            [
-                call.get_thread("thread_1"),
-                call.delete_feedback("fb_1"),
-                call.delete_element("el_1", "thread_1"),
-                call.delete_step("child_1"),
-                call.delete_step("child_2"),
-            ],
-            any_order=False,
-        )
+        assert events == [
+            ("get_thread", "thread_1"),
+            ("delete_feedback", "fb_1"),
+            ("delete_element", "el_1", "thread_1"),
+            ("delete_step", "child_1"),
+            ("delete_step", "child_2"),
+        ]
 
     @pytest.mark.asyncio
     async def test_message_itself_is_not_deleted(self):
@@ -916,15 +928,12 @@ class TestRemoveChildren:
             ],
             "elements": [],
         }
-        mock_data_layer = AsyncMock()
-        mock_data_layer.get_thread.return_value = thread
+        mock_data_layer, events = self._tracked_data_layer(thread)
 
         with patch("chainlit.message.get_data_layer", return_value=mock_data_layer):
             await msg.remove_children()
 
-        deleted_ids = [
-            call.args[0] for call in mock_data_layer.delete_step.call_args_list
+        assert events == [
+            ("get_thread", "thread_1"),
+            ("delete_step", "child_1"),
         ]
-        assert "msg_1" not in deleted_ids
-        mock_data_layer.delete_feedback.assert_not_called()
-        mock_data_layer.delete_element.assert_not_called()
