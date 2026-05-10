@@ -32,11 +32,11 @@ def decode_jwt(token: str) -> User:
     secret = get_jwt_secret()
     assert secret
 
-    dict = pyjwt.decode(
+    decoded_token = pyjwt.decode(
         token,
         secret,
         algorithms=["HS256"],
         options={"verify_signature": True},
     )
-    del dict["exp"]
-    return User(**dict)
+    del decoded_token["exp"]
+    return User(**decoded_token)
