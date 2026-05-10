@@ -309,7 +309,7 @@ async def process_message(session: WebsocketSession, payload: MessagePayload):
             await asyncio.sleep(0.001)
             await config.code.on_message(message)
     except asyncio.CancelledError:
-        pass
+        raise
     except Exception as e:
         logger.exception(e)
         await ErrorMessage(
@@ -344,7 +344,7 @@ async def edit_message(sid, payload: MessagePayload):
         try:
             await config.code.on_message(orig_message)
         except asyncio.CancelledError:
-            pass
+            raise
         finally:
             await context.emitter.task_end()
 
@@ -423,7 +423,7 @@ async def window_message(sid, data):
         try:
             await config.code.on_window_message(data)
         except asyncio.CancelledError:
-            pass
+            raise
 
 
 @sio.on("audio_start")  # pyright: ignore [reportOptionalCall]
@@ -476,7 +476,7 @@ async def audio_end(sid):
             await config.code.on_audio_end()
 
     except asyncio.CancelledError:
-        pass
+        raise
     except Exception as e:
         logger.exception(e)
         await ErrorMessage(
