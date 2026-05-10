@@ -1482,7 +1482,20 @@ async def connect_mcp(
     )
 
     # Wait for the background task to finish initialisation.
-    await ready_event.wait()
+    try:
+        await asyncio.wait_for(ready_event.wait(), timeout=30)
+    except asyncio.TimeoutError:
+        task.cancel()
+        try:
+            await task
+        except BaseException:
+            pass
+        return JSONResponse(
+            status_code=504,
+            content={
+                "detail": f"MCP connection to '{payload.name}' timed out during initialization"
+            },
+        )
 
     if "error" in result_holder:
         # The task already exited and cleaned up its exit stack.
