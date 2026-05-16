@@ -1152,3 +1152,64 @@ def test_health_check(test_client: TestClient):
     response = test_client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+@pytest.mark.parametrize(("is_shared", "on_shared_thread_view_result", "allowed"), [
+    (True, True, True),
+    (True, False, False),
+    (True, ValueError("error"), False),
+    (False, True, True),
+    (False, False, False),
+])
+def test_get_shared_thread_access(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    is_shared: bool,
+    on_shared_thread_view_result: bool | Exception,
+    allowed: bool,
+):
+    """Check if shared thread access is allowed based on is_shared and on_shared_thread_view result."""
+    import chainlit.data as data_mod
+    from chainlit.server import app as _app, get_current_user as _get_current_user
+
+    viewer = PersistedUser(
+        id="viewer1",
+        createdAt=datetime.datetime.now().isoformat(),
+        identifier="viewer",
+    )
+    _app.dependency_overrides[_get_current_user] = lambda: viewer
+
+    dl = AsyncMock()
+    dl.get_thread.return_value = {
+        "id": "shared-thread-1",
+        "name": "Shared Thread",
+        "userIdentifier": "author",
+        "metadata": {"is_shared": is_shared, "chat_profile": "pro"},
+    }
+    dl.get_thread_author.return_value = "author"
+    dl.build_debug_url.return_value = ""
+
+    data_mod._data_layer = dl
+    data_mod._data_layer_initialized = True
+
+    async def deny_cb(thread, user):
+        if isinstance(on_shared_thread_view_result, Exception):
+            raise on_shared_thread_view_result
+        return on_shared_thread_view_result
+
+    test_config.code.on_shared_thread_view = deny_cb
+
+    r = test_client.get("/project/share/shared-thread-1")
+
+    if allowed:
+        assert r.status_code == 200
+        assert r.json()["id"] == "shared-thread-1"
+    else:
+        assert r.status_code == 404
+        assert r.json() == {"detail": "Thread not found"}
+
+    # Cleanup
+    del _app.dependency_overrides[_get_current_user]
+    data_mod._data_layer = None
+    data_mod._data_layer_initialized = False
+    test_config.code.on_shared_thread_view = None
