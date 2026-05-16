@@ -36,11 +36,17 @@ const useUpload = ({ onError, onResolved, options, spec }: useUploadProps) => {
   const accept = spec.accept;
 
   if (Array.isArray(accept)) {
-    accept.forEach((a) => {
-      if (typeof a === 'string') {
-        dzAccept[a] = [];
-      }
-    });
+    // "*/*" means "any file" but react-dropzone treats it as a literal
+    // MIME and rejects it; an empty accept map falls back to accept-all.
+    if (accept.includes('*/*')) {
+      dzAccept = {};
+    } else {
+      accept.forEach((a) => {
+        if (typeof a === 'string') {
+          dzAccept[a] = [];
+        }
+      });
+    }
   } else if (typeof accept === 'object') {
     dzAccept = accept;
   }
