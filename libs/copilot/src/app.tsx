@@ -55,6 +55,30 @@ export default function App({ widgetConfig }: Props) {
 
   const defaultTheme = widgetConfig.theme || data?.default_theme;
 
+  // Detect third-party cookie blocking errors
+  const isCookieBlockedError = (error: string): boolean => {
+    const lowerError = error.toLowerCase();
+    return (
+      lowerError.includes('set-cookie') ||
+      lowerError.includes('cookie') ||
+      lowerError.includes('blocked') ||
+      lowerError.includes('third-party') ||
+      lowerError.includes('third party')
+    );
+  };
+
+  // Format error message with helpful instructions for cookie issues
+  const formatAuthError = (err: unknown): string => {
+    const errorStr = String(err);
+    if (isCookieBlockedError(errorStr)) {
+      return (
+        'Authentication failed due to third-party cookies being blocked. ' +
+        'Please allow third-party cookies in your browser settings to use the Copilot.'
+      );
+    }
+    return errorStr;
+  };
+
   useEffect(() => {
     if (fetchError) return;
     if (!isAuthenticated) {
@@ -63,7 +87,7 @@ export default function App({ widgetConfig }: Props) {
       } else {
         apiClient
           .jwtAuth(widgetConfig.accessToken)
-          .catch((err) => setAuthError(String(err)));
+          .catch((err) => setAuthError(formatAuthError(err)));
       }
     } else {
       setAuthError(undefined);
