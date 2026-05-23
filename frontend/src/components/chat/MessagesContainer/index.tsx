@@ -94,6 +94,9 @@ const MessagesContainer = ({ navigate }: Props) => {
   const knownSideElementsRef = useRef<Map<string, IMessageElement>>(new Map());
   const knownSideOrderRef = useRef<string[]>([]);
 
+  // Check if side panel should auto-open based on config
+  const shouldAutoOpenSidePanel = config?.features?.side_panel?.default_state !== 'closed';
+
   useEffect(() => {
     const sideElements = elements.filter((e) => e.display === 'side');
 
@@ -101,6 +104,12 @@ const MessagesContainer = ({ navigate }: Props) => {
       knownSideElementsRef.current = new Map();
       knownSideOrderRef.current = [];
       setSideView(undefined);
+      return;
+    }
+
+    // If default_state is 'closed', don't auto-open the side panel
+    // User must manually click to open it via onElementRefClick
+    if (!shouldAutoOpenSidePanel) {
       return;
     }
 
@@ -123,7 +132,7 @@ const MessagesContainer = ({ navigate }: Props) => {
         elements: sideElements
       });
     }
-  }, [elements]);
+  }, [elements, shouldAutoOpenSidePanel]);
 
   const onElementRefClick = useCallback(
     (element: IMessageElement) => {

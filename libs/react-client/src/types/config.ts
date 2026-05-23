@@ -67,6 +67,9 @@ export interface IChainlitConfig {
     }[];
   };
   features: {
+    side_panel?: {
+      default_state?: 'open' | 'closed';
+    };
     spontaneous_file_upload?: {
       enabled?: boolean;
       max_size_mb?: number;
