@@ -546,9 +546,23 @@ def on_shared_thread_view(
     """Hook to authorize viewing a shared thread.
 
     Users must implement and return True to allow a non-author to view a thread.
-    This callback is the sole gatekeeper for the GET /project/share/{thread_id} endpoint.
-    Thread metadata may contain "is_shared" boolean flag and "shared_at" timestamp for custom thread sharing.
+    Thread metadata contains "is_shared" boolean flag and "shared_at" timestamp for custom thread sharing.
     Signature: async (thread: ThreadDict, viewer: Optional[User]) -> bool
     """
     config.code.on_shared_thread_view = wrap_user_function(func)
+    return func
+
+
+def on_shared_thread_access_allowed(
+    func: Callable[[ThreadDict, Optional[User]], Awaitable[bool]],
+) -> Callable[[ThreadDict, Optional[User]], Awaitable[bool]]:
+    """Hook to add extra permission check for viewing a shared thread.
+
+    Unlike on_shared_thread_view, this callback can only deny access further.
+    If defined and returns False, the viewer is blocked regardless of other checks.
+    If undefined or returns True, normal authorization flow proceeds.
+
+    Signature: async (thread: ThreadDict, viewer: Optional[User]) -> bool
+    """
+    config.code.on_shared_thread_access_allowed = wrap_user_function(func)
     return func

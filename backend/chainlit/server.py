@@ -992,9 +992,8 @@ async def get_shared_thread(
     """Get a shared thread (read-only for everyone).
 
     This endpoint is separate from the resume endpoint and does not require the caller
-    to be the author of the thread. Access is authorized by the app-defined
-    on_shared_thread_view callback — if the callback returns True the thread is
-    returned; otherwise a 404 is raised to avoid leaking existence.
+    to be the author of the thread. It only returns the thread if its metadata
+    contains is_shared=True. Otherwise, it returns 404 to avoid leaking existence.
     """
 
     data_layer = get_data_layer()
@@ -1002,7 +1001,7 @@ async def get_shared_thread(
     if not data_layer:
         raise HTTPException(status_code=400, detail="Data persistence is not enabled")
 
-    # Retrieve thread from data layer; authorization is handled by the on_shared_thread_view callback below
+    # No auth required: allow anonymous access to shared threads
     thread = await data_layer.get_thread(thread_id)
 
     if not thread:
@@ -1025,10 +1024,22 @@ async def get_shared_thread(
             )
         except Exception:
             user_can_view = False
+    is_shared = bool(metadata.get("is_shared"))
 
-    # Proceed only raise an error if user_can_view return False or exception
-    if not user_can_view:
+    if (not user_can_view) and (not is_shared):
         raise HTTPException(status_code=404, detail="Thread not found")
+
+    if getattr(config.code, "on_shared_thread_access_allowed", None):
+        try:
+            access_allowed = await config.code.on_shared_thread_access_allowed(
+                thread, current_user
+            )
+            if not access_allowed:
+                raise HTTPException(status_code=404, detail="Thread not found")
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=404, detail="Thread not found")
 
     metadata.pop("chat_profile", None)
     metadata.pop("chat_settings", None)
