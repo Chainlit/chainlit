@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
-import hljs from 'highlight.js';
+import hljs, { LanguageFn } from 'highlight.js';
+import iecst from 'highlightjs-structured-text';
 import { useEffect, useRef } from 'react';
 
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
@@ -8,9 +9,24 @@ import 'highlight.js/styles/monokai-sublime.css';
 
 import CopyButton from './CopyButton';
 
+// Append this list with missing languages as needed, ensuring they are registered with hljs
+const additionalLanguages: LanguageRegistrations = [['iecst', iecst]];
+
+registerAdditionalLanguages();
+
+type LanguageRegistrations = [string, LanguageFn][];
+
 interface CodeSnippetProps {
   language: string;
   children: string;
+}
+
+function registerAdditionalLanguages() {
+  for (const [name, lang] of additionalLanguages) {
+    if (!hljs.getLanguage(name)) {
+      hljs.registerLanguage(name, lang);
+    }
+  }
 }
 
 const HighlightedCode = ({ language, children }: CodeSnippetProps) => {
