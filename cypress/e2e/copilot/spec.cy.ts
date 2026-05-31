@@ -302,4 +302,57 @@ describe('Copilot', { includeShadowDom: true }, () => {
       });
     });
   });
+
+  describe('Theme', () => {
+    beforeEach(() => {
+      cy.window().then((win) => {
+        win.localStorage.removeItem('vite-ui-theme');
+      });
+    });
+
+    it('should be able to change theme programmatically', () => {
+      mountCopilotWidget();
+      cy.window().should('have.property', 'setChainlitCopilotTheme');
+
+      cy.step('Change to dark theme');
+      cy.window().then((win) => {
+        win.setChainlitCopilotTheme('dark');
+      });
+
+      cy.get('#chainlit-copilot')
+        .shadow()
+        .find('#cl-shadow-root')
+        .should('have.class', 'dark');
+      cy.window().then((win) => {
+        expect(win.localStorage.getItem('vite-ui-theme')).to.equal('dark');
+      });
+
+      cy.step('Change to light theme');
+      cy.window().then((win) => {
+        win.setChainlitCopilotTheme('light');
+      });
+
+      cy.get('#chainlit-copilot')
+        .shadow()
+        .find('#cl-shadow-root')
+        .should('have.class', 'light');
+      cy.window().then((win) => {
+        expect(win.localStorage.getItem('vite-ui-theme')).to.equal('light');
+      });
+    });
+
+    it('should respect persisted theme on mount', () => {
+      cy.step('Pre-set dark theme in localStorage');
+      cy.window().then((win) => {
+        win.localStorage.setItem('vite-ui-theme', 'dark');
+      });
+
+      mountCopilotWidget();
+
+      cy.get('#chainlit-copilot')
+        .shadow()
+        .find('#cl-shadow-root')
+        .should('have.class', 'dark');
+    });
+  });
 });
