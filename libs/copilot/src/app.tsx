@@ -28,6 +28,7 @@ declare global {
     };
     getChainlitCopilotThreadId: () => string | null;
     clearChainlitCopilotThreadId: (newThreadId?: string) => void;
+    setChainlitCopilotTheme: (theme: any) => void;
   }
 }
 

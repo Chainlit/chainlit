@@ -13,6 +13,7 @@ import { useConfig } from '@chainlit/react-client';
 
 import Header from './components/Header';
 
+import { useTheme } from './ThemeProvider';
 import ChatWrapper from './chat';
 import { useSidebarResize } from './hooks';
 import { LS_DISPLAY_MODE_KEY, resolveDisplayMode } from './resolveDisplayMode';
@@ -28,6 +29,7 @@ interface Props {
 }
 
 const Widget = ({ config, error }: Props) => {
+  const { setTheme } = useTheme();
   const [expanded, setExpanded] = useState(config?.expanded || false);
   const [isOpen, setIsOpen] = useState(config?.opened || false);
   const [displayMode, setDisplayMode] = useState<DisplayMode>(() =>
@@ -43,6 +45,7 @@ const Widget = ({ config, error }: Props) => {
     window.toggleChainlitCopilot = () => setIsOpen((prev) => !prev);
     window.getChainlitCopilotThreadId = getChainlitCopilotThreadId;
     window.clearChainlitCopilotThreadId = clearChainlitCopilotThreadId;
+    window.setChainlitCopilotTheme = setTheme;
 
     return () => {
       window.toggleChainlitCopilot = () => console.error('Widget not mounted.');
@@ -50,8 +53,10 @@ const Widget = ({ config, error }: Props) => {
 
       window.clearChainlitCopilotThreadId = () =>
         console.error('Widget not mounted.');
+      window.setChainlitCopilotTheme = () =>
+        console.error('Widget not mounted.');
     };
-  }, []);
+  }, [setTheme]);
 
   useEffect(() => {
     localStorage.setItem(LS_DISPLAY_MODE_KEY, displayMode);
