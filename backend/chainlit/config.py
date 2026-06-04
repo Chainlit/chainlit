@@ -633,7 +633,7 @@ def load_settings():
         ui_settings = toml_dict.get("UI", {})
         meta = toml_dict.get("meta")
 
-        if not meta or meta.get("generated_by") <= "0.3.0":
+        if not meta or not meta.get("generated_by") or meta.get("generated_by") <= "0.3.0":
             raise ValueError(
                 f"Your config file '{config_file}' is outdated. Please delete it and restart the app to regenerate it."
             )
