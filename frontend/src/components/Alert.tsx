@@ -80,7 +80,7 @@ export const Alert: React.FC<AlertProps> = ({
   return (
     <div
       id={id}
-      role="alert"
+      role={variant === 'error' ? 'alert' : 'status'}
       className={cn(
         'border rounded-lg p-4 mb-4 alert',
         styles.container,

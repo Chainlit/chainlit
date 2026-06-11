@@ -679,7 +679,7 @@ async def oauth_callback(
     try:
         validate_oauth_state_cookie(request, state)
     except Exception as e:
-        logger.exception("Unable to validate oauth state: %s", e)
+        logger.warning("Unable to validate oauth state: %s", e)
         return _get_oauth_redirect_error(request, "oauthSignin")
 
     url = get_user_facing_url(request.url)
