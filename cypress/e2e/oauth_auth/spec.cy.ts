@@ -7,7 +7,9 @@ describe('OAuth Auth Error UX (#1273)', () => {
         failOnStatusCode: false
       }).then((response) => {
         expect(response.status).to.be.oneOf([301, 302, 303, 307, 308]);
-        expect(response.headers['location']).to.include('/login?error=');
+        expect(response.headers['location']).to.include(
+          '/login?error=oauthSignin'
+        );
       });
     });
 
@@ -19,7 +21,9 @@ describe('OAuth Auth Error UX (#1273)', () => {
       }).then((response) => {
         expect(response.status).to.be.oneOf([301, 302, 303, 307, 308]);
         expect(response.headers['location']).to.include('/login?error=');
-        expect(response.body).to.not.include('{"detail"');
+        expect(response.headers['content-type'] || '').to.not.include(
+          'application/json'
+        );
       });
     });
   });
@@ -29,7 +33,7 @@ describe('OAuth Auth Error UX (#1273)', () => {
       cy.visit('/login?error=oauthSignin');
       cy.get('[role="alert"]').should(
         'contain',
-        'Try signing in with a different account'
+        'Sign in failed. Please try again, or use a different sign-in method.'
       );
       cy.get('body').should('not.contain', '{"detail"');
     });

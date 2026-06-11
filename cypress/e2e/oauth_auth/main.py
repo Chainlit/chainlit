@@ -5,7 +5,7 @@ os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
 os.environ["OAUTH_GITHUB_CLIENT_ID"] = "fake_client_id"  # nosec B105
 os.environ["OAUTH_GITHUB_CLIENT_SECRET"] = "fake_client_secret"  # nosec B105
 
-import chainlit as cl  # noqa: E402
+import chainlit as cl
 
 
 @cl.oauth_callback

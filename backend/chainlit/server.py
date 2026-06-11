@@ -491,14 +491,19 @@ def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Respons
     return JSONResponse(response_dict)
 
 
-def _get_oauth_redirect_error(request: Request, error: str) -> Response:
+def _get_oauth_redirect_error(
+    request: Request, error: str, status_code: int = 302
+) -> Response:
     """Get the redirect response for an OAuth error."""
     params = urllib.parse.urlencode(
         {
             "error": error,
         }
     )
-    response = RedirectResponse(url=str(request.url_for("login")) + "?" + params)
+    response = RedirectResponse(
+        url=str(request.url_for("login")) + "?" + params,
+        status_code=status_code,
+    )
     return response
 
 
@@ -665,7 +670,8 @@ async def oauth_callback(
         )
 
     if error:
-        return _get_oauth_redirect_error(request, error)
+        logger.warning("OAuth provider %s returned error: %s", provider_id, error)
+        return _get_oauth_redirect_error(request, "oauthSignin")
 
     if not code or not state:
         return _get_oauth_redirect_error(request, "oauthSignin")
@@ -683,6 +689,8 @@ async def oauth_callback(
         user = await config.code.oauth_callback(
             provider_id, token, raw_user_data, default_user
         )
+    except asyncio.CancelledError:
+        raise
     except Exception as e:
         logger.exception("OAuth callback error: %s", e)
         return _get_oauth_redirect_error(request, "oauthSignin")
@@ -722,10 +730,11 @@ async def oauth_azure_hf_callback(
         )
 
     if error:
-        return _get_oauth_redirect_error(request, error)
+        logger.warning("OAuth provider %s returned error: %s", provider_id, error)
+        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
 
     if not code:
-        return _get_oauth_redirect_error(request, "oauthSignin")
+        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
 
     url = get_user_facing_url(request.url)
     try:
@@ -734,12 +743,14 @@ async def oauth_azure_hf_callback(
         user = await config.code.oauth_callback(
             provider_id, token, raw_user_data, default_user, id_token
         )
+    except asyncio.CancelledError:
+        raise
     except Exception as e:
         logger.exception("OAuth callback error: %s", e)
-        return _get_oauth_redirect_error(request, "oauthSignin")
+        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
 
     if not user:
-        return _get_oauth_redirect_error(request, "oauthSignin")
+        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
 
     response = await _authenticate_user(request, user, redirect_to_callback=True)
 

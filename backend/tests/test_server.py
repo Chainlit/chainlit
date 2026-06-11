@@ -1185,8 +1185,8 @@ def test_oauth_callback_provider_error_redirects(
         "/auth/oauth/github/callback?error=access_denied",
         follow_redirects=False,
     )
-    assert response.status_code in (302, 307)
-    assert "/login?error=" in response.headers["location"]
+    assert response.status_code == 302
+    assert "error=oauthSignin" in response.headers["location"]
 
 
 def test_oauth_callback_missing_code_redirects(
@@ -1200,7 +1200,7 @@ def test_oauth_callback_missing_code_redirects(
         "/auth/oauth/github/callback",
         follow_redirects=False,
     )
-    assert response.status_code in (302, 307)
+    assert response.status_code == 302
     assert "/login?error=" in response.headers["location"]
 
 
@@ -1216,7 +1216,7 @@ def test_oauth_callback_invalid_state_redirects(
         "/auth/oauth/github/callback?code=fake_code&state=fake_state",
         follow_redirects=False,
     )
-    assert response.status_code in (302, 307)
+    assert response.status_code == 302
     assert "/login?error=" in response.headers["location"]
 
 
@@ -1233,7 +1233,7 @@ def test_oauth_callback_get_token_error_redirects(
         cookies={"oauth_state": "valid_state"},
         follow_redirects=False,
     )
-    assert response.status_code in (302, 307)
+    assert response.status_code == 302
     assert "/login?error=" in response.headers["location"]
 
 
@@ -1249,7 +1249,7 @@ def test_oauth_callback_none_user_redirects(
         cookies={"oauth_state": "valid_state"},
         follow_redirects=False,
     )
-    assert response.status_code in (302, 307)
+    assert response.status_code == 302
     assert "/login?error=" in response.headers["location"]
 
 
@@ -1270,7 +1270,7 @@ def test_oauth_azure_hf_callback_missing_code_redirects(
         data={},
         follow_redirects=False,
     )
-    assert response.status_code in (302, 307)
+    assert response.status_code == 303
     assert "/login?error=" in response.headers["location"]
 
 
@@ -1287,7 +1287,7 @@ def test_oauth_azure_hf_callback_get_token_error_redirects(
         data={"code": "fake_code"},
         follow_redirects=False,
     )
-    assert response.status_code in (302, 307)
+    assert response.status_code == 303
     assert "/login?error=" in response.headers["location"]
 
 
@@ -1303,5 +1303,5 @@ def test_oauth_azure_hf_callback_none_user_redirects(
         data={"code": "fake_code"},
         follow_redirects=False,
     )
-    assert response.status_code in (302, 307)
+    assert response.status_code == 303
     assert "/login?error=" in response.headers["location"]
