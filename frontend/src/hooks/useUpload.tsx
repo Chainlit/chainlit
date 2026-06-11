@@ -6,7 +6,7 @@ import {
   useDropzone
 } from 'react-dropzone';
 
-import type { FileSpec } from 'client-types/';
+import type { FileSpec } from '@chainlit/react-client';
 
 interface useUploadProps {
   onError?: (error: string) => void;

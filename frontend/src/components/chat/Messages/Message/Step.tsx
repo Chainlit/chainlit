@@ -9,7 +9,7 @@ import {
   AccordionItem,
   AccordionTrigger
 } from '@/components/ui/accordion';
-import { Translator } from 'components/i18n';
+import { Translator } from '@/components/i18n';
 
 interface Props {
   step: IStep;

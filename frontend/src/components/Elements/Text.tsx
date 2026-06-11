@@ -4,7 +4,7 @@ import Alert from '@/components/Alert';
 import { Markdown } from '@/components/Markdown';
 import { Skeleton } from '@/components/ui/skeleton';
 
-import { useFetch } from 'hooks/useFetch';
+import { useFetch } from '@/hooks/useFetch';
 
 interface TextElementProps {
   element: ITextElement;

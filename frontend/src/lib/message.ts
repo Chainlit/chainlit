@@ -1,4 +1,4 @@
-import type { IMessageElement } from 'client-types/';
+import type { IMessageElement } from '@chainlit/react-client';
 
 const toSafeLinkTarget = (name: string) =>
   encodeURIComponent(name.replace(/\s+/g, '_'))

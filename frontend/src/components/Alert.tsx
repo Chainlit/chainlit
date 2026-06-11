@@ -1,3 +1,4 @@
+﻿
 import { cn } from '@/lib/utils';
 import React from 'react';
 
@@ -89,7 +90,8 @@ export const Alert: React.FC<AlertProps> = ({
       <div className="flex">
         <div className={cn('flex-shrink-0', styles.icon)}>{icons[variant]}</div>
         <div className="ml-3">
-          <p className={cn('text-sm', styles.text)}>{children}</p>
+          {/* Correction : Changement de <p> vers <div> pour autoriser les composants block-level comme Skeleton */}
+          <div className={cn('text-sm', styles.text)}>{children}</div>
         </div>
       </div>
     </div>

@@ -26,7 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
-import { useTranslation } from 'components/i18n/Translator';
+import { useTranslation } from '@/components/i18n/Translator';
 
 import { useCommandNavigation } from '@/hooks/useCommandNavigation';
 
@@ -175,7 +175,7 @@ export const CommandPopoverButton = ({
                   />
                   {!hasSelectedNonButtonCommand && (
                     <span className="overflow-hidden transition-all duration-300 opacity-100 w-auto max-w-[100px]">
-                      {t('chat.commands.button')}
+                      {String(t('chat.commands.button'))}
                     </span>
                   )}
                 </Button>
@@ -184,8 +184,8 @@ export const CommandPopoverButton = ({
             <TooltipContent>
               <p>
                 {hasSelectedNonButtonCommand
-                  ? t('chat.commands.changeTool')
-                  : t('chat.commands.availableTools')}
+                  ? String(t('chat.commands.changeTool'))
+                  : String(t('chat.commands.availableTools'))}
               </p>
             </TooltipContent>
           </Tooltip>

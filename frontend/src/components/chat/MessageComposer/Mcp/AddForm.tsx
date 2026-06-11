@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Translator } from 'components/i18n';
+import { Translator } from '@/components/i18n';
 
 interface McpAddFormProps {
   onSuccess: () => void;

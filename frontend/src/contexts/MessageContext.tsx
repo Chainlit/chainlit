@@ -1,6 +1,6 @@
 import { createContext } from 'react';
 
-import { IMessageContext } from 'types/messageContext';
+import { IMessageContext } from '@/types/messageContext';
 
 const defaultMessageContext = {
   highlightedMessage: null,

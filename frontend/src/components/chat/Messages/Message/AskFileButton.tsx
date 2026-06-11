@@ -1,4 +1,4 @@
-import { MessageContext } from 'contexts/MessageContext';
+import { MessageContext } from '@/contexts/MessageContext';
 import { Upload } from 'lucide-react';
 import { useContext, useState } from 'react';
 
@@ -9,7 +9,7 @@ import { useTranslation } from '@/components/i18n/Translator';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 
-import { useUpload } from 'hooks/useUpload';
+import { useUpload } from '@/hooks/useUpload';
 
 interface UploadState {
   progress: number;

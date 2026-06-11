@@ -1,5 +1,6 @@
+﻿
 import { Plug } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRecoilState } from 'recoil';
 
 import { mcpState, useConfig } from '@chainlit/react-client';
@@ -28,8 +29,10 @@ interface Props {
   disabled?: boolean;
 }
 
-const McpButton = ({ disabled }: Props) => {
+// Composant interne contenant la logique mÃ©tier
+const McpButtonContent = ({ disabled }: Props) => {
   const { config } = useConfig();
+  // useRecoilState(mcpState) provoque l'erreur localStorage sur le serveur
   const [mcps] = useRecoilState(mcpState);
 
   const [open, setOpen] = useState(false);
@@ -43,12 +46,11 @@ const McpButton = ({ disabled }: Props) => {
   if (!allowMcp || (!allowSse && !allowStdio && !allowHttp)) return null;
 
   const connectedMcps = mcps.filter((mcp) => mcp.status === 'connected');
-
   const mcpLoading = mcps.find((mcp) => mcp.status === 'connecting');
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
+      <DialogTrigger asChild>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -109,6 +111,20 @@ const McpButton = ({ disabled }: Props) => {
       </DialogContent>
     </Dialog>
   );
+};
+
+// Composant principal avec garde de montage pour Next.js
+const McpButton = (props: Props) => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Ne rien rendre sur le serveur pour Ã©viter l'accÃ¨s prÃ©maturÃ© Ã  localStorage
+  if (!mounted) return null;
+
+  return <McpButtonContent {...props} />;
 };
 
 export default McpButton;

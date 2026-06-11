@@ -1,3 +1,4 @@
+﻿
 import {
   MutableRefObject,
   useCallback,
@@ -7,6 +8,7 @@ import {
 } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
+import { useSearchParams } from 'react-router-dom';
 
 import {
   FileSpec,
@@ -22,15 +24,7 @@ import { modesState } from '@chainlit/react-client';
 
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from '@/components/ui/tooltip';
-import { useTranslation } from 'components/i18n/Translator';
-
-import { useQuery } from '@/hooks/query';
+import { useTranslation } from '@/components/i18n/Translator';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { chatSettingsOpenState } from '@/state/project';
@@ -38,7 +32,7 @@ import {
   IAttachment,
   attachmentsState,
   persistentCommandState
-} from 'state/chat';
+} from '@/state/chat';
 
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
@@ -71,20 +65,24 @@ export default function MessageComposer({
   );
   const commands = useRecoilValue(commandsState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
-
-  // Pre-select the command marked as selected by the backend
-  useEffect(() => {
-    const defaultSelected = commands.find((c) => c.selected);
-    if (defaultSelected && !selectedCommand) {
-      setSelectedCommand(defaultSelected);
-    }
-  }, [commands]);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
 
   const { user } = useAuth();
   const { sendMessage, replyMessage } = useChatInteract();
   const { askUser, chatSettingsInputs, disabled: _disabled } = useChatData();
+
+  // Next.js: Extraction du prompt depuis l'URL
+  const searchParams = useSearchParams();
+  const promptValue = searchParams?.get('prompt') || '';
+  const [promptUsed, setPromptUsed] = useState(false);
+
+  useEffect(() => {
+    const defaultSelected = commands.find((c) => c.selected);
+    if (defaultSelected && !selectedCommand) {
+      setSelectedCommand(defaultSelected);
+    }
+  }, [commands, selectedCommand, setSelectedCommand]);
 
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
@@ -95,7 +93,6 @@ export default function MessageComposer({
 
   const isMobile = useIsMobile();
 
-  // Get/set available modes from state - selections are tracked via the 'default' flag on options
   const [modes, setModes] = useRecoilState(modesState);
 
   const handleModeSelect = useCallback(
@@ -116,21 +113,10 @@ export default function MessageComposer({
     [setModes]
   );
 
-  // Helper to get selected option for a mode (the one with default=true, or first option)
   const getSelectedOptionId = useCallback((mode: IMode): string | undefined => {
     const defaultOpt = mode.options.find((opt) => opt.default);
     return defaultOpt?.id || mode.options[0]?.id;
   }, []);
-
-  let promptValue = '';
-  try {
-    const query = useQuery();
-    promptValue = query.get('prompt') || '';
-  } catch {
-    console.warn('Could not parse query parameters');
-  }
-
-  const [promptUsed, setPromptUsed] = useState(false);
 
   const onFavoriteSelect = useCallback((content: string) => {
     setValue(content);
@@ -143,8 +129,6 @@ export default function MessageComposer({
     (event: ClipboardEvent) => {
       if (event.clipboardData && event.clipboardData.items) {
         const items = Array.from(event.clipboardData.items);
-
-        // If no text data, check for files (e.g., images)
         items.forEach((item) => {
           if (item.kind === 'file') {
             const file = item.getAsFile();
@@ -162,9 +146,8 @@ export default function MessageComposer({
     async (
       msg: string,
       attachments?: IAttachment[],
-      selectedCommand?: string
+      commandId?: string // RenommÃ© pour Ã©viter le conflit avec selectedCommand (objet)
     ) => {
-      // Build modes dict: only include modes that have selections
       const modesDict: Record<string, string> = {};
       modes.forEach((mode) => {
         const selectedId = getSelectedOptionId(mode);
@@ -175,14 +158,17 @@ export default function MessageComposer({
 
       const message: IStep = {
         threadId: '',
-        command: selectedCommand,
+        command: commandId,
         modes: Object.keys(modesDict).length > 0 ? modesDict : undefined,
         id: uuidv4(),
         name: user?.identifier || 'User',
         type: 'user_message',
         output: msg,
         createdAt: new Date().toISOString(),
-        metadata: { location: window.location.href }
+        metadata: { 
+          // Protection SSR pour window.location
+          location: typeof window !== 'undefined' ? window.location.href : '' 
+        }
       };
 
       const fileReferences = attachments
@@ -206,7 +192,9 @@ export default function MessageComposer({
         type: 'user_message',
         output: msg,
         createdAt: new Date().toISOString(),
-        metadata: { location: window.location.href }
+        metadata: { 
+          location: typeof window !== 'undefined' ? window.location.href : '' 
+        }
       };
 
       replyMessage(message);
@@ -232,7 +220,7 @@ export default function MessageComposer({
     }
 
     setAttachments([]);
-    setValue(''); // Clear the value state
+    setValue('');
     inputRef.current?.reset();
   }, [
     value,
@@ -248,14 +236,12 @@ export default function MessageComposer({
   useEffect(() => {
     if (inputRef.current && promptValue && !promptUsed) {
       const prompt = promptValue;
-      if (prompt) {
-        if (prompt.length > 1000) {
-          inputRef.current?.setValueExtern(prompt.slice(0, 1000));
-        } else {
-          inputRef.current?.setValueExtern(prompt);
-        }
-        setPromptUsed(true);
+      if (prompt.length > 1000) {
+        inputRef.current?.setValueExtern(prompt.slice(0, 1000));
+      } else {
+        inputRef.current?.setValueExtern(prompt);
       }
+      setPromptUsed(true);
     }
   }, [promptValue, promptUsed]);
 
@@ -278,7 +264,7 @@ export default function MessageComposer({
         onChange={setValue}
         onPaste={onPaste}
         onEnter={submit}
-        placeholder={t('chat.input.placeholder')}
+        placeholder={String(t('chat.input.placeholder'))}
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
@@ -290,25 +276,16 @@ export default function MessageComposer({
             onFileUpload={onFileUpload}
           />
           {showSettingsInComposer && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    id="chat-settings-open-modal"
-                    disabled={disabled}
-                    onClick={() => setChatSettingsOpen(true)}
-                    className="hover:bg-muted rounded-full"
-                    variant="ghost"
-                    size="icon"
-                  >
-                    <Settings className="!size-6" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{t('navigation.user.menu.settings')}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Button
+              id="chat-settings-open-modal"
+              disabled={disabled}
+              onClick={() => setChatSettingsOpen(true)}
+              className="hover:bg-muted rounded-full"
+              variant="ghost"
+              size="icon"
+            >
+              <Settings className="!size-6" />
+            </Button>
           )}
           <McpButton disabled={disabled} />
           {modes.map((mode) => (
@@ -330,7 +307,6 @@ export default function MessageComposer({
             selectedCommandId={selectedCommand?.id}
             onCommandSelect={setSelectedCommand}
           />
-
           <FavoriteButton disabled={disabled} onSelect={onFavoriteSelect} />
         </div>
         <div className="flex items-center gap-1">

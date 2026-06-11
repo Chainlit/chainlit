@@ -10,10 +10,10 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
-import { Translator } from 'components/i18n';
+import { Translator } from '@/components/i18n';
 
 import { Loader } from '../../Loader';
-import { VoiceLines } from '../../icons/VoiceLines';
+import { VoiceLines } from '@/components/icons/VoiceLines';
 import { Button } from '../../ui/button';
 
 interface Props {

@@ -94,7 +94,7 @@ const NewChatButton = ({ navigate, onConfirm, ...buttonProps }: Props) => {
       onConfirm();
     } else {
       clear();
-      navigate?.('/');
+      navigate?.('/chat');
     }
     handleClose();
   };

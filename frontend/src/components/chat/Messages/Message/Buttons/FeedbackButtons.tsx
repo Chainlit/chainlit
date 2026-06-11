@@ -179,7 +179,7 @@ export function FeedbackButtons({ message }: FeedbackButtonsProps) {
           <Textarea
             value={commentInput}
             onChange={(e) => setCommentInput(e.target.value || undefined)}
-            placeholder={t('chat.messages.feedback.dialog.yourFeedback')}
+            
             className="min-h-[100px]"
           />
 

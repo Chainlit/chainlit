@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { MessageContext } from 'contexts/MessageContext';
+import { MessageContext } from '@/contexts/MessageContext';
 import { memo, useContext, useMemo, useRef } from 'react';
 
 import {
@@ -8,7 +8,7 @@ import {
   type IStep
 } from '@chainlit/react-client';
 
-import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+import { useLayoutMaxWidth } from '@/hooks/useLayoutMaxWidth';
 
 import { Messages } from '..';
 import { AskActionButtons } from './AskActionButtons';
@@ -18,7 +18,7 @@ import { MessageButtons } from './Buttons';
 import { MessageContent } from './Content';
 import Step from './Step';
 import UserMessage from './UserMessage';
-
+import BlinkingCursor from '@/components/BlinkingCursor';
 interface Props {
   message: IStep;
   elements: IMessageElement[];
@@ -159,30 +159,32 @@ const Message = memo(
                   ) : (
                     // Display an assistant message
                     <div className="flex flex-col items-start min-w-[150px] flex-grow gap-2">
-                      <MessageContent
-                        ref={contentRef}
-                        elements={elements}
-                        message={message}
-                        allowHtml={allowHtml}
-                        latex={latex}
-                        renderMarkdown={true}
-                      />
+  {isRunning && !message.output?.trim() ? (
+    <BlinkingCursor />
+  ) : (
+    <MessageContent
+      ref={contentRef}
+      elements={elements}
+      message={message}
+      allowHtml={allowHtml}
+      latex={latex}
+      renderMarkdown={true}
+    />
+  )}
 
-                      <AskFileButton messageId={message.id} onError={onError} />
-                      <AskActionButtons
-                        actions={actions}
-                        messageId={message.id}
-                      />
+  <AskFileButton messageId={message.id} onError={onError} />
+  <AskActionButtons
+    actions={actions}
+    messageId={message.id}
+  />
 
-                      <MessageButtons
-                        message={message}
-                        actions={actions}
-                        run={
-                          scorableRun && isScorable ? scorableRun : undefined
-                        }
-                        contentRef={contentRef}
-                      />
-                    </div>
+  <MessageButtons
+    message={message}
+    actions={actions}
+    run={scorableRun && isScorable ? scorableRun : undefined}
+    contentRef={contentRef}
+  />
+</div>
                   )}
                 </div>
               )}

@@ -1,6 +1,6 @@
 import { VideoElement } from '@/components/Elements/Video';
 
-import type { IVideoElement } from 'client-types/';
+import type { IVideoElement } from '@chainlit/react-client';
 
 interface Props {
   items: IVideoElement[];

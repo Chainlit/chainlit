@@ -1,7 +1,7 @@
 import { ImageElement } from '@/components/Elements/Image';
 import { QuiltedGrid } from '@/components/QuiltedGrid';
 
-import type { IImageElement } from 'client-types/';
+import type { IImageElement } from '@chainlit/react-client';
 
 interface Props {
   items: IImageElement[];

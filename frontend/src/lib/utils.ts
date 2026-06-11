@@ -1,12 +1,13 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-
 import { IStep } from '@chainlit/react-client';
 
+// 1. Fonction utilitaire pour Tailwind (fusionnée, une seule fois)
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// 2. Fonction utilitaire pour vérifier si un message est valide (issue de Chainlit)
 export const hasMessage = (messages: IStep[]): boolean => {
   const validTypes = ['user_message', 'assistant_message', 'tool'];
   return messages.some(
@@ -15,6 +16,7 @@ export const hasMessage = (messages: IStep[]): boolean => {
   );
 };
 
+// 3. Fonction utilitaire pour convertir les couleurs (issue de Chainlit)
 export function hslToHex(hslStr: string): string {
   // Parse HSL string
   const values = hslStr

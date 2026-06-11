@@ -1,3 +1,4 @@
+﻿
 import {
   ColumnDef,
   flexRender,
@@ -30,7 +31,7 @@ import {
   TableRow
 } from '@/components/ui/table';
 
-import { useFetch } from 'hooks/useFetch';
+import { useFetch } from '@/hooks/useFetch';
 
 interface DataframeData {
   index: (string | number)[];
@@ -49,7 +50,7 @@ const _DataframeElement = ({ data }: { data: DataframeData }) => {
           const sort = column.getIsSorted();
           return (
             <div
-              className="flex items-center cursor-pointer"
+              className="flex items-center cursor-pointer select-none"
               onClick={() => column.toggleSorting()}
             >
               {col}
@@ -91,12 +92,15 @@ const _DataframeElement = ({ data }: { data: DataframeData }) => {
         <PaginationLink
           onClick={() => table.setPageIndex(i)}
           isActive={table.getState().pagination.pageIndex === i}
+          // CORRECTION : Ajout de la prop size
+          size="icon" 
+          className="cursor-pointer"
         >
           {i + 1}
         </PaginationLink>
       </PaginationItem>
     ));
-  }, [table.getPageCount(), table.getState().pagination.pageIndex]);
+  }, [table.getPageCount(), table.getState().pagination.pageIndex, table.setPageIndex]);
 
   return (
     <div className="flex flex-col gap-2 h-full overflow-y-auto dataframe">
@@ -150,6 +154,8 @@ const _DataframeElement = ({ data }: { data: DataframeData }) => {
           <PaginationItem>
             <PaginationPrevious
               onClick={() => table.previousPage()}
+              // CORRECTION : Ajout de la prop size
+              size="default"
               className={
                 !table.getCanPreviousPage()
                   ? 'pointer-events-none opacity-50'
@@ -161,6 +167,8 @@ const _DataframeElement = ({ data }: { data: DataframeData }) => {
           <PaginationItem>
             <PaginationNext
               onClick={() => table.nextPage()}
+              // CORRECTION : Ajout de la prop size
+              size="default"
               className={
                 !table.getCanNextPage()
                   ? 'pointer-events-none opacity-50'
@@ -179,11 +187,12 @@ function DataframeElement({ element }: { element: IDataframeElement }) {
 
   const jsonData = useMemo(() => {
     if (data) return JSON.parse(data);
+    return null;
   }, [data]);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full w-full bg-muted">
+      <div className="flex items-center justify-center h-full w-full bg-muted rounded-md">
         <Loader />
       </div>
     );
@@ -192,6 +201,8 @@ function DataframeElement({ element }: { element: IDataframeElement }) {
   if (error) {
     return <Alert variant="error">{error.message}</Alert>;
   }
+
+  if (!jsonData) return null;
 
   return <_DataframeElement data={jsonData} />;
 }

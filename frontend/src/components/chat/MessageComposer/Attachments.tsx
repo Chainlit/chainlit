@@ -77,8 +77,8 @@ const Attachments = () => {
 
   if (attachments.length === 0) return null;
 
-  return (
-    <div id="attachments" className="flex flex-row flex-wrap gap-4 w-fit">
+return (
+    <div id="attachments" className="flex flex-row flex-wrap gap-4 w-fit p-1">
       {attachments.map((attachment) => {
         const showProgress = !attachment.uploaded && attachment.cancel;
 
@@ -86,7 +86,7 @@ const Attachments = () => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <div className="absolute -right-2 -top-2">
+                <div className="absolute -right-2 -top-2 z-10">
                   <CircularProgressButton
                     progress={attachment.uploadProgress || 0}
                     onClick={() => attachment.cancel?.()}
@@ -96,7 +96,8 @@ const Attachments = () => {
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {t('chat.fileUpload.actions.cancelUpload')}
+                {/* CORRECTION : div au lieu de p */}
+                <div className="text-xs">{String(t('chat.fileUpload.actions.cancelUpload'))}</div>
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>
@@ -107,10 +108,10 @@ const Attachments = () => {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="absolute -right-2 -top-2">
+                  <div className="absolute -right-2 -top-2 z-10">
                     <Button
                       size="icon"
-                      className="w-6 h-6 shadow-sm rounded-full border-4 bg-card hover:bg-card text-foreground light:border-muted"
+                      className="w-6 h-6 shadow-sm rounded-full border-2 bg-card hover:bg-muted text-foreground"
                       onClick={attachment.remove}
                     >
                       <X className="!size-3" />
@@ -118,7 +119,8 @@ const Attachments = () => {
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {t('chat.fileUpload.actions.removeAttachment')}
+                   {/* CORRECTION : div au lieu de p */}
+                  <div className="text-xs">{String(t('chat.fileUpload.actions.removeAttachment'))}</div>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>

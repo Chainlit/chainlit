@@ -1,58 +1,61 @@
-import { Suspense, lazy, useMemo } from 'react';
+﻿
+
+import { Suspense, useMemo } from 'react';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useFetch } from '@/hooks/useFetch';
+import { type IPlotlyElement } from '@chainlit/react-client';
 
-import { useFetch } from 'hooks/useFetch';
-
-import { type IPlotlyElement } from 'client-types/';
-
-const Plot = lazy(() => import('react-plotly.js'));
+// Chargement dynamique SANS rendu serveur pour Ã©viter l'erreur "window is not defined"
+const Plot = React.lazy(() => import('react-plotly.js'), { 
+  ssr: false,
+  loading: () => <Skeleton className="h-full w-full rounded-md" />
+});
 
 interface Props {
   element: IPlotlyElement;
 }
 
 const _PlotlyElement = ({ element }: Props) => {
-  const { data, error, isLoading } = useFetch(element.url || null);
+  const { data: rawData, error, isLoading } = useFetch(element.url || null);
 
-  // deep-clone SWR data so Plotly.js mutations don't corrupt the cache.
-  // keyed on the data reference so clones stay stable between re-renders,
-  // preserving react-plotly.js's prevProps === this.props skip check.
   const plotly = useMemo(() => {
-    if (!data) return null;
+    if (!rawData) return null;
+    
+    // Si useFetch retourne une string (JSON), on la parse
+    const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+
     return {
-      data: structuredClone(data.data),
-      layout: structuredClone(data.layout),
+      data: structuredClone(data.data || []),
+      layout: structuredClone(data.layout || {}),
       frames: data.frames ? structuredClone(data.frames) : undefined,
       config: data.config ? structuredClone(data.config) : undefined,
       height: data.layout?.height || 400
     };
-  }, [data]);
+  }, [rawData]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>An error occurred</div>;
+  if (isLoading) return <Skeleton className="h-[400px] w-full" />;
+  if (error) return <div className="text-destructive">Une erreur est survenue lors du chargement du graphique.</div>;
   if (!plotly) return null;
 
   return (
-    <Suspense fallback={<Skeleton className="h-full rounded-md" />}>
-      <div style={{ width: '100%', height: `${plotly.height}px` }}>
-        <Plot
-          className={`${element.display}-plotly`}
-          data={plotly.data}
-          layout={plotly.layout}
-          frames={plotly.frames}
-          config={plotly.config}
-          style={{
-            width: '100%',
-            height: '100%',
-            borderRadius: '1rem',
-            overflow: 'hidden'
-          }}
-          useResizeHandler={true}
-        />
-      </div>
-    </Suspense>
+    <div style={{ width: '100%', height: `${plotly.height}px` }}>
+      <Plot
+        className={`${element.display}-plotly`}
+        data={plotly.data}
+        layout={plotly.layout}
+        frames={plotly.frames}
+        config={plotly.config}
+        style={{
+          width: '100%',
+          height: '100%',
+          borderRadius: '1rem',
+          overflow: 'hidden'
+        }}
+        useResizeHandler={true}
+      />
+    </div>
   );
 };
 

@@ -17,6 +17,9 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@/components/ui/tooltip';
+import { apiClient } from '@/lib/axios';
+
+const BACKEND_URL = apiClient.defaults.baseURL as string;
 
 interface Props {
   author?: string;
@@ -26,7 +29,7 @@ interface Props {
 }
 
 const MessageAvatar = ({ author, hide, isError, iconName }: Props) => {
-  const apiClient = useContext(ChainlitContext);
+  const chainlit = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
   const { config } = useConfig();
 
@@ -35,14 +38,16 @@ const MessageAvatar = ({ author, hide, isError, iconName }: Props) => {
   }, [config, chatProfile]);
 
   const avatarUrl = useMemo(() => {
-    if (config?.ui?.default_avatar_file_url)
-      return config?.ui?.default_avatar_file_url;
+    if (config?.ui?.default_avatar_file_url) {
+      const url = config.ui.default_avatar_file_url;
+      return url.startsWith('http') ? url : `${BACKEND_URL}${url}`;
+    }
     const isAssistant = !author || author === config?.ui.name;
     if (isAssistant && selectedChatProfile?.icon) {
       return selectedChatProfile.icon;
     }
-    return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
-  }, [apiClient, selectedChatProfile, config, author]);
+    return chainlit?.buildEndpoint(`/avatars/${author || 'default'}`);
+  }, [chainlit, selectedChatProfile, config, author]);
 
   const avatarSize = config?.ui?.avatar_size;
   const sizeStyle = avatarSize
@@ -57,10 +62,9 @@ const MessageAvatar = ({ author, hide, isError, iconName }: Props) => {
     );
   }
 
-  // Render icon or avatar based on iconName
   const avatarContent = iconName ? (
     <span className="inline-flex mt-[3px]">
-      <Icon name={iconName} size={avatarSize ?? 20} /> {/* 20 => h-5 w-5 */}
+      <Icon name={iconName} size={avatarSize ?? 20} />
     </span>
   ) : (
     <Avatar

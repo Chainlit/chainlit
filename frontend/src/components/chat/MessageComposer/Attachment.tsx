@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo } from 'react';
+﻿
+import React, { useEffect, useState, useMemo } from 'react';
 import { DefaultExtensionType, FileIcon, defaultStyles } from 'react-file-icon';
 
 import { Card } from '@/components/ui/card';
@@ -22,74 +23,62 @@ const Attachment: React.FC<AttachmentProps> = ({
   children,
   file
 }) => {
-  const isImage = useMemo(() => mime.startsWith('image/'), [mime]);
-  const imageUrl = useMemo(() => {
-    if (isImage && file) {
-      return URL.createObjectURL(file);
-    }
-    return undefined;
-  }, [isImage, file]);
+  const [imageUrl, setImageUrl] = useState<string | undefined>();
+  const isImage = mime.startsWith('image/');
 
-  // Cleanup Object URL on unmount or when imageUrl changes
   useEffect(() => {
-    return () => {
-      if (imageUrl) {
-        URL.revokeObjectURL(imageUrl);
-      }
-    };
-  }, [imageUrl]);
+    if (isImage && file) {
+      const url = URL.createObjectURL(file);
+      setImageUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [file, isImage]);
 
-  let extension: DefaultExtensionType;
-  if (name.includes('.')) {
-    extension = name.split('.').pop()!.toLowerCase() as DefaultExtensionType;
-  } else {
-    extension = mime
-      ? ((mime.split('/').pop() || 'txt') as DefaultExtensionType)
-      : ('txt' as DefaultExtensionType);
-  }
+  // Extraction propre de l'extension pour react-file-icon
+  const extension = useMemo(() => {
+    const ext = name.includes('.') 
+      ? name.split('.').pop()?.toLowerCase() 
+      : (mime?.split('/').pop() || 'txt');
+    return ext as DefaultExtensionType;
+  }, [name, mime]);
 
-  if (isImage && imageUrl) {
-    return (
-      <TooltipProvider delayDuration={100}>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className="relative h-[58px] w-[58px]">
-              {children}
-              <Card className="h-full p-1 flex items-center justify-center rounded-lg border overflow-hidden">
-                <img
-                  src={imageUrl}
-                  alt={name}
-                  className="h-full w-full object-cover"
-                />
-              </Card>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{name}</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
-  }
+  const renderContent = () => (
+    <div className="relative h-[58px] w-full flex items-center justify-center">
+      {children}
+      {isImage && imageUrl ? (
+        <Card className="h-[58px] w-[58px] p-1 flex items-center justify-center rounded-lg border overflow-hidden">
+          <img
+            src={imageUrl}
+            alt={name}
+            className="h-full w-full object-cover"
+          />
+        </Card>
+      ) : (
+        <Card className="h-full p-2 flex flex-row items-center gap-3 rounded-lg w-full max-w-[200px] border bg-card">
+          <div className="w-8 shrink-0">
+            <FileIcon 
+              extension={extension} 
+              {...(defaultStyles[extension] || defaultStyles.txt)} 
+            />
+          </div>
+          <span className="truncate flex-1 font-medium text-xs">
+            {name}
+          </span>
+        </Card>
+      )}
+    </div>
+  );
 
   return (
     <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="relative h-[58px]">
-            {children}
-            <Card className="h-full p-2 flex flex-row items-center gap-3 rounded-lg w-full max-w-[200px] border">
-              <div className="w-10">
-                <FileIcon {...defaultStyles[extension]} extension={extension} />
-              </div>
-              <span className="truncate w-[80%] font-medium text-sm font-medium">
-                {name}
-              </span>
-            </Card>
+          <div className={isImage ? "w-[58px]" : "w-fit"}>
+            {renderContent()}
           </div>
         </TooltipTrigger>
         <TooltipContent>
-          <p>{name}</p>
+          <div className="text-xs font-sans">{name}</div>
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

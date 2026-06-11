@@ -1,14 +1,15 @@
+﻿
 import { cn } from '@/lib/utils';
 import { omit } from 'lodash';
 import { useContext, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { PluggableList } from 'react-markdown/lib';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
 import remarkDirective from 'remark-directive';
 import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import { visit } from 'unist-util-visit';
+import 'katex/dist/katex.min.css';
 
 import { ChainlitContext, type IMessageElement } from '@chainlit/react-client';
 
@@ -99,6 +100,31 @@ const Markdown = ({
 }: Props) => {
   const apiClient = useContext(ChainlitContext);
 
+  const rehypePlugins = useMemo(() => {
+    let plugins: any[] = [];
+    if (allowHtml) {
+      plugins = [rehypeRaw, ...plugins];
+    }
+    if (latex) {
+      plugins = [rehypeKatex, ...plugins];
+    }
+    return plugins;
+  }, [allowHtml, latex]);
+
+  const remarkPlugins = useMemo(() => {
+    let plugins: any[] = [
+      cursorPlugin,
+      remarkGfm,
+      remarkDirective,
+      MarkdownAlert
+    ];
+
+    if (latex) {
+      plugins = [...plugins, remarkMath];
+    }
+    return plugins;
+  }, [latex]);
+
   if (renderMarkdown === false) {
     return (
       <pre
@@ -110,224 +136,113 @@ const Markdown = ({
     );
   }
 
-  const rehypePlugins = useMemo(() => {
-    let rehypePlugins: PluggableList = [];
-    if (allowHtml) {
-      rehypePlugins = [rehypeRaw as any, ...rehypePlugins];
-    }
-    if (latex) {
-      rehypePlugins = [rehypeKatex as any, ...rehypePlugins];
-    }
-    return rehypePlugins;
-  }, [allowHtml, latex]);
-
-  const remarkPlugins = useMemo(() => {
-    let remarkPlugins: PluggableList = [
-      cursorPlugin,
-      remarkGfm as any,
-      remarkDirective as any,
-      MarkdownAlert
-    ];
-
-    if (latex) {
-      remarkPlugins = [...remarkPlugins, remarkMath as any];
-    }
-    return remarkPlugins;
-  }, [latex]);
-
   return (
-    <ReactMarkdown
-      className={cn('prose lg:prose-xl', className)}
-      remarkPlugins={remarkPlugins}
-      rehypePlugins={rehypePlugins}
-      components={{
-        ...alertComponents, // add alert components
-        code(props) {
-          return (
-            <code
-              {...omit(props, ['node'])}
-              className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold"
-            />
-          );
-        },
-        pre({ children, ...props }: any) {
-          return <CodeSnippet {...props} />;
-        },
-        a({ children, ...props }) {
-          const name = children as string;
-          const element = refElements?.find((e) => e.name === name);
-          if (element) {
-            return <ElementRef element={element} />;
-          } else {
+    /* CORRECTION: On applique les classes de style sur une div parente 
+      car react-markdown n'accepte plus className depuis la v9.
+    */
+    <div className={cn('prose lg:prose-xl max-w-none dark:prose-invert', className)}>
+      <ReactMarkdown
+        remarkPlugins={remarkPlugins}
+        rehypePlugins={rehypePlugins}
+        components={{
+          ...alertComponents,
+          code(props) {
             return (
-              <a
-                {...props}
-                className="text-primary hover:underline"
-                target="_blank"
-              >
-                {children}
-              </a>
+              <code
+                {...omit(props, ['node'])}
+                className="relative rounded bg-muted px-[0.3rem] py-[0.2rem] font-mono text-sm font-semibold text-white"
+              />
             );
-          }
-        },
-        img: (image: any) => {
-          // Check if the image source is actually a video file
-          const src = image.src.startsWith('/public')
-            ? apiClient.buildEndpoint(image.src)
-            : image.src;
-
-          const videoExtensions = [
-            '.mp4',
-            '.webm',
-            '.mov',
-            '.avi',
-            '.ogv',
-            '.m4v'
-          ];
-          const isVideo = videoExtensions.some((ext) =>
-            src.toLowerCase().split(/[?#]/)[0].endsWith(ext)
-          );
-
-          if (isVideo) {
-            return (
-              <div className="sm:max-w-sm md:max-w-md">
-                <video
-                  src={src}
-                  controls
-                  className="w-full h-auto rounded-md"
-                  style={{ maxWidth: '100%' }}
+          },
+          pre({ children, ...props }: any) {
+            return <CodeSnippet {...props} />;
+          },
+          a({ children, ...props }) {
+            const name = children as string;
+            const element = refElements?.find((e) => e.name === name);
+            if (element) {
+              return <ElementRef element={element} />;
+            } else {
+              return (
+                <a
+                  {...props}
+                  className="text-primary hover:underline"
+                  target="_blank"
                 >
-                  Your browser does not support the video tag.
-                </video>
+                  {children}
+                </a>
+              );
+            }
+          },
+          img: (image: any) => {
+            const src = image.src.startsWith('/public')
+              ? apiClient.buildEndpoint(image.src)
+              : image.src;
+
+            const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.ogv', '.m4v'];
+            const isVideo = videoExtensions.some((ext) =>
+              src.toLowerCase().split(/[?#]/)[0].endsWith(ext)
+            );
+
+            if (isVideo) {
+              return (
+                <div className="my-4">
+                  <video
+                    src={src}
+                    controls
+                    className="w-full h-auto rounded-md"
+                    style={{ maxWidth: '100%' }}
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              );
+            }
+
+            return (
+              <div className="my-4">
+                <AspectRatio ratio={16 / 9} className="bg-muted rounded-md overflow-hidden">
+                  <img
+                    src={src}
+                    alt={image.alt}
+                    className="h-full w-full object-contain"
+                  />
+                </AspectRatio>
               </div>
             );
+          },
+          blockquote(props) {
+            return (
+              <blockquote
+                {...omit(props, ['node'])}
+                className="mt-6 border-l-2 pl-6 italic border-primary/50"
+              />
+            );
+          },
+          ul(props) {
+            return <ul {...omit(props, ['node'])} className="my-3 ml-3 list-disc pl-2" />;
+          },
+          ol(props) {
+            return <ol {...omit(props, ['node'])} className="my-3 ml-3 list-decimal pl-2" />;
+          },
+          table({ children, ...props }) {
+            return (
+              <Card className="my-4 overflow-hidden">
+                <Table {...(props as any)}>{children}</Table>
+              </Card>
+            );
+          },
+          // @ts-expect-error custom plugin
+          blinkingCursor: () => <BlinkingCursor whitespace />,
+          alert: ({ type, children, ...props }: AlertProps & { type?: string }) => {
+            const alertType = normalizeAlertType(type || props.variant || 'info');
+            return alertComponents.Alert({ variant: alertType, children });
           }
-
-          return (
-            <div className="sm:max-w-sm md:max-w-md">
-              <AspectRatio
-                ratio={16 / 9}
-                className="bg-muted rounded-md overflow-hidden"
-              >
-                <img
-                  src={src}
-                  alt={image.alt}
-                  className="h-full w-full object-contain"
-                />
-              </AspectRatio>
-            </div>
-          );
-        },
-        blockquote(props) {
-          return (
-            <blockquote
-              {...omit(props, ['node'])}
-              className="mt-6 border-l-2 pl-6 italic"
-            />
-          );
-        },
-        em(props) {
-          return <span {...omit(props, ['node'])} className="italic" />;
-        },
-        strong(props) {
-          return <span {...omit(props, ['node'])} className="font-bold" />;
-        },
-        hr() {
-          return <Separator />;
-        },
-        ul(props) {
-          return (
-            <ul
-              {...omit(props, ['node'])}
-              className="my-3 ml-3 list-disc pl-2 [&>li]:mt-1"
-            />
-          );
-        },
-        ol(props) {
-          return (
-            <ol
-              {...omit(props, ['node'])}
-              className="my-3 ml-3 list-decimal pl-2 [&>li]:mt-1"
-            />
-          );
-        },
-        h1(props) {
-          return (
-            <h1
-              {...omit(props, ['node'])}
-              className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mt-8 first:mt-0"
-            />
-          );
-        },
-        h2(props) {
-          return (
-            <h2
-              {...omit(props, ['node'])}
-              className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight mt-8 first:mt-0"
-            />
-          );
-        },
-        h3(props) {
-          return (
-            <h3
-              {...omit(props, ['node'])}
-              className="scroll-m-20 text-2xl font-semibold tracking-tight mt-6 first:mt-0"
-            />
-          );
-        },
-        h4(props) {
-          return (
-            <h4
-              {...omit(props, ['node'])}
-              className="scroll-m-20 text-xl font-semibold tracking-tight mt-6 first:mt-0"
-            />
-          );
-        },
-        p(props) {
-          return (
-            <div
-              {...omit(props, ['node'])}
-              className="leading-7 [&:not(:first-child)]:mt-4 whitespace-pre-wrap break-words"
-              role="article"
-            />
-          );
-        },
-        table({ children, ...props }) {
-          return (
-            <Card className="[&:not(:first-child)]:mt-2 [&:not(:last-child)]:mb-2">
-              <Table {...(props as any)}>{children}</Table>
-            </Card>
-          );
-        },
-        thead({ children, ...props }) {
-          return <TableHeader {...(props as any)}>{children}</TableHeader>;
-        },
-        tr({ children, ...props }) {
-          return <TableRow {...(props as any)}>{children}</TableRow>;
-        },
-        th({ children, ...props }) {
-          return <TableHead {...(props as any)}>{children}</TableHead>;
-        },
-        td({ children, ...props }) {
-          return <TableCell {...(props as any)}>{children}</TableCell>;
-        },
-        tbody({ children, ...props }) {
-          return <TableBody {...(props as any)}>{children}</TableBody>;
-        },
-        // @ts-expect-error custom plugin
-        blinkingCursor: () => <BlinkingCursor whitespace />,
-        alert: ({
-          type,
-          children,
-          ...props
-        }: AlertProps & { type?: string }) => {
-          const alertType = normalizeAlertType(type || props.variant || 'info');
-          return alertComponents.Alert({ variant: alertType, children });
-        }
-      }}
-    >
-      {children}
-    </ReactMarkdown>
+        }}
+      >
+        {children}
+      </ReactMarkdown>
+    </div>
   );
 };
 

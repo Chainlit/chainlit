@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Translator } from 'components/i18n';
+import { Translator } from '@/components/i18n';
 
 interface McpListProps {
   onAddNewClick: () => void;

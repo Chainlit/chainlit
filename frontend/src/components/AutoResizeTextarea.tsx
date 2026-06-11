@@ -1,6 +1,6 @@
+﻿
+import React, { forwardRef, useEffect, useRef, useState, useImperativeHandle } from 'react';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef, useState } from 'react';
-
 import { Textarea } from '@/components/ui/textarea';
 
 interface Props extends Omit<React.ComponentProps<'textarea'>, 'onPaste'> {
@@ -16,7 +16,7 @@ interface Props extends Omit<React.ComponentProps<'textarea'>, 'onPaste'> {
   ) => void;
 }
 
-const AutoResizeTextarea = ({
+const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, Props>(({
   maxHeight,
   onPaste,
   onEnter,
@@ -26,9 +26,12 @@ const AutoResizeTextarea = ({
   onCompositionStart,
   onCompositionEnd,
   ...props
-}: Props) => {
+}, ref) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isComposing, setIsComposing] = useState(false);
+
+  // Synchronise la ref locale (utilisÃ©e pour les calculs de hauteur) avec la ref externe
+  useImperativeHandle(ref, () => textareaRef.current!);
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -44,18 +47,18 @@ const AutoResizeTextarea = ({
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea || !maxHeight) return;
+    
+    // RÃ©initialisation temporaire pour calculer le scrollHeight rÃ©el
     textarea.style.height = '40px';
     const newHeight = Math.min(textarea.scrollHeight, maxHeight);
     textarea.style.height = `${newHeight}px`;
   }, [props.value, maxHeight]);
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    // Call the parent's onKeyDown first (this is Input's handler)
     if (onKeyDown) {
       onKeyDown(event);
     }
 
-    // Only handle our Enter logic if the event wasn't already handled
     if (
       !event.defaultPrevented &&
       event.key === 'Enter' &&
@@ -88,7 +91,7 @@ const AutoResizeTextarea = ({
 
   return (
     <Textarea
-      ref={textareaRef as any}
+      ref={textareaRef}
       {...props}
       onKeyDown={handleKeyDown}
       onCompositionStart={handleCompositionStart}
@@ -101,6 +104,8 @@ const AutoResizeTextarea = ({
       style={{ maxHeight }}
     />
   );
-};
+});
+
+AutoResizeTextarea.displayName = "AutoResizeTextarea";
 
 export default AutoResizeTextarea;

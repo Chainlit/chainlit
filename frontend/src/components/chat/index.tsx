@@ -1,5 +1,6 @@
+﻿
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -15,13 +16,13 @@ import {
 
 import Alert from '@/components/Alert';
 import { TaskList } from '@/components/Tasklist';
-import { Translator } from 'components/i18n';
-import { useTranslation } from 'components/i18n/Translator';
+import { Translator } from '@/components/i18n';
+import { useTranslation } from '@/components/i18n/Translator';
 
 import { useUpload } from '@/hooks/useUpload';
-import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
+import { useLayoutMaxWidth } from '@/hooks/useLayoutMaxWidth';
 
-import { IAttachment, attachmentsState } from 'state/chat';
+import { IAttachment, attachmentsState } from '@/state/chat';
 
 import { ErrorBoundary } from '../ErrorBoundary';
 import ChatFooter from './Footer';
@@ -39,27 +40,23 @@ const Chat = () => {
   const { error, disabled, callFn } = useChatData();
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
-  const navigate = useNavigate();
+  
+  // <-- ImplÃ©mentation Next.js
+  const router = useNavigate();
+  const pathname = useLocation().pathname;
+  const navigate = router.push; 
 
-  // Update file upload MIME types to use standard format following Mozilla's guidelines: @see https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/file#unique_file_type_specifiers
-  // Instead of using '*/*' which may cause MIME type warnings, we specify exact MIME type categories:
-  // - 'application/*' - for general files
-  // - 'audio/*' - for audio files
-  // - 'image/*' - for image files
-  // - 'text/*' - for text files
-  // - 'video/*' - for video files
-  // This provides better type safety and clearer file type expectations.
   const fileSpec = useMemo(
     () => ({
       max_size_mb:
         config?.features?.spontaneous_file_upload?.max_size_mb || 500,
       max_files: config?.features?.spontaneous_file_upload?.max_files || 20,
       accept: config?.features?.spontaneous_file_upload?.accept || {
-        'application/*': [], // All application files
-        'audio/*': [], // All audio files
-        'image/*': [], // All image files
-        'text/*': [], // All text files
-        'video/*': [] // All video files
+        'application/*': [], 
+        'audio/*': [], 
+        'image/*': [], 
+        'text/*': [], 
+        'video/*': [] 
       }
     }),
     [config]
@@ -107,7 +104,6 @@ const Chat = () => {
                 if (attachment.id === id) {
                   return {
                     ...attachment,
-                    // Update with the server ID
                     serverId: res.id,
                     uploaded: true,
                     uploadProgress: 100,
@@ -154,12 +150,12 @@ const Chat = () => {
       });
       setAttachments((prev) => prev.concat(attachements));
     },
-    [uploadFile]
+    [uploadFile, setAttachments, t]
   );
 
   const onFileUploadError = useCallback(
     (error: string) => toast.error(error),
-    [toast]
+    []
   );
 
   const upload = useUpload({
@@ -172,12 +168,12 @@ const Chat = () => {
   const { threadId } = useChatMessages();
 
   useEffect(() => {
-    const currentPage = new URL(window.location.href);
+    // <-- AdaptÃ© pour Next.js : utilisation de pathname au lieu de window.location.href
     if (
       user &&
       config?.dataPersistence &&
       threadId &&
-      currentPage.pathname === '/'
+      (pathname === '/' || pathname === '/chat')
     ) {
       navigate(`/thread/${threadId}`);
     } else {
@@ -186,16 +182,16 @@ const Chat = () => {
         currentThreadId: threadId
       }));
     }
-  }, []);
+  }, [user, config, threadId, pathname, navigate, setThreads]);
 
   const enableAttachments =
     !disabled && config?.features?.spontaneous_file_upload?.enabled;
+    
   return (
     <div
       {...(enableAttachments
         ? upload.getRootProps({ className: 'dropzone' })
         : {})}
-      // Disable the onFocus and onBlur events in react-dropzone to avoid interfering with child trigger events
       onBlur={undefined}
       onFocus={undefined}
       className="flex w-full h-full flex-col relative"

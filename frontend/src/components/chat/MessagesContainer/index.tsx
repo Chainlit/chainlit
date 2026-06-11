@@ -19,7 +19,7 @@ import {
 } from '@chainlit/react-client';
 
 import { Messages } from '@/components/chat/Messages';
-import { useTranslation } from 'components/i18n/Translator';
+import { useTranslation } from '@/components/i18n/Translator';
 
 interface Props {
   navigate?: (to: string) => void;
@@ -44,11 +44,11 @@ const MessagesContainer = ({ navigate }: Props) => {
     [_uploadFile]
   );
 
-  const onFeedbackUpdated = useCallback(
+const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
       toast.promise(apiClient.setFeedback(feedback, sessionId), {
-        loading: t('chat.messages.feedback.status.updating'),
-        success: (res) => {
+        loading: String(t('chat.messages.feedback.status.updating')),
+        success: (res: { feedbackId: string }) => { // Typage explicite du résultat
           setMessages((prev) =>
             updateMessageById(prev, message.id, {
               ...message,
@@ -59,20 +59,22 @@ const MessagesContainer = ({ navigate }: Props) => {
             })
           );
           onSuccess();
-          return t('chat.messages.feedback.status.updated');
+          // CORRECTION : On s'assure que le retour est une string pour satisfaire TypeScript
+          return String(t('chat.messages.feedback.status.updated'));
         },
         error: (err) => {
           return <span>{err.message}</span>;
         }
       });
     },
-    []
+    [sessionId, t, setMessages] // N'oubliez pas d'ajouter les dépendances ici
   );
 
-  const onFeedbackDeleted = useCallback(
+const onFeedbackDeleted = useCallback(
     async (message: IStep, onSuccess: () => void, feedbackId: string) => {
       toast.promise(apiClient.deleteFeedback(feedbackId), {
-        loading: t('chat.messages.feedback.status.updating'),
+        // Correction : On force la conversion en string pour le chargement
+        loading: String(t('chat.messages.feedback.status.updating')),
         success: () => {
           setMessages((prev) =>
             updateMessageById(prev, message.id, {
@@ -81,14 +83,15 @@ const MessagesContainer = ({ navigate }: Props) => {
             })
           );
           onSuccess();
-          return t('chat.messages.feedback.status.updated');
+          // Correction : On force la conversion en string pour le succès
+          return String(t('chat.messages.feedback.status.updated'));
         },
         error: (err) => {
           return <span>{err.message}</span>;
         }
       });
     },
-    []
+    [apiClient, setMessages, t] // Dépendances ajoutées pour éviter les bugs de closure
   );
 
   const knownSideElementsRef = useRef<Map<string, IMessageElement>>(new Map());

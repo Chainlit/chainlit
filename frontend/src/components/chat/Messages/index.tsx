@@ -1,4 +1,4 @@
-import { MessageContext } from 'contexts/MessageContext';
+import { MessageContext } from '@/contexts/MessageContext';
 import React, { memo, useContext, useMemo } from 'react';
 
 import {
@@ -41,6 +41,16 @@ const hasAssistantMessage = (step: IStep): boolean => {
   );
 };
 
+const hasNonEmptyAssistantMessage = (step: IStep): boolean => {
+  return (
+    step.steps?.some(
+      (s) =>
+        (s.type === 'assistant_message' && s.output?.trim()) ||
+        hasNonEmptyAssistantMessage(s)
+    ) || false
+  );
+};
+
 const Messages = memo(
   ({ messages, elements, actions, indent, isRunning, scorableRun }: Props) => {
     const messageContext = useContext(MessageContext);
@@ -61,6 +71,7 @@ const Messages = memo(
           // Handle chainlit runs
           if (CL_RUN_NAMES.includes(m.name)) {
             const isRunning = !m.end && !m.isError && messageContext.loading;
+//console.log('isRunning:', isRunning, 'm.name:', m.name, 'm.end:', m.end, 'loading:', messageContext.loading);
             const isToolCallCoT =
               messageContext.cot === 'tool_call' ||
               messageContext.cot === 'full';
@@ -77,23 +88,19 @@ const Messages = memo(
             const scorableRun =
               !isRunning && m.name !== 'on_chat_start' ? m : undefined;
             return (
-              <React.Fragment key={m.id}>
-                {m.steps?.length ? (
-                  <Messages
-                    messages={m.steps}
-                    elements={elements}
-                    actions={actions}
-                    indent={indent}
-                    isRunning={isRunning}
-                    scorableRun={scorableRun}
-                  />
-                ) : null}
-                {(showToolCoTLoader || showHiddenCoTLoader) &&
-                m.name !== 'on_chat_start' ? (
-                  <BlinkingCursor />
-                ) : null}
-              </React.Fragment>
-            );
+  <React.Fragment key={m.id}>
+    {m.steps?.length ? (
+      <Messages
+        messages={m.steps}
+        elements={elements}
+        actions={actions}
+        indent={indent}
+        isRunning={isRunning}
+        scorableRun={scorableRun}
+      />
+    ) : null}
+  </React.Fragment>
+);
           } else {
             // Score the current run
             const _scorableRun = m.type === 'run' ? m : scorableRun;

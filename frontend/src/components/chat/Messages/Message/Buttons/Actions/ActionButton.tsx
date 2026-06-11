@@ -1,4 +1,4 @@
-import { MessageContext } from 'contexts/MessageContext';
+import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { toast } from 'sonner';
