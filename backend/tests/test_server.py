@@ -1201,7 +1201,7 @@ def test_oauth_callback_missing_code_redirects(
         follow_redirects=False,
     )
     assert response.status_code == 302
-    assert "/login?error=" in response.headers["location"]
+    assert "error=oauthSignin" in response.headers["location"]
 
 
 def test_oauth_callback_invalid_state_redirects(
@@ -1217,7 +1217,7 @@ def test_oauth_callback_invalid_state_redirects(
         follow_redirects=False,
     )
     assert response.status_code == 302
-    assert "/login?error=" in response.headers["location"]
+    assert "error=oauthSignin" in response.headers["location"]
 
 
 def test_oauth_callback_get_token_error_redirects(
@@ -1234,7 +1234,7 @@ def test_oauth_callback_get_token_error_redirects(
         follow_redirects=False,
     )
     assert response.status_code == 302
-    assert "/login?error=" in response.headers["location"]
+    assert "error=oauthSignin" in response.headers["location"]
 
 
 def test_oauth_callback_none_user_redirects(
@@ -1250,7 +1250,7 @@ def test_oauth_callback_none_user_redirects(
         follow_redirects=False,
     )
     assert response.status_code == 302
-    assert "/login?error=" in response.headers["location"]
+    assert "error=oauthSignin" in response.headers["location"]
 
 
 # ---------------------------------------------------------------------------
@@ -1271,7 +1271,7 @@ def test_oauth_azure_hf_callback_missing_code_redirects(
         follow_redirects=False,
     )
     assert response.status_code == 303
-    assert "/login?error=" in response.headers["location"]
+    assert "error=oauthSignin" in response.headers["location"]
 
 
 def test_oauth_azure_hf_callback_get_token_error_redirects(
@@ -1288,7 +1288,7 @@ def test_oauth_azure_hf_callback_get_token_error_redirects(
         follow_redirects=False,
     )
     assert response.status_code == 303
-    assert "/login?error=" in response.headers["location"]
+    assert "error=oauthSignin" in response.headers["location"]
 
 
 def test_oauth_azure_hf_callback_none_user_redirects(
@@ -1304,4 +1304,4 @@ def test_oauth_azure_hf_callback_none_user_redirects(
         follow_redirects=False,
     )
     assert response.status_code == 303
-    assert "/login?error=" in response.headers["location"]
+    assert "error=oauthSignin" in response.headers["location"]

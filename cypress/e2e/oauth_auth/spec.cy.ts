@@ -6,7 +6,7 @@ describe('OAuth Auth Error UX (#1273)', () => {
         followRedirect: false,
         failOnStatusCode: false
       }).then((response) => {
-        expect(response.status).to.be.oneOf([301, 302, 303, 307, 308]);
+        expect(response.status).to.equal(302);
         expect(response.headers['location']).to.include(
           '/login?error=oauthSignin'
         );
@@ -19,8 +19,10 @@ describe('OAuth Auth Error UX (#1273)', () => {
         followRedirect: false,
         failOnStatusCode: false
       }).then((response) => {
-        expect(response.status).to.be.oneOf([301, 302, 303, 307, 308]);
-        expect(response.headers['location']).to.include('/login?error=');
+        expect(response.status).to.equal(302);
+        expect(response.headers['location']).to.include(
+          '/login?error=oauthSignin'
+        );
         expect(response.headers['content-type'] || '').to.not.include(
           'application/json'
         );
