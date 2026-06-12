@@ -14,7 +14,7 @@ import {
 import { Translator } from '../i18n';
 
 interface Props {
-  // Changement ici : on accepte l'Ã©vÃ©nement pour stopper la propagation
+  // Changement ici : on accepte l'événement pour stopper la propagation
   onDelete: (e: React.MouseEvent) => void;
   onRename: (e: React.MouseEvent) => void;
   onShare?: (e: React.MouseEvent) => void;
@@ -30,10 +30,10 @@ export default function ThreadOptions({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {/* Changement : Utilisation d'un bouton rÃ©el pour l'accessibilitÃ© */}
+        {/* Changement : Utilisation d'un bouton réel pour l'accessibilité */}
         <button
           type="button"
-          id="thread-options"
+          
           onClick={(e) => {
             e.stopPropagation();
             e.preventDefault(); // Indispensable pour ne pas activer le <Link> parent

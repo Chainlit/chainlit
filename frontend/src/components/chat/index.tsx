@@ -41,10 +41,7 @@ const Chat = () => {
   const { uploadFile } = useChatInteract();
   const uploadFileRef = useRef(uploadFile);
   
-  // <-- ImplÃ©mentation Next.js
-  const router = useNavigate();
-  const pathname = useLocation().pathname;
-  const navigate = router.push; 
+  const navigate = useNavigate(); 
 
   const fileSpec = useMemo(
     () => ({

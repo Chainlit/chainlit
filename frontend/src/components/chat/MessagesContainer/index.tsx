@@ -1,4 +1,4 @@
-import { MessageContext } from '@/contexts/MessageContext';
+﻿import { MessageContext } from '@/contexts/MessageContext';
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
@@ -48,7 +48,7 @@ const onFeedbackUpdated = useCallback(
     async (message: IStep, onSuccess: () => void, feedback: IFeedback) => {
       toast.promise(apiClient.setFeedback(feedback, sessionId), {
         loading: String(t('chat.messages.feedback.status.updating')),
-        success: (res: { feedbackId: string }) => { // Typage explicite du résultat
+        success: (res: { feedbackId: string }) => { // Typage explicite du rÃ©sultat
           setMessages((prev) =>
             updateMessageById(prev, message.id, {
               ...message,
@@ -67,7 +67,7 @@ const onFeedbackUpdated = useCallback(
         }
       });
     },
-    [sessionId, t, setMessages] // N'oubliez pas d'ajouter les dépendances ici
+    [apiClient, sessionId, t, setMessages]
   );
 
 const onFeedbackDeleted = useCallback(
@@ -83,7 +83,7 @@ const onFeedbackDeleted = useCallback(
             })
           );
           onSuccess();
-          // Correction : On force la conversion en string pour le succès
+          // Correction : On force la conversion en string pour le succÃ¨s
           return String(t('chat.messages.feedback.status.updated'));
         },
         error: (err) => {
@@ -91,7 +91,7 @@ const onFeedbackDeleted = useCallback(
         }
       });
     },
-    [apiClient, setMessages, t] // Dépendances ajoutées pour éviter les bugs de closure
+    [apiClient, setMessages, t] // DÃ©pendances ajoutÃ©es pour Ã©viter les bugs de closure
   );
 
   const knownSideElementsRef = useRef<Map<string, IMessageElement>>(new Map());

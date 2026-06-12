@@ -24,7 +24,7 @@ const _PlotlyElement = ({ element }: Props) => {
     if (!rawData) return null;
     
     // Si useFetch retourne une string (JSON), on la parse
-    const data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData;
+    let data; try { data = typeof rawData === 'string' ? JSON.parse(rawData) : rawData; } catch { return null; }
 
     return {
       data: structuredClone(data.data || []),

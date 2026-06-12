@@ -1,4 +1,4 @@
-import { MessageContext } from '@/contexts/MessageContext';
+﻿import { MessageContext } from '@/contexts/MessageContext';
 import React, { memo, useContext, useMemo } from 'react';
 
 import {
@@ -99,9 +99,12 @@ const Messages = memo(
         scorableRun={scorableRun}
       />
     ) : null}
+    {(showToolCoTLoader || showHiddenCoTLoader) && m.name !== 'on_chat_start' ? (
+      <BlinkingCursor />
+    ) : null}
   </React.Fragment>
 );
-          } else {
+} else {
             // Score the current run
             const _scorableRun = m.type === 'run' ? m : scorableRun;
             // The message is scorable if it is the last assistant message of the run

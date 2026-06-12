@@ -1,4 +1,4 @@
-import { X } from 'lucide-react';
+﻿import { X } from 'lucide-react';
 import React from 'react';
 import { useRecoilValue } from 'recoil';
 
@@ -96,8 +96,7 @@ return (
                 </div>
               </TooltipTrigger>
               <TooltipContent>
-                {/* CORRECTION : div au lieu de p */}
-                <div className="text-xs">{String(t('chat.fileUpload.actions.cancelUpload'))}</div>
+                {t('chat.fileUpload.actions.cancelUpload')}
               </TooltipContent>
             </Tooltip>
           </TooltipProvider>

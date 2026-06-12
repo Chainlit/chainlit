@@ -73,7 +73,7 @@ const Attachment: React.FC<AttachmentProps> = ({
     <TooltipProvider delayDuration={100}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className={isImage ? "w-[58px]" : "w-fit"}>
+          <div className={isImage && imageUrl ? "w-[58px]" : "w-fit"}>
             {renderContent()}
           </div>
         </TooltipTrigger>

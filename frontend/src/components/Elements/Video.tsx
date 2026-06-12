@@ -20,8 +20,7 @@ const VideoElement = ({ element }: { element: IVideoElement }) => {
   }
 
   return (
-    <div className="w-full aspect-video rounded-xl overflow-hidden border bg-zinc-950 shadow-sm">
-      <ReactPlayer
+    <React.Suspense fallback={<div className="w-full aspect-video bg-zinc-950 rounded-xl" />}><div className="w-full aspect-video rounded-xl overflow-hidden border bg-zinc-950 shadow-sm"><ReactPlayer
         className={`${element.display}-video`}
         width="100%"
         height="100%"
