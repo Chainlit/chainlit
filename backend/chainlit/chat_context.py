@@ -48,6 +48,10 @@ class ChatContext:
         if context.session and context.session.id in chat_contexts:
             chat_contexts[context.session.id] = []
 
+    def delete_session(self, session_id: str) -> None:
+        """Remove a session's chat context to free memory."""
+        chat_contexts.pop(session_id, None)
+
     def to_openai(self):
         messages = []
         for message in self.get():

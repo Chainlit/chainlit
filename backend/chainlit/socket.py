@@ -272,6 +272,8 @@ async def disconnect(sid):
             # Clean up the user session
             if session.id in user_sessions:
                 user_sessions.pop(session.id)
+            # Clean up the chat context
+            chat_context.delete_session(session.id)
             # Clean up the session
             await session.delete()
 
