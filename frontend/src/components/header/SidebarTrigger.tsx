@@ -1,4 +1,3 @@
-﻿
 import React, { forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -7,20 +6,21 @@ import { Sidebar } from '../icons/Sidebar';
 import { useSidebar } from '../ui/sidebar';
 
 const SidebarTrigger = forwardRef<HTMLButtonElement, React.ComponentProps<typeof Button>>(
-  (props, ref) => {
+  ({ onClick, ...props }, ref) => {
     const { setOpen, open, openMobile, setOpenMobile, isMobile } = useSidebar();
-
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
-              {...props}
-              ref={ref} // Transmission de la ref ici
-              id="sidebar-trigger-button"
-              onClick={() => (isMobile ? setOpenMobile(!openMobile) : setOpen(!open))}
+              ref={ref}
               size="icon"
               variant="ghost"
+              {...props}
+              onClick={(e) => {
+                isMobile ? setOpenMobile(!openMobile) : setOpen(!open);
+                onClick?.(e);
+              }}
               className="text-muted-foreground hover:text-muted-foreground"
             >
               <Sidebar className="!size-6" />
