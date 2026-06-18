@@ -7,6 +7,7 @@ import {
   useRef,
   useState
 } from 'react';
+import { flushSync } from 'react-dom';
 
 import { useChatMessages } from '@chainlit/react-client';
 
@@ -28,11 +29,27 @@ export default function ScrollContainer({
   className
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const spacerRef = useRef<HTMLDivElement>(null);
   const lastUserMessageRef = useRef<HTMLDivElement | null>(null);
+  const touchStartY = useRef(0);
+  const lastAutoscrollDisabledTime = useRef(0);
   const { messages } = useChatMessages();
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
+
+  const isAtBottom = useCallback(() => {
+    if (!ref.current) return true;
+    const { scrollTop, scrollHeight, clientHeight } = ref.current;
+    return scrollTop + clientHeight >= scrollHeight - 10;
+  }, []);
+
+  const syncScrollButtonVisibility = useCallback(() => {
+    const autoScrollDisabled = autoScrollRef ? !autoScrollRef.current : false;
+    flushSync(() => {
+      setShowScrollButton(autoScrollDisabled);
+    });
+  }, [autoScrollRef]);
 
   // Calculate and update spacer height
   const updateSpacerHeight = useCallback(() => {
@@ -63,7 +80,7 @@ export default function ScrollContainer({
       }
 
       // Scroll to position the message at the top
-      if (afterMessagesHeight === 0) {
+      if (afterMessagesHeight === 0 && autoScrollRef?.current !== false) {
         scrollToPosition();
       } else if (autoScrollAssistantMessage && autoScrollRef?.current) {
         ref.current.scrollTop = ref.current.scrollHeight;
@@ -82,7 +99,7 @@ export default function ScrollContainer({
       return;
     }
 
-    // Get all message elements
+    // Get all user message elements
     const userMessages = ref.current.querySelectorAll(
       '[data-step-type="user_message"]'
     );
@@ -91,10 +108,12 @@ export default function ScrollContainer({
         userMessages.length - 1
       ] as HTMLDivElement;
       lastUserMessageRef.current = lastUserMessage;
-
-      // Update spacer height when last user message is found
-      updateSpacerHeight();
+    } else if (lastUserMessageRef.current) {
+      lastUserMessageRef.current = null;
     }
+
+    // Update spacer height whether or not there actually is a user message, to make autoscrolling work
+    updateSpacerHeight();
   }, [messages, updateSpacerHeight]);
 
   // Add window resize listener to update spacer height
@@ -115,20 +134,43 @@ export default function ScrollContainer({
     };
   }, [autoScrollUserMessage, updateSpacerHeight]);
 
-  // Check scroll position on mount
+  // Add content resize listener to update spacer height
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleContentHeightChange = () => {
+      updateSpacerHeight();
+      syncScrollButtonVisibility();
+    };
+
+    const observer = new ResizeObserver(() => {
+      handleContentHeightChange();
+    });
+
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, [
+    scrollContainerRef,
+    updateSpacerHeight,
+    autoScrollRef,
+    isScrolling,
+    syncScrollButtonVisibility
+  ]);
+
+  // On mount, sync the initial scroll-to-bottom button visibility
   useEffect(() => {
     if (!ref.current) return;
 
     setTimeout(() => {
       if (!ref.current) return;
-
-      const { scrollTop, scrollHeight, clientHeight } = ref.current;
-      const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
-      setShowScrollButton(!atBottom);
+      syncScrollButtonVisibility();
     }, 500);
-  }, []);
+  }, [syncScrollButtonVisibility]);
 
-  const checkScrollEnd = () => {
+  // Wait for programmatic scrolling to settle, then sync autoscroll state
+  const checkScrollEnd = (updateAutoScrollState = true) => {
     if (!ref.current) return;
 
     const prevScrollTop = ref.current.scrollTop;
@@ -140,15 +182,27 @@ export default function ScrollContainer({
       if (currentScrollTop === prevScrollTop) {
         setIsScrolling(false);
 
-        const { scrollTop, scrollHeight, clientHeight } = ref.current;
-        const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
-        setShowScrollButton(!atBottom);
+        const atBottom = isAtBottom();
+
+        // Only RE-ENABLE autoscroll when at bottom, never disable
+        // (disabling is handled by wheel/touch events)
+        if (
+          updateAutoScrollState &&
+          autoScrollRef &&
+          atBottom &&
+          !autoScrollRef.current
+        ) {
+          autoScrollRef.current = true;
+        }
+
+        syncScrollButtonVisibility();
       } else {
-        checkScrollEnd();
+        checkScrollEnd(updateAutoScrollState);
       }
     }, 100);
   };
 
+  // Triggers a smooth scroll to the bottom of the page
   const scrollToBottom = () => {
     if (!ref.current) return;
 
@@ -158,14 +212,17 @@ export default function ScrollContainer({
       behavior: 'smooth'
     });
 
+    setShowScrollButton(false);
+
     if (autoScrollRef) {
       autoScrollRef.current = true;
     }
 
-    setShowScrollButton(false);
-    checkScrollEnd();
+    checkScrollEnd(false);
   };
 
+  // Triggers a smooth scroll to position the last user message at the
+  // top of the container.
   const scrollToPosition = () => {
     if (!ref.current || !lastUserMessageRef.current) return;
 
@@ -182,17 +239,77 @@ export default function ScrollContainer({
     checkScrollEnd();
   };
 
+  // onScroll event handler - ONLY re-enables autoscroll when at bottom
+  // Disabling autoscroll is handled by wheel/touch events to avoid false triggers from content reflow
   const handleScroll = () => {
     if (!ref.current || isScrolling) return;
-    const { scrollTop, scrollHeight, clientHeight } = ref.current;
-    const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
-
-    if (autoScrollRef) {
-      autoScrollRef.current = atBottom;
+    if (Date.now() - lastAutoscrollDisabledTime.current < 100) {
+      // cooldown period after disabling autoscroll
+      return;
     }
+    const atBottom = isAtBottom();
 
-    setShowScrollButton(!atBottom);
+    // Only RE-ENABLE autoscroll when user reaches bottom
+    // Disabling is handled by handleWheel/handleTouchMove
+    if (atBottom && autoScrollRef && !autoScrollRef.current) {
+      autoScrollRef.current = true;
+      syncScrollButtonVisibility();
+    }
   };
+
+  // Handle mouse wheel scroll - disable autoscroll when user scrolls UP
+  const handleWheel = useCallback(
+    (e: WheelEvent) => {
+      // deltaY < 0 means scrolling UP (away from bottom)
+      if (e.deltaY < 0 && autoScrollRef?.current) {
+        autoScrollRef.current = false;
+        lastAutoscrollDisabledTime.current = Date.now();
+        syncScrollButtonVisibility();
+      }
+    },
+    [autoScrollRef, syncScrollButtonVisibility, lastAutoscrollDisabledTime]
+  );
+
+  // Handle touch start - record initial touch position
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  // Handle touch move - disable autoscroll when user scrolls toward earlier content
+  const handleTouchMove = useCallback(
+    (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      const deltaY = currentY - touchStartY.current;
+
+      // Dragging a finger down decreases scrollTop, revealing earlier messages.
+      if (deltaY > 10 && autoScrollRef?.current) {
+        lastAutoscrollDisabledTime.current = Date.now();
+        autoScrollRef.current = false;
+        syncScrollButtonVisibility();
+      }
+
+      touchStartY.current = currentY;
+    },
+    [autoScrollRef, syncScrollButtonVisibility, lastAutoscrollDisabledTime]
+  );
+
+  // Add wheel and touch event listeners for user scroll detection
+  useEffect(() => {
+    const container = ref.current;
+    if (!container) return;
+
+    container.addEventListener('wheel', handleWheel, { passive: true });
+    container.addEventListener('touchstart', handleTouchStart, {
+      passive: true
+    });
+    container.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [handleWheel, handleTouchStart, handleTouchMove]);
 
   return (
     <div className="relative flex flex-col flex-grow overflow-y-auto">
@@ -201,23 +318,26 @@ export default function ScrollContainer({
         className={cn('flex flex-col flex-grow overflow-y-auto', className)}
         onScroll={handleScroll}
       >
-        {children}
+        <div ref={scrollContainerRef}>{children}</div>
         {/* Dynamic spacer to position the last user message at the top */}
         <div ref={spacerRef} className="flex-shrink-0" />
       </div>
 
-      {showScrollButton ? (
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-          <Button
-            size="icon"
-            variant="outline"
-            className="rounded-full"
-            onClick={scrollToBottom}
-          >
-            <ArrowDown className="size-4" />
-          </Button>
-        </div>
-      ) : null}
+      <div
+        className={cn(
+          'absolute bottom-4 left-0 right-0 flex justify-center',
+          showScrollButton ? '' : 'hidden'
+        )}
+      >
+        <Button
+          size="icon"
+          variant="outline"
+          className="rounded-full"
+          onClick={scrollToBottom}
+        >
+          <ArrowDown className="size-4" />
+        </Button>
+      </div>
     </div>
   );
 }
