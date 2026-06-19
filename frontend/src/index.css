@@ -96,6 +96,15 @@ code {
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Prevent KaTeX/MathJax rendered math from creating its own vertical scrollbars */
+  .katex,
+  .katex-display,
+  .MathJax,
+  mjx-container {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
 }
 
 @keyframes loading-shimmer {
