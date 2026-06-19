@@ -1,13 +1,14 @@
 import importlib
 
 import pytest
-from fastapi import FastAPI, Form
+from fastapi import Depends, FastAPI, Form
 from fastapi.testclient import TestClient
 from starlette.requests import Request
 from starlette.responses import Response
 
 import chainlit.auth.cookie as cookie_module
 from chainlit.auth import (
+    OAuth2PasswordBearerWithCookie,
     clear_auth_cookie,
     get_token_from_cookies,
     set_auth_cookie,
@@ -163,3 +164,22 @@ def test_clear_auth_cookie(client):
     assert len(clear_response.cookies) == 0
     final_response = client.get("/get-token")
     assert final_response.json()["token"] is None
+
+
+def test_cookie_oauth_generates_openapi_security_scheme():
+    auth_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/login", auto_error=False)
+    app = FastAPI()
+
+    @app.get("/protected")
+    async def protected(token: str = Depends(auth_scheme)):
+        return {"token": token}
+
+    schema = app.openapi()
+    security_scheme = schema["components"]["securitySchemes"][
+        "OAuth2PasswordBearerWithCookie"
+    ]
+
+    assert security_scheme == {
+        "type": "oauth2",
+        "flows": {"password": {"scopes": {}, "tokenUrl": "/login"}},
+    }
