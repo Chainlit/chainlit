@@ -46,6 +46,7 @@
         "emailCreateAccount": "Intenta iniciar sesión con otra cuenta",
         "callback": "Intenta iniciar sesión con otra cuenta",
         "oauthAccountNotLinked": "Para confirmar tu identidad, inicia sesión con la misma cuenta que usaste originalmente",
+        "access_denied": "El inicio de sesión se canceló o se denegó el acceso. Si fue un error, vuelva a intentarlo.",
         "emailSignin": "No se pudo enviar el correo electrónico",
         "emailVerify": "Por favor verifica tu correo, se ha enviado un nuevo correo",
         "credentialsSignin": "Error al iniciar sesión. Verifica que los datos proporcionados sean correctos",

@@ -46,6 +46,7 @@
         "emailCreateAccount": "Essayez de vous connecter avec un autre compte",
         "callback": "Essayez de vous connecter avec un autre compte",
         "oauthAccountNotLinked": "Pour confirmer votre identité, connectez-vous avec le même compte que vous avez utilisé à l'origine",
+        "access_denied": "La connexion a été annulée ou l'accès a été refusé. Si c'est une erreur, veuillez réessayer.",
         "emailSignin": "L'e-mail n'a pas pu être envoyé",
         "emailVerify": "Veuillez vérifier votre e-mail, un nouvel e-mail a été envoyé",
         "credentialsSignin": "La connexion a échoué. Vérifiez que les informations que vous avez fournies sont correctes",

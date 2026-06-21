@@ -46,6 +46,7 @@
         "emailCreateAccount": "다른 계정으로 로그인해보세요",
         "callback": "다른 계정으로 로그인해보세요",
         "oauthAccountNotLinked": "신원을 확인하려면 원래 사용했던 계정으로 로그인하세요",
+        "access_denied": "로그인이 취소되었거나 접근이 거부되었습니다. 실수였다면 다시 시도해 주세요.",
         "emailSignin": "이메일을 보낼 수 없습니다",
         "emailVerify": "이메일을 확인해주세요. 새로운 이메일이 발송되었습니다",
         "credentialsSignin": "로그인 실패. 제공한 정보가 올바른지 확인하세요",

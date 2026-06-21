@@ -46,6 +46,7 @@
         "emailCreateAccount": "Prova ad accedere con un account diverso",
         "callback": "Prova ad accedere con un account diverso",
         "oauthAccountNotLinked": "Per confermare la tua identità, accedi con lo stesso account che hai usato in precedenza",
+        "access_denied": "L'accesso è stato annullato o l'autorizzazione è stata negata. Se è stato un errore, riprova.",
         "emailSignin": "Impossibile inviare l'email",
         "emailVerify": "Verifica la tua email, è stata inviata una nuova email",
         "credentialsSignin": "Accesso non riuscito. Verifica che i dati forniti siano corretti",

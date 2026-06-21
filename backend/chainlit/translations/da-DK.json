@@ -46,6 +46,7 @@
         "emailCreateAccount": "Prøv at logge ind med en anden konto",
         "callback": "Prøv at logge ind med en anden konto",
         "oauthAccountNotLinked": "For at bekræfte din identitet, log ind med samme konto, som du oprindeligt brugte",
+        "access_denied": "Login blev annulleret, eller adgang blev nægtet. Hvis det var en fejl, så prøv igen.",
         "emailSignin": "E-mailen kunne ikke sendes",
         "emailVerify": "Bekræft venligst din e-mail, en ny e-mail er blevet sendt",
         "credentialsSignin": "Login mislykkedes. Kontroller at de angivne oplysninger er korrekte",

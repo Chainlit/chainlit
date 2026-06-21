@@ -46,6 +46,7 @@
         "emailCreateAccount": "Tente iniciar sess\u00e3o com outra conta",
         "callback": "Tente iniciar sess\u00e3o com outra conta",
         "oauthAccountNotLinked": "Para confirmar a sua identidade, inicie sess\u00e3o com a mesma conta utilizada anteriormente",
+        "access_denied": "O in\u00edcio de sess\u00e3o foi cancelado ou o acesso foi negado. Se foi um engano, tente novamente.",
         "emailSignin": "N\u00e3o foi poss\u00edvel enviar o e-mail",
         "emailVerify": "Por favor, verifique o seu e-mail. Foi enviada uma nova mensagem",
         "credentialsSignin": "Erro ao iniciar sess\u00e3o. Verifique se os dados fornecidos est\u00e3o corretos",

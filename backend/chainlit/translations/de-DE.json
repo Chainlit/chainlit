@@ -46,6 +46,7 @@
         "emailCreateAccount": "Versuche dich mit einem anderen Konto anzumelden",
         "callback": "Versuche dich mit einem anderen Konto anzumelden",
         "oauthAccountNotLinked": "Um die Identität zu bestätigen, melde dich mit demselben Konto an, das du ursprünglich verwendet hast",
+        "access_denied": "Die Anmeldung wurde abgebrochen oder der Zugriff wurde verweigert. Falls dies ein Versehen war, versuchen Sie es bitte erneut.",
         "emailSignin": "Die E-Mail konnte nicht gesendet werden",
         "emailVerify": "Es wurde eine neue E-Mail versandt. Bitte überprüfe dein E-Mail Postfach",
         "credentialsSignin": "Anmeldung fehlgeschlagen. Überprüfe, ob die angegebenen Benutzerdaten korrekt sind",

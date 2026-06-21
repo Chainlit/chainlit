@@ -46,6 +46,7 @@
         "emailCreateAccount": "请尝试使用其他账号登录",
         "callback": "请尝试使用其他账号登录",
         "oauthAccountNotLinked": "为确认您的身份，请使用原始账号登录",
+        "access_denied": "登录已取消或访问被拒绝。如果这是误操作，请重试。",
         "emailSignin": "邮件发送失败",
         "emailVerify": "请验证您的邮箱，新的验证邮件已发送",
         "credentialsSignin": "登录失败。请检查您提供的信息是否正确",

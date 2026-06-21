@@ -46,6 +46,7 @@
         "emailCreateAccount": "Try signing in with a different account",
         "callback": "Try signing in with a different account",
         "oauthAccountNotLinked": "To confirm your identity, sign in with the same account you used originally",
+        "access_denied": "Sign in was cancelled or access was denied. If this was a mistake, please try again.",
         "emailSignin": "The e-mail could not be sent",
         "emailVerify": "Please verify your email, a new email has been sent",
         "credentialsSignin": "Sign in failed. Check the details you provided are correct",

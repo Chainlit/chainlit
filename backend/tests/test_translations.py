@@ -1,8 +1,12 @@
+import glob
+import json
+import os
 from io import StringIO
 from unittest.mock import patch
 
 import pytest
 
+from chainlit.config import TRANSLATIONS_DIR
 from chainlit.translations import compare_json_structures, lint_translation_json
 
 
@@ -384,3 +388,51 @@ class TestTranslationsEdgeCases:
         missing_errors = [e for e in errors if "Missing" in e]
         assert len(extra_errors) == 2
         assert len(missing_errors) == 3
+
+
+def _locale_files():
+    return sorted(glob.glob(os.path.join(TRANSLATIONS_DIR, "*.json")))
+
+
+def _login_errors(path):
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)["auth"]["login"]["errors"]
+
+
+class TestOAuthAccessDeniedKey:
+    """The access_denied error code must resolve to a dedicated, distinct
+    login message in every shipped locale.
+
+    The frontend builds the i18n key as auth.login.errors.{error.toLowerCase()},
+    so an OAuth ?error=access_denied redirect looks up auth.login.errors.access_denied.
+    Without this key it falls back to the generic 'default' message, which is
+    misleading for an explicit user/provider denial.
+    """
+
+    def test_access_denied_present_in_en_us(self):
+        errors = _login_errors(os.path.join(TRANSLATIONS_DIR, "en-US.json"))
+        assert "access_denied" in errors
+        assert isinstance(errors["access_denied"], str)
+        assert errors["access_denied"].strip()
+
+    def test_access_denied_distinct_from_default_in_en_us(self):
+        errors = _login_errors(os.path.join(TRANSLATIONS_DIR, "en-US.json"))
+        assert errors["access_denied"] != errors["default"]
+
+    def test_access_denied_present_in_all_locales(self):
+        files = _locale_files()
+        assert files, "no locale files found"
+        for path in files:
+            errors = _login_errors(path)
+            name = os.path.basename(path)
+            assert "access_denied" in errors, f"{name} missing access_denied key"
+            value = errors["access_denied"]
+            assert isinstance(value, str), f"{name} access_denied is not a string"
+            assert value.strip(), f"{name} has empty access_denied value"
+
+    def test_locale_login_errors_match_en_us_structure(self):
+        truth = _login_errors(os.path.join(TRANSLATIONS_DIR, "en-US.json"))
+        for path in _locale_files():
+            name = os.path.basename(path)
+            errors = compare_json_structures(truth, _login_errors(path))
+            assert errors == [], f"{name} login.errors structure drift: {errors}"

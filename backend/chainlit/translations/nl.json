@@ -46,6 +46,7 @@
         "emailCreateAccount": "Probeer in te loggen met een ander account",
         "callback": "Probeer in te loggen met een ander account",
         "oauthAccountNotLinked": "Om je identiteit te bevestigen, log in met hetzelfde account dat je oorspronkelijk hebt gebruikt",
+        "access_denied": "Het inloggen is geannuleerd of de toegang is geweigerd. Als dit een vergissing was, probeer het opnieuw.",
         "emailSignin": "De e-mail kon niet worden verzonden",
         "emailVerify": "Verifieer je e-mail, er is een nieuwe e-mail verzonden",
         "credentialsSignin": "Inloggen mislukt. Controleer of de ingevoerde gegevens correct zijn",
