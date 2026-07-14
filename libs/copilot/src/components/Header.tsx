@@ -14,6 +14,7 @@ import {
 } from '@chainlit/app/src/components/ui/dropdown-menu';
 import { IChainlitConfig, useAudio } from '@chainlit/react-client';
 
+import { useTheme } from '../ThemeProvider';
 import { useCopilotInteract } from '../hooks';
 import { DisplayMode } from '../types';
 
@@ -44,13 +45,18 @@ const Header = ({
   const { config } = projectConfig;
   const { audioConnection } = useAudio();
   const { startNewChat } = useCopilotInteract();
+  const { variant } = useTheme();
 
   const hasChatProfiles = !!config?.chatProfiles.length;
 
   return (
     <div className="flex align-center justify-between p-4 pb-0">
       <div className="flex items-center gap-1">
-        {hasChatProfiles ? <ChatProfiles /> : <Logo className="w-[100px]" />}
+        {hasChatProfiles ? (
+          <ChatProfiles />
+        ) : (
+          <Logo className="w-[100px]" themeVariant={variant} />
+        )}
       </div>
       <div className="flex items-center">
         {audioConnection === 'on' ? (

@@ -7,16 +7,20 @@ import { useTheme } from './ThemeProvider';
 
 interface Props {
   className?: string;
+  themeVariant?: 'light' | 'dark';
 }
 
-export const Logo = ({ className }: Props) => {
+export const Logo = ({ className, themeVariant }: Props) => {
   const { variant } = useTheme();
   const { config } = useConfig();
   const apiClient = useContext(ChainlitContext);
 
   return (
     <img
-      src={apiClient.getLogoEndpoint(variant, config?.ui?.logo_file_url)}
+      src={apiClient.getLogoEndpoint(
+        themeVariant ?? variant,
+        config?.ui?.logo_file_url
+      )}
       alt="logo"
       className={cn('logo', className)}
     />
