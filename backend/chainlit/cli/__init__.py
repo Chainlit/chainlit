@@ -4,13 +4,17 @@ import os
 import sys
 
 import click
-import nest_asyncio
 import uvicorn
 
-# Not sure if it is necessary to call nest_asyncio.apply() before the other imports
-nest_asyncio.apply()
-
-# ruff: noqa: E402
+# nest_asyncio was intentionally removed (see https://github.com/Chainlit/chainlit/issues/2767).
+# nest_asyncio ≤ 1.6.0 patches loop.run_until_complete() via
+# asyncio.ensure_future(future, loop=self), where the ``loop=`` keyword was
+# deprecated in Python 3.8 and **removed in Python 3.14** (bpo-39529).
+# Applying it at import time silently corrupted asyncio task registration:
+# asyncio.current_task() returned None inside running coroutines, which
+# caused anyio.NoEventLoopError on every static-asset request (HTTP 500 /
+# white page) on Python 3.14.  The entry point asyncio.run(start()) is a
+# top-level call and has never needed re-entrant loop support.
 from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
 from chainlit.config import (
