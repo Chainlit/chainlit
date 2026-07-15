@@ -325,31 +325,48 @@ class WebsocketSession(BaseSession):
         )
         self.language = match.group(1) if match else "en-US"
 
-        self.config: ChainlitConfig = self.get_config()
+        # Start with global config; chat-profile overrides are applied
+        # asynchronously via resolve_config() after construction.
+        from chainlit.config import config as global_config
+
+        self.config: ChainlitConfig = global_config
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
 
     def get_config(self) -> "ChainlitConfig":
         """
-        Return the config for this session: overridden if chat profile exists and has overrides, else global config.
+        Return the config for this session.
+
+        If ``resolve_config()`` has already been awaited the returned
+        object includes any chat-profile overrides; otherwise it falls
+        back to the global config.
+        """
+        return self.config
+
+    async def resolve_config(self) -> "ChainlitConfig":
+        """
+        Resolve chat-profile config overrides asynchronously.
+
+        Must be awaited from an async context (e.g. the SocketIO
+        ``connect`` handler) *after* the session has been constructed.
+        Once overrides are successfully applied the result is cached
+        on ``self.config`` and subsequent calls return immediately.
         """
         from chainlit.config import config as global_config
 
-        # If no chat profile, always fallback to global config
+        # Nothing to resolve when there is no chat profile.
         if not self.chat_profile:
-            return global_config
-        # If already computed, use self.config
-        if hasattr(self, "config") and self.config:
             return self.config
-        # Try to compute overrides
-        cfg = global_config
-        if global_config.code.set_chat_profiles:
-            import asyncio
 
+        # Already resolved — return cached value.
+        if self.config is not global_config:
+            return self.config
+
+        if global_config.code.set_chat_profiles:
             try:
-                profiles = asyncio.get_event_loop().run_until_complete(
-                    global_config.code.set_chat_profiles(self.user, self.language)
+                profiles = await global_config.code.set_chat_profiles(
+                    self.user, self.language
                 )
                 current_profile = next(
                     (p for p in profiles if p.name == self.chat_profile), None
@@ -357,11 +374,12 @@ class WebsocketSession(BaseSession):
                 if current_profile and getattr(
                     current_profile, "config_overrides", None
                 ):
-                    cfg = global_config.with_overrides(current_profile.config_overrides)
+                    self.config = global_config.with_overrides(
+                        current_profile.config_overrides
+                    )
             except Exception:
                 pass
-        self.config = cfg
-        return cfg
+        return self.config
 
     def restore(self, new_socket_id: str):
         """Associate a new socket id to the session."""

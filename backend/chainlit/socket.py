@@ -188,7 +188,7 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
         unquote(url_encoded_chat_profile) if url_encoded_chat_profile else None
     )
 
-    WebsocketSession(
+    session = WebsocketSession(
         id=session_id,
         socket_id=sid,
         emit=emit_fn,
@@ -201,6 +201,11 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
         thread_id=thread_id,
         environ=environ,
     )
+
+    # Resolve chat-profile config overrides asynchronously.
+    # This must happen after construction so that the session is
+    # registered and the event loop is available.
+    await session.resolve_config()
 
     return True
 

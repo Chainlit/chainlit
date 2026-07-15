@@ -763,3 +763,248 @@ class TestMcpSession:
         await mcp.close()  # second call should be safe
 
         assert task.done()
+
+
+def test_get_config_returns_global_config_by_default():
+    """get_config() returns the global config when no profile is set."""
+    from chainlit.config import config as global_config
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_1",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+    )
+    assert session.get_config() is global_config
+
+
+def test_get_config_returns_global_config_with_profile_before_resolve():
+    """get_config() returns global config even with a profile, before resolve_config()."""
+    from chainlit.config import config as global_config
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_2",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+        chat_profile="gpt-4",
+    )
+    assert session.get_config() is global_config
+
+
+@pytest.mark.asyncio
+async def test_resolve_config_noop_without_chat_profile():
+    """resolve_config() is a no-op when there is no chat profile."""
+    from chainlit.config import config as global_config
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_3",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+    )
+    result = await session.resolve_config()
+    assert result is global_config
+    assert session.get_config() is global_config
+
+
+@pytest.mark.asyncio
+async def test_resolve_config_applies_overrides(monkeypatch):
+    """resolve_config() applies chat-profile config overrides."""
+    from chainlit.config import (
+        ChainlitConfigOverrides,
+        UISettings,
+        config as global_config,
+    )
+    from chainlit.types import ChatProfile
+
+    profiles = [
+        ChatProfile(
+            name="custom",
+            markdown_description="Custom profile",
+            config_overrides=ChainlitConfigOverrides(
+                ui=UISettings(name="Custom App"),
+            ),
+        ),
+    ]
+
+    async def mock_set_chat_profiles(user, language):
+        return profiles
+
+    monkeypatch.setattr(global_config.code, "set_chat_profiles", mock_set_chat_profiles)
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_4",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+        chat_profile="custom",
+    )
+
+    result = await session.resolve_config()
+    assert result is not global_config
+    assert result.ui.name == "Custom App"
+    # get_config() should return the resolved config
+    assert session.get_config().ui.name == "Custom App"
+
+
+@pytest.mark.asyncio
+async def test_resolve_config_no_overrides_for_profile(monkeypatch):
+    """resolve_config() returns global config when profile has no overrides."""
+    from chainlit.config import config as global_config
+    from chainlit.types import ChatProfile
+
+    async def mock_set_chat_profiles(user, language):
+        return [ChatProfile(name="basic", markdown_description="Basic profile")]
+
+    monkeypatch.setattr(global_config.code, "set_chat_profiles", mock_set_chat_profiles)
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_5",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+        chat_profile="basic",
+    )
+    result = await session.resolve_config()
+    assert result is global_config
+
+
+@pytest.mark.asyncio
+async def test_resolve_config_idempotent(monkeypatch):
+    """Calling resolve_config() twice returns the same cached result."""
+    from chainlit.config import (
+        ChainlitConfigOverrides,
+        UISettings,
+        config as global_config,
+    )
+    from chainlit.types import ChatProfile
+
+    call_count = 0
+
+    async def mock_set_chat_profiles(user, language):
+        nonlocal call_count
+        call_count += 1
+        return [
+            ChatProfile(
+                name="custom",
+                markdown_description="Custom profile",
+                config_overrides=ChainlitConfigOverrides(
+                    ui=UISettings(name="Custom App"),
+                ),
+            ),
+        ]
+
+    monkeypatch.setattr(global_config.code, "set_chat_profiles", mock_set_chat_profiles)
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_6",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+        chat_profile="custom",
+    )
+
+    first = await session.resolve_config()
+    second = await session.resolve_config()
+    assert first is second
+    assert call_count == 1  # callback only invoked once
+
+
+@pytest.mark.asyncio
+async def test_resolve_config_handles_callback_exception(monkeypatch):
+    """resolve_config() falls back to global config if the callback raises."""
+    from chainlit.config import config as global_config
+
+    async def broken_set_chat_profiles(user, language):
+        raise RuntimeError("something went wrong")
+
+    monkeypatch.setattr(
+        global_config.code, "set_chat_profiles", broken_set_chat_profiles
+    )
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_7",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+        chat_profile="some-profile",
+    )
+    result = await session.resolve_config()
+    assert result is global_config
+
+
+@pytest.mark.asyncio
+async def test_resolve_config_unknown_profile(monkeypatch):
+    """resolve_config() returns global config for a profile name not in the list."""
+    from chainlit.config import config as global_config
+    from chainlit.types import ChatProfile
+
+    async def mock_set_chat_profiles(user, language):
+        return [ChatProfile(name="known", markdown_description="Known profile")]
+
+    monkeypatch.setattr(global_config.code, "set_chat_profiles", mock_set_chat_profiles)
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_8",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+        chat_profile="unknown",
+    )
+    result = await session.resolve_config()
+    assert result is global_config
+
+
+def test_get_config_does_not_use_run_until_complete(monkeypatch):
+    """get_config() must not call asyncio.get_event_loop().run_until_complete().
+
+    This is the key regression test: the old implementation used
+    run_until_complete() which required nest_asyncio and broke on
+    Python 3.14.
+    """
+    import asyncio
+
+    from chainlit.config import config as global_config
+    from chainlit.types import ChatProfile
+
+    async def mock_set_chat_profiles(user, language):
+        return [ChatProfile(name="test", markdown_description="Test")]
+
+    monkeypatch.setattr(global_config.code, "set_chat_profiles", mock_set_chat_profiles)
+
+    session = WebsocketSession(
+        id="ws_id",
+        socket_id="socket_cfg_9",
+        emit=Mock(),
+        emit_call=Mock(),
+        user_env={},
+        client_type="webapp",
+        chat_profile="test",
+    )
+
+    # get_config() should return immediately without calling
+    # run_until_complete.  Verify by patching it to raise.
+    loop = asyncio.get_event_loop()
+    monkeypatch.setattr(
+        loop, "run_until_complete", Mock(side_effect=RuntimeError("must not be called"))
+    )
+    config = session.get_config()
+    # Should return global config (overrides not yet resolved)
+    assert config is global_config
