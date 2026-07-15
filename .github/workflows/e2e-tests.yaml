@@ -35,6 +35,9 @@ jobs:
     needs: prepare
     runs-on: ${{ matrix.os }}
     strategy:
+      # Keep every shard running even if one fails: a flaky Cypress binary
+      # install on a single shard should not cancel the whole matrix.
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         containers: ${{ fromJSON(needs.prepare.outputs.indexes) }}
@@ -57,6 +60,15 @@ jobs:
         with:
           working-directory: ${{ env.BACKEND_DIR }}
           uv-args: --extra tests
+      - name: Ensure Cypress binary is installed
+        # A restored-but-incomplete cache (notably on Windows) can leave the npm
+        # package present while the binary is missing, which fails at run time
+        # with "the Cypress binary is missing". `install` re-downloads only when
+        # needed; `verify` fails fast if the binary is still unusable.
+        run: |
+          pnpm exec cypress install
+          pnpm exec cypress verify
+        shell: bash
       - name: Run tests
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
