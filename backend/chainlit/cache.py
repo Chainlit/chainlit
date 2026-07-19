@@ -46,10 +46,8 @@ _cache_lock = threading.Lock()
 
 def cache(func):
     def wrapper(*args, **kwargs):
-        # Create a cache key based on the function name, arguments, and keyword arguments
-        cache_key = (
-            (func.__name__,) + args + tuple((k, v) for k, v in sorted(kwargs.items()))
-        )
+        # Include the function object so same-named callables cannot share entries.
+        cache_key = (func,) + args + tuple((k, v) for k, v in sorted(kwargs.items()))
 
         with _cache_lock:
             # Check if the result is already in the cache
