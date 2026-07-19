@@ -52,6 +52,9 @@ jobs:
           key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
       - uses: ./.github/actions/pnpm-node-install
         name: Install Node, pnpm and dependencies.
+      - name: Ensure Cypress binary is installed
+        run: pnpm exec cypress install
+        shell: bash
       - uses: ./.github/actions/uv-python-install
         name: Install Python, uv and Python & pnpm (uv does it automatically) dependencies
         with:
