@@ -49,7 +49,9 @@ export default function WelcomeScreen(props: Props) {
       const currentChatProfile = chatProfiles.find(
         (cp) => cp.name === chatProfile
       );
-      if (!currentChatProfile) return null;
+      if (!currentChatProfile) {
+        return <Logo className="w-[200px] mb-2" />;
+      }
 
       const profileIcon = currentChatProfile.icon
         ? currentChatProfile.icon.startsWith('/public')
