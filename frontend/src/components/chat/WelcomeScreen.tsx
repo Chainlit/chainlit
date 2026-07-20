@@ -49,29 +49,36 @@ export default function WelcomeScreen(props: Props) {
       const currentChatProfile = chatProfiles.find(
         (cp) => cp.name === chatProfile
       );
-      if (currentChatProfile?.icon) {
-        return (
-          <div className="flex flex-col gap-2 mb-2 items-center">
+      if (!currentChatProfile) return null;
+
+      const profileIcon = currentChatProfile.icon
+        ? currentChatProfile.icon.startsWith('/public')
+          ? apiClient.buildEndpoint(currentChatProfile.icon)
+          : currentChatProfile.icon
+        : null;
+
+      return (
+        <div className="flex flex-col gap-2 mb-2 items-center">
+          {profileIcon ? (
             <img
               className="h-16 w-16 rounded-full"
-              src={
-                currentChatProfile?.icon.startsWith('/public')
-                  ? apiClient.buildEndpoint(currentChatProfile?.icon)
-                  : currentChatProfile?.icon
-              }
+              src={profileIcon}
+              alt={currentChatProfile.display_name || currentChatProfile.name}
             />
-            {currentChatProfile?.markdown_description ? (
-              <Markdown
-                allowHtml={allowHtml}
-                latex={latex}
-                renderMarkdown={true}
-              >
-                {currentChatProfile.markdown_description}
-              </Markdown>
-            ) : null}
-          </div>
-        );
-      }
+          ) : (
+            <Logo className="w-[200px] mb-2" />
+          )}
+          {currentChatProfile?.markdown_description ? (
+            <Markdown
+              allowHtml={allowHtml}
+              latex={latex}
+              renderMarkdown={true}
+            >
+              {currentChatProfile.markdown_description}
+            </Markdown>
+          ) : null}
+        </div>
+      );
     }
 
     return <Logo className="w-[200px] mb-2" />;
