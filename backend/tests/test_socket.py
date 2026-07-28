@@ -403,10 +403,9 @@ class TestLoadUserEnv:
         with patch("chainlit.socket.config") as mock_config:
             mock_config.project.user_env = ["API_KEY"]
 
-            # The function has a bug - it raises UnboundLocalError instead of ConnectionRefusedError
-            # Python 3.10: "referenced before assignment"
-            # Python 3.11+: "cannot access local variable"
-            with pytest.raises(UnboundLocalError, match="user_env_dict"):
+            with pytest.raises(
+                ConnectionRefusedError, match="Missing user environment variables"
+            ):
                 load_user_env(None)
 
     def test_load_user_env_none_without_required_keys(self):
@@ -414,10 +413,9 @@ class TestLoadUserEnv:
         with patch("chainlit.socket.config") as mock_config:
             mock_config.project.user_env = []
 
-            # The function has a bug - it raises NameError when user_env is None
-            # even when no required keys are configured
-            with pytest.raises(NameError, match="user_env_dict"):
-                load_user_env(None)
+            result = load_user_env(None)
+
+            assert result == {}
 
 
 class TestCleanSession:
