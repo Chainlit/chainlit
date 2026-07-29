@@ -14,7 +14,7 @@ const FileElement = ({ element }: { element: IFileElement }) => {
       href={element.url}
       target="_blank"
     >
-      <Attachment name={element.name} mime={element.mime!} />
+      <Attachment name={element.name} mime={element.mime} />
     </a>
   );
 };
