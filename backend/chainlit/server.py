@@ -710,10 +710,15 @@ async def oauth_callback(
 async def oauth_azure_hf_callback(
     request: Request,
     error: Optional[str] = None,
+    form_error: Annotated[Optional[str], Form(alias="error")] = None,
     code: Annotated[Optional[str], Form()] = None,
     id_token: Annotated[Optional[str], Form()] = None,
 ):
     """Handle the azure ad hybrid flow callback and login the user."""
+
+    # This provider uses response_mode=form_post, so the provider posts `error`
+    # as a form field. Keep accepting it as a query param for backward compat.
+    error = error or form_error
 
     provider_id = "azure-ad-hybrid"
     if config.code.oauth_callback is None:

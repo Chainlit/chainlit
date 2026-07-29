@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import pathlib
 from pathlib import Path
@@ -1272,6 +1273,28 @@ def test_oauth_azure_hf_callback_missing_code_redirects(
     )
     assert response.status_code == 303
     assert "error=oauthSignin" in response.headers["location"]
+
+
+def test_oauth_azure_hf_callback_form_error_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+    caplog: pytest.LogCaptureFixture,
+):
+    """Azure posts errors as form fields (response_mode=form_post), not query params."""
+    test_config.code.oauth_callback = AsyncMock()
+    with caplog.at_level(logging.WARNING, logger="chainlit"):
+        response = test_client.post(
+            "/auth/oauth/azure-ad-hybrid/callback",
+            data={"error": "access_denied"},
+            follow_redirects=False,
+        )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]
+    assert any(
+        "returned error: access_denied" in record.getMessage()
+        for record in caplog.records
+    )
 
 
 def test_oauth_azure_hf_callback_get_token_error_redirects(
