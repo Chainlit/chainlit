@@ -2,6 +2,7 @@ import pytest
 
 from chainlit.input_widget import (
     Checkbox,
+    DatePicker,
     MultiSelect,
     NumberInput,
     RadioGroup,
@@ -627,6 +628,29 @@ class TestTabWidget:
         assert result["id"] == "test_tab"
         assert result["label"] == "Empty Tab"
         assert result["inputs"] == []
+
+
+class TestDatePickerWidget:
+    def test_single_mode_rejects_range_initial_value(self):
+        with pytest.raises(
+            ValueError, match="'initial' must be a single date for single mode"
+        ):
+            DatePicker(
+                id="date",
+                label="Date",
+                mode="single",
+                initial=("2026-01-01", "2026-01-02"),
+            )
+
+    def test_single_mode_rejects_inverted_bounds(self):
+        with pytest.raises(ValueError, match="start must be before end"):
+            DatePicker(
+                id="date",
+                label="Date",
+                mode="single",
+                min_date="2026-02-01",
+                max_date="2026-01-01",
+            )
 
 
 class TestInputWidgetEdgeCases:
