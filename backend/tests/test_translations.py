@@ -1,9 +1,13 @@
+import json
 from io import StringIO
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 from chainlit.translations import compare_json_structures, lint_translation_json
+
+TRANSLATIONS_DIR = Path(__file__).resolve().parents[1] / "chainlit" / "translations"
 
 
 class TestCompareJsonStructures:
@@ -309,6 +313,24 @@ class TestLintTranslationJson:
             lines = output.strip().split("\n")
             assert "Linting format.json..." in lines[0]
             assert len(lines) >= 2  # At least linting message + errors
+
+
+class TestPackagedTranslations:
+    """Test suite for packaged locale files."""
+
+    def test_packaged_locale_files_match_en_us_structure(self):
+        truth_path = TRANSLATIONS_DIR / "en-US.json"
+        truth = json.loads(truth_path.read_text(encoding="utf-8"))
+
+        errors = []
+        for locale_path in sorted(TRANSLATIONS_DIR.glob("*.json")):
+            locale = json.loads(locale_path.read_text(encoding="utf-8"))
+            errors.extend(
+                f"{locale_path.name}: {error}"
+                for error in compare_json_structures(truth, locale)
+            )
+
+        assert errors == []
 
 
 class TestTranslationsEdgeCases:
