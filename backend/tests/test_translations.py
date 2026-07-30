@@ -1,9 +1,26 @@
+import json
 from io import StringIO
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 from chainlit.translations import compare_json_structures, lint_translation_json
+
+
+def test_bundled_translations_match_en_us_structure():
+    translations_dir = Path(__file__).parents[1] / "chainlit" / "translations"
+    with (translations_dir / "en-US.json").open(encoding="utf-8") as source:
+        truth = json.load(source)
+
+    errors_by_locale = {}
+    for locale_path in sorted(translations_dir.glob("*.json")):
+        with locale_path.open(encoding="utf-8") as source:
+            errors = compare_json_structures(truth, json.load(source))
+        if errors:
+            errors_by_locale[locale_path.stem] = errors
+
+    assert errors_by_locale == {}
 
 
 class TestCompareJsonStructures:
