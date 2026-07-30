@@ -1,3 +1,5 @@
+import io
+import sys
 from io import StringIO
 from unittest.mock import patch
 
@@ -235,6 +237,25 @@ class TestLintTranslationJson:
 
             assert "Linting test.json..." in output
             assert "✅ No errors found in test.json" in output
+
+    def test_lint_with_cp1252_stdout(self):
+        """Regression test for Windows cp1252 consoles."""
+
+        truth = {"key": "value"}
+        to_compare = {}
+
+        buffer = io.BytesIO()
+        stdout = io.TextIOWrapper(buffer, encoding="cp1252")
+
+        with patch.object(sys, "stdout", stdout):
+            lint_translation_json("test.json", truth, to_compare)
+
+        stdout.flush()
+        buffer.seek(0)
+        output = buffer.read().decode("cp1252")
+
+        assert "Linting test.json..." in output
+        assert "Missing key: 'key'" in output
 
     def test_lint_with_errors(self):
         """Test linting when there are errors."""
