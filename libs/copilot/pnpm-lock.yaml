@@ -12,7 +12,6 @@ overrides:
   tar@<6.2.1: '>=6.2.1'
   braces@<3.0.3: '>=3.0.3'
   ejs@<3.1.10: '>=3.1.10'
-  ws@>=8.0.0 <8.17.1: '>=8.17.1'
   micromatch@<4.0.8: '>=4.0.8'
   body-parser@<1.20.3: '>=1.20.3'
   send@<0.19.0: '>=0.19.0'
@@ -21,13 +20,12 @@ overrides:
   path-to-regexp@<0.1.10: '>=0.1.10'
   vite@>=4.0.0 <4.5.4: '>=4.5.4'
   vite@>=4.0.0 <=4.5.3: '>=4.5.4'
-  rollup@>=3.0.0 <3.29.5: '>=3.29.5'
   cookie@<0.7.0: '>=0.7.0'
   cross-spawn@>=7.0.0 <7.0.5: '>=7.0.5'
   handlebars@<4.7.9: '>=4.7.9 <5.0.0'
   brace-expansion@>=2.0.0 <2.1.2: '>=2.1.2 <3.0.0'
-  ws@>=8.17.1 <8.21.0: '>=8.21.0 <9.0.0'
-  rollup@>=4.0.0 <4.59.0: '>=4.59.0 <5.0.0'
+  ws@>=8.0.0 <8.21.0: '>=8.21.0 <9.0.0'
+  rollup@>=3.0.0 <4.59.0: '>=4.59.0 <5.0.0'
   minimatch@<9.0.7: '>=9.0.7 <10.0.0'
   glob@<10.5.0: '>=10.5.0 <11.0.0'
   picomatch@<2.3.2: '>=2.3.2 <3.0.0'
@@ -2672,8 +2670,8 @@ packages:
     resolution: {integrity: sha512-si7QWI6zUMq56bESFvagtmzMdGOtoxfR+Sez11Mobfc7tm+VkUckk9bW2UeffTGVUbOksxmSw0AA2gs8g71NCQ==}
     engines: {node: '>=12'}
 
-  ws@8.18.0:
-    resolution: {integrity: sha512-8VbfWfHLbbwu3+N6OKsOMpBdT4kXPDDB9cJk2bJ6mh9ucxdlnNvH1e+roYkKmN9Nxw2yjz7VzeO9oOz2zJ04Pw==}
+  ws@8.21.1:
+    resolution: {integrity: sha512-+0NTnW77fFN/DjQi6k/Sq/Yvk4Sgajw7urW8V+asjXnRgDs9gyGkdb7EzgfhA4goXsRIZKE28fzIXBHEzhuiWw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -3354,7 +3352,7 @@ snapshots:
       recast: 0.23.7
       semver: 7.6.3
       util: 0.12.5
-      ws: 8.18.0
+      ws: 8.21.1
     transitivePeerDependencies:
       - bufferutil
       - storybook
@@ -5203,7 +5201,7 @@ snapshots:
       string-width: 5.1.2
       strip-ansi: 7.1.0
 
-  ws@8.18.0: {}
+  ws@8.21.1: {}
 
   yallist@3.1.1: {}
 
