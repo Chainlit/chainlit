@@ -10,17 +10,69 @@ export const DEFAULT_LOCKFILES = [
   'libs/react-client/pnpm-lock.yaml'
 ];
 
-export function parseOverrideSelector(selector) {
+function parsePackageSelector(selector) {
   const atIndex = selector.lastIndexOf('@');
+  const packageNameEnd = selector.startsWith('@') ? selector.indexOf('/') : 0;
 
-  if (atIndex <= 0) {
+  if (!selector || (selector.startsWith('@') && packageNameEnd <= 1)) {
     throw new Error(`Invalid override selector "${selector}"`);
   }
 
-  return {
-    packageName: selector.slice(0, atIndex),
-    sourceRange: selector.slice(atIndex + 1)
-  };
+  const parsedSelector =
+    atIndex <= packageNameEnd
+      ? {
+          packageName: selector,
+          sourceRange: '*'
+        }
+      : {
+          packageName: selector.slice(0, atIndex),
+          sourceRange: selector.slice(atIndex + 1) || '*'
+        };
+
+  if (
+    !/^(?:@[a-z0-9._~-]+\/)?[a-z0-9._~-]+$/i.test(parsedSelector.packageName)
+  ) {
+    throw new Error(`Invalid override selector "${selector}"`);
+  }
+
+  return parsedSelector;
+}
+
+export function parseOverrideSelector(selector) {
+  try {
+    const packageSelector = parsePackageSelector(selector);
+
+    if (semver.validRange(packageSelector.sourceRange)) {
+      return packageSelector;
+    }
+  } catch {
+    // Try parsing the selector as a parent-to-dependency edge below.
+  }
+
+  for (let edgeIndex = selector.indexOf('>'); edgeIndex >= 0; ) {
+    try {
+      const parentSelector = parsePackageSelector(selector.slice(0, edgeIndex));
+      const dependencySelector = parsePackageSelector(
+        selector.slice(edgeIndex + 1)
+      );
+
+      if (
+        semver.validRange(parentSelector.sourceRange) &&
+        semver.validRange(dependencySelector.sourceRange)
+      ) {
+        return {
+          ...dependencySelector,
+          parentSelector
+        };
+      }
+    } catch {
+      // Keep looking because the range itself may contain a comparator.
+    }
+
+    edgeIndex = selector.indexOf('>', edgeIndex + 1);
+  }
+
+  throw new Error(`Invalid override selector "${selector}"`);
 }
 
 export function parsePackageKey(packageKey) {
@@ -36,10 +88,56 @@ export function parsePackageKey(packageKey) {
   };
 }
 
+function parseDependencyVersion(reference) {
+  if (typeof reference !== 'string') {
+    return null;
+  }
+
+  const parsedPackage = parsePackageKey(reference);
+
+  if (parsedPackage && semver.valid(parsedPackage.version)) {
+    return parsedPackage.version;
+  }
+
+  const version = reference.split('(', 1)[0];
+  return semver.valid(version) ? version : null;
+}
+
+function getEdgeVersions(snapshots, parentSelector, dependencyName) {
+  const versions = new Set();
+
+  for (const [snapshotKey, snapshot] of Object.entries(snapshots)) {
+    const parsedParent = parsePackageKey(snapshotKey);
+
+    if (
+      !parsedParent ||
+      parsedParent.packageName !== parentSelector.packageName ||
+      !semver.valid(parsedParent.version) ||
+      !semver.satisfies(parsedParent.version, parentSelector.sourceRange, {
+        includePrerelease: true
+      })
+    ) {
+      continue;
+    }
+
+    const dependencyReference =
+      snapshot.dependencies?.[dependencyName] ??
+      snapshot.optionalDependencies?.[dependencyName];
+    const dependencyVersion = parseDependencyVersion(dependencyReference);
+
+    if (dependencyVersion) {
+      versions.add(dependencyVersion);
+    }
+  }
+
+  return [...versions].sort(semver.compare);
+}
+
 export function validateLockfile(lockfilePath, lockfileContents) {
   const parsed = yaml.parse(lockfileContents);
   const overrides = parsed.overrides || {};
   const packages = parsed.packages || {};
+  const snapshots = parsed.snapshots || {};
   const packageVersions = new Map();
   const errors = [];
 
@@ -58,22 +156,23 @@ export function validateLockfile(lockfilePath, lockfileContents) {
   }
 
   for (const [selector, targetRange] of Object.entries(overrides)) {
-    const { packageName } = parseOverrideSelector(selector);
-    const resolvedVersions = [...(packageVersions.get(packageName) || [])].sort(
-      semver.compare
-    );
+    const { packageName, sourceRange, parentSelector } =
+      parseOverrideSelector(selector);
 
-    if (!semver.validRange(targetRange)) {
-      errors.push(
-        `${lockfilePath}: override "${selector}" has invalid target range "${targetRange}"`
-      );
+    if (typeof targetRange !== 'string' || !semver.validRange(targetRange)) {
       continue;
     }
 
+    const resolvedVersions = parentSelector
+      ? getEdgeVersions(snapshots, parentSelector, packageName)
+      : [...(packageVersions.get(packageName) || [])].sort(semver.compare);
+
     for (const version of resolvedVersions) {
-      if (
-        !semver.satisfies(version, targetRange, { includePrerelease: true })
-      ) {
+      if (semver.satisfies(version, targetRange, { includePrerelease: true })) {
+        continue;
+      }
+
+      if (semver.satisfies(version, sourceRange, { includePrerelease: true })) {
         errors.push(
           `${lockfilePath}: resolved ${packageName}@${version} does not satisfy override "${selector}" -> "${targetRange}"`
         );

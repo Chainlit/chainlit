@@ -12,6 +12,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - name: 'Test pnpm override validator'
+            command: pnpm test:check-pnpm-overrides
           - name: 'Validate pnpm overrides'
             command: pnpm check-pnpm-overrides
           - name: 'Linting: frontend'
