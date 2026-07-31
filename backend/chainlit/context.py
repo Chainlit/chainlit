@@ -7,6 +7,11 @@ from lazify import LazyProxy
 
 from chainlit.session import ClientType, HTTPSession, WebsocketSession
 
+# The event loop only keeps weak references to tasks, so a persistence task
+# whose only reference was the create_task() call can be garbage collected
+# before it reaches the data layer. Hold each one until it completes.
+_persistence_tasks: set[asyncio.Task] = set()
+
 if TYPE_CHECKING:
     from chainlit.emitter import BaseChainlitEmitter
     from chainlit.step import Step
@@ -95,9 +100,11 @@ def init_http_context(
 
     if data_layer := get_data_layer():
         if user_id := getattr(user, "id", None):
-            asyncio.create_task(
+            _task = asyncio.create_task(
                 data_layer.update_thread(thread_id=thread_id, user_id=user_id)
             )
+            _persistence_tasks.add(_task)
+            _task.add_done_callback(_persistence_tasks.discard)
 
     return context
 

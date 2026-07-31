@@ -24,6 +24,11 @@ from chainlit.context import context
 from chainlit.data import get_data_layer
 from chainlit.logger import logger
 
+# The event loop only keeps weak references to tasks, so a persistence task
+# whose only reference was the create_task() call can be garbage collected
+# before it reaches the data layer. Hold each one until it completes.
+_persistence_tasks: set[asyncio.Task] = set()
+
 mime_types = {
     "text": "text/plain",
     "tasklist": "application/json",
@@ -212,7 +217,9 @@ class Element:
 
         if (data_layer := get_data_layer()) and persist:
             try:
-                asyncio.create_task(data_layer.create_element(self))
+                _task = asyncio.create_task(data_layer.create_element(self))
+                _persistence_tasks.add(_task)
+                _task.add_done_callback(_persistence_tasks.discard)
             except Exception as e:
                 logger.error(f"Failed to create element: {e!s}")
         if not self.url and (not self.chainlit_key or self.updatable):
