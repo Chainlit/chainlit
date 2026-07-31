@@ -17,12 +17,15 @@
     "husky": "^9.1.6",
     "lint-staged": "^13.3.0",
     "prettier": "^3.8.1",
+    "semver": "^7.7.3",
     "shell-exec": "^1.1.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.2.2",
-    "typescript-eslint": "^8.58.0"
+    "typescript-eslint": "^8.58.0",
+    "yaml": "^2.8.1"
   },
   "scripts": {
+    "check-pnpm-overrides": "node scripts/check-pnpm-overrides.mjs",
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky",
     "build": "pnpm run --recursive build",
@@ -34,6 +37,7 @@
     "format": "pnpm format-check --write",
     "type-check": "pnpm run --parallel type-check",
     "test": "pnpm run --recursive test",
+    "test:check-pnpm-overrides": "node --test scripts/check-pnpm-overrides.test.mjs",
     "test:e2e": "cypress run",
     "test:e2e:interactive": "cypress open"
   },
