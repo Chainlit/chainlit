@@ -46,7 +46,7 @@ export function LoginForm({
   const {
     register,
     handleSubmit,
-    formState: { errors, touchedFields }
+    formState: { errors, isSubmitted, touchedFields }
   } = useForm<FormValues>({
     defaultValues: {
       username: '',
@@ -114,12 +114,12 @@ export function LoginForm({
                   required: t('auth.login.form.email.required')
                 })}
                 className={cn(
-                  touchedFields.username &&
+                  (touchedFields.username || isSubmitted) &&
                     errors.username &&
                     'border-destructive'
                 )}
               />
-              {touchedFields.username && errors.username && (
+              {(touchedFields.username || isSubmitted) && errors.username && (
                 <p className="text-sm text-destructive">
                   {errors.username.message}
                 </p>
@@ -141,7 +141,7 @@ export function LoginForm({
                     required: t('auth.login.form.password.required')
                   })}
                   className={cn(
-                    touchedFields.password &&
+                    (touchedFields.password || isSubmitted) &&
                       errors.password &&
                       'border-destructive'
                   )}
@@ -160,7 +160,7 @@ export function LoginForm({
                   )}
                 </Button>
               </div>
-              {touchedFields.password && errors.password && (
+              {(touchedFields.password || isSubmitted) && errors.password && (
                 <p className="text-sm text-destructive">
                   {errors.password.message}
                 </p>

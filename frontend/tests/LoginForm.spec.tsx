@@ -89,4 +89,43 @@ describe('LoginForm', () => {
       );
     });
   });
+
+  it('shows required-field errors when submitted empty', async () => {
+    render(
+      <LoginForm callbackUrl="/" providers={[]} onPasswordSignIn={vi.fn()} />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+
+    expect(
+      await screen.findByText('username or email is a required field')
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText('password is a required field')
+    ).toBeInTheDocument();
+  });
+
+  it('shows an error when password sign-in fails', async () => {
+    const onPasswordSignIn = vi
+      .fn()
+      .mockRejectedValue(new Error('Sign-in failed'));
+
+    render(
+      <LoginForm
+        callbackUrl="/"
+        providers={[]}
+        onPasswordSignIn={onPasswordSignIn}
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText('Username or email'), {
+      target: { value: 'plain-username' }
+    });
+    fireEvent.change(screen.getByLabelText('Password'), {
+      target: { value: 'secret' }
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Sign In' }));
+
+    expect(await screen.findByText('Something went wrong')).toBeInTheDocument();
+  });
 });
