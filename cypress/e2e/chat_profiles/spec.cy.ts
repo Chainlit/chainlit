@@ -3,7 +3,7 @@ import { submitMessage } from '../../support/testUtils';
 describe('Chat profiles', () => {
   it('should be able to select a chat profile', () => {
     cy.visit('/');
-    cy.get("input[name='email']").type('admin');
+    cy.get("input[name='username']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
     cy.get('#chat-input').should('exist');
@@ -67,7 +67,7 @@ describe('Chat profiles', () => {
 
   it('should keep chat profile description visible when hovering over a link', () => {
     cy.visit('/');
-    cy.get("input[name='email']").type('admin');
+    cy.get("input[name='username']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
     cy.get('#chat-input').should('exist');

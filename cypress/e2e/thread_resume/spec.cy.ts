@@ -4,8 +4,8 @@ const login = (user: 'alice' | 'bob') => {
   cy.visit('/');
   cy.location('pathname').should('eq', '/login');
 
-  cy.get("input[name='email']").clear();
-  cy.get("input[name='email']").type(user);
+  cy.get("input[name='username']").clear();
+  cy.get("input[name='username']").type(user);
   cy.get("input[name='password']").clear();
   cy.get("input[name='password']").type(user === 'alice' ? 'a' : 'b');
 
