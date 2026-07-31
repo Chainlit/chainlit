@@ -1,4 +1,4 @@
-from io import StringIO
+from io import BytesIO, StringIO, TextIOWrapper
 from unittest.mock import patch
 
 import pytest
@@ -224,6 +224,12 @@ class TestCompareJsonStructures:
 class TestLintTranslationJson:
     """Test suite for lint_translation_json function."""
 
+    @staticmethod
+    def _cp1252_stdout():
+        raw = BytesIO()
+        stream = TextIOWrapper(raw, encoding="cp1252")
+        return raw, stream
+
     def test_lint_with_no_errors(self):
         """Test linting when there are no errors."""
         truth = {"key1": "value1", "key2": "value2"}
@@ -309,6 +315,37 @@ class TestLintTranslationJson:
             lines = output.strip().split("\n")
             assert "Linting format.json..." in lines[0]
             assert len(lines) >= 2  # At least linting message + errors
+
+    def test_lint_with_errors_on_legacy_stdout_encoding(self):
+        """Test linting degrades markers when stdout cannot encode them."""
+        truth = {"key1": "value1"}
+        to_compare = {"key2": "value2"}
+        raw, stream = self._cp1252_stdout()
+
+        with patch("sys.stdout", new=stream):
+            lint_translation_json("test.json", truth, to_compare)
+            stream.flush()
+
+        output = raw.getvalue().decode("cp1252")
+
+        assert "Linting test.json..." in output
+        assert "Missing key: 'key1'" in output
+        assert "Extra key: 'key2'" in output
+
+    def test_lint_success_on_legacy_stdout_encoding(self):
+        """Test success output does not crash on legacy stdout encodings."""
+        truth = {"key1": "value1"}
+        to_compare = {"key1": "value1"}
+        raw, stream = self._cp1252_stdout()
+
+        with patch("sys.stdout", new=stream):
+            lint_translation_json("test.json", truth, to_compare)
+            stream.flush()
+
+        output = raw.getvalue().decode("cp1252")
+
+        assert "Linting test.json..." in output
+        assert "No errors found in test.json" in output
 
 
 class TestTranslationsEdgeCases:
