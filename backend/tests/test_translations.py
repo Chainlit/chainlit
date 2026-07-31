@@ -1,4 +1,6 @@
+import json
 from io import StringIO
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -384,3 +386,69 @@ class TestTranslationsEdgeCases:
         missing_errors = [e for e in errors if "Missing" in e]
         assert len(extra_errors) == 2
         assert len(missing_errors) == 3
+
+
+# The shipped locale files, discovered at collection time so each locale gets
+# its own test id and a failure names the offending file.
+TRANSLATIONS_DIR = Path(__file__).parent.parent / "chainlit" / "translations"
+GROUND_TRUTH_LOCALE = "en-US.json"
+LOCALE_FILENAMES = sorted(path.name for path in TRANSLATIONS_DIR.glob("*.json"))
+
+
+def _load_locale(filename: str) -> dict:
+    """Load one locale file from the shipped translations directory."""
+    with open(TRANSLATIONS_DIR / filename, encoding="utf-8") as file:
+        return json.load(file)
+
+
+class TestShippedTranslationFileParity:
+    """Structural parity of the locale files actually shipped in this repo.
+
+    The suites above exercise ``compare_json_structures`` against synthetic
+    dictionaries, and ``chainlit lint-translations`` inspects a *consuming
+    app's* ``.chainlit/translations/`` rather than this directory. So nothing
+    checked the real locale files, and keys added to ``en-US.json`` could land
+    without the other locales - which is how ``components.DatePickerInput``,
+    ``chat.favorites.remove`` and ``chat.fileUpload.browse`` went missing.
+
+    ``en-US.json`` is both a locale file and the ground truth; comparing it to
+    itself is trivially clean, so it needs no special-casing here.
+    """
+
+    def test_translations_directory_is_discoverable(self):
+        """Guard against the parametrized tests passing vacuously.
+
+        If this file moves, or the translations directory is renamed,
+        ``LOCALE_FILENAMES`` would be empty and every parametrized test below
+        would silently disappear rather than fail.
+        """
+        assert TRANSLATIONS_DIR.is_dir(), (
+            f"translations directory not found at {TRANSLATIONS_DIR}"
+        )
+        assert GROUND_TRUTH_LOCALE in LOCALE_FILENAMES, (
+            f"{GROUND_TRUTH_LOCALE} missing from {TRANSLATIONS_DIR}"
+        )
+        # Two is the floor that makes a parity check meaningful at all: the
+        # ground truth plus something to compare against.
+        assert len(LOCALE_FILENAMES) > 1, (
+            f"expected multiple locale files, found {LOCALE_FILENAMES}"
+        )
+
+    @pytest.mark.parametrize("filename", LOCALE_FILENAMES)
+    def test_locale_matches_ground_truth_structure(self, filename):
+        """Every locale must carry exactly the keys in en-US.json."""
+        truth = _load_locale(GROUND_TRUTH_LOCALE)
+        errors = compare_json_structures(truth, _load_locale(filename))
+
+        assert not errors, "{} differs from {}:\n{}".format(
+            filename,
+            GROUND_TRUTH_LOCALE,
+            "\n".join(f"  {error}" for error in errors),
+        )
+
+    @pytest.mark.parametrize("filename", LOCALE_FILENAMES)
+    def test_locale_is_a_json_object(self, filename):
+        """compare_json_structures rejects non-dict input, so fail clearly."""
+        assert isinstance(_load_locale(filename), dict), (
+            f"{filename} must contain a JSON object at the top level"
+        )
