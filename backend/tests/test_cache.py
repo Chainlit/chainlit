@@ -228,6 +228,22 @@ class TestCacheDecorator:
         assert call_count_1 == 1
         assert call_count_2 == 1
 
+    def test_cache_distinguishes_different_functions_with_same_name(self):
+        """Test that function identity, not only its name, scopes cache entries."""
+
+        def make_loader(value):
+            @cache
+            def load(key):
+                return value
+
+            return load
+
+        first = make_loader("first")
+        second = make_loader("second")
+
+        assert first("same") == "first"
+        assert second("same") == "second"
+
     def test_cache_with_none_arguments(self):
         """Test cache with None as argument."""
         call_count = 0
