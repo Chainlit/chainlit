@@ -1,8 +1,11 @@
+import json
+import os
 from io import StringIO
 from unittest.mock import patch
 
 import pytest
 
+from chainlit.config import TRANSLATIONS_DIR
 from chainlit.translations import compare_json_structures, lint_translation_json
 
 
@@ -384,3 +387,35 @@ class TestTranslationsEdgeCases:
         missing_errors = [e for e in errors if "Missing" in e]
         assert len(extra_errors) == 2
         assert len(missing_errors) == 3
+
+
+def _load_translation(filename):
+    with open(os.path.join(TRANSLATIONS_DIR, filename), encoding="utf-8") as f:
+        return json.load(f)
+
+
+_TRUTH_LOCALE = "en-US.json"
+_LOCALE_FILES = sorted(f for f in os.listdir(TRANSLATIONS_DIR) if f.endswith(".json"))
+
+
+class TestTranslationFileParity:
+    """Every shipped locale file must carry every key in en-US.json.
+
+    This walks the real backend/chainlit/translations/ directory rather than
+    synthetic dictionaries, so a PR that adds a key to en-US.json without
+    updating the other locales fails here instead of shipping silently.
+    """
+
+    @pytest.mark.parametrize("locale_file", _LOCALE_FILES)
+    def test_locale_has_no_missing_keys(self, locale_file):
+        truth = _load_translation(_TRUTH_LOCALE)
+        # Comparing en-US.json to itself is expected to be trivially clean —
+        # it is both a locale file and the ground truth.
+        to_compare = _load_translation(locale_file)
+
+        errors = compare_json_structures(truth, to_compare)
+        missing = [e for e in errors if "Missing" in e]
+
+        assert missing == [], (
+            f"{locale_file} is missing keys present in {_TRUTH_LOCALE}: {missing}"
+        )
