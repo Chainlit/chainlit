@@ -407,15 +407,20 @@ class TestTranslationFileParity:
     """
 
     @pytest.mark.parametrize("locale_file", _LOCALE_FILES)
-    def test_locale_has_no_missing_keys(self, locale_file):
+    def test_locale_has_no_missing_or_mismatched_keys(self, locale_file):
         truth = _load_translation(_TRUTH_LOCALE)
         # Comparing en-US.json to itself is expected to be trivially clean —
         # it is both a locale file and the ground truth.
         to_compare = _load_translation(locale_file)
 
         errors = compare_json_structures(truth, to_compare)
-        missing = [e for e in errors if "Missing" in e]
+        # "Extra key" is excluded: a locale carrying a key en-US.json doesn't
+        # (yet) have is not a rendering regression. Missing keys and structure
+        # mismatches both are — a key present as the wrong shape (e.g. an
+        # object where en-US.json has a string) breaks rendering exactly like
+        # a missing key does, so both must fail here.
+        relevant = [e for e in errors if "Extra" not in e]
 
-        assert missing == [], (
-            f"{locale_file} is missing keys present in {_TRUTH_LOCALE}: {missing}"
+        assert relevant == [], (
+            f"{locale_file} diverges from {_TRUTH_LOCALE}: {relevant}"
         )
