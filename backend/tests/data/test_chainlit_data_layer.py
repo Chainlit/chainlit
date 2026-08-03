@@ -1,9 +1,76 @@
 import json
+from typing import cast
 from unittest.mock import AsyncMock
 
 import pytest
 
 from chainlit.data.chainlit_data_layer import ChainlitDataLayer
+from chainlit.data.storage_clients.base import BaseStorageClient
+from chainlit.element import Element, File, Image, Pdf
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("element_type", [Image, Pdf])
+async def test_create_element_uses_inline_disposition_for_browser_rendered_types(
+    monkeypatch: pytest.MonkeyPatch,
+    mock_chainlit_context,
+    mock_storage_client: BaseStorageClient,
+    element_type: type[Element],
+):
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test",
+        storage_client=mock_storage_client,
+        show_logger=False,
+    )
+    monkeypatch.setattr(
+        data_layer, "execute_query", AsyncMock(return_value=[{"id": "existing"}])
+    )
+
+    async with mock_chainlit_context:
+        element = element_type(
+            name="rendered-element",
+            content=b"content",
+            for_id="test-step",
+        )
+        await data_layer.create_element(element)
+
+    upload_file = cast(AsyncMock, mock_storage_client.upload_file)
+    upload_file.assert_awaited_once()
+    upload_call = upload_file.await_args
+    assert upload_call is not None
+    assert upload_call.kwargs["content_disposition"] == "inline"
+
+
+@pytest.mark.asyncio
+async def test_create_element_preserves_attachment_disposition_for_generic_files(
+    monkeypatch: pytest.MonkeyPatch,
+    mock_chainlit_context,
+    mock_storage_client: BaseStorageClient,
+):
+    data_layer = ChainlitDataLayer(
+        database_url="postgresql://test",
+        storage_client=mock_storage_client,
+        show_logger=False,
+    )
+    monkeypatch.setattr(
+        data_layer, "execute_query", AsyncMock(return_value=[{"id": "existing"}])
+    )
+
+    async with mock_chainlit_context:
+        element = File(
+            name="report.txt",
+            content=b"content",
+            for_id="test-step",
+        )
+        await data_layer.create_element(element)
+
+    upload_file = cast(AsyncMock, mock_storage_client.upload_file)
+    upload_file.assert_awaited_once()
+    upload_call = upload_file.await_args
+    assert upload_call is not None
+    assert upload_call.kwargs["content_disposition"] == (
+        'attachment; filename="report.txt"'
+    )
 
 
 @pytest.mark.asyncio

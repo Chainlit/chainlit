@@ -615,16 +615,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if not element.mime:
             element.mime = "application/octet-stream"
 
-        # Set inline disposition for browser-renderable elements so they display
-        # correctly on chat resume (e.g. PDF in iframe, images in <img> tags).
-        content_disposition = None
-        _RENDERABLE_MIME_PREFIXES = ("image/", "audio/", "video/")
-        _RENDERABLE_MIME_TYPES = ("application/pdf",)
-        if element.mime:
-            if element.mime in _RENDERABLE_MIME_TYPES or element.mime.startswith(
-                _RENDERABLE_MIME_PREFIXES
-            ):
-                content_disposition = "inline"
+        content_disposition = element.get_content_disposition()
 
         uploaded_file = await self.storage_provider.upload_file(
             object_key=file_object_key,

@@ -13,6 +13,7 @@ from chainlit.element import (
     File,
     Image,
     Pdf,
+    Plotly,
     Task,
     TaskList,
     TaskStatus,
@@ -163,6 +164,18 @@ class TestElementBase:
         assert Element.infer_type_from_mime("video/mp4") == "video"
         assert Element.infer_type_from_mime("text/plain") == "file"
         assert Element.infer_type_from_mime("application/json") == "file"
+
+    @pytest.mark.parametrize("element_type", [Image, Pdf, Audio, Video])
+    async def test_browser_rendered_element_content_disposition(
+        self, element_type: type[Element]
+    ):
+        assert element_type.get_content_disposition() == "inline"
+
+    @pytest.mark.parametrize("element_type", [Text, File, Plotly])
+    async def test_non_browser_rendered_element_content_disposition(
+        self, element_type: type[Element]
+    ):
+        assert element_type.get_content_disposition() is None
 
 
 @pytest.mark.asyncio

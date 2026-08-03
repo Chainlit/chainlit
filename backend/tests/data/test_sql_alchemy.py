@@ -1,6 +1,8 @@
 import json
 import uuid
 from pathlib import Path
+from typing import cast
+from unittest.mock import AsyncMock
 
 import pytest
 from sqlalchemy import text
@@ -9,7 +11,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from chainlit import User
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
-from chainlit.element import Text
+from chainlit.element import Image, Pdf, Text
 
 
 @pytest.fixture
@@ -154,8 +156,6 @@ async def test_create_element_pdf_inline_disposition(
 ):
     """PDF elements must get content_disposition=inline for Azure Blob iframe rendering."""
     async with mock_chainlit_context:
-        from chainlit.element import Pdf
-
         pdf_element = Pdf(
             id=str(uuid.uuid4()),
             name="test.pdf",
@@ -165,7 +165,11 @@ async def test_create_element_pdf_inline_disposition(
         )
         await data_layer.create_element(pdf_element)
 
-    upload_call = data_layer.storage_provider.upload_file.call_args
+    assert data_layer.storage_provider is not None
+    upload_file = cast(AsyncMock, data_layer.storage_provider.upload_file)
+    upload_file.assert_awaited_once()
+    upload_call = upload_file.await_args
+    assert upload_call is not None
     assert upload_call.kwargs.get("content_disposition") == "inline", (
         f"Expected content_disposition=inline for PDF, got {upload_call.kwargs}"
     )
@@ -185,7 +189,11 @@ async def test_create_element_text_default_disposition(
         )
         await data_layer.create_element(text_element)
 
-    upload_call = data_layer.storage_provider.upload_file.call_args
+    assert data_layer.storage_provider is not None
+    upload_file = cast(AsyncMock, data_layer.storage_provider.upload_file)
+    upload_file.assert_awaited_once()
+    upload_call = upload_file.await_args
+    assert upload_call is not None
     assert upload_call.kwargs.get("content_disposition") is None, (
         f"Expected content_disposition=None for text/plain, got {upload_call.kwargs}"
     )
@@ -196,7 +204,7 @@ async def test_create_element_image_inline_disposition(
 ):
     """Image elements must get content_disposition=inline."""
     async with mock_chainlit_context:
-        img_element = Text(
+        img_element = Image(
             id=str(uuid.uuid4()),
             name="test.png",
             mime="image/png",
@@ -205,7 +213,11 @@ async def test_create_element_image_inline_disposition(
         )
         await data_layer.create_element(img_element)
 
-    upload_call = data_layer.storage_provider.upload_file.call_args
+    assert data_layer.storage_provider is not None
+    upload_file = cast(AsyncMock, data_layer.storage_provider.upload_file)
+    upload_file.assert_awaited_once()
+    upload_call = upload_file.await_args
+    assert upload_call is not None
     assert upload_call.kwargs.get("content_disposition") == "inline", (
         f"Expected content_disposition=inline for image/png, got {upload_call.kwargs}"
     )
