@@ -40,6 +40,7 @@
         "default": "Impossible de se connecter",
         "signin": "Essayez de vous connecter avec un autre compte",
         "oauthSignin": "La connexion a échoué. Veuillez réessayer ou utiliser un autre mode de connexion.",
+        "oauthAccessDenied": "La connexion a été annulée ou l'accès a été refusé. Si c'est une erreur, veuillez réessayer.",
         "redirectUriMismatch": "L'URI de redirection ne correspond pas à la configuration de l'application oauth",
         "oauthCallback": "Essayez de vous connecter avec un autre compte",
         "oauthCreateAccount": "Essayez de vous connecter avec un autre compte",

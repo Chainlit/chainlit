@@ -1,9 +1,25 @@
+import json
 from io import StringIO
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
+from chainlit.config import TRANSLATIONS_DIR
 from chainlit.translations import compare_json_structures, lint_translation_json
+
+
+def test_oauth_access_denied_present_in_all_locales():
+    locale_files = sorted(Path(TRANSLATIONS_DIR).glob("*.json"))
+    assert len(locale_files) == 23
+
+    for locale_file in locale_files:
+        errors = json.loads(locale_file.read_text(encoding="utf-8"))["auth"]["login"][
+            "errors"
+        ]
+        message = errors.get("oauthAccessDenied")
+        assert isinstance(message, str), f"{locale_file.name} is missing the key"
+        assert message.strip(), f"{locale_file.name} has an empty message"
 
 
 class TestCompareJsonStructures:

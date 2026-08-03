@@ -1180,10 +1180,25 @@ def test_oauth_callback_provider_error_redirects(
     test_config,
     mock_oauth_provider,
 ):
-    """Provider-returned error param already redirects — guard the existing path."""
+    """An explicit access denial gets a specific user-facing error."""
     test_config.code.oauth_callback = AsyncMock()
     response = test_client.get(
         "/auth/oauth/github/callback?error=access_denied",
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    assert "error=oauthAccessDenied" in response.headers["location"]
+
+
+def test_oauth_callback_other_provider_error_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """Other provider errors continue to use the generic OAuth message."""
+    test_config.code.oauth_callback = AsyncMock()
+    response = test_client.get(
+        "/auth/oauth/github/callback?error=temporarily_unavailable",
         follow_redirects=False,
     )
     assert response.status_code == 302
@@ -1275,13 +1290,13 @@ def test_oauth_azure_hf_callback_missing_code_redirects(
     assert "error=oauthSignin" in response.headers["location"]
 
 
-def test_oauth_azure_hf_callback_form_error_redirects(
+def test_oauth_azure_hf_callback_access_denied_form_error_redirects(
     test_client: TestClient,
     test_config,
     mock_oauth_provider,
     caplog: pytest.LogCaptureFixture,
 ):
-    """Azure posts errors as form fields (response_mode=form_post), not query params."""
+    """Azure form-post access denials get the specific user-facing error."""
     test_config.code.oauth_callback = AsyncMock()
     with caplog.at_level(logging.WARNING, logger="chainlit"):
         response = test_client.post(
@@ -1290,11 +1305,27 @@ def test_oauth_azure_hf_callback_form_error_redirects(
             follow_redirects=False,
         )
     assert response.status_code == 303
-    assert "error=oauthSignin" in response.headers["location"]
+    assert "error=oauthAccessDenied" in response.headers["location"]
     assert any(
         "returned error: access_denied" in record.getMessage()
         for record in caplog.records
     )
+
+
+def test_oauth_azure_hf_callback_other_form_error_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """Other Azure form-post errors continue to use the generic OAuth message."""
+    test_config.code.oauth_callback = AsyncMock()
+    response = test_client.post(
+        "/auth/oauth/azure-ad-hybrid/callback",
+        data={"error": "temporarily_unavailable"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]
 
 
 def test_oauth_azure_hf_callback_get_token_error_redirects(

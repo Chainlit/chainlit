@@ -40,6 +40,7 @@
         "default": "Não foi possível iniciar sessão",
         "signin": "Tente iniciar sessão com outra conta",
         "oauthSignin": "Falha no início de sessão. Por favor, tente novamente ou utilize um método de início de sessão diferente.",
+        "oauthAccessDenied": "O in\u00edcio de sess\u00e3o foi cancelado ou o acesso foi negado. Se foi um engano, tente novamente.",
         "redirectUriMismatch": "O URI de redirecionamento não corresponde à configuração da aplicação OAuth",
         "oauthCallback": "Tente iniciar sessão com outra conta",
         "oauthCreateAccount": "Tente iniciar sessão com outra conta",

@@ -40,6 +40,7 @@
         "default": "Kunne ikke logge ind",
         "signin": "Prøv at logge ind med en anden konto",
         "oauthSignin": "Log ind mislykkedes. Prøv igen, eller brug en anden loginmetode.",
+        "oauthAccessDenied": "Login blev annulleret, eller adgang blev nægtet. Hvis det var en fejl, så prøv igen.",
         "redirectUriMismatch": "Omdirigerings-URI'en matcher ikke oauth-app konfigurationen",
         "oauthCallback": "Prøv at logge ind med en anden konto",
         "oauthCreateAccount": "Prøv at logge ind med en anden konto",

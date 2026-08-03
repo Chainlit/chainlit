@@ -40,6 +40,7 @@
         "default": "Kan niet inloggen",
         "signin": "Probeer in te loggen met een ander account",
         "oauthSignin": "Inloggen mislukt. Probeer het opnieuw of gebruik een andere aanmeldmethode.",
+        "oauthAccessDenied": "Het inloggen is geannuleerd of de toegang is geweigerd. Als dit een vergissing was, probeer het opnieuw.",
         "redirectUriMismatch": "De redirect URI komt niet overeen met de oauth app configuratie",
         "oauthCallback": "Probeer in te loggen met een ander account",
         "oauthCreateAccount": "Probeer in te loggen met een ander account",

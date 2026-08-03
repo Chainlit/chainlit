@@ -671,7 +671,8 @@ async def oauth_callback(
 
     if error:
         logger.warning("OAuth provider %s returned error: %s", provider_id, error)
-        return _get_oauth_redirect_error(request, "oauthSignin")
+        error_key = "oauthAccessDenied" if error == "access_denied" else "oauthSignin"
+        return _get_oauth_redirect_error(request, error_key)
 
     if not code or not state:
         return _get_oauth_redirect_error(request, "oauthSignin")
@@ -736,7 +737,8 @@ async def oauth_azure_hf_callback(
 
     if error:
         logger.warning("OAuth provider %s returned error: %s", provider_id, error)
-        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
+        error_key = "oauthAccessDenied" if error == "access_denied" else "oauthSignin"
+        return _get_oauth_redirect_error(request, error_key, status_code=303)
 
     if not code:
         return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)

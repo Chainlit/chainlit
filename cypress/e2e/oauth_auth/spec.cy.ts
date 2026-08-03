@@ -8,7 +8,7 @@ describe('OAuth Auth Error UX (#1273)', () => {
       }).then((response) => {
         expect(response.status).to.equal(302);
         expect(response.headers['location']).to.include(
-          '/login?error=oauthSignin'
+          '/login?error=oauthAccessDenied'
         );
       });
     });
@@ -36,6 +36,15 @@ describe('OAuth Auth Error UX (#1273)', () => {
       cy.get('[role="alert"]').should(
         'contain',
         'Sign in failed. Please try again, or use a different sign-in method.'
+      );
+      cy.get('body').should('not.contain', '{"detail"');
+    });
+
+    it('shows a specific message for oauthAccessDenied error', () => {
+      cy.visit('/login?error=oauthAccessDenied');
+      cy.get('[role="alert"]').should(
+        'contain',
+        'Sign in was cancelled or access was denied. If this was a mistake, please try again.'
       );
       cy.get('body').should('not.contain', '{"detail"');
     });

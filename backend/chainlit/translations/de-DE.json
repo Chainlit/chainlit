@@ -40,6 +40,7 @@
         "default": "Anmeldung fehlgeschlagen",
         "signin": "Versuche dich mit einem anderen Konto anzumelden",
         "oauthSignin": "Anmeldung fehlgeschlagen. Bitte versuche es erneut oder verwende eine andere Anmeldemethode.",
+        "oauthAccessDenied": "Die Anmeldung wurde abgebrochen oder der Zugriff wurde verweigert. Falls dies ein Versehen war, versuchen Sie es bitte erneut.",
         "redirectUriMismatch": "Der Redirect-URI stimmt nicht mit der Konfiguration der Oauth-Anwendung überein",
         "oauthCallback": "Versuche dich mit einem anderen Konto anzumelden",
         "oauthCreateAccount": "Versuche dich mit einem anderen Konto anzumelden",

@@ -40,6 +40,7 @@
         "default": "Unable to sign in",
         "signin": "Try signing in with a different account",
         "oauthSignin": "Sign in failed. Please try again, or use a different sign-in method.",
+        "oauthAccessDenied": "Sign in was cancelled or access was denied. If this was a mistake, please try again.",
         "redirectUriMismatch": "The redirect URI is not matching the oauth app configuration",
         "oauthCallback": "Try signing in with a different account",
         "oauthCreateAccount": "Try signing in with a different account",

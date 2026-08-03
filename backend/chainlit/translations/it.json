@@ -40,6 +40,7 @@
         "default": "Impossibile effettuare l'accesso",
         "signin": "Prova ad accedere con un account diverso",
         "oauthSignin": "Accesso non riuscito. Riprova o utilizza un metodo di accesso diverso.",
+        "oauthAccessDenied": "L'accesso è stato annullato o l'autorizzazione è stata negata. Se è stato un errore, riprova.",
         "redirectUriMismatch": "L'URI di reindirizzamento non corrisponde alla configurazione dell'app OAuth",
         "oauthCallback": "Prova ad accedere con un account diverso",
         "oauthCreateAccount": "Prova ad accedere con un account diverso",
