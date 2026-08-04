@@ -504,7 +504,9 @@ class Step:
                 self.parent_id = parent_step.id
         local_steps.set(previous_steps + [self])
 
-        asyncio.create_task(self.send())
+        _task = asyncio.create_task(self.send())
+        _persistence_tasks.add(_task)
+        _task.add_done_callback(_persistence_tasks.discard)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -519,4 +521,6 @@ class Step:
             current_steps.remove(self)
             local_steps.set(current_steps)
 
-        asyncio.create_task(self.update())
+        _task = asyncio.create_task(self.update())
+        _persistence_tasks.add(_task)
+        _task.add_done_callback(_persistence_tasks.discard)
