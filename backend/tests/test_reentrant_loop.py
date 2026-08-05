@@ -185,6 +185,20 @@ async def test_private_apis_relied_on_behave_as_the_module_assumes():
     assert asyncio.current_task() is task
 
 
+async def test_repays_nothing_when_the_ready_queue_was_empty():
+    """The nested task's own first-step handle is scheduled by ensure_future
+    after the enclosing _run_once took its snapshot, so it is not owed back.
+    Counting it would leave a cancelled handle behind on every single call."""
+    loop = asyncio.get_running_loop()
+
+    while loop._ready:
+        await asyncio.sleep(0)
+
+    assert run_coroutine_reentrant(loop, _return("noop")) == "noop"
+
+    assert list(loop._ready) == []
+
+
 async def test_sibling_callbacks_ready_in_the_same_iteration_do_not_underflow():
     """A nested run must not consume the ready-queue budget of the ``_run_once``
     that is driving it.

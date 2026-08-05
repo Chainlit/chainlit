@@ -104,24 +104,31 @@ def run_coroutine_reentrant(
     The calling task is suspended for the duration, so the coroutine's own task
     can be entered; other pending callbacks keep being serviced meanwhile.
     """
-    future = asyncio.ensure_future(coro, loop=loop)
-    # The RuntimeError below is a better diagnostic than the "Future exception
-    # was never retrieved" warning that would otherwise fire at collection.
-    future._log_destroy_pending = False  # type: ignore[attr-defined]
-
     # An enclosing ``_run_once`` snapshots ``ntodo = len(self._ready)`` and then
     # pops exactly that many times. Anything already queued here is within that
     # count, and the nested run below will consume it, so the enclosing pops
     # must be given something to find or they raise ``IndexError: pop from an
-    # empty deque``. Repay the exact number borrowed with cancelled handles,
-    # which ``_run_once`` pops and skips. Padding rather than hiding the queue
-    # keeps those callbacks running during the nested run: user code routinely
-    # waits on work that a callback queued in this same iteration completes,
-    # and withholding them deadlocks it.
+    # empty deque``. Repay the number borrowed with cancelled handles, which
+    # ``_run_once`` pops and skips. Padding rather than hiding the queue keeps
+    # those callbacks running during the nested run: user code routinely waits
+    # on work that a callback queued in this same iteration completes, and
+    # withholding them deadlocks it.
+    #
+    # Measured before ``ensure_future`` below, whose ``call_soon`` of the nested
+    # task's first step is appended after the enclosing snapshot was taken and
+    # so is not owed back. This is an upper bound, not an exact count: handles
+    # appended by earlier callbacks in the same iteration are also outside
+    # ``ntodo``. Over-repaying is harmless -- the surplus is popped and skipped
+    # on a later iteration -- whereas under-repaying raises.
     ready = loop._ready  # type: ignore[attr-defined]
     borrowed = len(ready)
     filler = asyncio.Handle(_noop, (), loop)
     filler.cancel()
+
+    future = asyncio.ensure_future(coro, loop=loop)
+    # The RuntimeError below is a better diagnostic than the "Future exception
+    # was never retrieved" warning that would otherwise fire at collection.
+    future._log_destroy_pending = False  # type: ignore[attr-defined]
 
     outer_task = _suspend_current_task(loop)
     try:
