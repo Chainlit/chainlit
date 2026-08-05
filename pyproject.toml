@@ -12,6 +12,7 @@ module = [
     "filetype",
     "langflow",
     "lazify",
+    "nest_asyncio",
     "plotly",
     "socketio.*",
     "syncer",

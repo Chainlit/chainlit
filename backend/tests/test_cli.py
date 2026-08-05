@@ -1,16 +1,19 @@
 """Regression tests for chainlit.cli import behaviour.
 
-Ensures nest_asyncio is not imported by chainlit.cli.
+Ensures nest_asyncio is not applied globally by chainlit.cli.
 
 Background
 ----------
-nest_asyncio ≤ 1.6.0 patches ``asyncio.BaseEventLoop.run_until_complete`` via
-``asyncio.ensure_future(future, loop=self)``.  The ``loop=`` keyword was
-deprecated in Python 3.8 and **removed in Python 3.14** (bpo-39529).  When
-``nest_asyncio.apply()`` ran at module-import time it silently corrupted asyncio
-task registration: ``asyncio.current_task()`` returned ``None`` inside running
-coroutines, causing ``anyio.NoEventLoopError`` on every static-asset request
-and a white screen for users on Python 3.14.
+``nest_asyncio.apply()`` rebinds ``asyncio.Task`` and ``asyncio.Future`` to
+their pure Python implementations, while ``asyncio.current_task`` stays bound
+to the C accelerator.  ``current_task()`` therefore returns ``None`` inside
+running coroutines, and anyio -- which takes a weak reference to it -- raises
+``anyio.NoEventLoopError`` on every static-asset request, giving users a white
+screen.  On Python 3.14 the C-level task registry makes this rebind the only
+way to obtain a re-entrant loop, so the failure became unavoidable there.
+
+Re-entrancy that is genuinely needed is provided in ``chainlit/sync.py`` by
+patching the running loop alone, which leaves the task classes untouched.
 
 See https://github.com/Chainlit/chainlit/issues/2767
 """
@@ -28,6 +31,23 @@ def test_nest_asyncio_not_in_cli_namespace():
     assert not hasattr(chainlit.cli, "nest_asyncio"), (
         "chainlit.cli exposes 'nest_asyncio' in its namespace. "
         "Remove 'import nest_asyncio' and 'nest_asyncio.apply()' from "
-        "backend/chainlit/cli/__init__.py — nest_asyncio breaks Python 3.14 "
-        "via the removed loop= kwarg in asyncio.ensure_future (bpo-39529)."
+        "backend/chainlit/cli/__init__.py — applying it globally rebinds "
+        "asyncio.Task/Future and breaks anyio via current_task() returning None."
+    )
+
+
+def test_asyncio_task_not_globally_patched():
+    """Importing chainlit.cli must leave the C task implementation in place.
+
+    This asserts the actual invariant that matters, rather than the absence of
+    one particular import: whatever chainlit.cli does, asyncio.Task must still
+    be the C accelerator class that asyncio.current_task() agrees with.
+    """
+    import asyncio
+
+    assert asyncio.Task.__module__ == "_asyncio", (
+        f"asyncio.Task is {asyncio.Task!r}, expected the C implementation. "
+        "Something imported by chainlit.cli has swapped in the pure Python "
+        "task class, which desynchronises asyncio.current_task() and breaks "
+        "anyio."
     )
