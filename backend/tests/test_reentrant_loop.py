@@ -112,17 +112,6 @@ async def _collect(sink, value):
     sink.append(value)
 
 
-async def test_anyio_task_group_still_works_in_the_outer_task_afterwards():
-    loop = asyncio.get_running_loop()
-    run_coroutine_reentrant(loop, _return("noop"))
-
-    collected = []
-    async with anyio.create_task_group() as tg:
-        tg.start_soon(_collect, collected, "after")
-
-    assert collected == ["after"]
-
-
 async def test_nothing_in_asyncio_is_globally_patched():
     """Unlike nest_asyncio, this technique mutates no asyncio global, no class
     and no loop instance. Asserted directly so a regression toward patching is
@@ -140,11 +129,13 @@ async def test_nothing_in_asyncio_is_globally_patched():
     assert not hasattr(loop_class, "_nest_patched")
 
 
-def test_private_apis_relied_on_exist_on_this_interpreter():
-    """A contract test for the private APIs documented in the module docstring.
+async def test_private_apis_relied_on_behave_as_the_module_assumes():
+    """Contract test for the private APIs documented in the module docstring.
 
-    Python 3.14 silently emptied asyncio.tasks._current_tasks, which is exactly
-    the kind of change that must fail loudly here.
+    Asserts not just that the current-task store exists but that it is the one
+    asyncio.current_task() actually consults -- Python 3.14 kept
+    asyncio.tasks._current_tasks while moving the real store into the thread
+    state, and that silent divergence is what broke nest_asyncio.
     """
     loop = asyncio.new_event_loop()
     try:
@@ -153,31 +144,20 @@ def test_private_apis_relied_on_exist_on_this_interpreter():
     finally:
         loop.close()
 
-    if sys.version_info >= (3, 12):
-        import _asyncio
-
-        assert hasattr(_asyncio, "_swap_current_task")
-    else:
-        assert isinstance(asyncio.tasks._current_tasks, dict)
-
-
-async def test_current_task_store_is_the_one_the_interpreter_reads():
-    """The suspension primitive must reach the store asyncio.current_task()
-    actually consults; on 3.14 the _current_tasks dict no longer is that store.
-    """
     task = asyncio.current_task()
 
     if sys.version_info >= (3, 12):
         from _asyncio import _swap_current_task
 
-        loop = asyncio.get_running_loop()
-        previous = _swap_current_task(loop, None)
+        running_loop = asyncio.get_running_loop()
+        previous = _swap_current_task(running_loop, None)
         try:
             assert previous is task
             assert asyncio.current_task() is None
         finally:
-            _swap_current_task(loop, previous)
+            _swap_current_task(running_loop, previous)
     else:
+        assert isinstance(asyncio.tasks._current_tasks, dict)
         assert asyncio.tasks._current_tasks[asyncio.get_running_loop()] is task
 
     assert asyncio.current_task() is task

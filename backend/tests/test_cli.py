@@ -1,9 +1,5 @@
-"""Regression tests for chainlit.cli import behaviour.
+"""Regression test for chainlit.cli import behaviour.
 
-Ensures nest_asyncio is not applied globally by chainlit.cli.
-
-Background
-----------
 ``nest_asyncio.apply()`` rebinds ``asyncio.Task`` and ``asyncio.Future`` to
 their pure Python implementations, while ``asyncio.current_task`` stays bound
 to the C accelerator.  ``current_task()`` therefore returns ``None`` inside
@@ -13,35 +9,20 @@ screen.
 
 nest_asyncio is no longer a dependency: the re-entrancy that is genuinely
 needed is provided by ``chainlit/_reentrant_loop.py``, which mutates nothing in
-asyncio.  These tests keep the global-patch regression from being reintroduced
+asyncio.  This test keeps the global-patch regression from being reintroduced
 by any future import.
 
 See https://github.com/Chainlit/chainlit/issues/2767
 """
 
-import chainlit.cli
-
-
-def test_nest_asyncio_not_in_cli_namespace():
-    """chainlit.cli must not expose nest_asyncio in its module namespace.
-
-    If ``import nest_asyncio`` is ever re-added to cli/__init__.py this test
-    will fail immediately, preventing the Python 3.14 regression from
-    being reintroduced.
-    """
-    assert not hasattr(chainlit.cli, "nest_asyncio"), (
-        "chainlit.cli exposes 'nest_asyncio' in its namespace. "
-        "Remove 'import nest_asyncio' and 'nest_asyncio.apply()' from "
-        "backend/chainlit/cli/__init__.py — applying it globally rebinds "
-        "asyncio.Task/Future and breaks anyio via current_task() returning None."
-    )
+import chainlit.cli  # noqa: F401  -- imported for its global side effects
 
 
 def test_asyncio_task_not_globally_patched():
     """Importing chainlit.cli must leave the C task implementation in place.
 
-    This asserts the actual invariant that matters, rather than the absence of
-    one particular import: whatever chainlit.cli does, asyncio.Task must still
+    This asserts the invariant that matters rather than the absence of one
+    particular import: whatever chainlit.cli pulls in, asyncio.Task must still
     be the C accelerator class that asyncio.current_task() agrees with.
     """
     import asyncio

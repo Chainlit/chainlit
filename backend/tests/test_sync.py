@@ -11,6 +11,7 @@ bookkeeping.
 import asyncio
 import contextvars
 import threading
+import warnings
 
 from chainlit.sync import run_sync
 
@@ -35,20 +36,6 @@ async def test_run_sync_from_main_thread_is_repeatable(mock_chainlit_context):
         assert run_sync(_return("second")) == "second"
 
 
-async def test_run_sync_leaves_asyncio_unpatched(mock_chainlit_context):
-    """run_sync must not mutate any asyncio global or the loop's class, which
-    is what made nest_asyncio.apply() unusable (see chainlit/cli/__init__.py)."""
-    import _asyncio
-
-    async with mock_chainlit_context:
-        loop = asyncio.get_running_loop()
-        run_sync(_return("noop"))
-
-        assert asyncio.Task is _asyncio.Task
-        assert asyncio.Future is _asyncio.Future
-        assert not hasattr(type(loop), "_nest_patched")
-
-
 def test_run_sync_without_a_running_loop():
     """Outside any loop there is nothing to re-enter; run_sync falls back to
     syncer, which drives a loop of its own."""
@@ -63,6 +50,19 @@ def test_run_sync_without_a_running_loop():
         session = HTTPSession(id="test-no-loop", user_env={}, client_type="webapp")
         return ChainlitContext(session)
 
+    # Leave this thread with a usable ambient loop afterwards. A bare
+    # asyncio.set_event_loop(None) in the finally below leaks into any later
+    # test that calls asyncio.get_event_loop(), which then raises "There is no
+    # current event loop in thread 'MainThread'". Note get_event_loop() here
+    # creates the loop if the thread has none yet, which is the state we want
+    # to restore to either way.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", DeprecationWarning)
+        try:
+            previous_loop = asyncio.get_event_loop_policy().get_event_loop()
+        except RuntimeError:
+            previous_loop = None
+
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     try:
@@ -70,7 +70,7 @@ def test_run_sync_without_a_running_loop():
         assert run_sync(_return("no-loop-ok")) == "no-loop-ok"
     finally:
         context_var.set(None)
-        asyncio.set_event_loop(None)
+        asyncio.set_event_loop(previous_loop)
         loop.close()
 
 
@@ -84,8 +84,8 @@ async def test_run_sync_from_worker_thread(mock_chainlit_context):
         current_ctx = contextvars.copy_context()
 
         def worker():
+            assert threading.current_thread() is not threading.main_thread()
             return current_ctx.run(run_sync, _return("worker-thread-ok"))
 
-        assert threading.current_thread() is not threading.main_thread
         result = await asyncio.to_thread(worker)
         assert result == "worker-thread-ok"
