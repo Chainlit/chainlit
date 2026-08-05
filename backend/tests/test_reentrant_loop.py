@@ -108,15 +108,32 @@ async def test_anyio_task_group_works_inside_the_nested_run():
     assert sorted(collected) == ["a", "b"]
 
 
+async def test_anyio_task_group_still_works_in_the_outer_task_afterwards():
+    """The other half of the guarantee: restoring asyncio.current_task() is only
+    useful if anyio's own per-task state survives the nested run too. anyio keys
+    that state on a WeakKeyDictionary of host tasks, so this fails for reasons
+    the current_task() identity assertion cannot see."""
+    loop = asyncio.get_running_loop()
+    run_coroutine_reentrant(loop, _return("noop"))
+
+    collected = []
+    async with anyio.create_task_group() as tg:
+        tg.start_soon(_collect, collected, "after")
+
+    assert collected == ["after"]
+
+
 async def _collect(sink, value):
     await asyncio.sleep(0)
     sink.append(value)
 
 
 async def test_nothing_in_asyncio_is_globally_patched():
-    """Unlike nest_asyncio, this technique mutates no asyncio global, no class
-    and no loop instance. Asserted directly so a regression toward patching is
-    caught."""
+    """Unlike nest_asyncio, this technique rebinds no asyncio global and no
+    class, and installs nothing persistent on the loop instance. Asserted
+    directly so a regression toward patching is caught. The loop's ready queue
+    is padded during a nested run (see the module docstring), but that is scoped
+    to the run and leaves no residue."""
     import _asyncio
 
     loop = asyncio.get_running_loop()
