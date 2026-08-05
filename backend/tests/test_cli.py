@@ -9,11 +9,12 @@ their pure Python implementations, while ``asyncio.current_task`` stays bound
 to the C accelerator.  ``current_task()`` therefore returns ``None`` inside
 running coroutines, and anyio -- which takes a weak reference to it -- raises
 ``anyio.NoEventLoopError`` on every static-asset request, giving users a white
-screen.  On Python 3.14 the C-level task registry makes this rebind the only
-way to obtain a re-entrant loop, so the failure became unavoidable there.
+screen.
 
-Re-entrancy that is genuinely needed is provided in ``chainlit/sync.py`` by
-patching the running loop alone, which leaves the task classes untouched.
+nest_asyncio is no longer a dependency: the re-entrancy that is genuinely
+needed is provided by ``chainlit/_reentrant_loop.py``, which mutates nothing in
+asyncio.  These tests keep the global-patch regression from being reintroduced
+by any future import.
 
 See https://github.com/Chainlit/chainlit/issues/2767
 """

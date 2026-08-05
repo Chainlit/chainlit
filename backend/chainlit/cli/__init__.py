@@ -1,5 +1,5 @@
-# nest_asyncio is deliberately NOT applied globally in this module.
-# See https://github.com/Chainlit/chainlit/issues/2767
+# nest_asyncio is deliberately NOT applied globally in this module, and is no
+# longer a dependency at all. See https://github.com/Chainlit/chainlit/issues/2767
 #
 # Why it breaks:
 #   nest_asyncio.apply() rebinds asyncio.Task and asyncio.Future to their pure
@@ -15,8 +15,8 @@
 #   required a re-entrant loop.
 #
 # Where re-entrancy genuinely is required -- cl.run_sync() from the main
-# thread -- chainlit/sync.py patches the running loop alone, which provides
-# re-entrancy without the rebind above.
+# thread -- chainlit/_reentrant_loop.py provides it without rebinding, or
+# otherwise mutating, anything in asyncio.
 
 import asyncio
 import logging
