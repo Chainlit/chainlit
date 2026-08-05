@@ -12,15 +12,29 @@ reduced to what ``run_sync()`` actually needs. nest_asyncio suspends the
 current task around *every individual callback*, which forces it to
 reimplement ``_run_once``, ``run_forever`` and the loop's running-state
 bookkeeping, and to install all of that onto ``loop.__class__``. Suspending
-the outer task around *one nested run* instead needs none of that: the
-stdlib scheduler is called as-is, and no asyncio global, class or loop
-instance is mutated.
+the outer task around *one nested run* instead needs none of that: the stdlib
+scheduler is called as-is, and no asyncio global or class is rebound. In
+particular ``asyncio.Task`` and ``asyncio.Future`` keep their C
+implementations, which is the rebind that broke nest_asyncio on 3.14.
+
+Calling the stdlib ``_run_once`` as-is does have one consequence to repay. It
+snapshots ``ntodo = len(self._ready)`` and then pops exactly that many
+handles, so a nested run started from inside one of those callbacks drains
+entries the enclosing iteration is still counting on and its next ``popleft()``
+raises ``IndexError: pop from an empty deque``. nest_asyncio avoids this by
+guarding its own reimplemented ``_run_once`` with ``if not ready: break`` --
+which only works because it patches the enclosing loop too. Since nothing here
+is patched, the nested run instead appends one cancelled handle per entry it
+borrowed; ``_run_once`` pops those and skips them. The queue is padded rather
+than swapped out so the borrowed callbacks still run during the nested run:
+withholding them deadlocks any nested coroutine waiting on work they complete.
 
 Private APIs relied on
 ----------------------
 - ``loop._run_once()`` — one iteration of the stdlib scheduler.
 - ``loop._stopping`` — set when something calls ``loop.stop()`` during the
   nested run; the run must then yield control rather than spin.
+- ``loop._ready`` — the scheduler's ready queue, padded as described above.
 - ``_asyncio._swap_current_task(loop, task)`` (Python 3.12+) — sets the loop's
   current task and returns the previous one.
 - ``asyncio.tasks._current_tasks`` (Python 3.10-3.11, where
@@ -78,6 +92,10 @@ def _make_suspension_pair() -> tuple[_SuspendCurrentTask, _ResumeCurrentTask]:
 _suspend_current_task, _resume_current_task = _make_suspension_pair()
 
 
+def _noop() -> None:
+    """Body of the cancelled filler handles; never actually invoked."""
+
+
 def run_coroutine_reentrant(
     loop: asyncio.AbstractEventLoop, coro: Coroutine[Any, Any, T_Retval]
 ) -> T_Retval:
@@ -91,6 +109,20 @@ def run_coroutine_reentrant(
     # was never retrieved" warning that would otherwise fire at collection.
     future._log_destroy_pending = False  # type: ignore[attr-defined]
 
+    # An enclosing ``_run_once`` snapshots ``ntodo = len(self._ready)`` and then
+    # pops exactly that many times. Anything already queued here is within that
+    # count, and the nested run below will consume it, so the enclosing pops
+    # must be given something to find or they raise ``IndexError: pop from an
+    # empty deque``. Repay the exact number borrowed with cancelled handles,
+    # which ``_run_once`` pops and skips. Padding rather than hiding the queue
+    # keeps those callbacks running during the nested run: user code routinely
+    # waits on work that a callback queued in this same iteration completes,
+    # and withholding them deadlocks it.
+    ready = loop._ready  # type: ignore[attr-defined]
+    borrowed = len(ready)
+    filler = asyncio.Handle(_noop, (), loop)
+    filler.cancel()
+
     outer_task = _suspend_current_task(loop)
     try:
         while not future.done():
@@ -99,6 +131,7 @@ def run_coroutine_reentrant(
                 break
     finally:
         _resume_current_task(loop, outer_task)
+        ready.extend([filler] * borrowed)
 
     if not future.done():
         future.cancel()

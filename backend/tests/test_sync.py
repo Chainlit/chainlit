@@ -65,11 +65,17 @@ def test_run_sync_without_a_running_loop():
 
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
+    token = None
     try:
-        context_var.set(loop.run_until_complete(build_context()))
+        token = context_var.set(loop.run_until_complete(build_context()))
         assert run_sync(_return("no-loop-ok")) == "no-loop-ok"
     finally:
-        context_var.set(None)
+        # reset(token), not set(None): this is a sync test, so the context var
+        # is the ambient one and survives the test. Setting None would leave
+        # get_context() returning None for later tests instead of raising
+        # ChainlitContextException, which is what an unset var must do.
+        if token is not None:
+            context_var.reset(token)
         asyncio.set_event_loop(previous_loop)
         loop.close()
 

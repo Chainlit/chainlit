@@ -15,6 +15,8 @@ by any future import.
 See https://github.com/Chainlit/chainlit/issues/2767
 """
 
+import pytest
+
 import chainlit.cli  # noqa: F401  -- imported for its global side effects
 
 
@@ -27,7 +29,14 @@ def test_asyncio_task_not_globally_patched():
     """
     import asyncio
 
-    assert asyncio.Task.__module__ == "_asyncio", (
+    # Compare against the accelerator class itself rather than matching
+    # Task.__module__ against "_asyncio": the point is that nothing rebound
+    # asyncio.Task, not that a C accelerator exists. importorskip keeps an
+    # interpreter built without _asyncio reporting "skipped" instead of a
+    # failure that has nothing to do with this regression.
+    _asyncio = pytest.importorskip("_asyncio")
+
+    assert asyncio.Task is _asyncio.Task, (
         f"asyncio.Task is {asyncio.Task!r}, expected the C implementation. "
         "Something imported by chainlit.cli has swapped in the pure Python "
         "task class, which desynchronises asyncio.current_task() and breaks "

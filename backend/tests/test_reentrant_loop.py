@@ -9,6 +9,7 @@ misbehaving at runtime.
 """
 
 import asyncio
+import collections
 import sys
 
 import anyio
@@ -141,6 +142,10 @@ async def test_private_apis_relied_on_behave_as_the_module_assumes():
     try:
         assert hasattr(loop, "_run_once")
         assert hasattr(loop, "_stopping")
+        # The ready queue must be a deque the module can append to; _run_once
+        # pops from its left, so padding on the right is what the compensation
+        # in run_coroutine_reentrant depends on.
+        assert isinstance(loop._ready, collections.deque)
     finally:
         loop.close()
 
@@ -161,3 +166,40 @@ async def test_private_apis_relied_on_behave_as_the_module_assumes():
         assert asyncio.tasks._current_tasks[asyncio.get_running_loop()] is task
 
     assert asyncio.current_task() is task
+
+
+async def test_sibling_callbacks_ready_in_the_same_iteration_do_not_underflow():
+    """A nested run must not consume the ready-queue budget of the ``_run_once``
+    that is driving it.
+
+    ``BaseEventLoop._run_once`` snapshots ``ntodo = len(self._ready)`` and then
+    calls ``popleft()`` exactly that many times. A nested run started from one
+    of those callbacks drains the queue the enclosing loop is still counting on,
+    so without compensation the enclosing ``popleft()`` raises
+    ``IndexError: pop from an empty deque`` and kills the loop.
+
+    Two callbacks queued back to back land in the same iteration, which is the
+    smallest arrangement that exercises it.
+    """
+    loop = asyncio.get_running_loop()
+    order = []
+
+    async def nested():
+        await asyncio.sleep(0)
+        return "nested"
+
+    def first():
+        order.append(run_coroutine_reentrant(loop, nested()))
+
+    def second():
+        order.append("sibling")
+
+    loop.call_soon(first)
+    loop.call_soon(second)
+
+    await asyncio.sleep(0.05)
+
+    # The sibling must still run: repaying the borrowed slots with cancelled
+    # handles keeps it queued, whereas hiding the queue from the nested run
+    # would strand it (and deadlock anything waiting on it).
+    assert sorted(order) == ["nested", "sibling"]
