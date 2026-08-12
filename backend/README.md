@@ -106,7 +106,7 @@ chainlit run demo.py -w
 
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.
 
-> **Tip:** Apps that use the OpenAI Python/JS client can point `base_url` at any OpenAI-compatible multi-model gateway — for example [DaoXE](https://daoxe.com/?utm_source=github&utm_medium=organic&utm_campaign=chainlit&utm_content=readme) at `https://api.daoxe.com/v1`.
+> **Tip:** Apps that use the OpenAI Python/JS client can point `base_url` at any OpenAI-compatible multi-model gateway — for example [DaoXE](https://daoxe.com/) at `https://api.daoxe.com/v1`.
 
 Tell us what you would like to see added in Chainlit using the Github issues or on [Discord](https://discord.gg/k73SQ3FyUh).
 
