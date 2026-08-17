@@ -181,6 +181,9 @@ class Element:
 
         elif type == "custom":
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
+
+        elif type == "pdf":
+            return Pdf(page=e_dict.get("page"), **common_params)  # type: ignore[arg-type]
         else:
             # Default to File for any other type
             return File(**common_params)  # type: ignore[arg-type]
