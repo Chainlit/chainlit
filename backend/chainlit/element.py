@@ -181,6 +181,9 @@ class Element:
 
         elif type == "custom":
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
+
+        elif type == "pdf":
+            return Pdf(page=e_dict.get("page"), **common_params)  # type: ignore[arg-type]
         else:
             # Default to File for any other type
             return File(**common_params)  # type: ignore[arg-type]
@@ -241,6 +244,12 @@ class Element:
                 file_type = filetype.guess(self.path or self.content)
                 if file_type:
                     self.mime = file_type.mime
+                else:
+                    # filetype.guess detects by magic bytes only, so text-based
+                    # files (.md, .csv, .txt, source code, ...) return None.
+                    # Fall back to filename-based detection so they still get a
+                    # sensible mime instead of being persisted as NULL.
+                    self.mime = mimetypes.guess_type(self.path or self.name)[0]
             elif self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
 
