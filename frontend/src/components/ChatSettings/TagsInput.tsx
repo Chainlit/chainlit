@@ -59,11 +59,11 @@ export const TagsInput = ({
             <Badge
               key={tag}
               variant="secondary"
-              className="flex items-center gap-1"
+              className={`flex items-center gap-1 ${disabled ? 'cursor-not-allowed opacity-50' : ''}`}
             >
               {tag}
               <X
-                className="h-3 w-3 cursor-pointer"
+                className={`h-3 w-3 ${disabled ? '' : 'cursor-pointer'}`}
                 onClick={() => !disabled && removeTag(tag)}
               />
             </Badge>
@@ -78,7 +78,7 @@ export const TagsInput = ({
           onChange={(e) => setInputValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="mt-1"
+          className={`mt-1 ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'}`}
         />
       </div>
     </InputStateHandler>

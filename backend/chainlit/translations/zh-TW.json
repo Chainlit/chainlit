@@ -156,10 +156,10 @@
     "thread": {
       "untitled": "未命名對話",
       "menu": {
-          "rename": "重新命名",
-          "share": "分享",
-          "delete": "刪除"
-        },
+        "rename": "重新命名",
+        "share": "分享",
+        "delete": "刪除"
+      },
       "actions": {
         "share": {
           "title": "分享聊天連結",

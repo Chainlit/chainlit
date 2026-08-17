@@ -9,6 +9,7 @@ from chainlit.socket import (
     _get_token,
     _get_token_from_cookie,
     clean_session,
+    connection_successful,
     load_user_env,
     persist_user_session,
     restore_existing_session,
@@ -116,6 +117,7 @@ class TestRestoreExistingSession:
     def test_restore_existing_session_success(self):
         """Test restoring an existing session."""
         mock_session = Mock(spec=WebsocketSession)
+        mock_session.user = None
         emit_fn = Mock()
         emit_call_fn = Mock()
         environ = {"HTTP_COOKIE": "token=token"}
@@ -132,6 +134,48 @@ class TestRestoreExistingSession:
             assert mock_session.emit == emit_fn
             assert mock_session.emit_call == emit_call_fn
             assert mock_session.environ == environ
+
+    def test_restore_existing_session_with_matching_user(self):
+        """Test restoring a session for its authenticated owner."""
+        mock_session = Mock(spec=WebsocketSession)
+        mock_session.user = Mock(identifier="user123")
+        authenticated_user = Mock(identifier="user123")
+
+        with patch.object(WebsocketSession, "get_by_id") as mock_get:
+            mock_get.return_value = mock_session
+
+            result = restore_existing_session(
+                "new_sid",
+                "session_123",
+                Mock(),
+                Mock(),
+                {"HTTP_COOKIE": "token=token"},
+                user=authenticated_user,
+            )
+
+            assert result is True
+            mock_session.restore.assert_called_once_with(new_socket_id="new_sid")
+
+    def test_restore_existing_session_rejects_different_user(self):
+        """Test that a session cannot be restored by another user."""
+        mock_session = Mock(spec=WebsocketSession)
+        mock_session.user = Mock(identifier="victim")
+        authenticated_user = Mock(identifier="attacker")
+
+        with patch.object(WebsocketSession, "get_by_id") as mock_get:
+            mock_get.return_value = mock_session
+
+            with pytest.raises(ConnectionRefusedError, match="authorization failed"):
+                restore_existing_session(
+                    "new_sid",
+                    "session_123",
+                    Mock(),
+                    Mock(),
+                    {"HTTP_COOKIE": "token=token"},
+                    user=authenticated_user,
+                )
+
+            mock_session.restore.assert_not_called()
 
     def test_restore_existing_session_not_found(self):
         """Test when session is not found."""
@@ -359,10 +403,9 @@ class TestLoadUserEnv:
         with patch("chainlit.socket.config") as mock_config:
             mock_config.project.user_env = ["API_KEY"]
 
-            # The function has a bug - it raises UnboundLocalError instead of ConnectionRefusedError
-            # Python 3.10: "referenced before assignment"
-            # Python 3.11+: "cannot access local variable"
-            with pytest.raises(UnboundLocalError, match="user_env_dict"):
+            with pytest.raises(
+                ConnectionRefusedError, match="Missing user environment variables"
+            ):
                 load_user_env(None)
 
     def test_load_user_env_none_without_required_keys(self):
@@ -370,10 +413,9 @@ class TestLoadUserEnv:
         with patch("chainlit.socket.config") as mock_config:
             mock_config.project.user_env = []
 
-            # The function has a bug - it raises NameError when user_env is None
-            # even when no required keys are configured
-            with pytest.raises(NameError, match="user_env_dict"):
-                load_user_env(None)
+            result = load_user_env(None)
+
+            assert result == {}
 
 
 class TestCleanSession:
@@ -481,3 +523,108 @@ class TestSocketEdgeCases:
                 # Should propagate the exception
                 with pytest.raises(Exception, match="Auth error"):
                     await _authenticate_connection(environ)
+
+
+class TestConnectionSuccessfulIdempotency:
+    """Regression tests: on_chat_start must fire exactly once per
+    WebsocketSession, even when connection_successful is dispatched multiple
+    times (Socket.IO reconnect, React StrictMode double-mount, reverse-proxy
+    WS 101 retry).
+
+    Refs chainlit#2535, chainlit#2549, chainlit#2228.
+    """
+
+    @pytest.mark.asyncio
+    async def test_on_chat_start_not_duplicated_on_reconnect(
+        self, mock_session_factory
+    ):
+        """Reconnect path (session.restored=True): on_chat_start scheduled once."""
+        on_chat_start = AsyncMock()
+
+        session = mock_session_factory(has_first_interaction=False)
+        session.restored = True
+        session.chat_started = False
+        session.current_task = None
+        session.thread_id_to_resume = None
+
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.code.on_chat_start = on_chat_start
+        mock_config.code.on_chat_resume = None
+
+        with (
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+        ):
+            await connection_successful("sid-1")
+            # Simulate reconnect: same session object, chat_started now True.
+            await connection_successful("sid-1")
+
+        assert on_chat_start.call_count == 1, (
+            "on_chat_start must be scheduled exactly once per WebsocketSession"
+        )
+        assert session.chat_started is True
+
+    @pytest.mark.asyncio
+    async def test_on_chat_start_fires_once_on_fresh_session(
+        self, mock_session_factory
+    ):
+        """Normal one-connect path still greets exactly once."""
+        on_chat_start = AsyncMock()
+
+        session = mock_session_factory(has_first_interaction=False)
+        session.restored = False
+        session.chat_started = False
+        session.current_task = None
+        session.thread_id_to_resume = None
+
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.code.on_chat_start = on_chat_start
+        mock_config.code.on_chat_resume = None
+
+        with (
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+        ):
+            await connection_successful("sid-1")
+
+        assert on_chat_start.call_count == 1
+        assert session.chat_started is True
+
+    @pytest.mark.asyncio
+    async def test_on_chat_start_not_duplicated_on_fresh_then_reconnect(
+        self, mock_session_factory
+    ):
+        """Fresh connect followed by a reconnect still fires exactly once."""
+        on_chat_start = AsyncMock()
+
+        session = mock_session_factory(has_first_interaction=False)
+        session.restored = False
+        session.chat_started = False
+        session.current_task = None
+        session.thread_id_to_resume = None
+
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.code.on_chat_start = on_chat_start
+        mock_config.code.on_chat_resume = None
+
+        with (
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+        ):
+            await connection_successful("sid-1")
+            session.restored = True
+            await connection_successful("sid-1")
+
+        assert on_chat_start.call_count == 1

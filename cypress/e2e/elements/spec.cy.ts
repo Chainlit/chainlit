@@ -21,13 +21,11 @@ describe('Elements', () => {
       .eq(0)
       .should('contain', 'text1')
       .click();
-    const sideViewTitle = cy.get('#side-view-title');
-    sideViewTitle.should('exist');
-    sideViewTitle.should('contain', 'text1');
+    cy.get('#side-view-title').should('exist').and('contain', 'text1');
 
-    const sideViewContent = cy.get('#side-view-content');
-    sideViewContent.should('exist');
-    sideViewContent.should('contain', 'Here is a side text document');
+    cy.get('#side-view-content')
+      .should('exist')
+      .and('contain', 'Here is a side text document');
 
     // Page
     cy.get('.step')
@@ -37,9 +35,9 @@ describe('Elements', () => {
       .should('contain', 'text2')
       .click();
 
-    const view = cy.get('#element-view');
-    view.should('exist');
-    view.should('contain', 'text2');
-    view.should('contain', 'Here is a page text document');
+    cy.get('#element-view')
+      .should('exist')
+      .and('contain', 'text2')
+      .and('contain', 'Here is a page text document');
   });
 });

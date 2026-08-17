@@ -21,7 +21,7 @@ def instrument_mistralai():
             parent_id = context.current_step.id
 
         step = Step(
-            name=generation.model if generation.model else generation.provider,
+            name=generation.model or generation.provider,
             type="llm",
             parent_id=parent_id,
         )

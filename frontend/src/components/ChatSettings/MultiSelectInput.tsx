@@ -1,3 +1,4 @@
+import { cn } from '@/lib/utils';
 import { IInput } from '@/types';
 import { Command as CommandPrimitive } from 'cmdk';
 import { X } from 'lucide-react';
@@ -60,6 +61,7 @@ const MultiSelectInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (disabled) return;
     const input = inputRef.current;
     if (input) {
       if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -91,14 +93,22 @@ const MultiSelectInput = ({
         className="overflow-visible bg-transparent"
       >
         <div className="group rounded-md border border-input px-3 py-2 text-sm ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-          <div className="flex flex-wrap gap-1">
+          <div className={cn('flex flex-wrap gap-1')}>
             {value.map((v) => {
               const item = items.find((item) => item.value === v);
               return (
-                <Badge key={v} variant="secondary">
+                <Badge
+                  key={v}
+                  variant="secondary"
+                  className={disabled ? 'cursor-not-allowed opacity-50' : ''}
+                >
                   {item?.label}
                   <button
-                    className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    className={cn(
+                      'ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                      disabled ? 'cursor-not-allowed' : ''
+                    )}
+                    disabled={disabled}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         handleSelect(v);
@@ -127,7 +137,10 @@ const MultiSelectInput = ({
                   : placeholder ||
                     t('components.MultiSelectInput.placeholder', 'Select...')
               }
-              className="ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+              className={cn(
+                'ml-2 flex-1 bg-transparent outline-none placeholder:text-muted-foreground',
+                disabled ? 'cursor-not-allowed' : ''
+              )}
               disabled={disabled}
             />
           </div>
@@ -164,4 +177,4 @@ const MultiSelectInput = ({
 };
 
 export { MultiSelectInput };
-export type { SelectItemType, MultiSelectInputProps };
+export type { MultiSelectInputProps, SelectItemType };

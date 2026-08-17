@@ -63,7 +63,9 @@ class StepDict(TypedDict, total=False):
     generation: Optional[Dict]
     showInput: Optional[Union[bool, str]]
     defaultOpen: Optional[bool]
+    autoCollapse: Optional[bool]
     language: Optional[str]
+    icon: Optional[str]
     feedback: Optional[FeedbackDict]
 
 
@@ -84,8 +86,10 @@ def step(
     tags: Optional[List[str]] = None,
     metadata: Optional[Dict] = None,
     language: Optional[str] = None,
+    icon: Optional[str] = None,
     show_input: Union[bool, str] = "json",
     default_open: bool = False,
+    auto_collapse: bool = False,
 ):
     """Step decorator for async and sync functions."""
 
@@ -107,8 +111,10 @@ def step(
                     parent_id=parent_id,
                     tags=tags,
                     language=language,
+                    icon=icon,
                     show_input=show_input,
                     default_open=default_open,
+                    auto_collapse=auto_collapse,
                     metadata=metadata,
                 ) as step:
                     try:
@@ -136,8 +142,10 @@ def step(
                     parent_id=parent_id,
                     tags=tags,
                     language=language,
+                    icon=icon,
                     show_input=show_input,
                     default_open=default_open,
+                    auto_collapse=auto_collapse,
                     metadata=metadata,
                 ) as step:
                     try:
@@ -183,7 +191,9 @@ class Step:
     end: Union[str, None]
     generation: Optional[BaseGeneration]
     language: Optional[str]
+    icon: Optional[str]
     default_open: Optional[bool]
+    auto_collapse: Optional[bool]
     elements: Optional[List[Element]]
     fail_on_persist_error: bool
 
@@ -197,7 +207,9 @@ class Step:
         metadata: Optional[Dict] = None,
         tags: Optional[List[str]] = None,
         language: Optional[str] = None,
+        icon: Optional[str] = None,
         default_open: Optional[bool] = False,
+        auto_collapse: Optional[bool] = False,
         show_input: Union[bool, str] = "json",
         thread_id: Optional[str] = None,
     ):
@@ -215,7 +227,9 @@ class Step:
         self.parent_id = parent_id
 
         self.language = language
+        self.icon = icon
         self.default_open = default_open
+        self.auto_collapse = auto_collapse
         self.generation = None
         self.elements = elements or []
 
@@ -288,6 +302,11 @@ class Step:
         self._output = self._process_content(content, set_language=True)
 
     def to_dict(self) -> StepDict:
+        # Move icon into metadata for storage
+        metadata = dict(self.metadata)
+        if self.icon:
+            metadata["icon"] = self.icon
+
         _dict: StepDict = {
             "name": self.name,
             "type": self.type,
@@ -295,7 +314,7 @@ class Step:
             "threadId": self.thread_id,
             "parentId": self.parent_id,
             "streaming": self.streaming,
-            "metadata": self.metadata,
+            "metadata": metadata,
             "tags": self.tags,
             "input": self.input,
             "isError": self.is_error,
@@ -305,6 +324,7 @@ class Step:
             "end": self.end,
             "language": self.language,
             "defaultOpen": self.default_open,
+            "autoCollapse": self.auto_collapse,
             "showInput": self.show_input,
             "generation": self.generation.to_dict() if self.generation else None,
         }

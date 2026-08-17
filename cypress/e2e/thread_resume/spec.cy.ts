@@ -4,8 +4,10 @@ const login = (user: 'alice' | 'bob') => {
   cy.visit('/');
   cy.location('pathname').should('eq', '/login');
 
-  cy.get("input[name='email']").clear().type(user);
-  cy.get("input[name='password']").clear().type(((user === 'alice') ? 'a' : 'b'));
+  cy.get("input[name='email']").clear();
+  cy.get("input[name='email']").type(user);
+  cy.get("input[name='password']").clear();
+  cy.get("input[name='password']").type(user === 'alice' ? 'a' : 'b');
 
   cy.intercept('POST', '/login').as('loginReq');
   cy.intercept('GET', '/user').as('userReq');
@@ -30,8 +32,8 @@ describe('Thread resume (author)', () => {
     cy.get('#message-composer').should('be.visible');
     cy.get('[data-testid="read-only-banner"]').should('not.exist');
 
-  // Continue chatting
-  submitMessage('still here');
-  cy.get("[data-step-type='assistant_message']").contains('Echo: still here');
+    // Continue chatting
+    submitMessage('still here');
+    cy.get("[data-step-type='assistant_message']").contains('Echo: still here');
   });
 });

@@ -5,12 +5,13 @@ import {
   useRef,
   useState
 } from 'react';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
   FileSpec,
   IStep,
+  commandsState,
   useAuth,
   useChatData,
   useChatInteract,
@@ -21,6 +22,12 @@ import { modesState } from '@chainlit/react-client';
 
 import { Settings } from '@/components/icons/Settings';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger
+} from '@/components/ui/tooltip';
 import { useTranslation } from 'components/i18n/Translator';
 
 import { useQuery } from '@/hooks/query';
@@ -62,7 +69,16 @@ export default function MessageComposer({
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
+  const commands = useRecoilValue(commandsState);
   const setChatSettingsOpen = useSetRecoilState(chatSettingsOpenState);
+
+  // Pre-select the command marked as selected by the backend
+  useEffect(() => {
+    const defaultSelected = commands.find((c) => c.selected);
+    if (defaultSelected && !selectedCommand) {
+      setSelectedCommand(defaultSelected);
+    }
+  }, [commands]);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
   const { t } = useTranslation();
 
@@ -274,16 +290,25 @@ export default function MessageComposer({
             onFileUpload={onFileUpload}
           />
           {showSettingsInComposer && (
-            <Button
-              id="chat-settings-open-modal"
-              disabled={disabled}
-              onClick={() => setChatSettingsOpen(true)}
-              className="hover:bg-muted rounded-full"
-              variant="ghost"
-              size="icon"
-            >
-              <Settings className="!size-6" />
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    id="chat-settings-open-modal"
+                    disabled={disabled}
+                    onClick={() => setChatSettingsOpen(true)}
+                    className="hover:bg-muted rounded-full"
+                    variant="ghost"
+                    size="icon"
+                  >
+                    <Settings className="!size-6" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{t('navigation.user.menu.settings')}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           )}
           <McpButton disabled={disabled} />
           {modes.map((mode) => (

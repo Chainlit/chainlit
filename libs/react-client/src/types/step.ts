@@ -31,6 +31,7 @@ export interface IStep {
   feedback?: IFeedback;
   language?: string;
   defaultOpen?: boolean;
+  autoCollapse?: boolean;
   streaming?: boolean;
   steps?: IStep[];
   metadata?: Record<string, any>;

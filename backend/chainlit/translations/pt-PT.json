@@ -1,0 +1,260 @@
+{
+  "common": {
+    "actions": {
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "continue": "Continuar",
+      "goBack": "Voltar",
+      "reset": "Repor",
+      "submit": "Enviar"
+    },
+    "status": {
+      "loading": "A carregar...",
+      "error": {
+        "default": "Ocorreu um erro",
+        "serverConnection": "N\u00e3o foi poss\u00edvel estabelecer liga\u00e7\u00e3o ao servidor"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Inicie sess\u00e3o para aceder \u00e0 aplica\u00e7\u00e3o",
+      "form": {
+        "email": {
+          "label": "E-mail",
+          "required": "o e-mail \u00e9 obrigat\u00f3rio",
+          "placeholder": "me@example.com"
+        },
+        "password": {
+          "label": "Palavra-passe",
+          "required": "a palavra-passe \u00e9 obrigat\u00f3ria"
+        },
+        "actions": {
+          "signin": "Iniciar sess\u00e3o"
+        },
+        "alternativeText": {
+          "or": "Ou"
+        }
+      },
+      "errors": {
+        "default": "N\u00e3o foi poss\u00edvel iniciar sess\u00e3o",
+        "signin": "Tente iniciar sess\u00e3o com outra conta",
+        "oauthSignin": "Tente iniciar sess\u00e3o com outra conta",
+        "redirectUriMismatch": "O URI de redirecionamento n\u00e3o corresponde \u00e0 configura\u00e7\u00e3o da aplica\u00e7\u00e3o OAuth",
+        "oauthCallback": "Tente iniciar sess\u00e3o com outra conta",
+        "oauthCreateAccount": "Tente iniciar sess\u00e3o com outra conta",
+        "emailCreateAccount": "Tente iniciar sess\u00e3o com outra conta",
+        "callback": "Tente iniciar sess\u00e3o com outra conta",
+        "oauthAccountNotLinked": "Para confirmar a sua identidade, inicie sess\u00e3o com a mesma conta utilizada anteriormente",
+        "emailSignin": "N\u00e3o foi poss\u00edvel enviar o e-mail",
+        "emailVerify": "Por favor, verifique o seu e-mail. Foi enviada uma nova mensagem",
+        "credentialsSignin": "Erro ao iniciar sess\u00e3o. Verifique se os dados fornecidos est\u00e3o corretos",
+        "sessionRequired": "Por favor, inicie sess\u00e3o para aceder a esta p\u00e1gina"
+      }
+    },
+    "provider": {
+      "continue": "Continuar com {{provider}}"
+    }
+  },
+  "chat": {
+    "input": {
+      "placeholder": "Escreva a sua mensagem aqui...",
+      "actions": {
+        "send": "Enviar mensagem",
+        "stop": "Parar tarefa",
+        "attachFiles": "Anexar ficheiros"
+      }
+    },
+    "favorites": {
+      "use": "Utilizar mensagem favorita",
+      "headline": "Mensagens favoritas",
+      "remove": "Remover favorito",
+      "empty": {
+        "title": "Ainda n\u00e3o h\u00e1 prompts guardados",
+        "description": "Comece por enviar um prompt e marc\u00e1-lo com estrela, ou marque com estrela um prompt de conversas anteriores"
+      }
+    },
+    "commands": {
+      "button": "Ferramentas",
+      "changeTool": "Alterar ferramenta",
+      "availableTools": "Ferramentas dispon\u00edveis"
+    },
+    "speech": {
+      "start": "Iniciar grava\u00e7\u00e3o",
+      "stop": "Parar grava\u00e7\u00e3o",
+      "connecting": "A ligar"
+    },
+    "fileUpload": {
+      "dragDrop": "Arraste e largue ficheiros aqui",
+      "browse": "Procurar ficheiros",
+      "sizeLimit": "Limite:",
+      "errors": {
+        "failed": "Erro ao carregar",
+        "cancelled": "Carregamento cancelado de"
+      },
+      "actions": {
+        "cancelUpload": "Cancelar carregamento",
+        "removeAttachment": "Remover anexo"
+      }
+    },
+    "messages": {
+      "status": {
+        "using": "A utilizar",
+        "used": "Utilizado"
+      },
+      "actions": {
+        "copy": {
+          "button": "Copiar para a \u00e1rea de transfer\u00eancia",
+          "success": "Copiado!"
+        }
+      },
+      "feedback": {
+        "positive": "\u00datil",
+        "negative": "N\u00e3o \u00fatil",
+        "edit": "Editar coment\u00e1rio",
+        "dialog": {
+          "title": "Adicionar um coment\u00e1rio",
+          "submit": "Enviar coment\u00e1rio",
+          "yourFeedback": "O seu coment\u00e1rio..."
+        },
+        "status": {
+          "updating": "A atualizar",
+          "updated": "Coment\u00e1rio atualizado"
+        }
+      }
+    },
+    "history": {
+      "title": "\u00daltimas entradas",
+      "empty": "Est\u00e1 vazio...",
+      "show": "Mostrar hist\u00f3rico"
+    },
+    "settings": {
+      "title": "Painel de configura\u00e7\u00f5es",
+      "customize": "Personalize aqui as configura\u00e7\u00f5es do seu chat"
+    },
+    "watermark": "Os modelos de linguagem podem cometer erros. Verifique sempre informa\u00e7\u00f5es importantes."
+  },
+  "threadHistory": {
+    "sidebar": {
+      "title": "Conversas anteriores",
+      "filters": {
+        "search": "Pesquisar",
+        "placeholder": "Pesquisar conversas..."
+      },
+      "timeframes": {
+        "today": "Hoje",
+        "yesterday": "Ontem",
+        "previous7days": "\u00daltimos 7 dias",
+        "previous30days": "\u00daltimos 30 dias"
+      },
+      "empty": "Nenhuma conversa encontrada",
+      "actions": {
+        "close": "Fechar barra lateral",
+        "open": "Abrir barra lateral"
+      }
+    },
+    "thread": {
+      "untitled": "Conversa sem t\u00edtulo",
+      "menu": {
+        "rename": "Renomear",
+        "share": "Partilhar",
+        "delete": "Eliminar"
+      },
+      "actions": {
+        "share": {
+          "title": "Partilhar liga\u00e7\u00e3o do chat",
+          "button": "Partilhar",
+          "status": {
+            "copied": "Liga\u00e7\u00e3o copiada",
+            "created": "Liga\u00e7\u00e3o de partilha criada!",
+            "unshared": "Partilha desativada para esta conversa"
+          },
+          "error": {
+            "create": "Erro ao criar liga\u00e7\u00e3o de partilha",
+            "unshare": "Erro ao desativar a partilha"
+          }
+        },
+        "delete": {
+          "title": "Confirmar elimina\u00e7\u00e3o",
+          "description": "Ir\u00e1 eliminar a conversa e todos os seus conte\u00fados. Esta a\u00e7\u00e3o n\u00e3o pode ser anulada.",
+          "success": "Chat eliminado",
+          "inProgress": "A eliminar chat"
+        },
+        "rename": {
+          "title": "Renomear conversa",
+          "description": "Insira um novo nome para esta conversa",
+          "form": {
+            "name": {
+              "label": "Nome",
+              "placeholder": "Insira o novo nome"
+            }
+          },
+          "success": "Conversa renomeada!",
+          "inProgress": "A renomear conversa"
+        }
+      }
+    }
+  },
+  "navigation": {
+    "header": {
+      "chat": "Chat",
+      "readme": "Leia-me",
+      "theme": {
+        "light": "Tema claro",
+        "dark": "Tema escuro",
+        "system": "Seguir sistema"
+      }
+    },
+    "newChat": {
+      "button": "Novo chat",
+      "dialog": {
+        "title": "Criar novo chat",
+        "description": "Isto ir\u00e1 apagar o hist\u00f3rico de chat atual. Tem a certeza de que pretende continuar?",
+        "tooltip": "Novo chat"
+      }
+    },
+    "user": {
+      "menu": {
+        "settings": "Configura\u00e7\u00f5es",
+        "settingsKey": "S",
+        "apiKeys": "Chaves API",
+        "logout": "Terminar sess\u00e3o"
+      }
+    }
+  },
+  "apiKeys": {
+    "title": "Chaves API necess\u00e1rias",
+    "description": "Para utilizar esta aplica\u00e7\u00e3o, s\u00e3o necess\u00e1rias as seguintes chaves API. As chaves s\u00e3o guardadas localmente no seu dispositivo.",
+    "success": {
+      "saved": "Guardado com sucesso"
+    }
+  },
+  "alerts": {
+    "info": "Informa\u00e7\u00e3o",
+    "note": "Nota",
+    "tip": "Dica",
+    "important": "Importante",
+    "warning": "Aviso",
+    "caution": "Cuidado",
+    "debug": "Depura\u00e7\u00e3o",
+    "example": "Exemplo",
+    "success": "Sucesso",
+    "help": "Ajuda",
+    "idea": "Ideia",
+    "pending": "Pendente",
+    "security": "Seguran\u00e7a",
+    "beta": "Beta",
+    "best-practice": "Boa pr\u00e1tica"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "Selecionar..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "Escolher uma data",
+        "range": "Escolher um intervalo de datas"
+      }
+    }
+  }
+}

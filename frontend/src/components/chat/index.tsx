@@ -122,7 +122,7 @@ const Chat = () => {
             toast.error(
               `${t('chat.fileUpload.errors.failed')} ${file.name}: ${
                 typeof error === 'object' && error !== null
-                  ? error.message ?? error
+                  ? (error.message ?? error)
                   : error
               }`
             );

@@ -3,7 +3,9 @@ import { toast } from 'sonner';
 
 import { ChainlitAPI, ClientError } from '@chainlit/react-client';
 
-const devServer = 'http://localhost:8000' + getRouterBasename();
+const devServer =
+  (import.meta.env.VITE_API_URL || 'http://localhost:8000') +
+  getRouterBasename();
 const url = import.meta.env.DEV
   ? devServer
   : window.origin + getRouterBasename();
@@ -41,22 +43,33 @@ class ExtendedChainlitAPI extends ChainlitAPI {
     headers?: Record<string, string>
   ) {
     // Assumes the backend expects { clientType, name, url }
-    return fetch(new URL("mcp", this.httpEndpoint.endsWith("/") ? this.httpEndpoint : `${this.httpEndpoint}/`), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(sessionId ? { 'x-session-id': sessionId } : {})
-      },
-      body: JSON.stringify({
-        clientType: 'streamable-http',
-        name,
-        url,
-        sessionId,
-        ...(headers ? { headers } : {})
-      })
-    }).then(async (res) => {
+    return fetch(
+      new URL(
+        'mcp',
+        this.httpEndpoint.endsWith('/')
+          ? this.httpEndpoint
+          : `${this.httpEndpoint}/`
+      ),
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(sessionId ? { 'x-session-id': sessionId } : {})
+        },
+        body: JSON.stringify({
+          clientType: 'streamable-http',
+          name,
+          url,
+          sessionId,
+          ...(headers ? { headers } : {})
+        })
+      }
+    ).then(async (res) => {
       const data = await res.json();
-      return { success: res.ok, mcp: data.mcp, error: data.detail };
+      if (!res.ok) {
+        throw new Error(data.detail || 'Failed to connect MCP');
+      }
+      return { success: true, mcp: data.mcp };
     });
   }
 }

@@ -156,10 +156,10 @@
     "thread": {
       "untitled": "शीर्षकहीन वार्तालाप",
       "menu": {
-          "rename": "नाम बदलें",
-          "share": "साझा करें",
-          "delete": "Delete"
-        },
+        "rename": "नाम बदलें",
+        "share": "साझा करें",
+        "delete": "Delete"
+      },
       "actions": {
         "share": {
           "title": "चैट का लिंक साझा करें",
