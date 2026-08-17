@@ -692,7 +692,6 @@ source = { editable = "backend" }
 dependencies = [
     { name = "aiofiles" },
     { name = "asyncer" },
-    { name = "audioop-lts", marker = "python_full_version >= '3.13'" },
     { name = "click" },
     { name = "dataclasses-json" },
     { name = "fastapi" },
@@ -766,7 +765,6 @@ requires-dist = [
     { name = "aiosqlite", marker = "extra == 'tests'", specifier = ">=0.20.0,<1.0.0" },
     { name = "asyncer", specifier = ">=0.0.8,<0.1.0" },
     { name = "asyncpg", marker = "extra == 'custom-data'", specifier = ">=0.30.0,<1.0.0" },
-    { name = "audioop-lts", marker = "python_full_version >= '3.13'", specifier = ">=0.2.1,<0.3.0" },
     { name = "azure-identity", marker = "extra == 'custom-data'", specifier = ">=1.14.1,<2.0.0" },
     { name = "azure-storage-blob", marker = "extra == 'custom-data'", specifier = ">=12.24.0,<13.0.0" },
     { name = "azure-storage-file-datalake", marker = "extra == 'custom-data'", specifier = ">=12.14.0,<13.0.0" },
