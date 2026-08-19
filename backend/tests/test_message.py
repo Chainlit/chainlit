@@ -162,7 +162,11 @@ class TestMessageBase:
                 with patch(
                     "chainlit.message.get_data_layer", return_value=mock_data_layer
                 ):
-                    with patch("asyncio.create_task") as mock_create_task:
+                    # Close the coroutine passed to create_task, otherwise it is
+                    # garbage collected un-awaited and raises a RuntimeWarning.
+                    with patch(
+                        "asyncio.create_task", side_effect=lambda coro: coro.close()
+                    ) as mock_create_task:
                         await msg.update()
 
                         mock_create_task.assert_called_once()
