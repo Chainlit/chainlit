@@ -10,7 +10,9 @@ from chainlit.mcp_oauth import (
     McpOAuthTokenStore,
     PendingAuthorizations,
     ScopedTokenStorage,
+    build_oauth_provider,
     canonical_server_key,
+    extract_state,
 )
 
 
@@ -195,7 +197,8 @@ class TestPendingAuthorizations:
 
     async def test_the_originating_user_completes_the_flow(self):
         pending = PendingAuthorizations()
-        state, flow = pending.start("alice", "https://jira.example.com/mcp")
+        state = "sdk-state-1"
+        flow = pending.register(state, "alice", "https://jira.example.com/mcp")
 
         resolved = pending.resolve(state, "alice", "auth-code")
 
@@ -205,7 +208,8 @@ class TestPendingAuthorizations:
 
     async def test_another_user_cannot_complete_someone_elses_flow(self):
         pending = PendingAuthorizations()
-        state, flow = pending.start("alice", "https://jira.example.com/mcp")
+        state = "sdk-state-1"
+        flow = pending.register(state, "alice", "https://jira.example.com/mcp")
 
         with pytest.raises(PermissionError):
             pending.resolve(state, "mallory", "stolen-code")
@@ -217,7 +221,8 @@ class TestPendingAuthorizations:
 
     async def test_a_state_cannot_be_replayed(self):
         pending = PendingAuthorizations()
-        state, _flow = pending.start("alice", "https://jira.example.com/mcp")
+        state = "sdk-state-1"
+        pending.register(state, "alice", "https://jira.example.com/mcp")
         pending.resolve(state, "alice", "auth-code")
 
         with pytest.raises(KeyError):
@@ -230,13 +235,14 @@ class TestPendingAuthorizations:
 
     async def test_states_are_unique_per_flow(self):
         pending = PendingAuthorizations()
-        first, _f1 = pending.start("alice", "https://jira.example.com/mcp")
-        second, _f2 = pending.start("alice", "https://jira.example.com/mcp")
-        assert first != second
+        pending.register("state-a", "alice", "https://jira.example.com/mcp")
+        pending.register("state-b", "alice", "https://jira.example.com/mcp")
+        assert len(pending) == 2
 
     async def test_expired_flows_are_dropped(self):
         pending = PendingAuthorizations(ttl_seconds=0)
-        state, flow = pending.start("alice", "https://jira.example.com/mcp")
+        state = "sdk-state-1"
+        flow = pending.register(state, "alice", "https://jira.example.com/mcp")
 
         with pytest.raises(KeyError):
             pending.resolve(state, "alice", "auth-code")
@@ -245,7 +251,8 @@ class TestPendingAuthorizations:
 
     async def test_cancel_releases_the_waiter(self):
         pending = PendingAuthorizations()
-        state, flow = pending.start("alice", "https://jira.example.com/mcp")
+        state = "sdk-state-1"
+        flow = pending.register(state, "alice", "https://jira.example.com/mcp")
 
         pending.cancel(state)
 
@@ -255,7 +262,12 @@ class TestPendingAuthorizations:
     def test_a_flow_requires_a_user_identifier(self):
         pending = PendingAuthorizations()
         with pytest.raises(ValueError, match="user identifier"):
-            pending.start("", "https://example.com/mcp")
+            pending.register("s", "", "https://example.com/mcp")
+
+    def test_a_flow_requires_a_state(self):
+        pending = PendingAuthorizations()
+        with pytest.raises(ValueError, match="state"):
+            pending.register("", "alice", "https://example.com/mcp")
 
 
 class TestScopeAccessors:
@@ -290,9 +302,8 @@ class TestMcpOAuthCallbackRoute:
     def test_the_owner_completes_the_flow(self, client_and_user):
         from chainlit.mcp_oauth import pending_authorizations
 
-        state, _flow = pending_authorizations.start(
-            "alice", "https://jira.example.com/mcp"
-        )
+        state = "sdk-owner-state"
+        pending_authorizations.register(state, "alice", "https://jira.example.com/mcp")
         client = client_and_user("alice")
 
         res = client.get(f"/mcp/oauth/callback?code=abc&state={state}")
@@ -302,8 +313,9 @@ class TestMcpOAuthCallbackRoute:
     def test_another_user_is_refused(self, client_and_user):
         from chainlit.mcp_oauth import pending_authorizations
 
-        state, flow = pending_authorizations.start(
-            "alice", "https://jira.example.com/mcp"
+        state = "sdk-mallory-state"
+        flow = pending_authorizations.register(
+            state, "alice", "https://jira.example.com/mcp"
         )
         client = client_and_user("mallory")
 
@@ -324,6 +336,123 @@ class TestMcpOAuthCallbackRoute:
         assert res.status_code == 400
 
     def test_missing_code_is_rejected(self, client_and_user):
+        """Use a real state so the 400 can only come from the missing code."""
+        from chainlit.mcp_oauth import pending_authorizations
+
+        state = "sdk-missing-code-state"
+        flow = pending_authorizations.register(
+            state, "alice", "https://jira.example.com/mcp"
+        )
         client = client_and_user("alice")
-        res = client.get("/mcp/oauth/callback?state=abc")
+
+        res = client.get(f"/mcp/oauth/callback?state={state}")
+
         assert res.status_code == 400
+        assert res.json()["detail"] == "Missing code or state"
+        # The waiting connection is released rather than left hanging.
+        assert flow.cancelled
+
+    def test_a_provider_error_abandons_the_flow(self, client_and_user):
+        from chainlit.mcp_oauth import pending_authorizations
+
+        state = "sdk-error-state"
+        flow = pending_authorizations.register(
+            state, "alice", "https://jira.example.com/mcp"
+        )
+        client = client_and_user("alice")
+
+        res = client.get(f"/mcp/oauth/callback?error=access_denied&state={state}")
+
+        assert res.status_code == 400
+        assert flow.cancelled
+
+    def test_an_error_cannot_abandon_someone_elses_flow(self, client_and_user):
+        from chainlit.mcp_oauth import pending_authorizations
+
+        state = "sdk-victim-state"
+        flow = pending_authorizations.register(
+            state, "alice", "https://jira.example.com/mcp"
+        )
+        client = client_and_user("mallory")
+
+        res = client.get(f"/mcp/oauth/callback?error=access_denied&state={state}")
+
+        assert res.status_code == 400
+        # Alice's connection is untouched.
+        assert not flow.cancelled
+
+
+class TestProviderStateCorrelation:
+    """The SDK mints the state, so the pending map must be keyed on that one.
+
+    Registering a Chainlit-generated state would key the map on a value the
+    browser never echoes back, and every callback would 404 the flow.
+    """
+
+    def test_extract_state_reads_the_url(self):
+        assert (
+            extract_state("https://as.example.com/authorize?client_id=x&state=s1")
+            == "s1"
+        )
+        assert extract_state("https://as.example.com/authorize?client_id=x") is None
+
+    async def test_the_flow_is_registered_under_the_sdk_state(self):
+        """Drive the provider's redirect handler and check the key it used."""
+        from chainlit.mcp_oauth import pending_authorizations
+
+        seen: list[str] = []
+
+        async def on_redirect(url: str) -> None:
+            seen.append(url)
+
+        provider = build_oauth_provider(
+            user_identifier="alice",
+            server_url="https://jira.example.com/mcp",
+            redirect_uri="https://app.example.com/mcp/oauth/callback",
+            on_redirect=on_redirect,
+        )
+
+        sdk_url = "https://as.example.com/authorize?client_id=c&state=sdk-generated"
+        await provider.context.redirect_handler(sdk_url)
+
+        assert seen == [sdk_url]
+        # The callback route looks the flow up by the state in that URL.
+        resolved = pending_authorizations.resolve("sdk-generated", "alice", "code-1")
+        assert resolved.user_identifier == "alice"
+
+    async def test_the_callback_handler_returns_the_sdk_state(self):
+        """The SDK compares the returned state with compare_digest."""
+        from chainlit.mcp_oauth import pending_authorizations
+
+        async def on_redirect(url: str) -> None:
+            return None
+
+        provider = build_oauth_provider(
+            user_identifier="alice",
+            server_url="https://jira.example.com/mcp",
+            redirect_uri="https://app.example.com/mcp/oauth/callback",
+            on_redirect=on_redirect,
+        )
+
+        await provider.context.redirect_handler(
+            "https://as.example.com/authorize?state=sdk-echo"
+        )
+        pending_authorizations.resolve("sdk-echo", "alice", "the-code")
+
+        assert await provider.context.callback_handler() == ("the-code", "sdk-echo")
+
+    async def test_a_url_without_state_is_refused(self):
+        async def on_redirect(url: str) -> None:
+            return None
+
+        provider = build_oauth_provider(
+            user_identifier="alice",
+            server_url="https://jira.example.com/mcp",
+            redirect_uri="https://app.example.com/mcp/oauth/callback",
+            on_redirect=on_redirect,
+        )
+
+        with pytest.raises(ValueError, match="state"):
+            await provider.context.redirect_handler(
+                "https://as.example.com/authorize?client_id=c"
+            )

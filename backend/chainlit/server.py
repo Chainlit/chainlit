@@ -1302,17 +1302,25 @@ async def mcp_oauth_callback(
     The redirect comes back on a route shared by every user, so the pending
     flow is resolved against the caller's identity: a state issued to someone
     else is refused rather than completed on their behalf.
+
+    A failed or malformed callback abandons the caller's own flow, so the
+    connection waiting on it fails fast instead of hanging until the state
+    expires.
     """
-    if error:
-        raise HTTPException(status_code=400, detail=error)
-
-    if not code or not state:
-        raise HTTPException(status_code=400, detail="Missing code or state")
-
     if not current_user:
         raise HTTPException(
             status_code=401, detail="MCP OAuth requires an authenticated user."
         )
+
+    if error:
+        if state:
+            pending_authorizations.abandon(state, current_user.identifier)
+        raise HTTPException(status_code=400, detail=error)
+
+    if not code or not state:
+        if state:
+            pending_authorizations.abandon(state, current_user.identifier)
+        raise HTTPException(status_code=400, detail="Missing code or state")
 
     try:
         pending_authorizations.resolve(state, current_user.identifier, code)
@@ -1454,8 +1462,10 @@ async def connect_mcp(
                 status_code=400,
                 detail="OAuth is only supported for HTTP MCP transports.",
             )
-        user = context.session.user
-        if not user:
+        # Scope to the HTTP-authenticated caller, which is the identity the
+        # callback route sees. Falling back to the session user would start a
+        # flow the callback then refuses as belonging to someone else.
+        if not current_user:
             raise HTTPException(
                 status_code=401,
                 detail="MCP OAuth requires an authenticated user.",
@@ -1467,8 +1477,8 @@ async def connect_mcp(
                 {"name": payload.name, "url": auth_url},
             )
 
-        oauth_provider, _oauth_state = build_oauth_provider(
-            user_identifier=user.identifier,
+        oauth_provider = build_oauth_provider(
+            user_identifier=current_user.identifier,
             server_url=mcp_connection.url,
             redirect_uri=f"{get_user_facing_url(request.url)}/oauth/callback",
             on_redirect=_emit_authorization_url,
