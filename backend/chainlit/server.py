@@ -58,6 +58,7 @@ from chainlit.data import get_data_layer
 from chainlit.data.acl import is_thread_author
 from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
+from chainlit.mcp_oauth import build_oauth_provider, pending_authorizations
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
 from chainlit.types import (
@@ -1289,8 +1290,45 @@ async def call_action(
     return JSONResponse(content={"success": True, "response": response})
 
 
+@router.get("/mcp/oauth/callback")
+async def mcp_oauth_callback(
+    current_user: UserParam,
+    code: Optional[str] = None,
+    state: Optional[str] = None,
+    error: Optional[str] = None,
+):
+    """Complete an MCP authorization started by this user.
+
+    The redirect comes back on a route shared by every user, so the pending
+    flow is resolved against the caller's identity: a state issued to someone
+    else is refused rather than completed on their behalf.
+    """
+    if error:
+        raise HTTPException(status_code=400, detail=error)
+
+    if not code or not state:
+        raise HTTPException(status_code=400, detail="Missing code or state")
+
+    if not current_user:
+        raise HTTPException(
+            status_code=401, detail="MCP OAuth requires an authenticated user."
+        )
+
+    try:
+        pending_authorizations.resolve(state, current_user.identifier, code)
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="Unauthorized")
+    except KeyError:
+        raise HTTPException(
+            status_code=400, detail="Unknown or expired authorization request."
+        )
+
+    return HTMLResponse("<p>Authorization complete. You can close this window.</p>")
+
+
 @router.post("/mcp")
 async def connect_mcp(
+    request: Request,
     payload: ConnectMCPRequest,
     current_user: UserParam,
 ):
@@ -1404,6 +1442,38 @@ async def connect_mcp(
     # opened it — avoiding the cross-task cancel-scope corruption from
     # https://github.com/Chainlit/chainlit/issues/2182.
 
+    # ── Optional per-user OAuth ──
+    #
+    # The SDK provider performs discovery, dynamic client registration and
+    # PKCE. Chainlit supplies the user scope, so a token obtained here is only
+    # ever replayed for the same user and the same server.
+    oauth_provider = None
+    if getattr(payload, "useOAuth", False):
+        if not isinstance(mcp_connection, (SseMcpConnection, HttpMcpConnection)):
+            raise HTTPException(
+                status_code=400,
+                detail="OAuth is only supported for HTTP MCP transports.",
+            )
+        user = context.session.user
+        if not user:
+            raise HTTPException(
+                status_code=401,
+                detail="MCP OAuth requires an authenticated user.",
+            )
+
+        async def _emit_authorization_url(auth_url: str) -> None:
+            await context.emitter.emit(
+                "mcp_authorization_required",
+                {"name": payload.name, "url": auth_url},
+            )
+
+        oauth_provider, _oauth_state = build_oauth_provider(
+            user_identifier=user.identifier,
+            server_url=mcp_connection.url,
+            redirect_uri=f"{get_user_facing_url(request.url)}/oauth/callback",
+            on_redirect=_emit_authorization_url,
+        )
+
     ready_event: asyncio.Event = asyncio.Event()
     stop_event: asyncio.Event = asyncio.Event()
     # Mutable container to pass the ClientSession back from the bg task.
@@ -1418,6 +1488,7 @@ async def connect_mcp(
                         sse_client(
                             url=mcp_connection.url,
                             headers=mcp_connection.headers,
+                            auth=oauth_provider,
                         )
                     )
                 elif isinstance(mcp_connection, StdioMcpConnection):
@@ -1434,6 +1505,7 @@ async def connect_mcp(
                         streamablehttp_client(
                             url=mcp_connection.url,
                             headers=mcp_connection.headers,
+                            auth=oauth_provider,
                         )
                     )
                 else:

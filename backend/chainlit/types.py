@@ -259,6 +259,8 @@ class ConnectSseMCPRequest(BaseModel):
     url: str
     # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
     headers: Optional[Dict[str, str]] = None
+    # Obtain a token via OAuth instead of relying on a static header.
+    useOAuth: bool = False
 
 
 class ConnectStreamableHttpMCPRequest(BaseModel):
@@ -268,6 +270,8 @@ class ConnectStreamableHttpMCPRequest(BaseModel):
     url: str
     # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
     headers: Dict[str, str] | None = None
+    # Obtain a token via OAuth instead of relying on a static header.
+    useOAuth: bool = False
 
 
 ConnectMCPRequest = Union[
