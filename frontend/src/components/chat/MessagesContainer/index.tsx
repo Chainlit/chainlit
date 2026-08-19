@@ -184,6 +184,18 @@ const MessagesContainer = ({ navigate }: Props) => {
 
   return (
     <MessageContext.Provider value={memoizedContext}>
+      {/*
+        Announce that a reply is being generated. The blinking cursor that
+        signals this visually is an empty <span> driven by CSS, so it carries
+        no text for a screen reader to read.
+
+        The announcement is deliberately the state, not the reply itself:
+        wrapping streamed content in a live region makes it re-read the
+        partial message on every chunk.
+      */}
+      <div className="sr-only" role="status" aria-live="polite">
+        {loading ? t('chat.messages.status.generating') : ''}
+      </div>
       <Messages
         indent={0}
         isRunning={loading}

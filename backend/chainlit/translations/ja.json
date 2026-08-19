@@ -98,6 +98,7 @@
     },
     "messages": {
       "status": {
+        "generating": "Generating response",
         "using": "使用中",
         "used": "使用済み"
       },
