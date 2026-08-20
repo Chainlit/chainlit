@@ -19,7 +19,7 @@ const useConfig = () => {
   const { data, error, isLoading } = useApi<IChainlitConfig>(apiUrl);
 
   useEffect(() => {
-    if (error) {
+    if (error && !data) {
       setConfig(undefined);
     } else if (data) {
       setConfig(data);
