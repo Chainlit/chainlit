@@ -61,12 +61,8 @@ def restore_existing_session(
     """Restore a session from the sessionId provided by the client."""
     if session := WebsocketSession.get_by_id(session_id):
         if not _session_owner_matches_user(session, user):
-            # Clean up in-memory bookkeeping; on-disk / DB state is untouched.
-            from chainlit.session import ws_sessions_id, ws_sessions_sid
-
-            ws_sessions_id.pop(session.id, None)
-            ws_sessions_sid.pop(session.socket_id, None)
-            return False
+            logger.error("Authorization for the session failed.")
+            raise ConnectionRefusedError("authorization failed")
 
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
