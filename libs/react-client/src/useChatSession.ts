@@ -85,7 +85,9 @@ const useChatSession = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const chatProfileRef = useRef(chatProfile);
-  useEffect(() => {chatProfileRef.current = chatProfile;}, [chatProfile]);
+  useEffect(() => {
+    chatProfileRef.current = chatProfile;
+  }, [chatProfile]);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
   const setFavoriteMessages = useSetRecoilState(favoriteMessagesState);
