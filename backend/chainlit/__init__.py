@@ -23,7 +23,7 @@ from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_context import chat_context
 from chainlit.chat_settings import ChatSettings
-from chainlit.context import context
+from chainlit.context import ChainlitContextException, context
 from chainlit.element import (
     Audio,
     CustomElement,
@@ -140,7 +140,11 @@ async def set_chat_profile(name: "str | None") -> bool:
     if not global_config.features.hot_swap_chat_profile:
         return False
 
-    session = getattr(context, "session", None)
+    try:
+        session = context.session
+    except ChainlitContextException:
+        return False
+
     if not isinstance(session, WebsocketSession):
         return False
 
@@ -174,6 +178,7 @@ async def set_chat_profile(name: "str | None") -> bool:
         pass
 
     return True
+
 
 @dataclass()
 class CopilotFunction:

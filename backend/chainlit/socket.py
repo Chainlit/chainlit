@@ -273,8 +273,9 @@ async def set_chat_profile(sid, payload: Dict[str, Any]):
         return
 
     new_profile: Optional[str] = payload.get("chatProfile") if payload else None
+    from chainlit import set_chat_profile as cl_set_chat_profile
 
-    ok = await session.set_chat_profile(new_profile)
+    ok = await cl_set_chat_profile(new_profile)
     if not ok:
         await context.emitter.send_toast(
             f"Unknown chat profile: {new_profile}", type="error"
@@ -285,31 +286,6 @@ async def set_chat_profile(sid, payload: Dict[str, Any]):
         )
         return
 
-    # Persist the new profile at the thread level so that a later resume picks
-    # it up via the existing `resume_thread` path (socket.py:96). Only persist
-    # once a thread actually exists (i.e. after the first interaction); before
-    # that, the next `flush_thread_queues` will write the correct profile as
-    # part of the thread creation.
-    data_layer = get_data_layer()
-    if (
-        data_layer
-        and session.has_first_interaction
-        and session.thread_id
-    ):
-        try:
-            await persist_user_session(session.thread_id, session.to_persistable())
-            if config.features.auto_tag_thread:
-                await data_layer.update_thread(
-                    thread_id=session.thread_id,
-                    tags=[new_profile] if new_profile else [],
-                )
-        except Exception as e:
-            logger.warning(f"Failed to persist hot-swapped chat profile: {e}")
-
-    await context.emitter.emit(
-        "chat_profile_updated",
-        {"chatProfile": session.chat_profile, "ok": True},
-    )
 
 @sio.on("disconnect")  # pyright: ignore [reportOptionalCall]
 async def disconnect(sid):

@@ -362,7 +362,8 @@ const useChatSession = () => {
 
       socket.on('ask', ({ msg, spec }, callback) => {
         setAskUser({ spec, callback, parentId: msg.parentId });
-        setMessages((oldMessages) => addMessage(oldMessages, msg));
+        const stamped = stampChatProfile(msg);
+        setMessages((oldMessages) => addMessage(oldMessages, stamped));
 
         setLoading(false);
       });

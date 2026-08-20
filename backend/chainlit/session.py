@@ -93,7 +93,10 @@ def clean_metadata(metadata: Dict, max_size: int = 1048576):
     if metadata_size > max_size:
         # Redact the metadata if it exceeds the maximum size
         cleaned_metadata = {
-            "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted."
+            "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted.",
+            "chat_profile": metadata.get("chat_profile"),
+            "chat_settings": metadata.get("chat_settings"),
+            "client_type": metadata.get("client_type"),
         }
 
     return cleaned_metadata
@@ -393,9 +396,7 @@ class WebsocketSession(BaseSession):
         # Recompute the per-session config with the new profile's overrides (if any).
         cfg = global_config
         if new_profile and profiles:
-            current_profile = next(
-                (p for p in profiles if p.name == new_profile), None
-            )
+            current_profile = next((p for p in profiles if p.name == new_profile), None)
             if current_profile and getattr(current_profile, "config_overrides", None):
                 cfg = global_config.with_overrides(current_profile.config_overrides)
         self.config = cfg

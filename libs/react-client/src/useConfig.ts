@@ -19,11 +19,14 @@ const useConfig = () => {
   const { data, error, isLoading } = useApi<IChainlitConfig>(apiUrl);
 
   useEffect(() => {
-    if (!data) return;
-    setConfig(data);
-  }, [data, setConfig]);
+    if (error) {
+      setConfig(undefined);
+    } else if (data) {
+      setConfig(data);
+    }
+  }, [data, error, setConfig]);
 
-  return { config, error, isLoading, language };
+  return { config: data ?? config, error, isLoading, language };
 };
 
 export { useConfig };
