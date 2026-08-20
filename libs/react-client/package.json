@@ -1,7 +1,7 @@
 {
   "name": "@chainlit/react-client",
   "description": "Websocket client to connect to your chainlit app.",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "scripts": {
     "dev": "tsup src/index.ts --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
     "build": "tsup src/index.ts --tsconfig tsconfig.build.json --clean --format esm,cjs --dts  --external react --external recoil --minify --sourcemap --treeshake",
@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "jwt-decode": "^3.1.2",
-    "lodash": "^4.17.21",
+    "lodash": "^4.18.1",
     "socket.io-client": "^4.7.2",
     "sonner": "^1.7.1",
     "swr": "^2.2.2",
