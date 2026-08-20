@@ -371,14 +371,16 @@ class WebsocketSession(BaseSession):
         from chainlit.user_session import user_sessions
 
         profiles = None
-        if new_profile and global_config.code.set_chat_profiles:
+        if new_profile:
+            if not global_config.code.set_chat_profiles:
+                return False
             try:
                 profiles = await global_config.code.set_chat_profiles(
                     self.user, self.language
                 )
             except Exception:
-                profiles = None
-            if profiles is not None and not any(
+                return False
+            if profiles is None or not any(
                 p.name == new_profile for p in profiles
             ):
                 return False
