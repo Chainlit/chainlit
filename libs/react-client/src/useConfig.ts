@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
+
 import { useApi, useAuth } from './api';
 import { chatProfileState, configState } from './state';
 import { IChainlitConfig } from './types';
@@ -9,7 +10,6 @@ const useConfig = () => {
   const { isAuthenticated } = useAuth();
   const chatProfile = useRecoilValue(chatProfileState);
   const language = navigator.language || 'en-US';
-  const prevChatProfileRef = useRef(chatProfile);
 
   // Build the API URL with optional chat profile parameter
   const apiUrl = isAuthenticated
@@ -22,14 +22,6 @@ const useConfig = () => {
     if (!data) return;
     setConfig(data);
   }, [data, setConfig]);
-
-  // Clear config when chat profile changes to force re-fetch
-  useEffect(() => {
-    if (prevChatProfileRef.current !== chatProfile) {
-      setConfig(undefined);
-      prevChatProfileRef.current = chatProfile;
-    }
-  }, [chatProfile, setConfig]);
 
   return { config, error, isLoading, language };
 };
