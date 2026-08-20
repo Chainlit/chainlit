@@ -153,7 +153,7 @@ async def set_chat_profile(name: "str | None") -> bool:
         try:
             await data_layer.update_thread(
                 thread_id=session.thread_id,
-                metadata={"chat_profile": session.chat_profile},
+                metadata=session.to_persistable(),
                 tags=(
                     [session.chat_profile]
                     if (global_config.features.auto_tag_thread and session.chat_profile)
