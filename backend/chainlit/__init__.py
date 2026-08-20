@@ -148,36 +148,40 @@ async def set_chat_profile(name: "str | None") -> bool:
     if not isinstance(session, WebsocketSession):
         return False
 
-    ok = await session.set_chat_profile(name)
-    if not ok:
-        return False
+    async with session._profile_lock:
+        ok = await session.set_chat_profile(name)
+        if not ok:
+            return False
 
-    data_layer = get_data_layer()
-    if data_layer and session.has_first_interaction and session.thread_id:
+        data_layer = get_data_layer()
+        if data_layer and session.has_first_interaction and session.thread_id:
+            try:
+                await data_layer.update_thread(
+                    thread_id=session.thread_id,
+                    metadata=session.to_persistable(),
+                    tags=(
+                        [session.chat_profile]
+                        if (
+                            global_config.features.auto_tag_thread
+                            and session.chat_profile
+                        )
+                        else []
+                        if global_config.features.auto_tag_thread
+                        else None
+                    ),
+                )
+            except Exception as e:
+                logger.warning(f"Failed to persist hot-swapped chat profile: {e}")
+
         try:
-            await data_layer.update_thread(
-                thread_id=session.thread_id,
-                metadata=session.to_persistable(),
-                tags=(
-                    [session.chat_profile]
-                    if (global_config.features.auto_tag_thread and session.chat_profile)
-                    else []
-                    if global_config.features.auto_tag_thread
-                    else None
-                ),
+            await context.emitter.emit(
+                "chat_profile_updated",
+                {"chatProfile": session.chat_profile, "ok": True},
             )
-        except Exception as e:
-            logger.warning(f"Failed to persist hot-swapped chat profile: {e}")
+        except Exception:
+            pass
 
-    try:
-        await context.emitter.emit(
-            "chat_profile_updated",
-            {"chatProfile": session.chat_profile, "ok": True},
-        )
-    except Exception:
-        pass
-
-    return True
+        return True
 
 
 @dataclass()

@@ -92,16 +92,10 @@ def clean_metadata(metadata: Dict, max_size: int = 1048576):
     metadata_size = len(json.dumps(cleaned_metadata).encode("utf-8"))
     if metadata_size > max_size:
         # Redact the metadata if it exceeds the maximum size
-        chat_settings = metadata.get("chat_settings")
+        chat_settings = cleaned_metadata.get("chat_settings")
         if chat_settings:
             try:
-                settings_size = len(
-                    json.dumps(
-                        chat_settings,
-                        cls=JSONEncoderIgnoreNonSerializable,
-                        ensure_ascii=False,
-                    ).encode("utf-8")
-                )
+                settings_size = len(json.dumps(chat_settings).encode("utf-8"))
                 if settings_size > max_size // 2:
                     chat_settings = None
             except Exception:
@@ -109,9 +103,9 @@ def clean_metadata(metadata: Dict, max_size: int = 1048576):
 
         cleaned_metadata = {
             "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted.",
-            "chat_profile": metadata.get("chat_profile"),
+            "chat_profile": cleaned_metadata.get("chat_profile"),
             "chat_settings": chat_settings,
-            "client_type": metadata.get("client_type"),
+            "client_type": cleaned_metadata.get("client_type"),
         }
 
     return cleaned_metadata

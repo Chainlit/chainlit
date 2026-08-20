@@ -278,17 +278,16 @@ async def set_chat_profile(sid, payload: Dict[str, Any]):
     new_profile: Optional[str] = payload["chatProfile"]
     from chainlit import set_chat_profile as cl_set_chat_profile
 
-    async with session._profile_lock:
-        ok = await cl_set_chat_profile(new_profile)
-        if not ok:
-            await context.emitter.send_toast(
-                f"Unknown chat profile: {new_profile}", type="error"
-            )
-            await context.emitter.emit(
-                "chat_profile_updated",
-                {"chatProfile": session.chat_profile, "ok": False},
-            )
-            return
+    ok = await cl_set_chat_profile(new_profile)
+    if not ok:
+        await context.emitter.send_toast(
+            f"Unknown chat profile: {new_profile}", type="error"
+        )
+        await context.emitter.emit(
+            "chat_profile_updated",
+            {"chatProfile": session.chat_profile, "ok": False},
+        )
+        return
 
 
 @sio.on("disconnect")  # pyright: ignore [reportOptionalCall]
