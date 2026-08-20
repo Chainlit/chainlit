@@ -298,10 +298,10 @@ async def set_chat_profile(sid, payload: Dict[str, Any]):
     ):
         try:
             await persist_user_session(session.thread_id, session.to_persistable())
-            if config.features.auto_tag_thread and new_profile:
+            if config.features.auto_tag_thread:
                 await data_layer.update_thread(
                     thread_id=session.thread_id,
-                    tags=[new_profile],
+                    tags=[new_profile] if new_profile else [],
                 )
         except Exception as e:
             logger.warning(f"Failed to persist hot-swapped chat profile: {e}")
