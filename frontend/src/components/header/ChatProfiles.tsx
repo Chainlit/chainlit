@@ -74,7 +74,12 @@ export default function ChatProfiles({ navigate }: Props) {
 
   const handleConfirm = (profile: string) => {
     if (hotSwapEnabled) {
-      hotSwapChatProfile(profile);
+      if (!hotSwapChatProfile(profile)) {
+        setChatProfile(profile);
+        setAttachments([]);
+        clear();
+        handleClose();
+      }
       setNewChatProfile(null);
       setOpenDialog(false);
       return;
