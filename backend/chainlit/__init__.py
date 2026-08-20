@@ -157,6 +157,8 @@ async def set_chat_profile(name: "str | None") -> bool:
                 tags=(
                     [session.chat_profile]
                     if (global_config.features.auto_tag_thread and session.chat_profile)
+                    else []
+                    if global_config.features.auto_tag_thread
                     else None
                 ),
             )
