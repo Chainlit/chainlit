@@ -92,10 +92,25 @@ def clean_metadata(metadata: Dict, max_size: int = 1048576):
     metadata_size = len(json.dumps(cleaned_metadata).encode("utf-8"))
     if metadata_size > max_size:
         # Redact the metadata if it exceeds the maximum size
+        chat_settings = metadata.get("chat_settings")
+        if chat_settings:
+            try:
+                settings_size = len(
+                    json.dumps(
+                        chat_settings,
+                        cls=JSONEncoderIgnoreNonSerializable,
+                        ensure_ascii=False,
+                    ).encode("utf-8")
+                )
+                if settings_size > max_size // 2:
+                    chat_settings = None
+            except Exception:
+                chat_settings = None
+
         cleaned_metadata = {
             "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted.",
             "chat_profile": metadata.get("chat_profile"),
-            "chat_settings": metadata.get("chat_settings"),
+            "chat_settings": chat_settings,
             "client_type": metadata.get("client_type"),
         }
 
@@ -329,6 +344,7 @@ class WebsocketSession(BaseSession):
         self.language = match.group(1) if match else "en-US"
 
         self.config: ChainlitConfig = self.get_config()
+        self._profile_lock = asyncio.Lock()
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
@@ -373,19 +389,21 @@ class WebsocketSession(BaseSession):
         from chainlit.config import config as global_config
         from chainlit.user_session import user_sessions
 
+        if new_profile == "":
+            return False
+
         profiles = None
-        if new_profile:
+        if new_profile is not None:
             if not global_config.code.set_chat_profiles:
                 return False
             try:
                 profiles = await global_config.code.set_chat_profiles(
                     self.user, self.language
                 )
-            except Exception:
+            except Exception as e:
+                logger.error(f"Error in set_chat_profiles callback: {e}")
                 return False
-            if profiles is None or not any(
-                p.name == new_profile for p in profiles
-            ):
+            if profiles is None or not any(p.name == new_profile for p in profiles):
                 return False
 
         if new_profile == self.chat_profile:

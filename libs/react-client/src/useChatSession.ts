@@ -85,6 +85,7 @@ const useChatSession = () => {
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const chatProfileRef = useRef(chatProfile);
+  const ackChatProfileRef = useRef(chatProfile);
   useEffect(() => {
     chatProfileRef.current = chatProfile;
   }, [chatProfile]);
@@ -146,6 +147,7 @@ const useChatSession = () => {
       });
 
       socket.on('connect', () => {
+        ackChatProfileRef.current = chatProfileRef.current;
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
         socket.emit('fetch_favorites');
@@ -280,6 +282,7 @@ const useChatSession = () => {
         }
         if (thread.metadata?.chat_profile) {
           setChatProfile(thread.metadata?.chat_profile);
+          ackChatProfileRef.current = thread.metadata?.chat_profile;
         }
         if (thread.metadata?.chat_settings) {
           setChatSettingsValue(thread.metadata?.chat_settings);
@@ -302,14 +305,14 @@ const useChatSession = () => {
 
       const stampChatProfile = (message: IStep): IStep => {
         const existing = message?.metadata?.chat_profile;
-        if (existing || !chatProfileRef.current) {
+        if (existing || !ackChatProfileRef.current) {
           return message;
         }
         return {
           ...message,
           metadata: {
             ...(message.metadata || {}),
-            chat_profile: chatProfileRef.current
+            chat_profile: ackChatProfileRef.current
           }
         };
       };
@@ -328,9 +331,8 @@ const useChatSession = () => {
       );
 
       socket.on('update_message', (message: IStep) => {
-        const stamped = stampChatProfile(message);
         setMessages((oldMessages) =>
-          updateMessageById(oldMessages, stamped.id, stamped)
+          updateMessageById(oldMessages, message.id, message)
         );
       });
 
@@ -497,6 +499,7 @@ const useChatSession = () => {
         (data: { chatProfile: string | null; ok: boolean }) => {
           if (data && typeof data.chatProfile !== 'undefined') {
             setChatProfile(data.chatProfile ?? undefined);
+            ackChatProfileRef.current = data.chatProfile ?? undefined;
           }
         }
       );

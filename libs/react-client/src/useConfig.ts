@@ -26,7 +26,12 @@ const useConfig = () => {
     }
   }, [data, error, setConfig]);
 
-  return { config: data ?? config, error, isLoading, language };
+  return {
+    config: isLoading ? undefined : (data ?? config),
+    error,
+    isLoading,
+    language
+  };
 };
 
 export { useConfig };
