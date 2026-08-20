@@ -552,7 +552,7 @@ const useChatSession = () => {
    */
   const hotSwapChatProfile = useCallback(
     (name: string | null) => {
-      if (!session?.socket) {
+      if (!session?.socket?.connected) {
         return false;
       }
       // Optimistically update local state so dependent UI (avatars, starters,
