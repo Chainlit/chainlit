@@ -30,6 +30,7 @@ from chainlit.step import step
 TASKMARKET_API_BASE = "https://api.taskmarket.dev/api"
 DEFAULT_MAX_SPEND = float(os.environ.get("TASKMARKET_MAX_SPEND", "5.0"))
 DEFAULT_AUTH_TTL_SECONDS = 300
+MAX_AUTH_TOKENS = 100
 HTTP_TIMEOUT_SECONDS = 45.0
 CLI_TIMEOUT_SECONDS = 120
 
@@ -105,12 +106,27 @@ class TaskmarketTool:
         """
         if reward <= 0:
             return "REFUSED: reward must be > 0 USDC."
-        ttl = ttl_seconds or self.auth_ttl_seconds
+        ttl = self.auth_ttl_seconds if ttl_seconds is None else ttl_seconds
+        if ttl <= 0:
+            return "REFUSED: authorization TTL must be > 0 seconds."
+        # Prune expired/used tokens before adding, so a long-lived tool
+        # instance never accumulates an unbounded authorization registry.
+        now = time.monotonic()
+        for tok, rec in list(self._auth_tokens.items()):
+            if rec["used"] or rec["expires_at"] <= now:
+                del self._auth_tokens[tok]
+        if len(self._auth_tokens) >= MAX_AUTH_TOKENS:
+            return (
+                f"REFUSED: too many outstanding authorization tokens "
+                f"({len(self._auth_tokens)}). Wait for existing tokens to "
+                "expire or use them before requesting another."
+            )
         token = "tm-" + secrets.token_urlsafe(24)
         self._auth_tokens[token] = {
             "reward": reward,
-            "expires_at": time.monotonic() + ttl,
+            "expires_at": now + ttl,
             "used": False,
+            "session_id": self._session_id(),
         }
         return json.dumps(
             {
@@ -277,6 +293,15 @@ class TaskmarketTool:
                 "by request_authorization (or the tool was re-created). "
                 "Nothing was created."
             )
+        if (
+            record.get("session_id") is not None
+            and record["session_id"] != self._session_id()
+        ):
+            return (
+                "REFUSED: authorization token was issued in a different "
+                "chat session and cannot be used here. Request a fresh "
+                "token from this session. Nothing was created."
+            )
         if record["used"]:
             return (
                 "REFUSED: authorization token already used exactly once. "
@@ -327,6 +352,7 @@ class TaskmarketTool:
             "--task-visibility",
             task_visibility,
         ]
+        proc = None
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd,
@@ -337,6 +363,12 @@ class TaskmarketTool:
                 proc.communicate(), timeout=CLI_TIMEOUT_SECONDS
             )
         except asyncio.TimeoutError:
+            # Terminate and reap the hung subprocess before returning, so
+            # timed-out CLI commands cannot accumulate or keep running
+            # unattended after the create command was issued.
+            if proc is not None and proc.returncode is None:
+                proc.kill()
+                await proc.wait()
             return _unknown_result(
                 "CLI exceeded the timeout after the create command was "
                 "issued. Settlement status is UNKNOWN -- reconcile through "

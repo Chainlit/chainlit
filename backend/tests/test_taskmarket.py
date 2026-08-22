@@ -55,6 +55,15 @@ def mock_get_json(monkeypatch):
     return fake_get_json
 
 
+@pytest.fixture
+def mock_taskmarket_cli(monkeypatch):
+    """Pretend the taskmarket CLI binary exists so the settlement path is
+    exercised even on machines/CI without the real CLI installed."""
+    monkeypatch.setattr(
+        "chainlit.taskmarket.shutil.which", lambda _name: "/usr/bin/taskmarket"
+    )
+
+
 def test_instantiation():
     tool = TaskmarketTool()
     assert tool.max_spend > 0
@@ -62,242 +71,325 @@ def test_instantiation():
 
 
 @pytest.mark.asyncio
-async def test_list_tasks_mocked(mock_get_json):
-    tool = TaskmarketTool()
-    out = await tool.list_tasks(status="open", limit=2)
-    tasks = json.loads(out)
-    assert isinstance(tasks, list)
-    assert len(tasks) == 2
-    assert tasks[0]["id"] == FAKE_TASK_ID
-    assert tasks[0]["rewardUSDC"] == 2.0
+async def test_list_tasks_mocked(mock_chainlit_context, mock_get_json):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        out = await tool.list_tasks(status="open", limit=2)
+        tasks = json.loads(out)
+        assert isinstance(tasks, list)
+        assert len(tasks) == 2
+        assert tasks[0]["id"] == FAKE_TASK_ID
+        assert tasks[0]["rewardUSDC"] == 2.0
 
 
 @pytest.mark.asyncio
-async def test_get_task_mocked(mock_get_json):
-    tool = TaskmarketTool()
-    detail = json.loads(await tool.get_task(FAKE_TASK_ID))
-    assert detail["status"] == "open"
-    assert detail["rewardUSDC"] == 5.0
+async def test_get_task_mocked(mock_chainlit_context, mock_get_json):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        detail = json.loads(await tool.get_task(FAKE_TASK_ID))
+        assert detail["status"] == "open"
+        assert detail["rewardUSDC"] == 5.0
 
 
 @pytest.mark.asyncio
-async def test_list_submissions_is_read_only(mock_get_json):
-    tool = TaskmarketTool()
-    subs = json.loads(await tool.list_submissions(FAKE_TASK_ID))
-    assert len(subs) == 1
-    assert subs[0]["id"] == "sub-1"
-    assert subs[0]["rejectedAt"] is None
+async def test_list_submissions_is_read_only(mock_chainlit_context, mock_get_json):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        subs = json.loads(await tool.list_submissions(FAKE_TASK_ID))
+        assert len(subs) == 1
+        assert subs[0]["id"] == "sub-1"
+        assert subs[0]["rejectedAt"] is None
 
 
 @pytest.mark.asyncio
-async def test_create_task_refuses_without_token():
-    tool = TaskmarketTool()
-    out = await tool.create_task(description="test", reward=1.0, duration_hours=24)
-    assert out.startswith("REFUSED")
-    assert "request_authorization" in out
-    assert "Nothing was created" in out
+async def test_create_task_refuses_without_token(mock_chainlit_context):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        out = await tool.create_task(description="test", reward=1.0, duration_hours=24)
+        assert out.startswith("REFUSED")
+        assert "request_authorization" in out
+        assert "Nothing was created" in out
 
 
 @pytest.mark.asyncio
-async def test_create_task_refuses_unknown_token():
-    tool = TaskmarketTool()
-    out = await tool.create_task(
-        description="test",
-        reward=1.0,
-        duration_hours=24,
-        authorization_token="tm-forged",
-    )
-    assert out.startswith("REFUSED")
-    assert "unknown authorization token" in out
+async def test_create_task_refuses_unknown_token(mock_chainlit_context):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        out = await tool.create_task(
+            description="test",
+            reward=1.0,
+            duration_hours=24,
+            authorization_token="tm-forged",
+        )
+        assert out.startswith("REFUSED")
+        assert "unknown authorization token" in out
 
 
 @pytest.mark.asyncio
-async def test_token_lifecycle_single_use(monkeypatch):
-    tool = TaskmarketTool()
-    token_payload = json.loads(await tool.request_authorization(reward=1.0))
-    token = token_payload["authorizationToken"]
-    assert token.startswith("tm-")
+async def test_token_lifecycle_single_use(
+    mock_chainlit_context, mock_taskmarket_cli, monkeypatch
+):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        token_payload = json.loads(await tool.request_authorization(reward=1.0))
+        token = token_payload["authorizationToken"]
+        assert token.startswith("tm-")
 
-    # Mock the CLI subprocess so no real money moves.
-    class FakeProc:
-        returncode = 0
+        # Mock the CLI subprocess so no real money moves.
+        class FakeProc:
+            returncode = 0
 
-        async def communicate(self):
-            return (
-                f"created task {FAKE_TASK_ID} ok".encode(),
-                b"",
+            async def communicate(self):
+                return (
+                    f"created task {FAKE_TASK_ID} ok".encode(),
+                    b"",
+                )
+
+        async def fake_spawn(*args, **kwargs):
+            return FakeProc()
+
+        async def fake_get_json(url, timeout=45.0):
+            return FIXTURE_TASK
+
+        monkeypatch.setattr(
+            "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
+        )
+        monkeypatch.setattr("chainlit.taskmarket._get_json", fake_get_json)
+
+        first = json.loads(
+            await tool.create_task(
+                description="test task",
+                reward=1.0,
+                duration_hours=24,
+                authorization_token=token,
             )
+        )
+        assert first["created"] is True
+        assert first["taskId"] == FAKE_TASK_ID
 
-    async def fake_spawn(*args, **kwargs):
-        return FakeProc()
-
-    async def fake_get_json(url, timeout=45.0):
-        return FIXTURE_TASK
-
-    monkeypatch.setattr(
-        "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
-    )
-    monkeypatch.setattr("chainlit.taskmarket._get_json", fake_get_json)
-
-    first = json.loads(
-        await tool.create_task(
+        # Single-use: a second execution must refuse.
+        second = await tool.create_task(
             description="test task",
             reward=1.0,
             duration_hours=24,
             authorization_token=token,
         )
-    )
-    assert first["created"] is True
-    assert first["taskId"] == FAKE_TASK_ID
-
-    # Single-use: a second execution must refuse.
-    second = await tool.create_task(
-        description="test task",
-        reward=1.0,
-        duration_hours=24,
-        authorization_token=token,
-    )
-    assert second.startswith("REFUSED")
-    assert "already used" in second
+        assert second.startswith("REFUSED")
+        assert "already used" in second
 
 
 @pytest.mark.asyncio
-async def test_create_task_refuses_expired_token():
-    tool = TaskmarketTool()
-    token = json.loads(await tool.request_authorization(reward=1.0))[
-        "authorizationToken"
-    ]
-    tool._auth_tokens[token]["expires_at"] = 0  # expire immediately
-    out = await tool.create_task(
-        description="test",
-        reward=1.0,
-        duration_hours=24,
-        authorization_token=token,
-    )
-    assert out.startswith("REFUSED")
-    assert "expired" in out
+async def test_create_task_refuses_expired_token(mock_chainlit_context):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        token = json.loads(await tool.request_authorization(reward=1.0))[
+            "authorizationToken"
+        ]
+        tool._auth_tokens[token]["expires_at"] = 0  # expire immediately
+        out = await tool.create_task(
+            description="test",
+            reward=1.0,
+            duration_hours=24,
+            authorization_token=token,
+        )
+        assert out.startswith("REFUSED")
+        assert "expired" in out
 
 
 @pytest.mark.asyncio
-async def test_create_task_refuses_reward_mismatch():
-    tool = TaskmarketTool()
-    token = json.loads(await tool.request_authorization(reward=1.0))[
-        "authorizationToken"
-    ]
-    out = await tool.create_task(
-        description="test",
-        reward=2.0,
-        duration_hours=24,
-        authorization_token=token,
-    )
-    assert out.startswith("REFUSED")
-    assert "bound to reward" in out
+async def test_create_task_refuses_reward_mismatch(mock_chainlit_context):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        token = json.loads(await tool.request_authorization(reward=1.0))[
+            "authorizationToken"
+        ]
+        out = await tool.create_task(
+            description="test",
+            reward=2.0,
+            duration_hours=24,
+            authorization_token=token,
+        )
+        assert out.startswith("REFUSED")
+        assert "bound to reward" in out
 
 
 @pytest.mark.asyncio
-async def test_create_task_unknown_when_cli_times_out(monkeypatch):
-    tool = TaskmarketTool()
-    token = json.loads(await tool.request_authorization(reward=1.0))[
-        "authorizationToken"
-    ]
+async def test_create_task_unknown_when_cli_times_out(
+    mock_chainlit_context, mock_taskmarket_cli, monkeypatch
+):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        token = json.loads(await tool.request_authorization(reward=1.0))[
+            "authorizationToken"
+        ]
 
-    async def fake_spawn(*args, **kwargs):
+        hung_proc = {}
+
         class HungProc:
             returncode = None
+            killed = False
 
             async def communicate(self):
                 await asyncio.sleep(999)
 
-        return HungProc()
+            def kill(self):
+                self.killed = True
+                self.returncode = -9
 
-    async def fake_wait_for(coro, timeout):
-        # Simulate the wait_for timeout WITHOUT awaiting the hung coro.
-        raise asyncio.TimeoutError
+            async def wait(self):
+                return self.returncode
 
-    monkeypatch.setattr(
-        "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
-    )
-    monkeypatch.setattr("chainlit.taskmarket.asyncio.wait_for", fake_wait_for)
+        async def fake_spawn(*args, **kwargs):
+            hung_proc["proc"] = HungProc()
+            return hung_proc["proc"]
 
-    out = json.loads(
-        await tool.create_task(
-            description="test",
-            reward=1.0,
-            duration_hours=24,
-            authorization_token=token,
+        async def fake_wait_for(coro, timeout):
+            # Simulate the wait_for timeout WITHOUT awaiting the hung coro.
+            coro.close()
+            raise asyncio.TimeoutError
+
+        monkeypatch.setattr(
+            "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
         )
-    )
-    assert out["created"] == "unknown"
-    assert "UNKNOWN" in out["message"]
+        monkeypatch.setattr("chainlit.taskmarket.asyncio.wait_for", fake_wait_for)
+
+        out = json.loads(
+            await tool.create_task(
+                description="test",
+                reward=1.0,
+                duration_hours=24,
+                authorization_token=token,
+            )
+        )
+        assert out["created"] == "unknown"
+        assert "UNKNOWN" in out["message"]
+        # P1: a timed-out CLI process must be killed and reaped, not leaked.
+        assert hung_proc["proc"].killed is True
+        assert hung_proc["proc"].returncode == -9
 
 
 @pytest.mark.asyncio
-async def test_create_task_unknown_when_output_unrecognized(monkeypatch):
-    tool = TaskmarketTool()
-    token = json.loads(await tool.request_authorization(reward=1.0))[
-        "authorizationToken"
-    ]
+async def test_create_task_unknown_when_output_unrecognized(
+    mock_chainlit_context, mock_taskmarket_cli, monkeypatch
+):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        token = json.loads(await tool.request_authorization(reward=1.0))[
+            "authorizationToken"
+        ]
 
-    class FakeProc:
-        returncode = 0
+        class FakeProc:
+            returncode = 0
 
-        async def communicate(self):
-            return b"all done, no id here", b""
+            async def communicate(self):
+                return b"all done, no id here", b""
 
-    async def fake_spawn(*args, **kwargs):
-        return FakeProc()
+        async def fake_spawn(*args, **kwargs):
+            return FakeProc()
 
-    monkeypatch.setattr(
-        "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
-    )
-
-    out = json.loads(
-        await tool.create_task(
-            description="test",
-            reward=1.0,
-            duration_hours=24,
-            authorization_token=token,
+        monkeypatch.setattr(
+            "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
         )
-    )
-    assert out["created"] == "unknown"
-    assert out["cliOutput"] == "all done, no id here"
+
+        out = json.loads(
+            await tool.create_task(
+                description="test",
+                reward=1.0,
+                duration_hours=24,
+                authorization_token=token,
+            )
+        )
+        assert out["created"] == "unknown"
+        assert out["cliOutput"] == "all done, no id here"
 
 
 @pytest.mark.asyncio
-async def test_create_task_returns_id_when_status_lookup_fails(monkeypatch):
-    tool = TaskmarketTool()
-    token = json.loads(await tool.request_authorization(reward=1.0))[
-        "authorizationToken"
-    ]
+async def test_create_task_returns_id_when_status_lookup_fails(
+    mock_chainlit_context, mock_taskmarket_cli, monkeypatch
+):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        token = json.loads(await tool.request_authorization(reward=1.0))[
+            "authorizationToken"
+        ]
 
-    class FakeProc:
-        returncode = 0
+        class FakeProc:
+            returncode = 0
 
-        async def communicate(self):
-            return f"created task {FAKE_TASK_ID} ok".encode(), b""
+            async def communicate(self):
+                return f"created task {FAKE_TASK_ID} ok".encode(), b""
 
-    async def fake_spawn(*args, **kwargs):
-        return FakeProc()
+        async def fake_spawn(*args, **kwargs):
+            return FakeProc()
 
-    async def fake_get_json(url, timeout=45.0):
-        raise RuntimeError("status endpoint down")
+        async def fake_get_json(url, timeout=45.0):
+            raise RuntimeError("status endpoint down")
 
-    monkeypatch.setattr(
-        "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
-    )
-    monkeypatch.setattr("chainlit.taskmarket._get_json", fake_get_json)
+        monkeypatch.setattr(
+            "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
+        )
+        monkeypatch.setattr("chainlit.taskmarket._get_json", fake_get_json)
 
-    out = json.loads(
-        await tool.create_task(
+        out = json.loads(
+            await tool.create_task(
+                description="test",
+                reward=1.0,
+                duration_hours=24,
+                authorization_token=token,
+            )
+        )
+        assert out["created"] is True
+        assert out["taskId"] == FAKE_TASK_ID
+        assert out["statusUnavailable"] is True
+
+
+@pytest.mark.asyncio
+async def test_create_task_refuses_token_issued_in_other_session(
+    mock_chainlit_context, mock_taskmarket_cli, monkeypatch
+):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        token = json.loads(await tool.request_authorization(reward=1.0))[
+            "authorizationToken"
+        ]
+        # Token was issued in session "test_session_id"; bind it to a
+        # different session and confirm create_task refuses to use it.
+        tool._auth_tokens[token]["session_id"] = "some-other-session"
+
+        class FakeProc:
+            returncode = 0
+
+            async def communicate(self):
+                return f"created task {FAKE_TASK_ID} ok".encode(), b""
+
+        async def fake_spawn(*args, **kwargs):
+            return FakeProc()
+
+        monkeypatch.setattr(
+            "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
+        )
+
+        out = await tool.create_task(
             description="test",
             reward=1.0,
             duration_hours=24,
             authorization_token=token,
         )
-    )
-    assert out["created"] is True
-    assert out["taskId"] == FAKE_TASK_ID
-    assert out["statusUnavailable"] is True
+        assert out.startswith("REFUSED")
+        assert "different" in out
+        assert "session" in out
+
+
+@pytest.mark.asyncio
+async def test_request_authorization_rejects_nonpositive_ttl(mock_chainlit_context):
+    async with mock_chainlit_context:
+        tool = TaskmarketTool()
+        out = await tool.request_authorization(reward=1.0, ttl_seconds=0)
+        assert out.startswith("REFUSED")
+        assert "TTL" in out
+        # None still falls back to the default lifetime.
+        default = json.loads(await tool.request_authorization(reward=1.0))
+        assert default["expiresInSeconds"] == tool.auth_ttl_seconds
 
 
 def test_extract_task_id():
