@@ -186,7 +186,13 @@ function satisfies(versionStr, rangeStr) {
 function lastParentSeparator(selector) {
   let last = -1;
   for (let i = 0; i < selector.length; i += 1) {
-    if (selector[i] === '>' && selector[i + 1] !== '=') {
+    if (selector[i] !== '>' || selector[i + 1] === '=') {
+      continue;
+    }
+    const next = selector[i + 1] ?? '';
+    // pnpm parent selectors are `foo>bar` / `foo@1>bar`. A `>` after `@`
+    // followed by a version digit is a comparator (`foo@>1.0.0`).
+    if (next === '@' || /[A-Za-z]/.test(next)) {
       last = i;
     }
   }
@@ -196,7 +202,10 @@ function lastParentSeparator(selector) {
 function parseSelector(selector) {
   const trimmed = selector.trim();
   const gt = lastParentSeparator(trimmed);
-  const pkg = gt === -1 ? trimmed : trimmed.slice(gt + 1);
+  if (gt !== -1) {
+    return { name: null, range: '*', parentScoped: true };
+  }
+  const pkg = trimmed;
   if (pkg.startsWith('@')) {
     const at = pkg.indexOf('@', 1);
     if (at === -1) {
@@ -257,12 +266,20 @@ function assertRangeParseable(range, label) {
     !comparators.length ||
     comparators.some((c) => c.op !== '*' && !c.version)
   ) {
-    throw new Error(`Cannot parse ${label}: ${range}`);
+    throw new Error(
+      `Cannot parse ${label}: ${range}. Only *, x, and simple comparators (>, >=, <, <=, =, and space-AND / ||-OR lists) are supported.`
+    );
   }
 }
 
 function checkOverride(lockfilePath, selector, target, versionsByName) {
-  const { name, range: selectorRange } = parseSelector(selector);
+  const parsed = parseSelector(selector);
+  if (parsed.parentScoped) {
+    return [
+      `${lockfilePath}: parent-scoped override "${selector}" is not supported; use a package selector such as "ws@>=8.0.0"`
+    ];
+  }
+  const { name, range: selectorRange } = parsed;
   assertRangeParseable(target, `target of ${selector}`);
   if (selectorRange && selectorRange !== '*') {
     assertRangeParseable(selectorRange, `selector ${selector}`);
@@ -270,20 +287,18 @@ function checkOverride(lockfilePath, selector, target, versionsByName) {
 
   const versions = [...(versionsByName.get(name) ?? [])].sort();
   const problems = [];
+  const unscoped = !selectorRange || selectorRange === '*';
 
   for (const version of versions) {
-    const inSelector =
-      selectorRange && selectorRange !== '*'
-        ? satisfies(version, selectorRange)
-        : false;
+    const inSelector = unscoped ? true : satisfies(version, selectorRange);
     const inTarget = satisfies(version, target);
 
-    if (inSelector) {
+    if (inSelector && unscoped === false) {
       problems.push(
         `${lockfilePath}: ${name}@${version} is still in the selector range of "${selector}" (override did not apply)`
       );
     }
-    if (!inTarget) {
+    if (inSelector && !inTarget) {
       problems.push(
         `${lockfilePath}: ${name}@${version} does not satisfy override target "${target}" from "${selector}"`
       );
@@ -360,9 +375,14 @@ function selfTest() {
     name: 'ws',
     range: '>=8.17.1 <8.21.0'
   });
-  assert.deepEqual(parseSelector('@adobe/css-tools@<4.3.2'), {
-    name: '@adobe/css-tools',
-    range: '<4.3.2'
+  assert.deepEqual(parseSelector('ws@>1.0.0'), {
+    name: 'ws',
+    range: '>1.0.0'
+  });
+  assert.deepEqual(parseSelector('foo>bar'), {
+    name: null,
+    range: '*',
+    parentScoped: true
   });
 
   const leftover = checkOverride(
@@ -380,6 +400,34 @@ function selfTest() {
     new Map([['ws', new Set(['8.18.0'])]])
   );
   assert.equal(applied.length, 0, 'applied unbounded ws pin should pass');
+
+  const disjoint = checkOverride(
+    'frontend/pnpm-lock.yaml',
+    'ws@>=8.17.1 <8.21.0',
+    '>=8.21.0 <9.0.0',
+    new Map([['ws', new Set(['8.11.0'])]])
+  );
+  assert.equal(
+    disjoint.length,
+    0,
+    'versions outside a version-scoped selector must not be required to match the target'
+  );
+
+  const parent = checkOverride(
+    'frontend/pnpm-lock.yaml',
+    'engine.io-client>ws',
+    '>=8.21.0',
+    new Map([['ws', new Set(['8.18.0'])]])
+  );
+  assert.ok(
+    parent.some((msg) => msg.includes('parent-scoped')),
+    'parent-scoped overrides must be rejected instead of treated as package-wide'
+  );
+
+  assert.throws(
+    () => assertRangeParseable('^1.2.3', 'target'),
+    /simple comparators/
+  );
 }
 
 function main() {
