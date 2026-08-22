@@ -6,31 +6,52 @@ tool: discover open tasks, track live status, review submissions, and (with
 explicit authorization and a spend cap) create a funded task.
 
 Every method surfaces as a Chainlit ``Step(type="tool")`` so tool activity is
-visible in the chat UI. Reads hit the public Taskmarket REST API and need no
-wallet. The funded write path shells out to the official ``taskmarket`` CLI
-so wallet keys, the X402 USDC payment, legal acceptance, and idempotency are
-handled by first-party tooling -- this module never touches private keys,
-seed phrases, or tokens.
+visible in the chat UI. Reads hit the public Taskmarket REST API through an
+async HTTP client and need no wallet. The funded write path shells out to the
+official ``taskmarket`` CLI through an async subprocess so wallet keys, the
+X402 USDC payment, legal acceptance, and idempotency are handled by
+first-party tooling -- this module never touches private keys, seed phrases,
+or tokens.
 """
 
+import asyncio
 import json
 import os
+import secrets
 import shutil
-import subprocess
+import time
 import urllib.parse
-import urllib.request
 from typing import Any, Optional
+
+import httpx
 
 from chainlit.step import step
 
 TASKMARKET_API_BASE = "https://api.taskmarket.dev/api"
 DEFAULT_MAX_SPEND = float(os.environ.get("TASKMARKET_MAX_SPEND", "5.0"))
+DEFAULT_AUTH_TTL_SECONDS = 300
+HTTP_TIMEOUT_SECONDS = 45.0
+CLI_TIMEOUT_SECONDS = 120
 
 
-def _get_json(url: str, timeout: int = 45) -> Any:
-    req = urllib.request.Request(url, headers={"Accept": "application/json"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.load(resp)
+async def _get_json(url: str, timeout: float = HTTP_TIMEOUT_SECONDS) -> Any:
+    """Fetch a JSON body over async HTTP (never blocks the event loop)."""
+    async with httpx.AsyncClient(timeout=timeout) as client:
+        resp = await client.get(url)
+        resp.raise_for_status()
+        return resp.json()
+
+
+def _unknown_result(message: str, cli_output: Optional[str] = None) -> str:
+    """Build an explicit unknown-settlement result (never raises the ID away)."""
+    payload: dict[str, Any] = {
+        "created": "unknown",
+        "taskId": None,
+        "message": message,
+    }
+    if cli_output is not None:
+        payload["cliOutput"] = cli_output
+    return json.dumps(payload, indent=2)
 
 
 class TaskmarketTool:
@@ -40,6 +61,7 @@ class TaskmarketTool:
         api_base: Taskmarket REST base URL.
         max_spend: Hard cap (USDC) for any single funded task creation.
         cli_path: Path/name of the official ``taskmarket`` CLI.
+        auth_ttl_seconds: Lifetime of a generated authorization token.
     """
 
     def __init__(
@@ -47,10 +69,61 @@ class TaskmarketTool:
         api_base: str = TASKMARKET_API_BASE,
         max_spend: float = DEFAULT_MAX_SPEND,
         cli_path: str = "taskmarket",
+        auth_ttl_seconds: int = DEFAULT_AUTH_TTL_SECONDS,
     ) -> None:
         self.api_base = api_base.rstrip("/")
         self.max_spend = max_spend
         self.cli_path = cli_path
+        self.auth_ttl_seconds = auth_ttl_seconds
+        # token -> {"reward": float, "expires_at": float (monotonic), "used": bool}
+        self._auth_tokens: dict[str, dict[str, Any]] = {}
+
+    @staticmethod
+    def _session_id() -> Optional[str]:
+        """Best-effort Chainlit session id for token binding."""
+        try:
+            from chainlit.context import context
+
+            return getattr(getattr(context, "session", None), "id", None)
+        except Exception:
+            return None
+
+    @step(name="taskmarket_request_authorization", type="tool")
+    async def request_authorization(
+        self, reward: float, ttl_seconds: Optional[int] = None
+    ) -> str:
+        """Generate a fresh, time-limited, single-use authorization token.
+
+        The returned token is server-generated (random, unguessable), expires
+        after ``ttl_seconds`` (default ``auth_ttl_seconds``), is bound to the
+        exact reward, and can be used exactly once. Present it to the human
+        operator; ``create_task`` refuses to move money without it.
+
+        Args:
+            reward (float): The exact USDC reward the token authorizes.
+            ttl_seconds (int): Optional override for the token lifetime.
+        """
+        if reward <= 0:
+            return "REFUSED: reward must be > 0 USDC."
+        ttl = ttl_seconds or self.auth_ttl_seconds
+        token = "tm-" + secrets.token_urlsafe(24)
+        self._auth_tokens[token] = {
+            "reward": reward,
+            "expires_at": time.monotonic() + ttl,
+            "used": False,
+        }
+        return json.dumps(
+            {
+                "authorizationToken": token,
+                "rewardUSDC": reward,
+                "expiresInSeconds": ttl,
+                "note": (
+                    "Hand this token to the human operator. It is single-use "
+                    "and expires; create_task refuses without it."
+                ),
+            },
+            indent=2,
+        )
 
     @step(name="taskmarket_list_tasks", type="tool")
     async def list_tasks(
@@ -76,7 +149,7 @@ class TaskmarketTool:
         if mode:
             params["mode"] = mode
         qs = "&".join(f"{k}={urllib.parse.quote(str(v))}" for k, v in params.items())
-        data = _get_json(f"{self.api_base}/tasks?{qs}")
+        data = await _get_json(f"{self.api_base}/tasks?{qs}")
         tasks = data.get("tasks", [])
         rows = []
         for t in tasks[:limit]:
@@ -106,7 +179,7 @@ class TaskmarketTool:
             task_id (str): The full 64-hex Taskmarket task id
                 (e.g. 0x...). Fetch it from list_tasks if unsure.
         """
-        data = _get_json(f"{self.api_base}/tasks/{task_id}")
+        data = await _get_json(f"{self.api_base}/tasks/{task_id}")
         reward = data.get("reward", "0")
         try:
             usdc = round(int(reward) / 1_000_000, 6)
@@ -135,7 +208,7 @@ class TaskmarketTool:
         Args:
             task_id (str): The full 64-hex Taskmarket task id.
         """
-        data = _get_json(f"{self.api_base}/tasks/{task_id}/submissions")
+        data = await _get_json(f"{self.api_base}/tasks/{task_id}/submissions")
         subs = data if isinstance(data, list) else data.get("submissions", [])
         rows = []
         for s in subs:
@@ -160,24 +233,25 @@ class TaskmarketTool:
         reward: float,
         duration_hours: int,
         mode: str = "bounty",
-        authorization: Optional[str] = None,
+        authorization_token: Optional[str] = None,
         task_visibility: str = "public",
     ) -> str:
         """Create a funded Taskmarket task through the official CLI.
 
         SAFETY CONTRACT (enforced here, before any money moves):
+        - An authorization token generated by ``request_authorization`` is
+          required. Tokens are server-generated, time-limited, single-use,
+          and bound to the exact reward, so a caller cannot construct the
+          gate itself.
         - The exact cost (reward + platform fees, in USDC on Base) is
           computed and SURFACED below; if it exceeds ``self.max_spend`` the
           call refuses before invoking anything.
-        - ``authorization`` must be a fresh, explicit string supplied by the
-          caller (e.g. an operator or a separate approval step) confirming
-          the exact amount. No authorization string -> no payment.
         - The actual transfer is delegated to the first-party ``taskmarket``
-          CLI (wallet keys, X402 payment, legal acceptance, and idempotency
-          are the CLI's responsibility). This tool never stores or logs
-          private keys, seeds, or tokens.
-        - Result handling polls task status by id; it never blindly retries
-          a payment whose settlement status is unknown.
+          CLI through an async subprocess (wallet keys, X402 payment, legal
+          acceptance, and idempotency are the CLI's responsibility). This
+          tool never stores or logs private keys, seeds, or tokens.
+        - Result handling surfaces explicit unknown-settlement states instead
+          of raising or blind-retrying a payment whose status is unknown.
 
         Args:
             description (str): Full task description with deliverables and
@@ -186,23 +260,37 @@ class TaskmarketTool:
             duration_hours (int): Task duration in hours.
             mode (str): Task mode: bounty (default), claim, pitch, benchmark,
                 auction.
-            authorization (str): Fresh explicit authorization string. Must
-                include the exact reward amount, e.g. "authorize 5 USDC for
-                taskmarket task".
+            authorization_token (str): Single-use token from
+                ``request_authorization`` for the exact reward.
             task_visibility (str): public (default), unlisted, or private.
         """
-        if not authorization:
+        if not authorization_token:
             return (
-                "REFUSED: no authorization. create_task requires a fresh, "
-                "explicit authorization string confirming the exact reward "
-                f'amount (e.g. "authorize {reward} USDC for taskmarket '
-                'task"). Nothing was created.'
+                "REFUSED: no authorization token. Call request_authorization "
+                "first -- it issues a fresh, single-use, time-limited token "
+                "bound to the exact reward. Nothing was created."
             )
-        if authorization.strip() != f"authorize {reward} USDC for taskmarket task":
+        record = self._auth_tokens.get(authorization_token)
+        if record is None:
             return (
-                "REFUSED: authorization string must exactly match "
-                f'"authorize {reward} USDC for taskmarket task". '
+                "REFUSED: unknown authorization token. Token was not issued "
+                "by request_authorization (or the tool was re-created). "
                 "Nothing was created."
+            )
+        if record["used"]:
+            return (
+                "REFUSED: authorization token already used exactly once. "
+                "Request a fresh token. Nothing was created."
+            )
+        if time.monotonic() > record["expires_at"]:
+            return (
+                "REFUSED: authorization token expired. Request a fresh "
+                "token. Nothing was created."
+            )
+        if record["reward"] != reward:
+            return (
+                "REFUSED: authorization token is bound to reward "
+                f"{record['reward']} USDC, not {reward}. Nothing was created."
             )
         if reward <= 0:
             return "REFUSED: reward must be > 0 USDC. Nothing was created."
@@ -221,6 +309,9 @@ class TaskmarketTool:
                 "created."
             )
 
+        # Token passes every gate: burn it now so it cannot be reused.
+        self._auth_tokens[authorization_token]["used"] = True
+
         cmd = [
             self.cli_path,
             "task",
@@ -236,18 +327,44 @@ class TaskmarketTool:
             "--task-visibility",
             task_visibility,
         ]
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout_b, stderr_b = await asyncio.wait_for(
+                proc.communicate(), timeout=CLI_TIMEOUT_SECONDS
+            )
+        except asyncio.TimeoutError:
+            return _unknown_result(
+                "CLI exceeded the timeout after the create command was "
+                "issued. Settlement status is UNKNOWN -- reconcile through "
+                "'taskmarket inbox' / task get before any retry. Never "
+                "blindly retry a payment."
+            )
+        out = stdout_b.decode("utf-8", "replace").strip()
+        err = stderr_b.decode("utf-8", "replace").strip()
         if proc.returncode != 0:
             return (
-                "taskmarket task create failed (exit "
-                f"{proc.returncode}): {proc.stderr.strip() or proc.stdout.strip()}"
+                f"taskmarket task create failed (exit {proc.returncode}): {err or out}"
             )
 
-        out = proc.stdout.strip()
         task_id = self._extract_task_id(out)
+        if task_id is None:
+            return _unknown_result(
+                "CLI exited 0 but no task id was found in its output. "
+                "Settlement status is UNKNOWN -- reconcile through "
+                "'taskmarket inbox' before any retry.",
+                cli_output=out,
+            )
+
         live_status = None
-        if task_id:
+        status_unavailable = False
+        try:
             live_status = json.loads(await self.get_task(task_id))
+        except Exception:
+            status_unavailable = True
         return json.dumps(
             {
                 "created": True,
@@ -257,6 +374,7 @@ class TaskmarketTool:
                 ),
                 "cliOutput": out,
                 "liveStatus": live_status,
+                "statusUnavailable": status_unavailable,
             },
             indent=2,
         )
