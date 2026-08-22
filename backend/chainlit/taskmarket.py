@@ -31,6 +31,7 @@ TASKMARKET_API_BASE = "https://api.taskmarket.dev/api"
 DEFAULT_MAX_SPEND = float(os.environ.get("TASKMARKET_MAX_SPEND", "5.0"))
 DEFAULT_AUTH_TTL_SECONDS = 300
 MAX_AUTH_TOKENS = 100
+MAX_AUTH_TOKENS_PER_SCOPE = 10
 HTTP_TIMEOUT_SECONDS = 45.0
 CLI_TIMEOUT_SECONDS = 120
 
@@ -76,16 +77,25 @@ class TaskmarketTool:
         self.max_spend = max_spend
         self.cli_path = cli_path
         self.auth_ttl_seconds = auth_ttl_seconds
-        # token -> {"reward": float, "expires_at": float (monotonic), "used": bool}
+        # token -> {"reward": float, "expires_at": float (monotonic),
+        #          "used": bool, "scope": str (conversation thread id, or
+        #          "no-context" when no Chainlit context is available)}
         self._auth_tokens: dict[str, dict[str, Any]] = {}
 
     @staticmethod
-    def _session_id() -> Optional[str]:
-        """Best-effort Chainlit session id for token binding."""
+    def _thread_id() -> Optional[str]:
+        """Best-effort conversation thread id for token binding.
+
+        Unlike the raw session id, a thread id survives across requests:
+        websocket sessions keep their thread across reconnections, and
+        HTTP API callers pass the same ``threadId`` across requests.
+        Binding to it keeps tokens scoped to one conversation without
+        breaking the HTTP flow, where the session id changes per request.
+        """
         try:
             from chainlit.context import context
 
-            return getattr(getattr(context, "session", None), "id", None)
+            return getattr(getattr(context, "session", None), "thread_id", None)
         except Exception:
             return None
 
@@ -115,6 +125,19 @@ class TaskmarketTool:
         for tok, rec in list(self._auth_tokens.items()):
             if rec["used"] or rec["expires_at"] <= now:
                 del self._auth_tokens[tok]
+        scope = self._thread_id()
+        if scope is None:
+            scope = "no-context"
+        outstanding_for_scope = sum(
+            1 for rec in self._auth_tokens.values() if rec["scope"] == scope
+        )
+        if outstanding_for_scope >= MAX_AUTH_TOKENS_PER_SCOPE:
+            return (
+                f"REFUSED: this conversation already has "
+                f"{outstanding_for_scope} outstanding authorization tokens. "
+                "Wait for existing tokens to expire or use them before "
+                "requesting another."
+            )
         if len(self._auth_tokens) >= MAX_AUTH_TOKENS:
             return (
                 f"REFUSED: too many outstanding authorization tokens "
@@ -126,7 +149,7 @@ class TaskmarketTool:
             "reward": reward,
             "expires_at": now + ttl,
             "used": False,
-            "session_id": self._session_id(),
+            "scope": scope,
         }
         return json.dumps(
             {
@@ -293,14 +316,14 @@ class TaskmarketTool:
                 "by request_authorization (or the tool was re-created). "
                 "Nothing was created."
             )
-        if (
-            record.get("session_id") is not None
-            and record["session_id"] != self._session_id()
-        ):
+        current_scope = self._thread_id()
+        if current_scope is None:
+            current_scope = "no-context"
+        if record.get("scope") != current_scope:
             return (
                 "REFUSED: authorization token was issued in a different "
-                "chat session and cannot be used here. Request a fresh "
-                "token from this session. Nothing was created."
+                "conversation and cannot be used here. Request a fresh "
+                "token from this conversation. Nothing was created."
             )
         if record["used"]:
             return (

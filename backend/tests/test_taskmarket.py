@@ -344,7 +344,7 @@ async def test_create_task_returns_id_when_status_lookup_fails(
 
 
 @pytest.mark.asyncio
-async def test_create_task_refuses_token_issued_in_other_session(
+async def test_create_task_refuses_token_issued_in_other_conversation(
     mock_chainlit_context, mock_taskmarket_cli, monkeypatch
 ):
     async with mock_chainlit_context:
@@ -352,9 +352,9 @@ async def test_create_task_refuses_token_issued_in_other_session(
         token = json.loads(await tool.request_authorization(reward=1.0))[
             "authorizationToken"
         ]
-        # Token was issued in session "test_session_id"; bind it to a
-        # different session and confirm create_task refuses to use it.
-        tool._auth_tokens[token]["session_id"] = "some-other-session"
+        # Token was issued in thread "test_thread_id"; bind it to a
+        # different conversation thread and confirm create_task refuses.
+        tool._auth_tokens[token]["scope"] = "some-other-thread"
 
         class FakeProc:
             returncode = 0
@@ -377,7 +377,79 @@ async def test_create_task_refuses_token_issued_in_other_session(
         )
         assert out.startswith("REFUSED")
         assert "different" in out
-        assert "session" in out
+        assert "conversation" in out
+
+
+@pytest.mark.asyncio
+async def test_token_bound_to_thread_survives_session_id_change(
+    mock_chainlit_context, mock_taskmarket_cli, monkeypatch
+):
+    """HTTP API flow: each request gets a NEW session id but the SAME
+    thread id, so a token issued in request 1 must still be usable in
+    request 2. The binding must follow the thread, not the session id."""
+    async with mock_chainlit_context as ctx:
+        tool = TaskmarketTool()
+        token = json.loads(await tool.request_authorization(reward=1.0))[
+            "authorizationToken"
+        ]
+        assert tool._auth_tokens[token]["scope"] == "test_thread_id"
+        # Simulate a follow-up HTTP request: session.id changes, thread_id
+        # stays put. (The mock session's thread_id attribute is what
+        # _thread_id() reads; the raw session id is no longer consulted.)
+        ctx.session.id = "some-other-ephemeral-session-id"
+
+        class FakeProc:
+            returncode = 0
+
+            async def communicate(self):
+                return f"created task {FAKE_TASK_ID} ok".encode(), b""
+
+        async def fake_spawn(*args, **kwargs):
+            return FakeProc()
+
+        async def fake_get_json(url, timeout=45.0):
+            return FIXTURE_TASK
+
+        monkeypatch.setattr(
+            "chainlit.taskmarket.asyncio.create_subprocess_exec", fake_spawn
+        )
+        monkeypatch.setattr("chainlit.taskmarket._get_json", fake_get_json)
+
+        out = json.loads(
+            await tool.create_task(
+                description="test",
+                reward=1.0,
+                duration_hours=24,
+                authorization_token=token,
+            )
+        )
+        assert out["created"] is True
+        assert out["taskId"] == FAKE_TASK_ID
+
+
+@pytest.mark.asyncio
+async def test_request_authorization_per_conversation_cap(
+    mock_chainlit_context, mock_taskmarket_cli, monkeypatch
+):
+    """One conversation must not be able to exhaust the shared token cap
+    and starve every other conversation: per-scope cap applies first."""
+    from chainlit.taskmarket import MAX_AUTH_TOKENS, MAX_AUTH_TOKENS_PER_SCOPE
+
+    assert MAX_AUTH_TOKENS_PER_SCOPE < MAX_AUTH_TOKENS
+    async with mock_chainlit_context as ctx:
+        tool = TaskmarketTool()
+        for _ in range(MAX_AUTH_TOKENS_PER_SCOPE):
+            out = await tool.request_authorization(reward=1.0)
+            assert "REFUSED" not in out
+        # The (N+1)-th token for THIS conversation is refused...
+        out = await tool.request_authorization(reward=1.0)
+        assert out.startswith("REFUSED")
+        assert "this conversation" in out
+        # ...but a different conversation (different thread) can still
+        # obtain tokens while the first one is capped.
+        ctx.session.thread_id = "another-conversation"
+        out = await tool.request_authorization(reward=1.0)
+        assert "REFUSED" not in out
 
 
 @pytest.mark.asyncio
