@@ -189,10 +189,13 @@ function lastParentSeparator(selector) {
     if (selector[i] !== '>' || selector[i + 1] === '=') {
       continue;
     }
+    // `foo@>1.0.0` is a version comparator, not a parent selector.
+    if (i > 0 && selector[i - 1] === '@') {
+      continue;
+    }
     const next = selector[i + 1] ?? '';
-    // pnpm parent selectors are `foo>bar` / `foo@1>bar`. A `>` after `@`
-    // followed by a version digit is a comparator (`foo@>1.0.0`).
-    if (next === '@' || /[A-Za-z]/.test(next)) {
+    // pnpm parent selectors: `foo>bar`, `foo@1>bar`, `foo>@scope/pkg`, `foo>123`.
+    if (next === '@' || /[A-Za-z0-9]/.test(next)) {
       last = i;
     }
   }
@@ -380,6 +383,11 @@ function selfTest() {
     range: '>1.0.0'
   });
   assert.deepEqual(parseSelector('foo>bar'), {
+    name: null,
+    range: '*',
+    parentScoped: true
+  });
+  assert.deepEqual(parseSelector('foo>123'), {
     name: null,
     range: '*',
     parentScoped: true
