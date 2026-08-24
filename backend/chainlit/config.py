@@ -422,6 +422,9 @@ class CodeSettings(BaseModel):
     on_shared_thread_view: Optional[
         Callable[["ThreadDict", Optional["User"]], Awaitable[bool]]
     ] = None
+    on_shared_thread_access_allowed: Optional[
+        Callable[["ThreadDict", Optional["User"]], Awaitable[bool]]
+    ] = None
     # Auth callbacks
     password_auth_callback: Optional[
         Callable[[str, str], Awaitable[Optional["User"]]]

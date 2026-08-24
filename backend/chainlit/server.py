@@ -1024,12 +1024,22 @@ async def get_shared_thread(
             )
         except Exception:
             user_can_view = False
-
     is_shared = bool(metadata.get("is_shared"))
 
-    # Proceed only raise an error if both conditions are False.
     if (not user_can_view) and (not is_shared):
         raise HTTPException(status_code=404, detail="Thread not found")
+
+    if getattr(config.code, "on_shared_thread_access_allowed", None):
+        try:
+            access_allowed = await config.code.on_shared_thread_access_allowed(
+                thread, current_user
+            )
+            if not access_allowed:
+                raise HTTPException(status_code=404, detail="Thread not found")
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(status_code=404, detail="Thread not found")
 
     metadata.pop("chat_profile", None)
     metadata.pop("chat_settings", None)

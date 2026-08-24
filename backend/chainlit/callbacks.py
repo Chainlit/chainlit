@@ -551,3 +551,18 @@ def on_shared_thread_view(
     """
     config.code.on_shared_thread_view = wrap_user_function(func)
     return func
+
+
+def on_shared_thread_access_allowed(
+    func: Callable[[ThreadDict, Optional[User]], Awaitable[bool]],
+) -> Callable[[ThreadDict, Optional[User]], Awaitable[bool]]:
+    """Hook to add extra permission check for viewing a shared thread.
+
+    Unlike on_shared_thread_view, this callback can only deny access further.
+    If defined and returns False, the viewer is blocked regardless of other checks.
+    If undefined or returns True, normal authorization flow proceeds.
+
+    Signature: async (thread: ThreadDict, viewer: Optional[User]) -> bool
+    """
+    config.code.on_shared_thread_access_allowed = wrap_user_function(func)
+    return func
