@@ -6,6 +6,7 @@ from chainlit.config import (
     ChainlitConfigOverrides,
     FeaturesSettings,
     McpFeature,
+    SseMcpServer,
     UISettings,
 )
 
@@ -47,9 +48,13 @@ async def chat_profile(current_user: cl.User):
                 features=FeaturesSettings(
                     mcp=McpFeature(
                         enabled=True,
-                        stdio={"enabled": True},
-                        sse={"enabled": True},
-                        streamable_http={"enabled": True},
+                        servers=[
+                            SseMcpServer(
+                                type="sse",
+                                name="example-sse",
+                                url="https://mcp.example.com/sse",
+                            )
+                        ],
                     )
                 ),
             ),
