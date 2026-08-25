@@ -39,7 +39,7 @@
       "errors": {
         "default": "로그인할 수 없습니다",
         "signin": "다른 계정으로 로그인해보세요",
-        "oauthSignin": "다른 계정으로 로그인해보세요",
+        "oauthSignin": "로그인에 실패했습니다. 다시 시도하거나 다른 로그인 방법을 사용해 주세요.",
         "redirectUriMismatch": "리다이렉트 URI가 OAuth 앱 설정과 일치하지 않습니다",
         "oauthCallback": "다른 계정으로 로그인해보세요",
         "oauthCreateAccount": "다른 계정으로 로그인해보세요",
