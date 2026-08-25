@@ -12,44 +12,44 @@
       "loading": "A carregar...",
       "error": {
         "default": "Ocorreu um erro",
-        "serverConnection": "N\u00e3o foi poss\u00edvel estabelecer liga\u00e7\u00e3o ao servidor"
+        "serverConnection": "Não foi possível estabelecer ligação ao servidor"
       }
     }
   },
   "auth": {
     "login": {
-      "title": "Inicie sess\u00e3o para aceder \u00e0 aplica\u00e7\u00e3o",
+      "title": "Inicie sessão para aceder à aplicação",
       "form": {
         "email": {
           "label": "E-mail",
-          "required": "o e-mail \u00e9 obrigat\u00f3rio",
+          "required": "o e-mail é obrigatório",
           "placeholder": "me@example.com"
         },
         "password": {
           "label": "Palavra-passe",
-          "required": "a palavra-passe \u00e9 obrigat\u00f3ria"
+          "required": "a palavra-passe é obrigatória"
         },
         "actions": {
-          "signin": "Iniciar sess\u00e3o"
+          "signin": "Iniciar sessão"
         },
         "alternativeText": {
           "or": "Ou"
         }
       },
       "errors": {
-        "default": "N\u00e3o foi poss\u00edvel iniciar sess\u00e3o",
-        "signin": "Tente iniciar sess\u00e3o com outra conta",
-        "oauthSignin": "Tente iniciar sess\u00e3o com outra conta",
-        "redirectUriMismatch": "O URI de redirecionamento n\u00e3o corresponde \u00e0 configura\u00e7\u00e3o da aplica\u00e7\u00e3o OAuth",
-        "oauthCallback": "Tente iniciar sess\u00e3o com outra conta",
-        "oauthCreateAccount": "Tente iniciar sess\u00e3o com outra conta",
-        "emailCreateAccount": "Tente iniciar sess\u00e3o com outra conta",
-        "callback": "Tente iniciar sess\u00e3o com outra conta",
-        "oauthAccountNotLinked": "Para confirmar a sua identidade, inicie sess\u00e3o com a mesma conta utilizada anteriormente",
-        "emailSignin": "N\u00e3o foi poss\u00edvel enviar o e-mail",
+        "default": "Não foi possível iniciar sessão",
+        "signin": "Tente iniciar sessão com outra conta",
+        "oauthSignin": "Falha no início de sessão. Por favor, tente novamente ou utilize um método de início de sessão diferente.",
+        "redirectUriMismatch": "O URI de redirecionamento não corresponde à configuração da aplicação OAuth",
+        "oauthCallback": "Tente iniciar sessão com outra conta",
+        "oauthCreateAccount": "Tente iniciar sessão com outra conta",
+        "emailCreateAccount": "Tente iniciar sessão com outra conta",
+        "callback": "Tente iniciar sessão com outra conta",
+        "oauthAccountNotLinked": "Para confirmar a sua identidade, inicie sessão com a mesma conta utilizada anteriormente",
+        "emailSignin": "Não foi possível enviar o e-mail",
         "emailVerify": "Por favor, verifique o seu e-mail. Foi enviada uma nova mensagem",
-        "credentialsSignin": "Erro ao iniciar sess\u00e3o. Verifique se os dados fornecidos est\u00e3o corretos",
-        "sessionRequired": "Por favor, inicie sess\u00e3o para aceder a esta p\u00e1gina"
+        "credentialsSignin": "Erro ao iniciar sessão. Verifique se os dados fornecidos estão corretos",
+        "sessionRequired": "Por favor, inicie sessão para aceder a esta página"
       }
     },
     "provider": {
@@ -70,18 +70,18 @@
       "headline": "Mensagens favoritas",
       "remove": "Remover favorito",
       "empty": {
-        "title": "Ainda n\u00e3o h\u00e1 prompts guardados",
-        "description": "Comece por enviar um prompt e marc\u00e1-lo com estrela, ou marque com estrela um prompt de conversas anteriores"
+        "title": "Ainda não há prompts guardados",
+        "description": "Comece por enviar um prompt e marcá-lo com estrela, ou marque com estrela um prompt de conversas anteriores"
       }
     },
     "commands": {
       "button": "Ferramentas",
       "changeTool": "Alterar ferramenta",
-      "availableTools": "Ferramentas dispon\u00edveis"
+      "availableTools": "Ferramentas disponíveis"
     },
     "speech": {
-      "start": "Iniciar grava\u00e7\u00e3o",
-      "stop": "Parar grava\u00e7\u00e3o",
+      "start": "Iniciar gravação",
+      "stop": "Parar gravação",
       "connecting": "A ligar"
     },
     "fileUpload": {
@@ -104,35 +104,35 @@
       },
       "actions": {
         "copy": {
-          "button": "Copiar para a \u00e1rea de transfer\u00eancia",
+          "button": "Copiar para a área de transferência",
           "success": "Copiado!"
         }
       },
       "feedback": {
-        "positive": "\u00datil",
-        "negative": "N\u00e3o \u00fatil",
-        "edit": "Editar coment\u00e1rio",
+        "positive": "Útil",
+        "negative": "Não útil",
+        "edit": "Editar comentário",
         "dialog": {
-          "title": "Adicionar um coment\u00e1rio",
-          "submit": "Enviar coment\u00e1rio",
-          "yourFeedback": "O seu coment\u00e1rio..."
+          "title": "Adicionar um comentário",
+          "submit": "Enviar comentário",
+          "yourFeedback": "O seu comentário..."
         },
         "status": {
           "updating": "A atualizar",
-          "updated": "Coment\u00e1rio atualizado"
+          "updated": "Comentário atualizado"
         }
       }
     },
     "history": {
-      "title": "\u00daltimas entradas",
-      "empty": "Est\u00e1 vazio...",
-      "show": "Mostrar hist\u00f3rico"
+      "title": "Últimas entradas",
+      "empty": "Está vazio...",
+      "show": "Mostrar histórico"
     },
     "settings": {
-      "title": "Painel de configura\u00e7\u00f5es",
-      "customize": "Personalize aqui as configura\u00e7\u00f5es do seu chat"
+      "title": "Painel de configurações",
+      "customize": "Personalize aqui as configurações do seu chat"
     },
-    "watermark": "Os modelos de linguagem podem cometer erros. Verifique sempre informa\u00e7\u00f5es importantes."
+    "watermark": "Os modelos de linguagem podem cometer erros. Verifique sempre informações importantes."
   },
   "threadHistory": {
     "sidebar": {
@@ -144,8 +144,8 @@
       "timeframes": {
         "today": "Hoje",
         "yesterday": "Ontem",
-        "previous7days": "\u00daltimos 7 dias",
-        "previous30days": "\u00daltimos 30 dias"
+        "previous7days": "Últimos 7 dias",
+        "previous30days": "Últimos 30 dias"
       },
       "empty": "Nenhuma conversa encontrada",
       "actions": {
@@ -154,7 +154,7 @@
       }
     },
     "thread": {
-      "untitled": "Conversa sem t\u00edtulo",
+      "untitled": "Conversa sem título",
       "menu": {
         "rename": "Renomear",
         "share": "Partilhar",
@@ -162,21 +162,21 @@
       },
       "actions": {
         "share": {
-          "title": "Partilhar liga\u00e7\u00e3o do chat",
+          "title": "Partilhar ligação do chat",
           "button": "Partilhar",
           "status": {
-            "copied": "Liga\u00e7\u00e3o copiada",
-            "created": "Liga\u00e7\u00e3o de partilha criada!",
+            "copied": "Ligação copiada",
+            "created": "Ligação de partilha criada!",
             "unshared": "Partilha desativada para esta conversa"
           },
           "error": {
-            "create": "Erro ao criar liga\u00e7\u00e3o de partilha",
+            "create": "Erro ao criar ligação de partilha",
             "unshare": "Erro ao desativar a partilha"
           }
         },
         "delete": {
-          "title": "Confirmar elimina\u00e7\u00e3o",
-          "description": "Ir\u00e1 eliminar a conversa e todos os seus conte\u00fados. Esta a\u00e7\u00e3o n\u00e3o pode ser anulada.",
+          "title": "Confirmar eliminação",
+          "description": "Irá eliminar a conversa e todos os seus conteúdos. Esta ação não pode ser anulada.",
           "success": "Chat eliminado",
           "inProgress": "A eliminar chat"
         },
@@ -209,42 +209,42 @@
       "button": "Novo chat",
       "dialog": {
         "title": "Criar novo chat",
-        "description": "Isto ir\u00e1 apagar o hist\u00f3rico de chat atual. Tem a certeza de que pretende continuar?",
+        "description": "Isto irá apagar o histórico de chat atual. Tem a certeza de que pretende continuar?",
         "tooltip": "Novo chat"
       }
     },
     "user": {
       "menu": {
-        "settings": "Configura\u00e7\u00f5es",
+        "settings": "Configurações",
         "settingsKey": "S",
         "apiKeys": "Chaves API",
-        "logout": "Terminar sess\u00e3o"
+        "logout": "Terminar sessão"
       }
     }
   },
   "apiKeys": {
-    "title": "Chaves API necess\u00e1rias",
-    "description": "Para utilizar esta aplica\u00e7\u00e3o, s\u00e3o necess\u00e1rias as seguintes chaves API. As chaves s\u00e3o guardadas localmente no seu dispositivo.",
+    "title": "Chaves API necessárias",
+    "description": "Para utilizar esta aplicação, são necessárias as seguintes chaves API. As chaves são guardadas localmente no seu dispositivo.",
     "success": {
       "saved": "Guardado com sucesso"
     }
   },
   "alerts": {
-    "info": "Informa\u00e7\u00e3o",
+    "info": "Informação",
     "note": "Nota",
     "tip": "Dica",
     "important": "Importante",
     "warning": "Aviso",
     "caution": "Cuidado",
-    "debug": "Depura\u00e7\u00e3o",
+    "debug": "Depuração",
     "example": "Exemplo",
     "success": "Sucesso",
     "help": "Ajuda",
     "idea": "Ideia",
     "pending": "Pendente",
-    "security": "Seguran\u00e7a",
+    "security": "Segurança",
     "beta": "Beta",
-    "best-practice": "Boa pr\u00e1tica"
+    "best-practice": "Boa prática"
   },
   "components": {
     "MultiSelectInput": {

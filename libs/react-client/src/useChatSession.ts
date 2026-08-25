@@ -146,21 +146,18 @@ const useChatSession = () => {
         setMcps((prev) =>
           prev.map((mcp) => {
             let promise;
-            if (mcp.clientType === 'sse') {
-              promise = client.connectSseMCP(sessionId, mcp.name, mcp.url!);
-            } else if (mcp.clientType === 'streamable-http') {
-              promise = client.connectStreamableHttpMCP(
+            if (mcp.isUserProvided && mcp.url && mcp.clientType) {
+              // User-provided MCP (SSE or streamable-http)
+              promise = client.connectUserMcp(
                 sessionId,
                 mcp.name,
-                mcp.url!,
-                mcp.headers || {}
+                mcp.clientType,
+                mcp.url,
+                mcp.headers
               );
             } else {
-              promise = client.connectStdioMCP(
-                sessionId,
-                mcp.name,
-                mcp.command!
-              );
+              // Named (developer-configured) MCP
+              promise = client.connectMcp(sessionId, mcp.name);
             }
             promise
               .then(async ({ success, mcp }) => {
