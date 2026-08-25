@@ -4,6 +4,229 @@ All notable changes to Chainlit will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2.12.0] - 2026-08-25
+
+### Security Advisory
+
+**IMPORTANT — this release contains breaking changes. Action is required if you
+use MCP.**
+
+- This release fixes a **critical command injection** (CVE-2026-45018,
+  SPL-2026-001, CVSS v3.1 9.8) and a **high-severity SSRF** (CVE-2026-45019,
+  SPL-2026-002, CVSS v3.1 7.2) in the `/mcp` endpoint. Both are exploitable by an
+  unauthenticated attacker whenever `features.mcp.enabled = true`. All versions
+  from v2.4.0rc0 through v2.11.x are affected; MCP has been disabled by default
+  since v2.7.0.
+- **The fix cannot be applied without config changes.** Legacy MCP config keys now
+  abort startup instead of being ignored, and the `@chainlit/react-client`
+  connection API changed. Before upgrading, follow the
+  [MCP config migration guide](#migration-guide-mcp-config) and the
+  [`@chainlit/react-client` migration guide](#migration-guide-chainlitreact-client)
+  at the end of this section.
+- **If you cannot upgrade immediately**, set `features.mcp.enabled = false` (the
+  default). This fully prevents exploitation of both vulnerabilities.
+- Full technical detail, impact analysis and additional mitigations:
+  [`docs/security-advisory-2026-mcp.md`](docs/security-advisory-2026-mcp.md).
+
+Both vulnerabilities were reported by **Vipin** and **Stephen** at **SPL Security**
+(security@spl.team) under coordinated disclosure, with working proof-of-concept
+exploits for each. We thank them for a thorough and responsibly disclosed report.
+
+### Security
+
+- Fix critical command injection (CVE-2026-45018, SPL-2026-001) and SSRF
+  (CVE-2026-45019, SPL-2026-002) in the `/mcp` endpoint — stdio MCP servers are now
+  defined server-side and the client supplies only a name; see the migration guides
+  below and [`docs/security-advisory-2026-mcp.md`](docs/security-advisory-2026-mcp.md)
+- Filter `Cookie`, `Host`, `Forwarded`, `X-Forwarded-*`, `X-Real-IP`, `Via`,
+  `Proxy-Authorization` and the method/URL override headers from user-provided
+  MCP connections
+- Stop disclosing the `user_servers` allowlist and server details through
+  `/project/settings`
+- Reject MCP URLs containing `.`/`..` segments, encoded separators,
+  double-encoded sequences, backslashes or non-ASCII characters
+- Raise backend minimum versions for `mcp`, `pydantic`, `pydantic-settings`,
+  `pyjwt` and `python-multipart`, and pin more than thirty vulnerable JS
+  dependencies — including `lodash`, `postcss`, `micromatch`, `form-data`,
+  `undici`, `ws` and `rollup` — to patched ranges across all four workspaces
+- Upgrade `react-router-dom` to 6.30.6, clearing an open-redirect to XSS
+  advisory that covered every previously shipped 6.30.x
+- Upgrade `socket.io-client` to 4.8.3 in the published `@chainlit/react-client`,
+  moving its `engine.io-client`/`ws` chain onto patched versions — the one
+  dependency change here that reaches downstream npm consumers
+
+### Added
+
+- Add a localized tooltip to the settings icon
+- Add `SECURITY.md` with a responsible disclosure policy
+- Support single-tenant Azure Bot registrations for Teams via `TEAMS_APP_TENANT_ID`
+
+### Fixed
+
+- Bound the MCP connect handshake so a blocked destination fails fast instead of
+  hanging and leaking its connection task
+- Keep the existing MCP session until a reconnect has succeeded, so a failed
+  reconnect no longer drops a working connection
+- Serialise concurrent reconnects to the same MCP server name to avoid leaking a
+  live connection
+- Report the underlying cause of an MCP connect failure instead of an empty error
+- Drop malformed stored MCP entries instead of letting them break the chat page
+- Resolve MCP servers declared in a chat profile's `config_overrides` instead of
+  returning a 500 from `/project/settings`
+- Redirect OAuth login failures to the login page with a friendly error instead
+  of raw JSON or a bare 500
+- Render file elements with a `null` mime instead of crashing the thread view
+- Reconstruct uploaded PDFs as `Pdf` elements in `Element.from_dict`
+- Handle a missing `userEnv` payload on WebSocket connect
+- Validate `DatePicker` mode and `min_date`/`max_date` bounds
+- Scope cache entries by function identity so same-named callables no longer
+  return each other's values
+- Degrade emoji markers in `lint-translations` instead of raising
+  `UnicodeEncodeError` on legacy consoles
+- Expose the OAuth2 model on `OAuth2PasswordBearerWithCookie` so OpenAPI
+  generation no longer raises
+- Resolve the transparent Copilot UI in light mode
+
+### Changed
+
+- **[breaking]**: Legacy MCP config keys (`[features.mcp.sse]`,
+  `[features.mcp.stdio]`, `[features.mcp.streamable-http]`,
+  `allowed_executables`) abort startup when MCP is enabled instead of being
+  silently ignored; they are replaced by a unified `[[features.mcp.servers]]`
+  array and an optional `[features.mcp.user_servers]` section
+- **[breaking]**: stdio MCP servers must be declared in
+  `[[features.mcp.servers]]` with `type = "stdio"` and a `command` — a
+  client-supplied `fullCommand` is rejected, and inline `KEY=value` assignments
+  must move to an `env` mapping on the server entry
+- **[breaking]**: `type` is now required on every `[[features.mcp.servers]]`
+  entry — `StdioMcpServer`, `SseMcpServer` and `StreamableHttpMcpServer` no
+  longer default it, so servers constructed in Python must pass it explicitly
+- **[breaking]**: User-provided SSE/HTTP connections require an explicit
+  `[features.mcp.user_servers] enabled = true` and a non-empty `allowed_urls`,
+  where they were previously enabled by default
+- **[breaking]**: MCP connections no longer follow HTTP redirects, for
+  developer-configured servers as well as user-provided ones — configure the
+  final `https://` URL directly
+- **[breaking]**: User-provided MCP connections are re-checked against their
+  allowlist entry on every request rather than only the first
+- **[breaking]**: Duplicate, empty and colliding MCP server names are rejected
+  instead of loading silently
+- **[breaking]**: `/mcp` returns `isUserProvided` instead of `url`/`headers` for
+  developer-configured (named) servers
+- **[breaking]**: `@chainlit/react-client` 0.5.0 removes `connectStdioMCP()`,
+  `connectSseMCP()` and `connectStreamableHttpMCP()` — use `connectMcp()` for
+  named servers and `connectUserMcp()` for user-provided ones
+- Declare `pydantic>=2.11.0` explicitly, narrowing the installable range from
+  `>=2.7.2`; this was already required transitively by `mcp>=1.28.1`, so no
+  install that resolves today stops resolving
+- Drop the unused `audioop-lts` core dependency
+
+### Migration guide (MCP config)
+
+Required to upgrade: the legacy keys below now abort startup. Background and
+rationale for each change are in
+[`docs/security-advisory-2026-mcp.md`](docs/security-advisory-2026-mcp.md)
+(CVE-2026-45018 / SPL-2026-001, CVE-2026-45019 / SPL-2026-002).
+
+**Before (v2.11.x):**
+
+```toml
+[features.mcp]
+enabled = true
+
+[features.mcp.stdio]
+enabled = true
+allowed_executables = ["npx", "uvx"]
+
+[features.mcp.sse]
+enabled = true
+allowed_urls = ["https://mcp.example.com"]
+```
+
+**After (v2.12.0):**
+
+```toml
+[features.mcp]
+enabled = true
+
+# Developer-configured servers (replaces allowed_executables / allowed_urls)
+[[features.mcp.servers]]
+name = "github"
+type = "stdio"
+command = "npx -y @modelcontextprotocol/server-github"
+
+[[features.mcp.servers]]
+name = "my-sse"
+type = "sse"
+url = "https://mcp.example.com/sse"
+
+# Optional: allow end-users to connect their own SSE/HTTP servers
+[features.mcp.user_servers]
+enabled = true
+allowed_urls = ["https://mcp.example.com"]
+```
+
+**Additional notes:**
+
+- If your config still has a `[features.mcp.sse]`, `[features.mcp.stdio]`, or
+  `[features.mcp.streamable-http]` table, or an `allowed_executables` key, the
+  app will refuse to start. Migrate to `[[features.mcp.servers]]` /
+  `[features.mcp.user_servers]` as shown above before upgrading.
+- MCP connections no longer follow HTTP redirects. If an `allowed_urls` entry
+  (or a `[[features.mcp.servers]]` `url`) relies on an `http` → `https` upgrade
+  redirect, update it to the final `https://` URL directly.
+- URLs must not contain `.`/`..` path segments, encoded separators (`%2e`,
+  `%2f`, `%5c`), double-encoded sequences (`%25`), backslashes, or non-ASCII
+  characters — these are rejected during validation.
+- A `[features.mcp.user_servers]` connection's `name` cannot match (case-
+  insensitively, ignoring surrounding whitespace) the `name` of any server
+  defined in `[[features.mcp.servers]]`.
+
+### Migration guide (`@chainlit/react-client`)
+
+The client-side MCP connection API changed to match the config split above:
+named (developer-configured) servers are connected by name, and only
+user-provided SSE/HTTP servers still take a URL from the browser. The reason a
+client-supplied command can no longer exist is set out in
+[`docs/security-advisory-2026-mcp.md`](docs/security-advisory-2026-mcp.md).
+
+**API changes:**
+
+| Before (v2.11.x)                                           | After (v2.12.0)                                                            |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `connectStdioMCP(sessionId, name, fullCommand)`            | Removed, no replacement — see below                                        |
+| `connectSseMCP(sessionId, name, url, headers?)`            | `connectUserMcp(sessionId, name, 'sse', url, headers?)`                    |
+| `connectStreamableHttpMCP(sessionId, name, url, headers?)` | `connectUserMcp(sessionId, name, 'streamable-http', url, headers?)`        |
+| _(n/a)_                                                    | `connectMcp(sessionId, name)` — connects any named server (stdio/sse/http) |
+
+`connectStdioMCP` is removed with no replacement: accepting a client-supplied
+command was SPL-2026-001. Declare stdio servers in
+`[[features.mcp.servers]]` on the server and connect to them by name with
+`connectMcp(sessionId, name)` — the same call now used for any named server,
+regardless of its transport.
+
+**`IMcp` type changes** (`libs/react-client/src/types/mcp.ts`):
+
+- `clientType` is now optional and narrowed to `'sse' | 'streamable-http'`
+  (previously required and included `'stdio'`).
+- `type?: 'stdio' | 'sse' | 'streamable-http'` was added — set on named
+  (developer-configured) servers.
+- `command` was removed — the client never sees a command string anymore.
+- `isUserProvided?: boolean` was added to explicitly mark a server connected
+  via the user-provided flow. Do not infer this from the presence of `url`
+  or `clientType`; check `isUserProvided` directly.
+
+**`IChainlitConfig.features.mcp` shape changes**
+(`libs/react-client/src/types/config.ts`): the per-transport
+`sse` / `streamable_http` / `stdio` feature-flag objects are replaced by
+`servers?: Array<{ name: string; type: 'stdio' | 'sse' | 'streamable-http' }>`
+(the list of named servers the client may `connectMcp` by name) and
+`user_servers?: { enabled?: boolean }` (whether the user-provided SSE/HTTP
+flow is available at all). This mirrors the `McpFeature` change in
+`backend/chainlit/config.py`.
+
+---
+
 ## [2.11.1] - 2026-04-22
 
 ### Added
