@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 from dataclasses import field
 
 from dataclasses_json import DataClassJsonMixin
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 from pydantic.dataclasses import dataclass
 
 InputWidgetType = Literal[
@@ -245,34 +245,29 @@ class CallActionRequest(BaseModel):
     sessionId: str
 
 
-class ConnectStdioMCPRequest(BaseModel):
-    sessionId: str
-    clientType: Literal["stdio"]
-    name: str
-    fullCommand: str
+class ConnectMCPRequest(BaseModel):
+    """Request to connect an MCP server.
 
+    Named server (developer-configured in config): provide sessionId + name only.
+    User-provided server (SSE/HTTP only, when enabled): also provide clientType + url.
+    """
 
-class ConnectSseMCPRequest(BaseModel):
     sessionId: str
-    clientType: Literal["sse"]
     name: str
-    url: str
-    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
+    # Present only for user-provided connections:
+    clientType: Optional[Literal["sse", "streamable-http"]] = None
+    url: Optional[str] = None
     headers: Optional[Dict[str, str]] = None
 
-
-class ConnectStreamableHttpMCPRequest(BaseModel):
-    sessionId: str
-    clientType: Literal["streamable-http"]
-    name: str
-    url: str
-    # Optional HTTP headers to forward to the MCP transport (e.g. Authorization)
-    headers: Dict[str, str] | None = None
-
-
-ConnectMCPRequest = Union[
-    ConnectStdioMCPRequest, ConnectSseMCPRequest, ConnectStreamableHttpMCPRequest
-]
+    @model_validator(mode="after")
+    def validate_user_provided_consistency(self) -> "ConnectMCPRequest":
+        has_url = self.url is not None
+        has_type = self.clientType is not None
+        if has_url != has_type:
+            raise ValueError(
+                "Both 'url' and 'clientType' must be provided together for user-provided connections"
+            )
+        return self
 
 
 class DisconnectMCPRequest(BaseModel):

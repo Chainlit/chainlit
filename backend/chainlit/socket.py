@@ -102,6 +102,7 @@ async def resume_thread(session: WebsocketSession):
 
 
 def load_user_env(user_env):
+    user_env_dict = {}
     if user_env:
         user_env_dict = json.loads(user_env)
     # Check user env
