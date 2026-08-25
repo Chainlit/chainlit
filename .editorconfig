@@ -1,15 +1,13 @@
 root = true
 
 [*]
-end_of_line = lf
-
-[*.{py,ts,tsx}]
+charset = utf-8
 indent_style = space
+indent_size = 2
 insert_final_newline = true
+max_line_length = 80
+quote_type = single
 
 [*.py]
 indent_size = 4
 trim_trailing_whitespace = true
-
-[*.{ts,tsx}]
-indent_size = 2

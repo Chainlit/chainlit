@@ -251,7 +251,7 @@ export class WavRecorder {
         });
         const tracks = stream.getTracks();
         tracks.forEach((track) => track.stop());
-      } catch (e) {
+      } catch (_e) {
         window.alert('You must grant microphone access to use this feature.');
       }
     }
@@ -318,7 +318,7 @@ export class WavRecorder {
       }
       this.stream = await navigator.mediaDevices.getUserMedia(config);
     } catch (err) {
-      throw new Error('Could not start media stream');
+      throw new Error('Could not start media stream', { cause: err });
     }
 
     const context = new AudioContext({ sampleRate: this.sampleRate });
@@ -328,7 +328,9 @@ export class WavRecorder {
       await context.audioWorklet.addModule(this.scriptSrc);
     } catch (e) {
       console.error(e);
-      throw new Error(`Could not add audioWorklet module: ${this.scriptSrc}`);
+      throw new Error(`Could not add audioWorklet module: ${this.scriptSrc}`, {
+        cause: e
+      });
     }
     const processor = new AudioWorkletNode(context, 'audio_processor');
     processor.port.onmessage = (e) => {
@@ -364,7 +366,6 @@ export class WavRecorder {
     analyser.smoothingTimeConstant = 0.1;
     node.connect(analyser);
     if (this.outputToSpeakers) {
-      // eslint-disable-next-line no-console
       console.warn(
         'Warning: Output to speakers may affect sound quality,\n' +
           'especially due to system audio feedback preventative measures.\n' +

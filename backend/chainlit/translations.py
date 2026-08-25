@@ -1,6 +1,17 @@
+import sys
+
 # TODO:
 # - Support linting plural
 # - Support interpolation
+
+
+def _safe_print(message: str) -> None:
+    """Print without crashing on streams that cannot encode emoji markers."""
+    try:
+        print(message)
+    except UnicodeEncodeError:
+        encoding = sys.stdout.encoding or "ascii"
+        print(message.encode(encoding, "replace").decode(encoding, "replace"))
 
 
 def compare_json_structures(truth, to_compare, path=""):
@@ -49,12 +60,12 @@ def compare_json_structures(truth, to_compare, path=""):
 
 
 def lint_translation_json(file, truth, to_compare):
-    print(f"\nLinting {file}...")
+    _safe_print(f"\nLinting {file}...")
 
     errors = compare_json_structures(truth, to_compare)
 
     if errors:
         for error in errors:
-            print(f"{error}")
+            _safe_print(f"{error}")
     else:
-        print(f"✅ No errors found in {file}")
+        _safe_print(f"✅ No errors found in {file}")

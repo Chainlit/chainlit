@@ -12,4 +12,4 @@ Mal podemos esperar para ver o que você cria com o Chainlit! Boa codificação!
 ## Tela de boas-vindas
 
 Para modificar a tela de boas-vindas, edite o arquivo chainlit.md
- na raiz do seu projeto. Se você não quiser uma tela de boas-vindas, basta deixar este arquivo vazio.
+na raiz do seu projeto. Se você não quiser uma tela de boas-vindas, basta deixar este arquivo vazio.

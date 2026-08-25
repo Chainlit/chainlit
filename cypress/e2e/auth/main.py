@@ -1,11 +1,12 @@
 import os
 from uuid import uuid4
 
+from fastapi import Request, Response
+
 import chainlit as cl
 from chainlit.auth import create_jwt
 from chainlit.server import _authenticate_user, app
 from chainlit.user import User
-from fastapi import Request, Response
 
 os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
 os.environ["CHAINLIT_CUSTOM_AUTH"] = "true"

@@ -4,7 +4,7 @@ import mimetypes
 import re
 import shutil
 import uuid
-from contextlib import AsyncExitStack
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Callable, Deque, Dict, Literal, Optional, Union
 
 import aiofiles
@@ -18,6 +18,79 @@ if TYPE_CHECKING:
     from chainlit.config import ChainlitConfig
     from chainlit.types import FileDict
     from chainlit.user import PersistedUser, User
+
+_CLOSE_TIMEOUT = 10.0  # seconds to wait for a background MCP task to finish
+
+
+async def stop_mcp_task(
+    task: asyncio.Task, stop_event: asyncio.Event, name: str
+) -> None:
+    """Signal an MCP background task to shut down and wait for it.
+
+    Extracted from ``McpSession.close`` so other callers (the ``/mcp``
+    connect handler in ``server.py``, for its timeout / blocked-destination
+    failure paths) can reuse the same bounded wait-then-cancel behaviour
+    instead of an ad-hoc ``await task``. The discriminator for what to do is
+    always "is the task done", not "did the wait raise" — cancelling a task
+    that is merely slow to close is what actually unsticks a hang: a
+    ``CancelledError`` raised inside ``initialize()`` is caught by the
+    runner's ``except BaseException`` and its ``finally: await
+    exit_stack.aclose()`` tears down the transport (and reaps any stdio
+    subprocess) regardless of why the task was still running.
+    """
+    stop_event.set()
+    try:
+        await asyncio.wait_for(task, timeout=_CLOSE_TIMEOUT)
+    except asyncio.TimeoutError:
+        logger.warning(
+            "MCP session %r did not shut down within %.1fs — cancelling",
+            name,
+            _CLOSE_TIMEOUT,
+        )
+        task.cancel()
+        try:
+            await task
+        except BaseException:
+            pass
+    except asyncio.CancelledError:
+        pass
+    except BaseException:
+        logger.debug("Error while closing MCP session %r", name, exc_info=True)
+
+
+@dataclass
+class McpSession:
+    """Lifecycle wrapper for a single MCP connection.
+
+    Each MCP connection is run inside its own ``asyncio.Task``.  That task
+    creates the ``AsyncExitStack``, enters all context managers (transport,
+    ``ClientSession``), calls ``initialize()``, and then blocks on
+    ``stop_event.wait()``.  When the event is set the task wakes up and
+    closes the exit stack **in the same task** that opened it, avoiding
+    the cross-task cancel-scope corruption described in
+    https://github.com/Chainlit/chainlit/issues/2182.
+
+    Original solution by @nigiva:
+    https://github.com/Chainlit/chainlit/issues/2182#issuecomment-2840283194
+    """
+
+    name: str
+    client: "ClientSession"
+    task: asyncio.Task
+    stop_event: asyncio.Event = field(default_factory=asyncio.Event)
+
+    async def close(self) -> None:
+        """Signal the background task to shut down and wait for it."""
+        await stop_mcp_task(self.task, self.stop_event, self.name)
+
+    # Backward-compatible tuple unpacking.
+    # The original Chainlit format is ``(ClientSession, AsyncExitStack)``.
+    # Code that does ``client, _ = mcp_sessions[name]`` will get the
+    # ``ClientSession`` and a safe sentinel (not the real exit stack,
+    # which must only be closed by the owning background task).
+    def __iter__(self):
+        return iter((self.client, self))
+
 
 ClientType = Literal["webapp", "copilot", "teams", "slack", "discord"]
 
@@ -51,6 +124,7 @@ class BaseSession:
     thread_id_to_resume: Optional[str] = None
     client_type: ClientType
     current_task: Optional[asyncio.Task] = None
+    chat_started: bool = False
 
     def __init__(
         self,
@@ -77,6 +151,7 @@ class BaseSession:
         self.client_type = client_type
         self.token = token
         self.has_first_interaction = False
+        self.chat_started = False
         self.user_env = user_env or {}
         self.environ = environ or {}
         self.chat_profile = chat_profile
@@ -216,7 +291,7 @@ class WebsocketSession(BaseSession):
 
     to_clear: bool = False
 
-    mcp_sessions: dict[str, tuple["ClientSession", AsyncExitStack]]
+    mcp_sessions: dict[str, McpSession]
 
     def __init__(
         self,
@@ -316,6 +391,38 @@ class WebsocketSession(BaseSession):
         self.socket_id = new_socket_id
         self.restored = True
 
+    def swap_mcp_session(
+        self, name: str, new_session: McpSession
+    ) -> Optional[McpSession]:
+        """Atomically replace the MCP session stored under ``name`` and
+        return whichever session was displaced (``None`` if there wasn't
+        one).
+
+        This is a plain, ``await``-free dict pop-then-insert. That's the
+        point: asyncio only ever switches between coroutines at an ``await``
+        (or task-boundary) point, so a synchronous block like this one can
+        never be interleaved with another coroutine's synchronous block --
+        it's atomic for free, no ``asyncio.Lock`` required.
+
+        This closes a race between two concurrent ``POST /mcp`` reconnects
+        for the same name: previously the connect handler did a separate
+        "check if present" / "pop" / (``await`` on ``on_mcp_disconnect`` and
+        ``close()``) / "store" sequence, with real ``await`` points sitting
+        between the check and the store. A second concurrent reconnect could
+        see the name already popped (skip eviction) and then have its own
+        freshly stored session silently overwritten once the first request
+        resumed and stored unconditionally -- orphaning the second session's
+        background task (a live stdio subprocess or open HTTP/SSE client)
+        forever, since it was never reachable from ``mcp_sessions`` again.
+
+        Callers are still responsible for tearing down the returned session
+        (``on_mcp_disconnect`` callback + ``close()``/``stop_mcp_task``) --
+        this method only makes the dict swap itself race-free.
+        """
+        old = self.mcp_sessions.pop(name, None)
+        self.mcp_sessions[name] = new_session
+        return old
+
     async def delete(self):
         """Delete the session."""
         if self.files_dir.is_dir():
@@ -323,11 +430,16 @@ class WebsocketSession(BaseSession):
         ws_sessions_sid.pop(self.socket_id, None)
         ws_sessions_id.pop(self.id, None)
 
-        for _, exit_stack in self.mcp_sessions.values():
+        for mcp_session in list(self.mcp_sessions.values()):
             try:
-                await exit_stack.aclose()
+                await mcp_session.close()
             except Exception:
-                pass
+                logger.debug(
+                    "Error closing MCP session %r during session delete",
+                    mcp_session.name,
+                    exc_info=True,
+                )
+        self.mcp_sessions.clear()
 
     async def flush_method_queue(self):
         for method_name, queue in self.thread_queues.items():

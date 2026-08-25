@@ -3,12 +3,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { ClientError } from '@chainlit/react-client';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import Translator, { useTranslation } from 'components/i18n/Translator';
-
-import { ClientError } from '@chainlit/react-client';
 
 import Alert from './Alert';
 import { ProviderButton } from './ProviderButton';
@@ -91,6 +91,7 @@ export function LoginForm({
       {errorState && (
         <Alert variant="error">
           {t([
+            `auth.login.errors.${errorState}`,
             `auth.login.errors.${errorState.toLowerCase()}`,
             `auth.login.errors.default`
           ])}

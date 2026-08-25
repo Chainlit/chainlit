@@ -1,5 +1,4 @@
 import { IInput } from '@/types';
-import * as React from 'react';
 
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -26,6 +25,7 @@ const RadioButtonGroup = ({
   tooltip,
   items = [],
   value,
+  disabled = false,
   onChange,
   setField
 }: RadioButtonGroupProps): JSX.Element => {
@@ -39,6 +39,7 @@ const RadioButtonGroup = ({
     >
       <RadioGroup
         value={value}
+        disabled={disabled}
         onValueChange={(v: string) => {
           onChange(v);
           setField?.(id, v);
@@ -46,7 +47,12 @@ const RadioButtonGroup = ({
       >
         {items.map((item) => (
           <div key={item.value} className="flex items-center space-x-2">
-            <RadioGroupItem value={item.value} id={item.value} />
+            <RadioGroupItem
+              value={item.value}
+              id={item.value}
+              disabled={disabled}
+              className="peer"
+            />
             <Label htmlFor={item.value}>{item.label}</Label>
           </div>
         ))}

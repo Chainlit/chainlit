@@ -230,30 +230,46 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         if user_id:
             user_identifier = await self._get_user_identifer_by_id(user_id)
 
-        if metadata is not None:
-            existing = await self.execute_sql(
-                query='SELECT "metadata" FROM threads WHERE "id" = :id',
-                parameters={"id": thread_id},
-            )
-            base = {}
-            if isinstance(existing, list) and existing:
-                raw = existing[0].get("metadata") or {}
-                if isinstance(raw, str):
-                    try:
-                        base = json.loads(raw)
-                    except json.JSONDecodeError:
-                        base = {}
-                elif isinstance(raw, dict):
-                    base = raw
-            incoming = {k: v for k, v in metadata.items() if v is not None}
-            metadata = {**base, **incoming}
+        has_updates = (
+            metadata is not None
+            or name is not None
+            or user_id is not None
+            or tags is not None
+        )
+
+        if metadata is None:
+            metadata = {}
+
+        existing = await self.execute_sql(
+            query='SELECT "metadata" FROM threads WHERE "id" = :id',
+            parameters={"id": thread_id},
+        )
+
+        thread_exists = isinstance(existing, list) and len(existing) > 0
+        if thread_exists and not has_updates:
+            return
+
+        base = {}
+        if isinstance(existing, list) and existing:
+            raw = existing[0].get("metadata") or {}
+            if isinstance(raw, str):
+                try:
+                    base = json.loads(raw)
+                except json.JSONDecodeError:
+                    base = {}
+            elif isinstance(raw, dict):
+                base = raw
+        to_delete = {k for k, v in metadata.items() if v is None}
+        incoming = {k: v for k, v in metadata.items() if v is not None}
+        base = {k: v for k, v in base.items() if k not in to_delete}
+        metadata = {**base, **incoming}
 
         name_value = name
         if name_value is None and metadata:
             name_value = metadata.get("name")
-        created_at_value = (
-            await self.get_current_timestamp() if metadata is None else None
-        )
+
+        is_new_thread = not thread_exists
+        created_at_value = await self.get_current_timestamp() if is_new_thread else None
 
         data = {
             "id": thread_id,
@@ -262,7 +278,7 @@ class SQLAlchemyDataLayer(BaseDataLayer):
             "userId": user_id,
             "userIdentifier": user_identifier,
             "tags": tags,
-            "metadata": json.dumps(metadata) if metadata else None,
+            "metadata": json.dumps(metadata),
         }
         parameters = {
             key: value for key, value in data.items() if value is not None

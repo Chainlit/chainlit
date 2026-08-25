@@ -8,8 +8,7 @@ describe('Chat profiles', () => {
     cy.get("button[type='submit']").click();
     cy.get('#chat-input').should('exist');
 
-    cy.wait(1000);
-    cy.get('#starter-say-hi').should('exist').click();
+    cy.get('#starter-say-hi').should('be.visible').click();
 
     cy.get('.step')
       .should('have.length', 2)
@@ -33,9 +32,10 @@ describe('Chat profiles', () => {
     cy.get('[data-test="select-item:GPT-4"]').click();
     cy.get('#confirm').click();
 
-    cy.wait(1000);
-
-    cy.get('#starter-ask-for-help').should('not.be.disabled').click();
+    cy.get('#starter-ask-for-help')
+      .should('be.visible')
+      .should('not.be.disabled')
+      .click();
 
     cy.get('.step')
       .should('have.length', 2)
@@ -109,7 +109,7 @@ describe('Chat profiles', () => {
     // Select GPT-4 profile
     cy.get('[data-test="select-item:GPT-4"]').click();
 
-    cy.wait(1000);
+    cy.get('#chat-input').should('be.visible');
 
     // Verify the profile has been changed
     submitMessage('hello');

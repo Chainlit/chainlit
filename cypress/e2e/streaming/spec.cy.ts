@@ -8,12 +8,14 @@ function messageStream(index: number) {
 }
 
 function toolStream(tool: string) {
-  const toolCall = cy.get(`#step-${tool}`);
-  toolCall.click();
+  cy.get(`#step-${tool}`).click();
   for (const token of tokenList) {
-    toolCall.parent().parent().should('contain', token);
+    cy.get(`#step-${tool}`).parent().parent().should('contain', token);
   }
-  toolCall.parent().parent().should('contain', tokenList.join(' '));
+  cy.get(`#step-${tool}`)
+    .parent()
+    .parent()
+    .should('contain', tokenList.join(' '));
 }
 
 describe('Streaming', () => {

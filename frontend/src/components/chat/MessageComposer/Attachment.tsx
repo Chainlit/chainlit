@@ -11,7 +11,7 @@ import {
 
 interface AttachmentProps {
   name: string;
-  mime: string;
+  mime?: string;
   children?: React.ReactNode;
   file?: File;
 }
@@ -22,7 +22,7 @@ const Attachment: React.FC<AttachmentProps> = ({
   children,
   file
 }) => {
-  const isImage = useMemo(() => mime.startsWith('image/'), [mime]);
+  const isImage = useMemo(() => !!mime?.startsWith('image/'), [mime]);
   const imageUrl = useMemo(() => {
     if (isImage && file) {
       return URL.createObjectURL(file);

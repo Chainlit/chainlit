@@ -9,6 +9,7 @@ import httpx
 from slack_bolt.adapter.fastapi.async_handler import AsyncSlackRequestHandler
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 from slack_bolt.async_app import AsyncApp
+from slack_sdk.errors import SlackApiError
 
 from chainlit.config import config
 from chainlit.context import ChainlitContext, HTTPSession, context, context_var
@@ -194,12 +195,27 @@ def clean_content(message: str):
     return cleaned_text
 
 
-async def get_user(slack_user_id: str):
+async def _get_bot_profile(bot_id: str) -> dict:
+    """Fetch bot info from Slack and return a profile-like dict."""
+    try:
+        bot_info = await slack_app.client.bots_info(bot=bot_id)
+        bot = bot_info.get("bot") or {}
+        bot_name = bot.get("name", bot_id)
+        return {"real_name": bot_name}
+    except SlackApiError:
+        logger.info("Could not fetch bot info for %s", bot_id)
+        return {"real_name": bot_id}
+
+
+async def get_user(slack_user_id: str, is_bot: bool = False):
     if slack_user_id in users_by_slack_id:
         return users_by_slack_id[slack_user_id]
 
-    slack_user = await slack_app.client.users_info(user=slack_user_id)
-    slack_user_profile = slack_user["user"]["profile"]
+    if is_bot:
+        slack_user_profile = await _get_bot_profile(slack_user_id)
+    else:
+        slack_user = await slack_app.client.users_info(user=slack_user_id)
+        slack_user_profile = slack_user["user"]["profile"]
 
     user_identifier = slack_user_profile.get("email") or slack_user_id
     user = User(identifier=USER_PREFIX + user_identifier, metadata=slack_user_profile)
@@ -301,7 +317,21 @@ async def process_slack_message(
 ):
     await add_reaction_if_enabled(event)
 
-    user = await get_user(event["user"])
+    slack_user_id = event.get("user")
+    is_bot = False
+    if not slack_user_id:
+        # Workflow or bot messages may not have a "user" field.
+        # Fall back to bot_id if available, otherwise skip processing.
+        slack_user_id = event.get("bot_id")
+        if not slack_user_id:
+            logger.warning(
+                "Skipping Slack message with no user or bot_id: %s",
+                event.get("subtype"),
+            )
+            return
+        is_bot = True
+
+    user = await get_user(slack_user_id, is_bot=is_bot)
 
     channel_id = event["channel"]
 
@@ -377,6 +407,11 @@ async def handle_app_mentions(event, say):
 
 @slack_app.event("message")
 async def handle_message(message, say):
+    # Ignore bot/workflow messages in DMs — only human messages should be
+    # processed here. Workflow mentions are handled via app_mention instead.
+    if message.get("bot_id") or message.get("subtype") == "bot_message":
+        return
+
     thread_ts = message.get("thread_ts", message["ts"])
     thread_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, thread_ts))
 

@@ -1,3 +1,4 @@
+import json
 import uuid
 from unittest.mock import AsyncMock
 
@@ -6,6 +7,7 @@ import pytest
 from chainlit.element import (
     Audio,
     CustomElement,
+    Dataframe,
     Element,
     ElementDict,
     File,
@@ -311,6 +313,31 @@ class TestFileElement:
 
             assert file.content == content
 
+    async def test_file_mime_falls_back_to_filename(self, mock_chainlit_context):
+        """Text-based content has no magic bytes, so filetype.guess() returns
+        None. send() should fall back to filename-based detection instead of
+        persisting a null mime (which crashed thread rendering, see #2938)."""
+        async with mock_chainlit_context:
+            file = File(name="notes.md", content=b"# hello\nmarkdown content")
+
+            await file.send(for_id="message_123")
+
+            assert file.mime == "text/markdown"
+
+    async def test_file_mime_falls_back_to_path_filename(
+        self, mock_chainlit_context, tmp_path
+    ):
+        """When only a path is provided, the filename fallback uses the path."""
+        csv_path = tmp_path / "export.csv"
+        csv_path.write_text("a,b\n1,2\n")
+
+        async with mock_chainlit_context:
+            file = File(name="data", path=str(csv_path))
+
+            await file.send(for_id="message_123")
+
+            assert file.mime == "text/csv"
+
 
 @pytest.mark.asyncio
 class TestTaskListElement:
@@ -495,3 +522,110 @@ class TestElementEdgeCases:
 
             ids = {element1.id, element2.id, element3.id}
             assert len(ids) == 3  # All unique
+
+
+@pytest.mark.asyncio
+class TestDataframeElement:
+    """Test suite for Dataframe element."""
+
+    async def test_dataframe_with_pandas(self, mock_chainlit_context):
+        """Test Dataframe element with a pandas DataFrame."""
+        import pandas as pd
+
+        async with mock_chainlit_context:
+            df = pd.DataFrame({"a": [4, 2, 0], "b": ["foo", "bar", "baz"]})
+            element = Dataframe(name="test_df", data=df)
+
+            assert element.type == "dataframe"
+            assert element.size == "large"
+
+            parsed = json.loads(element.content)
+            assert parsed["columns"] == ["a", "b"]
+            assert parsed["data"] == [[4, "foo"], [2, "bar"], [0, "baz"]]
+            assert parsed["index"] == [0, 1, 2]
+
+    async def test_dataframe_with_polars(self, mock_chainlit_context):
+        """Test Dataframe element with a polars DataFrame."""
+        import polars as pl
+
+        async with mock_chainlit_context:
+            df = pl.DataFrame({"a": [4, 2, 0], "b": ["foo", "bar", "baz"]})
+            element = Dataframe(name="test_df", data=df)
+
+            assert element.type == "dataframe"
+            assert element.size == "large"
+
+            parsed = json.loads(element.content)
+            assert parsed["columns"] == ["a", "b"]
+            assert parsed["data"] == [[4, "foo"], [2, "bar"], [0, "baz"]]
+            assert parsed["index"] == [0, 1, 2]
+
+    async def test_dataframe_with_invalid_data(self, mock_chainlit_context):
+        """Test Dataframe element rejects non-DataFrame data."""
+        async with mock_chainlit_context:
+            with pytest.raises(
+                TypeError,
+                match=r"data must be a pandas\.DataFrame or polars\.DataFrame",
+            ):
+                Dataframe(name="test_df", data={"a": [1, 2]})
+
+    async def test_dataframe_polars_and_pandas_produce_equal_outputs(
+        self, mock_chainlit_context
+    ):
+        """Test that pandas and polars DataFrames produce the same JSON."""
+        import pandas as pd
+        import polars as pl
+
+        async with mock_chainlit_context:
+            pd_df = pd.DataFrame({"a": [4, 2, 0], "b": ["foo", "bar", "baz"]})
+            pl_df = pl.DataFrame({"a": [4, 2, 0], "b": ["foo", "bar", "baz"]})
+
+            pd_element = Dataframe(name="pd_df", data=pd_df)
+            pl_element = Dataframe(name="pl_df", data=pl_df)
+
+            pd_parsed = json.loads(pd_element.content)
+            pl_parsed = json.loads(pl_element.content)
+
+            assert pd_parsed["columns"] == pl_parsed["columns"]
+            assert pd_parsed["index"] == pl_parsed["index"]
+            assert pd_parsed["data"] == pl_parsed["data"]
+
+    async def test_dataframe_polars_with_dates(self, mock_chainlit_context):
+        """Test Dataframe element with polars date columns serializes correctly."""
+        from datetime import date
+
+        import polars as pl
+
+        async with mock_chainlit_context:
+            df = pl.DataFrame(
+                {"date": [date(2026, 1, 1), date(2025, 12, 31)], "val": [1, 2]}
+            )
+            element = Dataframe(name="test_df", data=df)
+
+            parsed = json.loads(element.content)
+            assert parsed["columns"] == ["date", "val"]
+            assert len(parsed["data"]) == 2
+            assert parsed["data"][0][0] == "2026-01-01"
+            assert parsed["data"][1][0] == "2025-12-31"
+
+
+@pytest.mark.asyncio
+async def test_from_dict_pdf_reconstructs_pdf(mock_chainlit_context):
+    """A PDF upload (infer_type_from_mime -> 'pdf') must reconstruct as a Pdf element."""
+    async with mock_chainlit_context:
+        mime = "application/pdf"
+        e_dict = {
+            "id": "abc",
+            "name": "report.pdf",
+            "path": "/tmp/report.pdf",
+            "chainlitKey": "abc",
+            "display": "inline",
+            "type": Element.infer_type_from_mime(mime),
+            "mime": mime,
+            "page": 3,
+        }
+        assert e_dict["type"] == "pdf"
+        el = Element.from_dict(e_dict)
+        assert isinstance(el, Pdf)
+        assert el.type == "pdf"
+        assert el.page == 3

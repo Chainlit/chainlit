@@ -8,6 +8,7 @@ import {
   useConfig
 } from '@chainlit/react-client';
 
+import Icon from '@/components/Icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -21,9 +22,10 @@ interface Props {
   author?: string;
   hide?: boolean;
   isError?: boolean;
+  iconName?: string;
 }
 
-const MessageAvatar = ({ author, hide, isError }: Props) => {
+const MessageAvatar = ({ author, hide, isError, iconName }: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
   const { config } = useConfig();
@@ -55,25 +57,32 @@ const MessageAvatar = ({ author, hide, isError }: Props) => {
     );
   }
 
+  // Render icon or avatar based on iconName
+  const avatarContent = iconName ? (
+    <span className="inline-flex mt-[3px]">
+      <Icon name={iconName} size={avatarSize ?? 20} /> {/* 20 => h-5 w-5 */}
+    </span>
+  ) : (
+    <Avatar
+      className={avatarSize ? 'mt-[3px]' : 'h-5 w-5 mt-[3px]'}
+      style={sizeStyle}
+    >
+      <AvatarImage
+        src={avatarUrl}
+        alt={`Avatar for ${author || 'default'}`}
+        className="bg-transparent"
+      />
+      <AvatarFallback className="bg-transparent">
+        <Skeleton className="h-full w-full rounded-full" />
+      </AvatarFallback>
+    </Avatar>
+  );
+
   return (
     <span className={cn('inline-block', hide && 'invisible')}>
       <TooltipProvider>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Avatar
-              className={avatarSize ? 'mt-[3px]' : 'h-5 w-5 mt-[3px]'}
-              style={sizeStyle}
-            >
-              <AvatarImage
-                src={avatarUrl}
-                alt={`Avatar for ${author || 'default'}`}
-                className="bg-transparent"
-              />
-              <AvatarFallback className="bg-transparent">
-                <Skeleton className="h-full w-full rounded-full" />
-              </AvatarFallback>
-            </Avatar>
-          </TooltipTrigger>
+          <TooltipTrigger asChild>{avatarContent}</TooltipTrigger>
           <TooltipContent>
             <p>{author}</p>
           </TooltipContent>
