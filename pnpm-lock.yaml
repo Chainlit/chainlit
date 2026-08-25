@@ -7,17 +7,17 @@ settings:
 overrides:
   braces@<3.0.3: '>=3.0.3'
   micromatch@<4.0.8: '>=4.0.8'
-  postcss@<8.5.18: '>=8.5.18 <9.0.0'
-  brace-expansion@>=5.0.0 <5.0.8: '>=5.0.8 <6.0.0'
+  postcss@>=8.0.0 <8.5.23: '>=8.5.23 <9.0.0'
+  brace-expansion@>=5.0.0 <5.0.9: '>=5.0.9 <6.0.0'
   picomatch@>=2.0.0 <2.3.2: '>=2.3.2 <3.0.0'
-  form-data@<4.0.6: '>=4.0.6 <5.0.0'
-  flatted@<3.4.2: '>=3.4.2 <4.0.0'
-  lodash@<4.18.0: '>=4.18.0 <5.0.0'
-  undici@>=6.0.0 <6.27.0: '>=6.27.0 <7.0.0'
-  qs@<6.14.2: '>=6.14.2 <7.0.0'
-  tmp@<0.2.6: '>=0.2.6 <0.3.0'
-  yaml@<2.8.3: '>=2.8.3 <3.0.0'
-  '@babel/core@<7.29.6': '>=7.29.6 <8.0.0'
+  form-data@>=4.0.0 <4.0.6: '>=4.0.6 <5.0.0'
+  flatted@>=3.0.0 <3.4.2: '>=3.4.2 <4.0.0'
+  lodash@>=4.0.0 <4.18.0: '>=4.18.0 <5.0.0'
+  undici@>=6.0.0 <6.28.0: '>=6.28.0 <7.0.0'
+  qs@>=6.0.0 <6.15.2: '>=6.15.2 <7.0.0'
+  tmp@>=0.2.0 <0.2.7: '>=0.2.7 <0.3.0'
+  yaml@>=2.0.0 <2.8.3: '>=2.8.3 <3.0.0'
+  '@babel/core@>=7.0.0 <7.29.6': '>=7.29.6 <8.0.0'
 
 importers:
 
@@ -1058,7 +1058,7 @@ packages:
     resolution: {integrity: sha512-bEOVpHU9picRZux5XnwGsmCN4+8oZo7vSW0O0/Enq/TO5R2pIAP2279NsszpJR7ocnQt4WXU0+nnh/0JuK4KHQ==}
     engines: {node: ^14.0.0 || >=16.0.0}
     peerDependencies:
-      postcss: '>=8.5.18 <9.0.0'
+      postcss: '>=8.5.23 <9.0.0'
 
   detective-sass@6.0.1:
     resolution: {integrity: sha512-jSGPO8QDy7K7pztUmGC6aiHkexBQT4GIH+mBAL9ZyBmnUIOFbkfZnO8wPRRJFP/QP83irObgsZHCoDHZ173tRw==}
@@ -1997,7 +1997,7 @@ packages:
     resolution: {integrity: sha512-YLJpK0N1brcNJrs9WatuJFtHaV9q5aAOj+S4DI5S7jgHlRfm0PIbDCAFRYMQD5SHq7Fy6xsDhyutgS0QOAs0qw==}
     engines: {node: '>=10'}
     peerDependencies:
-      postcss: '>=8.5.18 <9.0.0'
+      postcss: '>=8.5.23 <9.0.0'
 
   postcss@8.5.25:
     resolution: {integrity: sha512-DTPx3RWSSnWyzLxQnlH0rJP+EW5ekl16ZU4/psbIhA0e53kJfdgaN5vKM+xP7yJtXVu+nfdVFmlgFDEKAe4Pyw==}
@@ -2438,6 +2438,7 @@ packages:
 
   uuid@8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
     hasBin: true
 
   v8-compile-cache-lib@3.0.1:
