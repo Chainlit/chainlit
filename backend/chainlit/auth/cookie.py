@@ -1,8 +1,9 @@
 import os
-from typing import Literal, Optional, cast
+from typing import Any, Literal, Optional, cast
 
 from fastapi import Request, Response
 from fastapi.exceptions import HTTPException
+from fastapi.openapi.models import OAuth2 as OAuth2Model, OAuthFlows as OAuthFlowsModel
 from fastapi.security.base import SecurityBase
 from fastapi.security.utils import get_authorization_scheme_param
 from starlette.status import HTTP_401_UNAUTHORIZED
@@ -48,6 +49,11 @@ class OAuth2PasswordBearerWithCookie(SecurityBase):
         self.tokenUrl = tokenUrl
         self.scheme_name = scheme_name or self.__class__.__name__
         self.auto_error = auto_error
+        self.model = OAuth2Model(
+            flows=OAuthFlowsModel(
+                password=cast(Any, {"tokenUrl": tokenUrl, "scopes": {}})
+            )
+        )
 
     async def __call__(self, request: Request) -> Optional[str]:
         # First try to get the token from the cookie

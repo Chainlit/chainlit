@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue } from 'recoil';
 
 import { useApi, useAuth } from './api';
-import { configState, chatProfileState } from './state';
+import { chatProfileState, configState } from './state';
 import { IChainlitConfig } from './types';
 
 const useConfig = () => {

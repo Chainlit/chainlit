@@ -1,4 +1,5 @@
 import datetime
+import logging
 import os
 import pathlib
 from pathlib import Path
@@ -1041,6 +1042,49 @@ def test_project_settings_thread_sharing_flag(
     assert resp.json().get("threadSharing") is True
 
 
+def test_project_settings_forwards_chat_profile_to_starter_categories(
+    test_client: TestClient,
+    test_config: ChainlitConfig,
+    mock_get_current_user: Mock,
+):
+    """Test that /project/settings forwards chat_profile to set_starter_categories."""
+    from chainlit.types import Starter, StarterCategory
+    from chainlit.utils import wrap_user_function
+
+    async def _get_starter_categories(user, language, chat_profile):
+        if chat_profile == "creative":
+            return [
+                StarterCategory(
+                    label="Writing",
+                    starters=[Starter(label="Write a poem", message="poem")],
+                ),
+            ]
+        return [
+            StarterCategory(
+                label="General",
+                starters=[Starter(label="Hello", message="hello")],
+            ),
+        ]
+
+    test_config.code.set_starter_categories = wrap_user_function(
+        _get_starter_categories
+    )
+
+    response = test_client.get("/project/settings", params={"chat_profile": "creative"})
+    assert response.status_code == 200
+    categories = response.json()["starterCategories"]
+    assert len(categories) == 1
+    assert categories[0]["label"] == "Writing"
+    assert categories[0]["starters"][0]["label"] == "Write a poem"
+
+    response = test_client.get("/project/settings")
+    assert response.status_code == 200
+    categories = response.json()["starterCategories"]
+    assert len(categories) == 1
+    assert categories[0]["label"] == "General"
+    assert categories[0]["starters"][0]["label"] == "Hello"
+
+
 def test_share_thread_endpoint_sets_flags(
     test_client: TestClient,
     monkeypatch: pytest.MonkeyPatch,
@@ -1109,3 +1153,178 @@ def test_health_check(test_client: TestClient):
     response = test_client.get("/health")
     assert response.status_code == 200
     assert response.json() == {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# OAuth callback redirect tests (regression for #1273)
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def mock_oauth_provider(monkeypatch: pytest.MonkeyPatch):
+    """Return a mock OAuthProvider and patch it into chainlit.server."""
+    from chainlit.user import User
+
+    provider = Mock()
+    provider.id = "github"
+    provider.get_token = AsyncMock(return_value="mock_token")
+    provider.get_user_info = AsyncMock(
+        return_value=({"login": "user"}, User(identifier="user"))
+    )
+    monkeypatch.setattr("chainlit.server.get_oauth_provider", lambda _: provider)
+    return provider
+
+
+def test_oauth_callback_provider_error_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """Provider-returned error param already redirects — guard the existing path."""
+    test_config.code.oauth_callback = AsyncMock()
+    response = test_client.get(
+        "/auth/oauth/github/callback?error=access_denied",
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    assert "error=oauthSignin" in response.headers["location"]
+
+
+def test_oauth_callback_missing_code_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """Missing code/state → redirect instead of 400 JSON (regression for #1273)."""
+    test_config.code.oauth_callback = AsyncMock()
+    response = test_client.get(
+        "/auth/oauth/github/callback",
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    assert "error=oauthSignin" in response.headers["location"]
+
+
+def test_oauth_callback_invalid_state_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """Invalid state cookie → redirect instead of 401 JSON (regression for #1273)."""
+    test_config.code.oauth_callback = AsyncMock()
+    # No oauth_state cookie set, so state validation will fail
+    response = test_client.get(
+        "/auth/oauth/github/callback?code=fake_code&state=fake_state",
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    assert "error=oauthSignin" in response.headers["location"]
+
+
+def test_oauth_callback_get_token_error_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """get_token exception → redirect instead of 500 (regression for #1273)."""
+    test_config.code.oauth_callback = AsyncMock()
+    mock_oauth_provider.get_token = AsyncMock(side_effect=Exception("provider down"))
+    response = test_client.get(
+        "/auth/oauth/github/callback?code=fake_code&state=valid_state",
+        cookies={"oauth_state": "valid_state"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    assert "error=oauthSignin" in response.headers["location"]
+
+
+def test_oauth_callback_none_user_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """oauth_callback returns None → redirect instead of 401 JSON (regression for #1273)."""
+    test_config.code.oauth_callback = AsyncMock(return_value=None)
+    response = test_client.get(
+        "/auth/oauth/github/callback?code=fake_code&state=valid_state",
+        cookies={"oauth_state": "valid_state"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 302
+    assert "error=oauthSignin" in response.headers["location"]
+
+
+# ---------------------------------------------------------------------------
+# Azure AD hybrid flow redirect tests (regression for #1273)
+# ---------------------------------------------------------------------------
+
+
+def test_oauth_azure_hf_callback_missing_code_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """Missing code in Azure hybrid flow → redirect instead of 400 JSON (regression for #1273)."""
+    test_config.code.oauth_callback = AsyncMock()
+    response = test_client.post(
+        "/auth/oauth/azure-ad-hybrid/callback",
+        data={},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]
+
+
+def test_oauth_azure_hf_callback_form_error_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+    caplog: pytest.LogCaptureFixture,
+):
+    """Azure posts errors as form fields (response_mode=form_post), not query params."""
+    test_config.code.oauth_callback = AsyncMock()
+    with caplog.at_level(logging.WARNING, logger="chainlit"):
+        response = test_client.post(
+            "/auth/oauth/azure-ad-hybrid/callback",
+            data={"error": "access_denied"},
+            follow_redirects=False,
+        )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]
+    assert any(
+        "returned error: access_denied" in record.getMessage()
+        for record in caplog.records
+    )
+
+
+def test_oauth_azure_hf_callback_get_token_error_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """get_token exception in Azure hybrid flow → redirect instead of 500 (regression for #1273)."""
+    test_config.code.oauth_callback = AsyncMock()
+    mock_oauth_provider.get_token = AsyncMock(side_effect=Exception("provider down"))
+    response = test_client.post(
+        "/auth/oauth/azure-ad-hybrid/callback",
+        data={"code": "fake_code"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]
+
+
+def test_oauth_azure_hf_callback_none_user_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """oauth_callback returns None in Azure hybrid flow → redirect (regression for #1273)."""
+    test_config.code.oauth_callback = AsyncMock(return_value=None)
+    response = test_client.post(
+        "/auth/oauth/azure-ad-hybrid/callback",
+        data={"code": "fake_code"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]

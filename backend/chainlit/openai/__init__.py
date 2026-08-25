@@ -24,7 +24,7 @@ def instrument_openai():
         parent_id = previous_steps[-1].id if previous_steps else None
 
         step = Step(
-            name=generation.model if generation.model else generation.provider,
+            name=generation.model or generation.provider,
             type="llm",
             parent_id=parent_id,
         )

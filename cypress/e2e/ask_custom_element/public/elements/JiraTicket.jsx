@@ -1,10 +1,24 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import React, { useEffect, useMemo, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function JiraTicket() {
   const [timeLeft, setTimeLeft] = useState(props.timeout || 30);
@@ -40,10 +54,19 @@ export default function JiraTicket() {
     const value = values[field.id];
     switch (field.type) {
       case 'textarea':
-        return <Textarea id={field.id} value={value} onChange={(e) => handleChange(field.id, e.target.value)} />;
+        return (
+          <Textarea
+            id={field.id}
+            value={value}
+            onChange={(e) => handleChange(field.id, e.target.value)}
+          />
+        );
       case 'select':
         return (
-          <Select value={value} onValueChange={(val) => handleChange(field.id, val)}>
+          <Select
+            value={value}
+            onValueChange={(val) => handleChange(field.id, val)}
+          >
             <SelectTrigger id={field.id}>
               <SelectValue placeholder={field.label} />
             </SelectTrigger>
@@ -57,19 +80,44 @@ export default function JiraTicket() {
           </Select>
         );
       case 'date':
-        return <Input type="date" id={field.id} value={value} onChange={(e) => handleChange(field.id, e.target.value)} />;
+        return (
+          <Input
+            type="date"
+            id={field.id}
+            value={value}
+            onChange={(e) => handleChange(field.id, e.target.value)}
+          />
+        );
       case 'datetime':
-        return <Input type="datetime-local" id={field.id} value={value} onChange={(e) => handleChange(field.id, e.target.value)} />;
+        return (
+          <Input
+            type="datetime-local"
+            id={field.id}
+            value={value}
+            onChange={(e) => handleChange(field.id, e.target.value)}
+          />
+        );
       default:
-        return <Input id={field.id} value={value} onChange={(e) => handleChange(field.id, e.target.value)} />;
+        return (
+          <Input
+            id={field.id}
+            value={value}
+            onChange={(e) => handleChange(field.id, e.target.value)}
+          />
+        );
     }
   };
 
   return (
-    <Card id="jira-ticket" className="mt-4 w-full max-w-3xl grid grid-cols-2 gap-4">
+    <Card
+      id="jira-ticket"
+      className="mt-4 w-full max-w-3xl grid grid-cols-2 gap-4"
+    >
       <CardHeader className="col-span-2">
         <CardTitle>Create JIRA Ticket</CardTitle>
-        <CardDescription>Provide details for the new issue. {timeLeft}s left</CardDescription>
+        <CardDescription>
+          Provide details for the new issue. {timeLeft}s left
+        </CardDescription>
       </CardHeader>
       <CardContent className="col-span-2 grid grid-cols-2 gap-4">
         {props.fields.map((field) => (
@@ -83,7 +131,11 @@ export default function JiraTicket() {
         ))}
       </CardContent>
       <CardFooter className="col-span-2 flex justify-end gap-2">
-        <Button id="ticket-cancel" variant="outline" onClick={() => cancelElement()}>
+        <Button
+          id="ticket-cancel"
+          variant="outline"
+          onClick={() => cancelElement()}
+        >
           Cancel
         </Button>
         <Button

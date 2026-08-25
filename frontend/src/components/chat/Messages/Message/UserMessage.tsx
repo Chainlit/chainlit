@@ -1,7 +1,7 @@
 import { cn } from '@/lib/utils';
 import { MessageContext } from 'contexts/MessageContext';
-import { memo, useContext, useMemo, useState } from 'react';
 import { Star } from 'lucide-react';
+import { memo, useContext, useMemo, useState } from 'react';
 import { useSetRecoilState } from 'recoil';
 
 import {

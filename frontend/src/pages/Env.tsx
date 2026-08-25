@@ -86,7 +86,7 @@ const Env = () => {
                   <Label htmlFor={key}>{key}</Label>
                   <Input
                     id={key}
-                    type={config?.maskUserEnv !== false ? "password" : "text"}
+                    type={config?.maskUserEnv !== false ? 'password' : 'text'}
                     {...register(key)}
                     className={
                       touchedFields[key] && errors[key] ? 'border-red-500' : ''

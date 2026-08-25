@@ -15,13 +15,13 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
     - [Requirements](#requirements)
     - [Set up the repo](#set-up-the-repo)
     - [Install dependencies](#install-dependencies)
-    - [Build Frontend](#build-frontend)
   - [Start the Chainlit server from source](#start-the-chainlit-server-from-source)
   - [Start the UI from source](#start-the-ui-from-source)
+  - [Lint \& Format](#lint--format)
   - [Run the tests](#run-the-tests)
     - [Backend unit tests](#backend-unit-tests)
+    - [Frontend unit tests](#frontend-unit-tests)
     - [E2E tests](#e2e-tests)
-    - [Headed/debugging](#headeddebugging)
 
 ## Local setup
 
@@ -33,7 +33,7 @@ I've copy/pasted the whole document there, and then formatted it with prettier.
 4. Pnpm ([See how to install](https://pnpm.io/installation))
 
 > **Note**
-> If you are on windows, some pnpm commands like `pnpm run formatPython` won't work. You can fix this by changing the pnpm script-shell to bash: `pnpm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"` (default x64 install location, [Info](https://pnpm.io/cli/run#script-shell))
+> If you are on Windows, some pnpm commands won't work out of the box. You can fix this by changing the pnpm script-shell to bash: `pnpm config set script-shell "C:\\Program Files\\git\\bin\\bash.exe"` (default x64 install location, [Info](https://pnpm.io/cli/run#script-shell))
 
 ### Set up the repo
 
@@ -75,8 +75,7 @@ $ git remote -v
 The following command will install Python dependencies, Node (pnpm) dependencies and build the frontend.
 
 ```sh
-cd backend
-uv sync --extra tests --extra mypy --extra dev --extra custom-data
+uv sync --all-packages --all-extras --dev
 ```
 
 ## Start the Chainlit server from source
@@ -84,8 +83,7 @@ uv sync --extra tests --extra mypy --extra dev --extra custom-data
 Start by running `backend/chainlit/sample/hello.py` as an example.
 
 ```sh
-cd backend
-uv run chainlit run chainlit/sample/hello.py
+uv run chainlit run backend/chainlit/sample/hello.py
 ```
 
 You should now be able to access the Chainlit app you just launched on `http://127.0.0.1:8000`.
@@ -105,6 +103,45 @@ pnpm run dev
 
 If you visit `http://localhost:5173/`, it should connect to your local server. If the local server is not running, it should say that it can't connect to the server.
 
+## Lint & Format
+
+Linting and formatting run from the **repo root** (not from individual packages). This ensures CI, lint-staged, and local commands all use the same tool invocation.
+
+```sh
+# Lint (CI uses this)
+pnpm lint
+
+# Lint and auto-fix
+pnpm lint:fix
+
+# Check formatting (CI uses this)
+pnpm format-check
+
+# Fix formatting
+pnpm format
+
+# Type check (TypeScript)
+pnpm type-check
+
+# Scope to specific files or directories
+pnpm lint frontend/src/App.tsx
+pnpm lint:fix frontend/
+pnpm format-check:files frontend/
+pnpm format:files frontend/src/App.tsx
+
+# Python (wrapper scripts for linting, formatting, and type checking)
+uv run scripts/lint.py                              # lint all
+uv run scripts/lint.py backend/chainlit/server.py   # lint single file
+uv run scripts/lint.py --fix                        # automatically fix linting issues
+uv run scripts/format.py                            # format all
+uv run scripts/format.py backend/chainlit/server.py # format single file
+uv run scripts/format.py --check                    # check formatting
+uv run scripts/type_check.py                        # check types (whole project, no per-file mode)
+```
+
+> **Note**
+> Linting and formatting scripts are defined only at the workspace root. Running `pnpm lint` from a sub-package directory won't work — always run from the repo root, passing a path argument to scope: `pnpm lint frontend/`.
+
 ## Run the tests
 
 ### Backend unit tests
@@ -116,6 +153,14 @@ cd backend
 uv run pytest --cov=chainlit
 ```
 
+### Frontend unit tests
+
+This will run the frontend's unit tests.
+
+```
+pnpm test
+```
+
 ### E2E tests
 
 You may need additional configuration or dependency installation to run Cypress. See the [Cypress system requirements](https://docs.cypress.io/app/get-started/install-cypress#System-requirements) for details.
@@ -124,12 +169,12 @@ This will run end to end tests, assessing both the frontend, the backend and the
 
 ```sh
 // from root
-pnpm test // will do cypress run
-pnpm test -- --spec cypress/e2e/copilot // will run single test with the name copilot
-pnpm test -- --spec "cypress/e2e/copilot,cypress/e2e/data_layer" // will run two tests with the names copilot and data_layer
-pnpm test -- --spec "cypress/e2e/**/async-*" // will run all async tests
-pnpm test -- --spec "cypress/e2e/**/sync-*" // will run all sync tests
-pnpm test -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
+pnpm test:e2e # will do cypress run
+pnpm test:e2e --spec cypress/e2e/copilot # will run single test with the name copilot
+pnpm test:e2e --spec "cypress/e2e/copilot,cypress/e2e/data_layer" # will run two tests with the names copilot and data_layer
+pnpm test:e2e --spec "cypress/e2e/**/async-*" # will run all async tests
+pnpm test:e2e --spec "cypress/e2e/**/sync-*" # will run all sync tests
+pnpm test:e2e --spec "cypress/e2e/**/spec.cy.ts" # will run all usual tests
 ```
 
 (Go grab a cup of something, this will take a while.)
@@ -137,18 +182,7 @@ pnpm test -- --spec "cypress/e2e/**/spec.cy.ts" // will run all usual tests
 For debugging purposes, you can use the **interactive mode** (Cypress UI). Run:
 
 ```
-pnpm test:interactive // runs `cypress open`
+pnpm test:e2e:interactive # runs `cypress open`
 ```
 
 Once you create a pull request, the tests will automatically run. It is a good practice to run the tests locally before pushing.
-
-Make sure to run `uv sync` again whenever you've updated the frontend!
-
-### Headed/debugging
-
-Causes the Electron browser to be shown on screen and keeps it open after tests are done.
-Extremely useful for debugging!
-
-```sh
-SINGLE_TEST=password_auth CYPRESS_OPTIONS='--headed --no-exit' pnpm test
-```

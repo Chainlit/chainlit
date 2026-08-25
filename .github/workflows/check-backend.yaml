@@ -1,0 +1,29 @@
+name: Check backend
+
+on: [workflow_call]
+
+permissions:
+  contents: read
+
+jobs:
+  check-backend:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: 'Linting: backend'
+            command: uv run --no-project scripts/lint.py
+          - name: 'Formatting: backend'
+            command: uv run --no-project scripts/format.py --check
+          - name: 'Type checking: backend'
+            command: uv run --no-project scripts/type_check.py
+    name: ${{ matrix.name }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/uv-python-install
+        name: Install Python, uv and Python dependencies
+        with:
+          uv-args: --no-install-workspace --all-extras --dev
+      - name: ${{ matrix.name }}
+        run: ${{ matrix.command }}

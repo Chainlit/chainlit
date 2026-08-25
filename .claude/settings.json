@@ -2,7 +2,7 @@
   "permissions": {
     "allow": [
       "Bash(tsc --noEmit)",
-      "Bash(uv run dmypy*)",
+      "Bash(uv run mypy*)",
       "Bash(uv run pytest*)",
       "Bash(uv run ruff*)",
       "Bash(uv run scripts/*)",
@@ -13,5 +13,8 @@
       "Bash(pnpm test*)",
       "Bash(pnpm run test*)"
     ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
   }
 }

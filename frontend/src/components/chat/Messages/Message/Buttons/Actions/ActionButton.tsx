@@ -33,8 +33,8 @@ const ActionButton = ({ action }: ActionProps) => {
     return action.icon
       ? action.label
       : action.label
-      ? action.label
-      : action.name;
+        ? action.label
+        : action.name;
   }, [action]);
 
   const icon = useMemo(() => {
