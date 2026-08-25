@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from contextlib import AsyncExitStack, asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
 
 import socketio
 from fastapi import (
@@ -491,14 +491,19 @@ def _get_auth_response(access_token: str, redirect_to_callback: bool) -> Respons
     return JSONResponse(response_dict)
 
 
-def _get_oauth_redirect_error(request: Request, error: str) -> Response:
+def _get_oauth_redirect_error(
+    request: Request, error: str, status_code: int = 302
+) -> Response:
     """Get the redirect response for an OAuth error."""
     params = urllib.parse.urlencode(
         {
             "error": error,
         }
     )
-    response = RedirectResponse(url=str(request.url_for("login")) + "?" + params)
+    response = RedirectResponse(
+        url=str(request.url_for("login")) + "?" + params,
+        status_code=status_code,
+    )
     return response
 
 
@@ -665,32 +670,33 @@ async def oauth_callback(
         )
 
     if error:
-        return _get_oauth_redirect_error(request, error)
+        logger.warning("OAuth provider %s returned error: %s", provider_id, error)
+        return _get_oauth_redirect_error(request, "oauthSignin")
 
     if not code or not state:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Missing code or state",
-        )
+        return _get_oauth_redirect_error(request, "oauthSignin")
 
     try:
         validate_oauth_state_cookie(request, state)
     except Exception as e:
-        logger.exception("Unable to validate oauth state: %s", e)
-
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Unauthorized",
-        )
+        logger.warning("Unable to validate oauth state: %s", e, exc_info=True)
+        return _get_oauth_redirect_error(request, "oauthSignin")
 
     url = get_user_facing_url(request.url)
-    token = await provider.get_token(code, url)
+    try:
+        token = await provider.get_token(code, url)
+        (raw_user_data, default_user) = await provider.get_user_info(token)
+        user = await config.code.oauth_callback(
+            provider_id, token, raw_user_data, default_user
+        )
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:
+        logger.exception("OAuth callback error: %s", e)
+        return _get_oauth_redirect_error(request, "oauthSignin")
 
-    (raw_user_data, default_user) = await provider.get_user_info(token)
-
-    user = await config.code.oauth_callback(
-        provider_id, token, raw_user_data, default_user
-    )
+    if not user:
+        return _get_oauth_redirect_error(request, "oauthSignin")
 
     response = await _authenticate_user(request, user, redirect_to_callback=True)
 
@@ -704,10 +710,15 @@ async def oauth_callback(
 async def oauth_azure_hf_callback(
     request: Request,
     error: Optional[str] = None,
+    form_error: Annotated[Optional[str], Form(alias="error")] = None,
     code: Annotated[Optional[str], Form()] = None,
     id_token: Annotated[Optional[str], Form()] = None,
 ):
     """Handle the azure ad hybrid flow callback and login the user."""
+
+    # This provider uses response_mode=form_post, so the provider posts `error`
+    # as a form field. Keep accepting it as a query param for backward compat.
+    error = error or form_error
 
     provider_id = "azure-ad-hybrid"
     if config.code.oauth_callback is None:
@@ -724,22 +735,27 @@ async def oauth_azure_hf_callback(
         )
 
     if error:
-        return _get_oauth_redirect_error(request, error)
+        logger.warning("OAuth provider %s returned error: %s", provider_id, error)
+        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
 
     if not code:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Missing code",
-        )
+        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
 
     url = get_user_facing_url(request.url)
-    token = await provider.get_token(code, url)
+    try:
+        token = await provider.get_token(code, url)
+        (raw_user_data, default_user) = await provider.get_user_info(token)
+        user = await config.code.oauth_callback(
+            provider_id, token, raw_user_data, default_user, id_token
+        )
+    except asyncio.CancelledError:
+        raise
+    except Exception as e:
+        logger.exception("OAuth callback error: %s", e)
+        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
 
-    (raw_user_data, default_user) = await provider.get_user_info(token)
-
-    user = await config.code.oauth_callback(
-        provider_id, token, raw_user_data, default_user, id_token
-    )
+    if not user:
+        return _get_oauth_redirect_error(request, "oauthSignin", status_code=303)
 
     response = await _authenticate_user(request, user, redirect_to_callback=True)
 
@@ -859,10 +875,24 @@ async def project_settings(
         if current_profile and getattr(current_profile, "config_overrides", None):
             cfg = config.with_overrides(current_profile.config_overrides)
 
+    features_dict = cfg.features.model_dump()
+    # Strip sensitive details from MCP server configs — only expose name and type to clients
+    if "mcp" in features_dict and isinstance(features_dict["mcp"].get("servers"), list):
+        features_dict["mcp"]["servers"] = [
+            {"name": s.name, "type": s.type} for s in cfg.features.mcp.servers
+        ]
+    # Don't leak the SSRF allowlist (allowed_urls) to the browser — clients only need
+    # to know whether user-provided servers are enabled.
+    if "mcp" in features_dict and isinstance(
+        features_dict["mcp"].get("user_servers"), dict
+    ):
+        features_dict["mcp"]["user_servers"] = {
+            "enabled": features_dict["mcp"]["user_servers"].get("enabled", False)
+        }
     return JSONResponse(
         content={
             "ui": cfg.ui.model_dump(),
-            "features": cfg.features.model_dump(),
+            "features": features_dict,
             "userEnv": cfg.project.user_env,
             "maskUserEnv": cfg.project.mask_user_env,
             "dataPersistence": data_layer is not None,
@@ -1289,12 +1319,112 @@ async def call_action(
     return JSONResponse(content={"success": True, "response": response})
 
 
+# `env`'s flags that consume a following value. Short forms take the value
+# fused (`-uNAME`, not handled below -- see _find_leading_env_assignment) or
+# as the next argument (`-u NAME`); long forms take it fused with `=`
+# (`--unset=NAME`) or as the next argument (`--unset NAME`). Only the
+# next-argument forms need special handling here: the fused forms already
+# read as a single token and are skipped like any other flag.
+_ENV_FLAGS_WITH_ARG = {"-u", "--unset", "-C", "--chdir", "-S", "--split-string"}
+
+
+def _find_leading_env_assignment(parts: List[str]) -> Optional[str]:
+    """Return the first `KEY=value`-shaped token before the actual command in
+    a shlex-split MCP stdio command, or None if there isn't one.
+
+    Only a bare `env` prefix is unwrapped (`parts[0] == "env"`); any other
+    command is inspected only at its first token, matching the plain
+    `FOO=bar cmd` case.
+
+    Walks past `env`'s own flags (`-i`, `--ignore-environment`, `-u NAME`,
+    `--unset=NAME`, `-C DIR`, `-S STRING`, ...) before looking for the
+    assignment, so `env -i FOO=bar cmd` and `env -u OTHER FOO=bar cmd` are
+    caught -- a fixed-width lookahead over the first one or two tokens misses
+    both, because the flag shifts the assignment further down the argument
+    list. A flag consumes one extra token only when it's one of
+    `_ENV_FLAGS_WITH_ARG` *and* its value isn't fused on with `=`.
+
+    Deliberately NOT handled: fused short-option values (`-uNAME`), GNU's
+    `--split-string` re-splitting semantics, combined short options
+    (`-iu NAME`), and a `--` end-of-options marker. None of those are
+    realistic in a Chainlit MCP server `command`, and guessing wrong would
+    either miss a real assignment or reject a legitimate command. The first
+    token that isn't a recognised flag and isn't `KEY=value`-shaped ends the
+    scan -- that's the actual command -- so an unrecognised flag can in
+    theory cause a later assignment to be missed, same as the original
+    fixed-width check did for anything past its lookahead window.
+    """
+    if not parts:
+        return None
+    if parts[0] != "env":
+        return parts[0] if "=" in parts[0] else None
+
+    idx = 1
+    while idx < len(parts):
+        part = parts[idx]
+        if part.startswith("-") and part != "-":
+            flag = part.split("=", 1)[0]
+            if flag in _ENV_FLAGS_WITH_ARG and "=" not in part:
+                idx += 2  # value is a separate token, e.g. `-u NAME`
+            else:
+                idx += 1  # value fused in (`--unset=NAME`), or a no-arg flag
+            continue
+        if "=" in part:
+            return part
+        break  # first non-flag, non-assignment token is the command itself
+
+    return None
+
+
+def _unwrap_mcp_error(exc: BaseException) -> BaseException:
+    """Return the most informative exception inside exc.
+
+    The SSE / streamable-http transports run their read/write loops in an
+    anyio TaskGroup, so failures reach the caller wrapped in an
+    (Base)ExceptionGroup. Reporting that verbatim gives the operator
+    "unhandled errors in a TaskGroup (1 sub-exception)" and nothing else.
+
+    Prefer our own McpDestinationError, since "the destination was outside
+    the allowlist" is the most actionable thing we can say. Failing that,
+    peel the group wrappers so the real cause (a connection error, a bad
+    status) surfaces instead of the wrapper.
+    """
+    from chainlit.mcp import McpDestinationError
+
+    seen: set[int] = set()
+    stack: list[BaseException] = [exc]
+    while stack:
+        current = stack.pop()
+        if id(current) in seen:
+            continue
+        seen.add(id(current))
+        if isinstance(current, McpDestinationError):
+            return current
+        sub_exceptions = getattr(current, "exceptions", None)
+        if sub_exceptions:
+            stack.extend(sub_exceptions)
+        if current.__cause__ is not None:
+            stack.append(current.__cause__)
+        if current.__context__ is not None:
+            stack.append(current.__context__)
+
+    # No destination error — unwrap group wrappers to the underlying cause.
+    current = exc
+    while True:
+        sub_exceptions = getattr(current, "exceptions", None)
+        if not sub_exceptions:
+            break
+        current = sub_exceptions[0]
+    return current
+
+
 @router.post("/mcp")
 async def connect_mcp(
     payload: ConnectMCPRequest,
     current_user: UserParam,
 ):
     import asyncio
+    import shlex
 
     from mcp import ClientSession
     from mcp.client.sse import sse_client
@@ -1305,15 +1435,24 @@ async def connect_mcp(
     )
     from mcp.client.streamable_http import streamablehttp_client
 
+    from chainlit.config import SseMcpServer, StdioMcpServer, StreamableHttpMcpServer
     from chainlit.context import init_ws_context
     from chainlit.mcp import (
+        _MCP_CONNECT_TIMEOUT_HTTP,
+        _MCP_CONNECT_TIMEOUT_STDIO,
         HttpMcpConnection,
         McpConnection,
+        McpDestinationError,
+        McpHttpClientFactory,
         SseMcpConnection,
         StdioMcpConnection,
-        validate_mcp_command,
+        _destination_in_allowlist,
+        _destination_on_origin,
+        make_mcp_http_client_factory,
+        validate_mcp_headers,
+        validate_mcp_url,
     )
-    from chainlit.session import McpSession, WebsocketSession
+    from chainlit.session import McpSession, WebsocketSession, stop_mcp_task
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
@@ -1335,65 +1474,126 @@ async def connect_mcp(
             detail="This app does not support MCP.",
         )
 
-    # Disconnect previous session for this name (reconnection)
-    if payload.name in session.mcp_sessions:
-        old_mcp = session.mcp_sessions.pop(payload.name)
-        if on_mcp_disconnect := config.code.on_mcp_disconnect:
-            try:
-                await on_mcp_disconnect(payload.name, old_mcp.client)
-            except Exception:
-                logger.debug(
-                    "Error in on_mcp_disconnect callback for %s",
-                    payload.name,
-                    exc_info=True,
-                )
-        try:
-            await old_mcp.close()
-        except Exception:
-            logger.debug(
-                "Error closing old MCP session %s", payload.name, exc_info=True
-            )
-
-    # ── Validate config before launching the background task ──
-    mcp_connection: McpConnection
-
-    if payload.clientType == "sse":
-        if not config.features.mcp.sse.enabled:
-            raise HTTPException(
-                status_code=400,
-                detail="SSE MCP is not enabled",
-            )
-        mcp_connection = SseMcpConnection(
-            url=payload.url,
-            name=payload.name,
-            headers=getattr(payload, "headers", None),
-        )
-    elif payload.clientType == "stdio":
-        if not config.features.mcp.stdio.enabled:
-            raise HTTPException(
-                status_code=400,
-                detail="Stdio MCP is not enabled",
-            )
-        env_from_cmd, command, args = validate_mcp_command(payload.fullCommand)
-        mcp_connection = StdioMcpConnection(
-            command=command, args=args, name=payload.name
-        )
-    elif payload.clientType == "streamable-http":
-        if not config.features.mcp.streamable_http.enabled:
-            raise HTTPException(
-                status_code=400,
-                detail="HTTP MCP is not enabled",
-            )
-        mcp_connection = HttpMcpConnection(
-            url=payload.url,
-            name=payload.name,
-            headers=getattr(payload, "headers", None),
-        )
-    else:
+    # Reject user-provided connections that try to claim a configured server's
+    # name — must run BEFORE the eviction block below, otherwise a rejected
+    # attempt would still have killed the legitimate session.
+    # Compared case-insensitively and whitespace-stripped so a near-miss name
+    # can't be used to impersonate a configured server in the UI.
+    if payload.url is not None and any(
+        s.name.strip().casefold() == payload.name.strip().casefold()
+        for s in config.features.mcp.servers
+    ):
         raise HTTPException(
             status_code=400,
-            detail=f"Unknown MCP client type: {payload.clientType}",
+            detail=(
+                f"MCP server name {payload.name!r} is reserved by a configured server "
+                "and cannot be used for a user-provided connection."
+            ),
         )
+
+    # ── Validate config before launching the background task ──
+    #
+    # Runs before the eviction block below (moved further down, right
+    # before "Store the session"): a reconnect that fails validation, fails
+    # to connect, times out, is blocked, or has its on_mcp_connect callback
+    # raise must not first kill the working session it was trying to
+    # replace. `session.mcp_sessions[name]` is written exactly once, after
+    # `on_mcp_connect` succeeds, so no two same-named sessions ever coexist
+    # under that key and no tool-name collision or emitter-ordering change
+    # results from this reordering.
+    mcp_connection: McpConnection
+    # Computed once and reused both by the destination-binding httpx factory
+    # (below) and the connect-response / error-hygiene branches (below that).
+    is_user_provided = payload.url is not None
+    # Only set for stdio named servers; merged into the spawn environment in
+    # the background runner.
+    stdio_env: Optional[Dict[str, str]] = None
+
+    try:
+        if payload.url is None:
+            # Named server: look it up in developer-configured servers
+            server_cfg = next(
+                (s for s in config.features.mcp.servers if s.name == payload.name),
+                None,
+            )
+            if server_cfg is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        f"MCP server {payload.name!r} is not configured. "
+                        "Add it to [[features.mcp.servers]] in your .chainlit/config.toml."
+                    ),
+                )
+            if isinstance(server_cfg, StdioMcpServer):
+                parts = shlex.split(server_cfg.command, posix=True)
+                if not parts:
+                    raise ValueError(f"Empty command for MCP server {payload.name!r}")
+                # Walk the leading tokens, skipping a bare `env` prefix and any
+                # of its flags, so `FOO=bar cmd`, `env FOO=bar cmd`, and
+                # `env -i FOO=bar cmd` are all caught. Without this, `-i` (or
+                # any other flag consuming a slot before the assignment) would
+                # shift `FOO=bar` past a fixed-width lookahead and slip
+                # through undetected.
+                inline_assignment = _find_leading_env_assignment(parts)
+                if inline_assignment:
+                    raise ValueError(
+                        f"MCP server {payload.name!r} command contains "
+                        f"{inline_assignment!r}, which looks like a leftover inline "
+                        "environment variable assignment (e.g. "
+                        "'KEY=value some-command args'). Move it into the "
+                        "server's `env` mapping instead, e.g.: "
+                        '[[features.mcp.servers]] ... env = { KEY = "value" }.'
+                    )
+                mcp_connection = StdioMcpConnection(
+                    command=parts[0], args=parts[1:], name=payload.name
+                )
+                # `env` is optional on StdioMcpServer; getattr keeps this
+                # working even for configs predating the field.
+                stdio_env = getattr(server_cfg, "env", None)
+            elif isinstance(server_cfg, SseMcpServer):
+                mcp_connection = SseMcpConnection(
+                    url=server_cfg.url,
+                    name=payload.name,
+                    headers=server_cfg.headers,
+                )
+            elif isinstance(server_cfg, StreamableHttpMcpServer):
+                mcp_connection = HttpMcpConnection(
+                    url=server_cfg.url,
+                    name=payload.name,
+                    headers=server_cfg.headers,
+                )
+            else:
+                raise HTTPException(
+                    status_code=500, detail="Unknown server config type"
+                )
+        else:
+            # User-provided server (SSE or streamable-http only; stdio is never user-provided)
+            if not config.features.mcp.user_servers.enabled:
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "User-provided MCP servers are not enabled. "
+                        "Set features.mcp.user_servers.enabled = true in your config."
+                    ),
+                )
+            validate_mcp_url(payload.url, config.features.mcp.user_servers.allowed_urls)
+            filtered_headers = validate_mcp_headers(payload.headers)
+            if payload.clientType == "sse":
+                mcp_connection = SseMcpConnection(
+                    url=payload.url,
+                    name=payload.name,
+                    headers=filtered_headers,
+                )
+            else:  # streamable-http
+                mcp_connection = HttpMcpConnection(
+                    url=payload.url,
+                    name=payload.name,
+                    headers=filtered_headers,
+                )
+    except HTTPException:
+        raise
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
     # ── Launch the MCP connection in its own background task ──
     #
@@ -1406,38 +1606,90 @@ async def connect_mcp(
 
     ready_event: asyncio.Event = asyncio.Event()
     stop_event: asyncio.Event = asyncio.Event()
-    # Mutable container to pass the ClientSession back from the bg task.
+    # Mutable container to pass the ClientSession (or an error) back from
+    # the bg task.
     result_holder: dict[str, object] = {}
+
+    def _record_blocked(exc: McpDestinationError) -> None:
+        # Fail-fast side channel: mcp/client/sse.py and
+        # mcp/client/streamable_http.py swallow exceptions raised from the
+        # httpx request hook (bare ``except Exception: logger.exception``,
+        # no re-raise), so a blocked destination would otherwise never
+        # reach ``ClientSession.initialize()`` and ``ready_event`` would
+        # never be set — hanging the bounded wait below until its timeout.
+        # This unblocks it immediately instead.
+        if "error" not in result_holder:
+            result_holder["error"] = exc
+        ready_event.set()
+
+    # ── Bind the destination-checking httpx client factory ──
+    #
+    # The SSE transport takes its POST target from the server's ``endpoint``
+    # event, and the SDK only validates that event's netloc/scheme — not its
+    # path. Re-checking every outgoing request against the *right* grant
+    # (below) closes that gap; using the wrong grant here would either reopen
+    # it (allowlist too broad) or fail conforming servers (origin too
+    # narrow), so which check applies depends on whether this is a
+    # user-provided or named connection.
+    mcp_http_client_factory: Optional[McpHttpClientFactory] = None
+    if isinstance(mcp_connection, (SseMcpConnection, HttpMcpConnection)):
+        if is_user_provided:
+            mcp_http_client_factory = make_mcp_http_client_factory(
+                _destination_in_allowlist(
+                    config.features.mcp.user_servers.allowed_urls
+                ),
+                on_blocked=_record_blocked,
+            )
+        else:
+            mcp_http_client_factory = make_mcp_http_client_factory(
+                _destination_on_origin(mcp_connection.url),
+                on_blocked=_record_blocked,
+            )
 
     async def _mcp_session_runner() -> None:
         exit_stack = AsyncExitStack()
         try:
             try:
                 if isinstance(mcp_connection, SseMcpConnection):
+                    # Set above for every SSE/HTTP connection; stdio is the only
+                    # transport without one.
+                    assert mcp_http_client_factory is not None
                     transport = await exit_stack.enter_async_context(
                         sse_client(
                             url=mcp_connection.url,
                             headers=mcp_connection.headers,
+                            httpx_client_factory=mcp_http_client_factory,
                         )
                     )
                 elif isinstance(mcp_connection, StdioMcpConnection):
-                    env = get_default_environment()
-                    env.update(env_from_cmd)
-                    server_params = StdioServerParameters(
-                        command=command, args=args, env=env
-                    )
+                    spawn_env = get_default_environment()
+                    if stdio_env:
+                        spawn_env.update(stdio_env)
                     transport = await exit_stack.enter_async_context(
-                        stdio_client(server_params)
+                        stdio_client(
+                            StdioServerParameters(
+                                command=mcp_connection.command,
+                                args=mcp_connection.args,
+                                env=spawn_env,
+                            )
+                        )
                     )
                 elif isinstance(mcp_connection, HttpMcpConnection):
+                    assert mcp_http_client_factory is not None
+                    # NOTE: streamablehttp_client is deprecated from mcp 1.24.0
+                    # (renamed streamable_http_client, taking http_client= instead
+                    # of a factory) and removed in 2.0.0 — update this on bump.
                     transport = await exit_stack.enter_async_context(
                         streamablehttp_client(
                             url=mcp_connection.url,
                             headers=mcp_connection.headers,
+                            httpx_client_factory=mcp_http_client_factory,
                         )
                     )
                 else:
-                    raise ValueError(f"Unknown client type: {payload.clientType}")
+                    raise ValueError(
+                        f"Unknown client type: {mcp_connection.clientType}"
+                    )
 
                 read, write = transport[:2]
 
@@ -1453,7 +1705,17 @@ async def connect_mcp(
                 result_holder["client"] = mcp_client
 
             except BaseException as exc:
-                result_holder["error"] = exc
+                # First error wins. The caller may already have recorded the
+                # *causal* failure — a blocked destination (_record_blocked)
+                # or the synthesized connect timeout — and then cancelled us
+                # to unstick ``initialize()``. The resulting CancelledError
+                # arrives here second and carries no message, so overwriting
+                # would replace the real reason with a blank one: the user
+                # would see "Could not connect to the MCP: " and, for a named
+                # server, the operator log (the only place the cause is
+                # recorded) would lose the blocked destination entirely.
+                if "error" not in result_holder:
+                    result_holder["error"] = _unwrap_mcp_error(exc)
                 return  # outer finally closes exit_stack
             finally:
                 # Always signal the caller so it doesn't wait forever.
@@ -1481,21 +1743,55 @@ async def connect_mcp(
         _mcp_session_runner(), name=f"mcp-session-{payload.name}"
     )
 
-    # Wait for the background task to finish initialisation.
-    await ready_event.wait()
+    # Wait for the background task to finish initialisation, bounded so a
+    # blocked destination (swallowed by the SDK — see _record_blocked above)
+    # or a slow/hanging transport can't hang the request (and its task)
+    # forever. Stdio gets a much longer budget: `npx -y ...` can cold-
+    # download a package on first run.
+    connect_timeout = (
+        _MCP_CONNECT_TIMEOUT_STDIO
+        if isinstance(mcp_connection, StdioMcpConnection)
+        else _MCP_CONNECT_TIMEOUT_HTTP
+    )
+    try:
+        await asyncio.wait_for(ready_event.wait(), timeout=connect_timeout)
+    except asyncio.TimeoutError:
+        pass
+    if "error" not in result_holder and "client" not in result_holder:
+        result_holder["error"] = asyncio.TimeoutError(
+            f"Timed out after {connect_timeout:.0f}s waiting for the MCP "
+            "connection to initialize."
+        )
 
     if "error" in result_holder:
-        # The task already exited and cleaned up its exit stack.
-        # Make sure the task itself is fully done.
-        try:
-            await task
-        except BaseException:
-            pass
+        # Always route through stop_mcp_task rather than a bare ``await
+        # task`` — the discriminator is "is the task done", not "did the
+        # wait raise": on the timeout/blocked paths the runner may still be
+        # sitting inside ``initialize()``, and stop_mcp_task's bounded
+        # wait-then-cancel unsticks that (and closes a latent unbounded
+        # hang if ``exit_stack.aclose()`` itself stalls).
+        await stop_mcp_task(task, stop_event, payload.name)
+        connect_error = cast(BaseException, result_holder["error"])
+        if is_user_provided:
+            # The client already supplied this URL, so echoing the failure
+            # detail back is useful and leaks nothing new.
+            detail = f"Could not connect to the MCP: {connect_error!s}"
+        else:
+            # Named servers are developer config and may embed secrets in
+            # userinfo or query params — httpx errors routinely include the
+            # request URL in their string form, so never return it verbatim.
+            logger.error(
+                "Failed to connect to MCP server %r",
+                payload.name,
+                exc_info=connect_error,
+            )
+            detail = (
+                "Could not connect to the MCP server. Check the server logs "
+                "for details."
+            )
         return JSONResponse(
             status_code=400,
-            content={
-                "detail": f"Could not connect to the MCP: {result_holder['error']!s}"
-            },
+            content={"detail": detail},
         )
 
     mcp_client_session = cast("ClientSession", result_holder["client"])
@@ -1506,45 +1802,101 @@ async def connect_mcp(
             await config.code.on_mcp_connect(mcp_connection, mcp_client_session)
         except Exception as e:
             # Callback failed — tear down the connection.
-            stop_event.set()
-            try:
-                await task
-            except BaseException:
-                pass
+            await stop_mcp_task(task, stop_event, payload.name)
+            if is_user_provided:
+                detail = f"Could not connect to the MCP: {e!s}"
+            else:
+                logger.error(
+                    "on_mcp_connect callback failed for MCP server %r",
+                    payload.name,
+                    exc_info=e,
+                )
+                detail = (
+                    "Could not connect to the MCP server. Check the server "
+                    "logs for details."
+                )
             return JSONResponse(
                 status_code=400,
-                content={"detail": f"Could not connect to the MCP: {e!s}"},
+                content={"detail": detail},
             )
 
-    # Store the session
+    # Disconnect previous session for this name (reconnection). Runs only
+    # now that on_mcp_connect has succeeded — a reconnect that failed for
+    # any reason above (bad creds, server down, blocked destination,
+    # timeout, a rejecting callback) leaves the old working session intact
+    # instead of evicting it before knowing the replacement would work.
+    # Trade-off: if the old session was already silently dead, it keeps
+    # showing "connected" until this succeeds — pre-existing (McpSession has
+    # no liveness probe), not made worse here.
+    #
+    # The check-then-store step itself must be atomic: two concurrent
+    # reconnects for the same name can both reach here around the same
+    # time, and if the dict pop and the dict store are separated by an
+    # `await` (as they used to be -- on_mcp_disconnect / old session close
+    # sat in between), a second request can see the name already popped by
+    # the first, skip eviction, and store its own session -- only for the
+    # first request to then resume and unconditionally overwrite it,
+    # orphaning the second session's background task forever (never
+    # reachable from mcp_sessions again, so even WebsocketSession.delete()
+    # can't close it). swap_mcp_session does the pop+store as a single
+    # `await`-free step, so no other coroutine can ever observe (or act on)
+    # an in-between state where the name is briefly absent -- it's atomic
+    # under asyncio's cooperative scheduling, no lock needed. Whichever
+    # request's swap runs second simply evicts the first request's
+    # just-stored session the same way it would evict any other stale one,
+    # so a task is always torn down through the normal path below and never
+    # silently dropped.
     mcp_session_obj = McpSession(
         name=mcp_connection.name,
         client=mcp_client_session,
         task=task,
         stop_event=stop_event,
     )
-    session.mcp_sessions[mcp_connection.name] = mcp_session_obj
+    old_mcp = session.swap_mcp_session(mcp_connection.name, mcp_session_obj)
+    if old_mcp is not None:
+        if on_mcp_disconnect := config.code.on_mcp_disconnect:
+            try:
+                await on_mcp_disconnect(payload.name, old_mcp.client)
+            except Exception:
+                logger.debug(
+                    "Error in on_mcp_disconnect callback for %s",
+                    payload.name,
+                    exc_info=True,
+                )
+        try:
+            await old_mcp.close()
+        except Exception:
+            logger.debug(
+                "Error closing old MCP session %s", payload.name, exc_info=True
+            )
 
     tool_list = await mcp_client_session.list_tools()
+
+    # `type` (named servers) vs `clientType` (user-provided) — IMcp in
+    # libs/react-client/src/types/mcp.ts declares both as optional, not
+    # nullable, so the field that doesn't apply is omitted rather than sent
+    # as null.
+    mcp_payload: Dict[str, object] = {
+        "name": mcp_connection.name,
+        "tools": [{"name": t.name} for t in tool_list.tools],
+        "isUserProvided": is_user_provided,
+        # Only echo url/headers back for user-provided servers — the client
+        # already sent those. For named servers they come from the
+        # developer's config (may contain secrets) and must not leak.
+        "url": getattr(mcp_connection, "url", None) if is_user_provided else None,
+        "headers": getattr(mcp_connection, "headers", None)
+        if is_user_provided
+        else None,
+    }
+    if is_user_provided:
+        mcp_payload["clientType"] = mcp_connection.clientType
+    else:
+        mcp_payload["type"] = mcp_connection.clientType
 
     return JSONResponse(
         content={
             "success": True,
-            "mcp": {
-                "name": payload.name,
-                "tools": [{"name": t.name} for t in tool_list.tools],
-                "clientType": payload.clientType,
-                "command": payload.fullCommand
-                if payload.clientType == "stdio"
-                else None,
-                "url": getattr(payload, "url", None)
-                if payload.clientType in ["sse", "streamable-http"]
-                else None,
-                # Include optional headers for SSE and streamable-http connections
-                "headers": getattr(payload, "headers", None)
-                if payload.clientType in ["sse", "streamable-http"]
-                else None,
-            },
+            "mcp": mcp_payload,
         }
     )
 
