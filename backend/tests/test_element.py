@@ -313,6 +313,31 @@ class TestFileElement:
 
             assert file.content == content
 
+    async def test_file_mime_falls_back_to_filename(self, mock_chainlit_context):
+        """Text-based content has no magic bytes, so filetype.guess() returns
+        None. send() should fall back to filename-based detection instead of
+        persisting a null mime (which crashed thread rendering, see #2938)."""
+        async with mock_chainlit_context:
+            file = File(name="notes.md", content=b"# hello\nmarkdown content")
+
+            await file.send(for_id="message_123")
+
+            assert file.mime == "text/markdown"
+
+    async def test_file_mime_falls_back_to_path_filename(
+        self, mock_chainlit_context, tmp_path
+    ):
+        """When only a path is provided, the filename fallback uses the path."""
+        csv_path = tmp_path / "export.csv"
+        csv_path.write_text("a,b\n1,2\n")
+
+        async with mock_chainlit_context:
+            file = File(name="data", path=str(csv_path))
+
+            await file.send(for_id="message_123")
+
+            assert file.mime == "text/csv"
+
 
 @pytest.mark.asyncio
 class TestTaskListElement:
@@ -582,3 +607,25 @@ class TestDataframeElement:
             assert len(parsed["data"]) == 2
             assert parsed["data"][0][0] == "2026-01-01"
             assert parsed["data"][1][0] == "2025-12-31"
+
+
+@pytest.mark.asyncio
+async def test_from_dict_pdf_reconstructs_pdf(mock_chainlit_context):
+    """A PDF upload (infer_type_from_mime -> 'pdf') must reconstruct as a Pdf element."""
+    async with mock_chainlit_context:
+        mime = "application/pdf"
+        e_dict = {
+            "id": "abc",
+            "name": "report.pdf",
+            "path": "/tmp/report.pdf",
+            "chainlitKey": "abc",
+            "display": "inline",
+            "type": Element.infer_type_from_mime(mime),
+            "mime": mime,
+            "page": 3,
+        }
+        assert e_dict["type"] == "pdf"
+        el = Element.from_dict(e_dict)
+        assert isinstance(el, Pdf)
+        assert el.type == "pdf"
+        assert el.page == 3

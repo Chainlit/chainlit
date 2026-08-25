@@ -340,12 +340,11 @@ class DatePicker(InputWidget):
         if self.mode not in ("single", "range"):
             raise ValueError("mode must be 'single' or 'range'")
 
-        if (
-            self.mode == "range"
-            and self.initial is not None
-            and not isinstance(self.initial, tuple)
-        ):
-            raise ValueError("'initial' must be a tuple for range mode")
+        if self.initial is not None:
+            if self.mode == "range" and not isinstance(self.initial, tuple):
+                raise ValueError("'initial' must be a tuple for range mode")
+            if self.mode == "single" and isinstance(self.initial, tuple):
+                raise ValueError("'initial' must be a single date for single mode")
 
         (initial_start, initial_end), min_date, max_date = (
             [
@@ -362,7 +361,8 @@ class DatePicker(InputWidget):
 
         if self.mode == "range":
             self._validate_range(initial_start, initial_end, "initial")
-            self._validate_range(min_date, max_date, "[min_date, max_date]")
+
+        self._validate_range(min_date, max_date, "[min_date, max_date]")
 
         # Validate that initial value(s) are within min_date and max_date bounds
         for d in [initial_start, initial_end]:

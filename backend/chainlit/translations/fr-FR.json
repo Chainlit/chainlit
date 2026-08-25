@@ -39,7 +39,7 @@
       "errors": {
         "default": "Impossible de se connecter",
         "signin": "Essayez de vous connecter avec un autre compte",
-        "oauthSignin": "Essayez de vous connecter avec un autre compte",
+        "oauthSignin": "La connexion a échoué. Veuillez réessayer ou utiliser un autre mode de connexion.",
         "redirectUriMismatch": "L'URI de redirection ne correspond pas à la configuration de l'application oauth",
         "oauthCallback": "Essayez de vous connecter avec un autre compte",
         "oauthCreateAccount": "Essayez de vous connecter avec un autre compte",
