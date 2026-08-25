@@ -6,6 +6,7 @@ from importlib import util
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
+    Annotated,
     Any,
     Awaitable,
     Callable,
@@ -17,7 +18,7 @@ from typing import (
 )
 
 import tomli
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 from pydantic_settings import BaseSettings
 from starlette.datastructures import Headers
 
@@ -148,18 +149,37 @@ reaction_on_message_received = false
     # Enable Model Context Protocol (MCP) features
     enabled = false
 
-[features.mcp.sse]
-    enabled = true
+    # Developer-configured MCP servers. Users can connect them by name.
+    # Supported types: "stdio" (server-side process), "sse", "streamable-http" (outbound HTTP).
+    #
+    # Migration note: if you previously used [features.mcp.sse], [features.mcp.stdio], or
+    # [features.mcp.streamable-http] sections, replace them with [[features.mcp.servers]] entries.
+    #
+    # [[features.mcp.servers]]
+    # name = "github"
+    # type = "stdio"
+    # command = "npx -y @modelcontextprotocol/server-github"
+    # # Optional: environment variables merged over the default subprocess
+    # # environment at spawn time. Never exposed to clients.
+    # env = {{ GITHUB_TOKEN = "..." }}
+    #
+    # [[features.mcp.servers]]
+    # name = "my-sse-server"
+    # type = "sse"
+    # url = "https://mcp.example.com/sse"
+    #
+    # [[features.mcp.servers]]
+    # name = "my-http-server"
+    # type = "streamable-http"
+    # url = "https://mcp.example.com/mcp"
 
-[features.mcp.streamable-http]
-    enabled = true
-
-[features.mcp.stdio]
-    enabled = true
-    # Only the executables in the allow list can be used for MCP stdio server.
-    # Only need the base name of the executable, e.g. "npx", not "/usr/bin/npx".
-    # Please don't comment this line for now, we need it to parse the executable name.
-    allowed_executables = [ "npx", "uvx" ]
+    [features.mcp.user_servers]
+        # Opt-in: allow end-users to connect their own SSE or streamable-http MCP servers.
+        # stdio is never user-provided (server-side config only).
+        enabled = false
+        # Allowlist of permitted URL prefixes. Empty list = deny all.
+        # Example: allowed_urls = ["https://mcp.example.com"]
+        allowed_urls = []
 
 [UI]
 # Name of the assistant.
@@ -297,30 +317,96 @@ class AudioFeature(BaseModel):
     enabled: bool = False
 
 
-class McpSseFeature(BaseModel):
-    enabled: bool = True
-
-
-class McpStreamableHttpFeature(BaseModel):
-    enabled: bool = True
-
-
-class McpStdioFeature(BaseModel):
-    enabled: bool = True
-    allowed_executables: Optional[list[str]] = None
-
-
 class SlackFeature(BaseModel):
     reaction_on_message_received: bool = False
 
 
+class StdioMcpServer(BaseModel):
+    # `type` is the union discriminator and carries no default deliberately: a
+    # default is dropped by model_dump(exclude_unset=True), which leaves the
+    # tag missing and makes the server unresolvable when chat-profile
+    # config_overrides are merged.
+    name: str
+    type: Literal["stdio"]
+    command: str  # developer-controlled; trusted at config time
+    # Developer-controlled config, merged over the MCP SDK's default subprocess
+    # environment at spawn time. Never exposed to clients.
+    env: Optional[dict[str, str]] = None
+
+
+class SseMcpServer(BaseModel):
+    name: str
+    type: Literal["sse"]  # discriminator; see StdioMcpServer
+    url: str
+    headers: Optional[dict[str, str]] = None
+
+
+class StreamableHttpMcpServer(BaseModel):
+    name: str
+    type: Literal["streamable-http"]  # discriminator; see StdioMcpServer
+    url: str
+    headers: Optional[dict[str, str]] = None
+
+
+McpServerConfig = Annotated[
+    Union[StdioMcpServer, SseMcpServer, StreamableHttpMcpServer],
+    Field(discriminator="type"),
+]
+
+
+class McpUserServersFeature(BaseModel):
+    enabled: bool = False
+    allowed_urls: list[str] = []  # empty = deny all user-provided URLs
+
+
 class McpFeature(BaseModel):
     enabled: bool = False
-    sse: McpSseFeature = Field(default_factory=McpSseFeature)
-    streamable_http: McpStreamableHttpFeature = Field(
-        default_factory=McpStreamableHttpFeature
-    )
-    stdio: McpStdioFeature = Field(default_factory=McpStdioFeature)
+    servers: list[McpServerConfig] = []
+    user_servers: McpUserServersFeature = Field(default_factory=McpUserServersFeature)
+
+    @model_validator(mode="after")
+    def _check_server_names(self) -> "McpFeature":
+        """Reject empty/whitespace-only server names, and names that collide
+        once normalised, so a second entry can't silently shadow the first.
+
+        `server.py`'s named-server lookup (`next(...)` over
+        `config.features.mcp.servers`) returns only the first exact-string
+        match, while `/project/settings` serialises *every* entry -- so a
+        duplicate name is dead config the user gets no warning about.
+        Normalised with `.strip().casefold()` to match the runtime collision
+        check in the `/mcp` handler exactly, so a near-miss (different case or
+        padding) can't alias a configured server either.
+
+        A `model_validator(mode="after")` -- rather than a raw-dict check next
+        to `_check_legacy_mcp_config` -- so this also fires when a chat
+        profile's `config_overrides` mutate `mcp.servers` via `with_overrides`,
+        which only re-validates the Pydantic models.
+        """
+        empty = [repr(s.name) for s in self.servers if not s.name.strip()]
+        if empty:
+            raise ValueError(
+                "MCP server name(s) "
+                f"{', '.join(empty)} in [[features.mcp.servers]] must not be "
+                "empty or whitespace-only."
+            )
+
+        seen: set[str] = set()
+        duplicates: List[str] = []
+        for s in self.servers:
+            key = s.name.strip().casefold()
+            if key in seen:
+                duplicates.append(s.name)
+            else:
+                seen.add(key)
+        if duplicates:
+            raise ValueError(
+                "Duplicate MCP server name(s) in [[features.mcp.servers]]: "
+                f"{', '.join(repr(d) for d in duplicates)}. Server names must "
+                "be unique (case-insensitive, ignoring surrounding "
+                "whitespace)."
+            )
+
+        return self
 
 
 class FeaturesSettings(BaseModel):
@@ -624,6 +710,89 @@ def load_module(target: str, force_refresh: bool = False):
     sys.path.pop(0)
 
 
+# Legacy (pre-2.12.0) per-transport MCP sections. These were replaced by a
+# unified `[[features.mcp.servers]]` array plus `[features.mcp.user_servers]`.
+# Note: `streamable-http` contains a hyphen, so tomli parses it into the dict
+# under the literal key "streamable-http" (not an attribute-style name).
+_LEGACY_MCP_TRANSPORT_KEYS = ("sse", "stdio", "streamable-http")
+
+
+def _check_legacy_mcp_config(features_settings: Dict[str, Any]) -> None:
+    """Fail loudly if the config file still uses the pre-2.12.0 MCP schema
+    AND MCP is actually enabled.
+
+    Pydantic's default `extra="ignore"` behavior means legacy keys like
+    `[features.mcp.sse]` or `allowed_executables` would otherwise be silently
+    dropped: the app would boot, `features.mcp.enabled` would stay true, but
+    `servers` would be empty and the frontend would hide the MCP button
+    entirely -- with no error and no log line. We check the raw TOML dict
+    (before Pydantic parsing discards the unknown keys) so we can name the
+    exact offending key(s) and tell the user how to fix it.
+
+    The pre-2.12.0 default config template (generated by every Chainlit app
+    that never touched its MCP settings) ships all of these legacy sections
+    with `features.mcp.enabled = false`. For that overwhelming majority of
+    deployments the legacy keys are inert leftovers, not a broken MCP setup,
+    so we only raise when `features.mcp.enabled` is truthy in the raw TOML.
+    A missing `enabled` key is treated as false, matching the schema default.
+    """
+    mcp_settings = features_settings.get("mcp")
+    if not isinstance(mcp_settings, dict):
+        return
+
+    if not mcp_settings.get("enabled", False):
+        if any(key in mcp_settings for key in _LEGACY_MCP_TRANSPORT_KEYS):
+            # Not fatal — MCP is off, so nothing is broken. Logged because this
+            # check only runs once against the on-disk config: a chat profile's
+            # `config_overrides` can turn MCP on afterwards, and it would then
+            # start with no servers and no other clue why.
+            logger.warning(
+                "Ignoring pre-2.12.0 MCP config sections in %s because "
+                "features.mcp.enabled is false. Remove them, or migrate to "
+                "[[features.mcp.servers]] before enabling MCP.",
+                config_file,
+            )
+        return
+
+    found_keys: List[str] = [
+        f"[features.mcp.{key}]"
+        for key in _LEGACY_MCP_TRANSPORT_KEYS
+        if key in mcp_settings
+    ]
+
+    # `allowed_executables` really lived under [features.mcp.stdio], but accept
+    # it at either level so a partially-migrated config is still named exactly.
+    if "allowed_executables" in mcp_settings:
+        found_keys.append("features.mcp.allowed_executables")
+    for key in _LEGACY_MCP_TRANSPORT_KEYS:
+        section = mcp_settings.get(key)
+        if isinstance(section, dict) and "allowed_executables" in section:
+            found_keys.append(f"features.mcp.{key}.allowed_executables")
+
+    if not found_keys:
+        return
+
+    raise ValueError(
+        "The MCP config schema changed in Chainlit 2.12.0 and your config file "
+        f"'{config_file}' still uses the legacy format. The app will NOT start "
+        "until this is migrated.\n\n"
+        f"Legacy key(s) found: {', '.join(found_keys)}\n\n"
+        "Replace the old per-transport sections with a list of servers, e.g.:\n\n"
+        "[features.mcp]\n"
+        "enabled = true\n\n"
+        "[[features.mcp.servers]]\n"
+        'name = "github"\n'
+        'type = "stdio"  # or "sse" / "streamable-http"\n'
+        'command = "npx -y @modelcontextprotocol/server-github"\n\n'
+        "# Optional: allow end-users to connect their own SSE/HTTP servers\n"
+        "[features.mcp.user_servers]\n"
+        "enabled = false\n"
+        "allowed_urls = []\n\n"
+        "See the full migration guide in CHANGELOG.md "
+        "('Migration guide (MCP config)') and docs/security-advisory-2026-mcp.md."
+    )
+
+
 def load_settings():
     with open(config_file, "rb") as f:
         toml_dict = tomli.load(f)
@@ -637,6 +806,8 @@ def load_settings():
             raise ValueError(
                 f"Your config file '{config_file}' is outdated. Please delete it and restart the app to regenerate it."
             )
+
+        _check_legacy_mcp_config(features_settings)
 
         lc_cache_path = os.path.join(config_dir, ".langchain.db")
 

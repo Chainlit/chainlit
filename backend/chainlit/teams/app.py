@@ -129,6 +129,7 @@ class TeamsEmitter(BaseChainlitEmitter):
 adapter_settings = BotFrameworkAdapterSettings(
     app_id=os.environ.get("TEAMS_APP_ID"),
     app_password=os.environ.get("TEAMS_APP_PASSWORD"),
+    channel_auth_tenant=os.environ.get("TEAMS_APP_TENANT_ID"),
 )
 adapter = BotFrameworkAdapter(adapter_settings)
 

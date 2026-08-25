@@ -39,7 +39,7 @@
       "errors": {
         "default": "サインインできません",
         "signin": "別のアカウントでサインインしてください",
-        "oauthSignin": "別のアカウントでサインインしてください",
+        "oauthSignin": "サインインに失敗しました。もう一度お試しいただくか、別のサインイン方法をお使いください。",
         "redirectUriMismatch": "リダイレクトURIがOAuthアプリの設定と一致しません",
         "oauthCallback": "別のアカウントでサインインしてください",
         "oauthCreateAccount": "別のアカウントでサインインしてください",

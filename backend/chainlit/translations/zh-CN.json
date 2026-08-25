@@ -39,7 +39,7 @@
       "errors": {
         "default": "无法登录",
         "signin": "请尝试使用其他账号登录",
-        "oauthSignin": "请尝试使用其他账号登录",
+        "oauthSignin": "登录失败。请重试，或使用其他登录方式。",
         "redirectUriMismatch": "重定向URI与OAuth应用配置不匹配",
         "oauthCallback": "请尝试使用其他账号登录",
         "oauthCreateAccount": "请尝试使用其他账号登录",
