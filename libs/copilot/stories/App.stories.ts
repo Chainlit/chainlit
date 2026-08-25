@@ -34,7 +34,7 @@ export const Secondary: Story = {
       theme: 'dark',
       button: {
         imageUrl:
-          'https://steelbluemedia.com/wp-content/uploads/2019/06/new-google-favicon-512.png',
+          'https://steelbluemedia.com/wp-content/uploads/2019/06/new-google-favicon-512.png'
       }
     }
   }

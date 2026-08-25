@@ -38,9 +38,32 @@ class WebSocketSessionAuth(TypedDict):
     threadId: str | None
 
 
-def restore_existing_session(sid, session_id, emit_fn, emit_call_fn, environ):
+def _session_owner_matches_user(
+    session: WebsocketSession, user: User | PersistedUser | None
+) -> bool:
+    if session.user is None and user is None:
+        return True
+
+    if session.user is None or user is None:
+        return False
+
+    return session.user.identifier == user.identifier
+
+
+def restore_existing_session(
+    sid,
+    session_id,
+    emit_fn,
+    emit_call_fn,
+    environ,
+    user: User | PersistedUser | None = None,
+):
     """Restore a session from the sessionId provided by the client."""
     if session := WebsocketSession.get_by_id(session_id):
+        if not _session_owner_matches_user(session, user):
+            logger.error("Authorization for the session failed.")
+            raise ConnectionRefusedError("authorization failed")
+
         session.restore(new_socket_id=sid)
         session.emit = emit_fn
         session.emit_call = emit_call_fn
@@ -79,6 +102,7 @@ async def resume_thread(session: WebsocketSession):
 
 
 def load_user_env(user_env):
+    user_env_dict = {}
     if user_env:
         user_env_dict = json.loads(user_env)
     # Check user env
@@ -150,7 +174,9 @@ async def connect(sid: str, environ: WSGIEnvironment, auth: WebSocketSessionAuth
         return sio.call(event, data, timeout=timeout, to=sid)
 
     session_id = auth["sessionId"]
-    if restore_existing_session(sid, session_id, emit_fn, emit_call_fn, environ):
+    if restore_existing_session(
+        sid, session_id, emit_fn, emit_call_fn, environ, user=user
+    ):
         return True
 
     user_env_string = auth.get("userEnv", None)
@@ -188,7 +214,8 @@ async def connection_successful(sid):
     await context.emitter.clear("clear_call_fn")
 
     if context.session.restored and not context.session.has_first_interaction:
-        if config.code.on_chat_start:
+        if config.code.on_chat_start and not context.session.chat_started:
+            context.session.chat_started = True
             task = asyncio.create_task(config.code.on_chat_start())
             context.session.current_task = task
         return
@@ -212,7 +239,8 @@ async def connection_successful(sid):
         else:
             await context.emitter.send_resume_thread_error("Thread not found.")
 
-    if config.code.on_chat_start:
+    if config.code.on_chat_start and not context.session.chat_started:
+        context.session.chat_started = True
         task = asyncio.create_task(config.code.on_chat_start())
         context.session.current_task = task
 

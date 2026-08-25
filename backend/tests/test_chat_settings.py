@@ -112,6 +112,24 @@ class TestChatSettings:
             assert call_args[0][0] == "chat_settings"
             assert len(call_args[0][1]) == 2  # Two inputs
 
+    async def test_chat_settings_refresh(self, mock_chainlit_context):
+        """Test ChatSettings.refresh() emits UI without updating session."""
+        async with mock_chainlit_context as ctx:
+            switch = Switch(id="enable", label="Enable", initial=True)
+            slider = Slider(id="temp", label="Temperature", initial=0.8)
+
+            settings = ChatSettings(inputs=[switch, slider])
+            result = await settings.refresh()
+
+            assert result["enable"] is True
+            assert result["temp"] == 0.8
+
+            ctx.emitter.set_chat_settings.assert_not_called()
+            ctx.emitter.emit.assert_called_once()
+            call_args = ctx.emitter.emit.call_args
+            assert call_args[0][0] == "chat_settings"
+            assert len(call_args[0][1]) == 2
+
     async def test_chat_settings_send_with_tabs(self, mock_chainlit_context):
         """Test ChatSettings.send() with tabs."""
         async with mock_chainlit_context as ctx:

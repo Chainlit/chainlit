@@ -293,15 +293,27 @@ def set_starter_categories(
 ]: ...
 
 
+@overload
+def set_starter_categories(
+    func: Callable[
+        [Optional["User"], Optional["str"], Optional["str"]],
+        Awaitable[List["StarterCategory"]],
+    ],
+) -> Callable[
+    [Optional["User"], Optional["str"], Optional["str"]],
+    Awaitable[List["StarterCategory"]],
+]: ...
+
+
 def set_starter_categories(func):
     """
     Programmatic declaration of starter categories with grouped starters.
 
     Args:
-        func (Callable[[Optional["User"], Optional["str"]], Awaitable[List["StarterCategory"]]]): The function declaring the starter categories with optional user and language arguments.
+        func (Callable[[Optional["User"], Optional["str"], Optional["str"]], Awaitable[List["StarterCategory"]]]): The function declaring the starter categories with optional user, language, and chat profile arguments.
 
     Returns:
-        Callable[[Optional["User"], Optional["str"]], Awaitable[List["StarterCategory"]]]: The decorated function.
+        Callable[[Optional["User"], Optional["str"], Optional["str"]], Awaitable[List["StarterCategory"]]]: The decorated function.
     """
 
     config.code.set_starter_categories = wrap_user_function(func)

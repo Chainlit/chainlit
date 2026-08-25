@@ -316,44 +316,24 @@ export class ChainlitAPI extends APIBase {
     return res.json();
   }
 
-  async connectStdioMCP(sessionId: string, name: string, fullCommand: string) {
-    const res = await this.post(`/mcp`, {
-      sessionId,
-      name,
-      fullCommand,
-      clientType: 'stdio'
-    });
+  async connectMcp(sessionId: string, name: string) {
+    const res = await this.post(`/mcp`, { sessionId, name });
     return res.json();
   }
 
-  async connectSseMCP(
+  async connectUserMcp(
     sessionId: string,
     name: string,
+    clientType: 'sse' | 'streamable-http',
     url: string,
     headers?: Record<string, string>
   ) {
     const res = await this.post(`/mcp`, {
       sessionId,
       name,
+      clientType,
       url,
-      ...(headers ? { headers } : {}),
-      clientType: 'sse'
-    });
-    return res.json();
-  }
-
-  async connectStreamableHttpMCP(
-    sessionId: string,
-    name: string,
-    url: string,
-    headers?: Record<string, string>
-  ) {
-    const res = await this.post(`/mcp`, {
-      sessionId,
-      name,
-      url,
-      ...(headers ? { headers } : {}),
-      clientType: 'streamable-http'
+      ...(headers ? { headers } : {})
     });
     return res.json();
   }
@@ -376,7 +356,10 @@ export class ChainlitAPI extends APIBase {
   getOAuthEndpoint(provider: string) {
     return this.buildEndpoint(`/auth/oauth/${provider}`);
   }
-  async shareThread(threadId: string, isShared: boolean): Promise<{ success: boolean }> {
+  async shareThread(
+    threadId: string,
+    isShared: boolean
+  ): Promise<{ success: boolean }> {
     const res = await this.put(`/project/thread/share`, {
       threadId,
       isShared

@@ -181,6 +181,9 @@ class Element:
 
         elif type == "custom":
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
+
+        elif type == "pdf":
+            return Pdf(page=e_dict.get("page"), **common_params)  # type: ignore[arg-type]
         else:
             # Default to File for any other type
             return File(**common_params)  # type: ignore[arg-type]
@@ -241,6 +244,12 @@ class Element:
                 file_type = filetype.guess(self.path or self.content)
                 if file_type:
                     self.mime = file_type.mime
+                else:
+                    # filetype.guess detects by magic bytes only, so text-based
+                    # files (.md, .csv, .txt, source code, ...) return None.
+                    # Fall back to filename-based detection so they still get a
+                    # sensible mime instead of being persisted as NULL.
+                    self.mime = mimetypes.guess_type(self.path or self.name)[0]
             elif self.url:
                 self.mime = mimetypes.guess_type(self.url)[0]
 
@@ -411,7 +420,6 @@ class Plotly(Element):
 
         self.figure.layout.autosize = True
         self.figure.layout.width = None
-        self.figure.layout.height = None
         self.content = pio.to_json(self.figure, validate=True)
         self.mime = "application/json"
 
@@ -420,20 +428,48 @@ class Plotly(Element):
 
 @dataclass
 class Dataframe(Element):
-    """Useful to send a pandas DataFrame to the UI."""
+    """Useful to send a pandas or polars DataFrame to the UI."""
 
     type: ClassVar[ElementType] = "dataframe"
     size: ElementSize = "large"
     data: Any = None  # The type is Any because it is checked in __post_init__.
 
+    @staticmethod
+    def _is_pandas_dataframe(data: Any) -> bool:
+        """Check if data is a pandas DataFrame without requiring pandas."""
+        try:
+            from pandas import DataFrame as PandasDataFrame
+
+            return isinstance(data, PandasDataFrame)
+        except ImportError:
+            return False
+
+    @staticmethod
+    def _is_polars_dataframe(data: Any) -> bool:
+        """Check if data is a polars DataFrame without requiring polars."""
+        try:
+            from polars import DataFrame as PolarsDataFrame
+
+            return isinstance(data, PolarsDataFrame)
+        except ImportError:
+            return False
+
     def __post_init__(self) -> None:
-        """Ensures the data is a pandas DataFrame and converts it to JSON."""
-        from pandas import DataFrame
+        """Ensures the data is a pandas or polars DataFrame and converts it to JSON."""
+        if self._is_pandas_dataframe(self.data):
+            self.content = self.data.to_json(orient="split", date_format="iso")
+        elif self._is_polars_dataframe(self.data):
+            self.content = json.dumps(
+                {
+                    "columns": self.data.columns,
+                    "index": list(range(len(self.data))),
+                    "data": self.data.rows(),
+                },
+                default=str,
+            )
+        else:
+            raise TypeError("data must be a pandas.DataFrame or polars.DataFrame")
 
-        if not isinstance(self.data, DataFrame):
-            raise TypeError("data must be a pandas.DataFrame")
-
-        self.content = self.data.to_json(orient="split", date_format="iso")
         super().__post_init__()
 
 

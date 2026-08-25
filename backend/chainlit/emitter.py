@@ -151,7 +151,7 @@ class BaseChainlitEmitter:
         """Stub method to send custom data to the host window."""
         pass
 
-    def send_toast(self, message: str, type: Optional[ToastType] = "info"):
+    async def send_toast(self, message: str, type: Optional[ToastType] = "info"):
         """Stub method to send a toast message to the UI."""
         pass
 
@@ -465,9 +465,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
         """Send custom data to the host window."""
         return self.emit("window_message", data)
 
-    def send_toast(self, message: str, type: Optional[ToastType] = "info"):
+    async def send_toast(self, message: str, type: Optional[ToastType] = "info"):
         """Send a toast message to the UI."""
         # check that the type is valid using ToastType
         if type not in get_args(ToastType):
             raise ValueError(f"Invalid toast type: {type}")
-        return self.emit("toast", {"message": message, "type": type})
+        await self.emit("toast", {"message": message, "type": type})

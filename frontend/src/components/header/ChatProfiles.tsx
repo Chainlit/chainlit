@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { useSetRecoilState } from 'recoil';
 
 import {
   ChainlitContext,
@@ -22,6 +23,8 @@ import {
   SelectValue
 } from '@/components/ui/select';
 
+import { IAttachment, attachmentsState } from '@/state/chat';
+
 import { NewChatDialog } from './NewChat';
 
 interface Props {
@@ -34,6 +37,7 @@ export default function ChatProfiles({ navigate }: Props) {
   const { chatProfile, setChatProfile } = useChatSession();
   const { firstInteraction } = useChatMessages();
   const { clear } = useChatInteract();
+  const setAttachments = useSetRecoilState<IAttachment[]>(attachmentsState);
   const [newChatProfile, setNewChatProfile] = useState<string | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
 
@@ -70,6 +74,7 @@ export default function ChatProfiles({ navigate }: Props) {
   const handleConfirm = (profile: string) => {
     setChatProfile(profile);
     setNewChatProfile(null);
+    setAttachments([]);
     clear();
     handleClose();
   };

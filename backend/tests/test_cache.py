@@ -228,6 +228,22 @@ class TestCacheDecorator:
         assert call_count_1 == 1
         assert call_count_2 == 1
 
+    def test_cache_distinguishes_different_functions_with_same_name(self):
+        """Test that function identity, not only its name, scopes cache entries."""
+
+        def make_loader(value):
+            @cache
+            def load(key):
+                return value
+
+            return load
+
+        first = make_loader("first")
+        second = make_loader("second")
+
+        assert first("same") == "first"
+        assert second("same") == "second"
+
     def test_cache_with_none_arguments(self):
         """Test cache with None as argument."""
         call_count = 0
@@ -328,7 +344,13 @@ class TestInitLcCache:
                         sys.modules,
                         {
                             "langchain": Mock(),
+                            "langchain_community.cache": Mock(
+                                SQLiteCache=mock_sqlite_cache
+                            ),
                             "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
+                            "langchain_core.globals": Mock(
+                                set_llm_cache=mock_set_llm_cache
+                            ),
                             "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
                         },
                     ):
@@ -359,7 +381,13 @@ class TestInitLcCache:
                         sys.modules,
                         {
                             "langchain": Mock(),
+                            "langchain_community.cache": Mock(
+                                SQLiteCache=mock_sqlite_cache
+                            ),
                             "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
+                            "langchain_core.globals": Mock(
+                                set_llm_cache=mock_set_llm_cache
+                            ),
                             "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
                         },
                     ):
@@ -391,7 +419,13 @@ class TestInitLcCache:
                         sys.modules,
                         {
                             "langchain": Mock(),
+                            "langchain_community.cache": Mock(
+                                SQLiteCache=mock_sqlite_cache
+                            ),
                             "langchain.cache": Mock(SQLiteCache=mock_sqlite_cache),
+                            "langchain_core.globals": Mock(
+                                set_llm_cache=mock_set_llm_cache
+                            ),
                             "langchain.globals": Mock(set_llm_cache=mock_set_llm_cache),
                         },
                     ):
@@ -400,6 +434,47 @@ class TestInitLcCache:
                         # Should not call SQLiteCache if path is None
                         mock_sqlite_cache.assert_not_called()
                         mock_set_llm_cache.assert_not_called()
+
+    def test_init_lc_cache_falls_back_to_legacy_langchain_modules(self):
+        """Test cache initialization falls back to legacy langchain imports."""
+        with patch.object(cache_module.config, "project") as mock_project:
+            mock_project.cache = True
+            mock_project.lc_cache_path = "/tmp/test_cache.db"
+            with patch.object(cache_module.config, "run") as mock_run:
+                mock_run.no_cache = False
+
+                mock_spec = Mock()
+                with patch.object(
+                    cache_module.importlib.util, "find_spec", return_value=mock_spec
+                ):
+                    mock_sqlite_cache = Mock()
+                    mock_set_llm_cache = Mock()
+
+                    def mock_import_module(name):
+                        if name == "langchain_core.globals":
+                            raise ImportError
+                        if name == "langchain_community.cache":
+                            raise ImportError
+                        if name == "langchain.globals":
+                            return Mock(set_llm_cache=mock_set_llm_cache)
+                        if name == "langchain.cache":
+                            return Mock(SQLiteCache=mock_sqlite_cache)
+                        raise ImportError
+
+                    with patch.object(
+                        cache_module.importlib,
+                        "import_module",
+                        side_effect=mock_import_module,
+                    ):
+                        with patch.object(
+                            cache_module.os.path, "exists", return_value=True
+                        ):
+                            init_lc_cache()
+
+                            mock_sqlite_cache.assert_called_once_with(
+                                database_path="/tmp/test_cache.db"
+                            )
+                            mock_set_llm_cache.assert_called_once()
 
 
 class TestCacheEdgeCases:

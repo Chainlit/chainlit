@@ -102,7 +102,7 @@ class DynamoDBDataLayer(BaseDataLayer):
         expression_attribute_values = {}
 
         for index, (attr, value) in enumerate(updates.items()):
-            if not value:
+            if value is None:
                 continue
 
             k, v = f"#{index}", f":{index}"
@@ -584,6 +584,9 @@ class DynamoDBDataLayer(BaseDataLayer):
         _logger.debug(
             "DynamoDB: update_thread name=%s tags=%s metadata=%s", name, tags, metadata
         )
+
+        if metadata is None:
+            metadata = {}
 
         ts = self._get_current_timestamp()
 

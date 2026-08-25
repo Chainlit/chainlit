@@ -1,0 +1,260 @@
+{
+  "common": {
+    "actions": {
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "continue": "Continuar",
+      "goBack": "Voltar",
+      "reset": "Repor",
+      "submit": "Enviar"
+    },
+    "status": {
+      "loading": "A carregar...",
+      "error": {
+        "default": "Ocorreu um erro",
+        "serverConnection": "Não foi possível estabelecer ligação ao servidor"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Inicie sessão para aceder à aplicação",
+      "form": {
+        "email": {
+          "label": "E-mail",
+          "required": "o e-mail é obrigatório",
+          "placeholder": "me@example.com"
+        },
+        "password": {
+          "label": "Palavra-passe",
+          "required": "a palavra-passe é obrigatória"
+        },
+        "actions": {
+          "signin": "Iniciar sessão"
+        },
+        "alternativeText": {
+          "or": "Ou"
+        }
+      },
+      "errors": {
+        "default": "Não foi possível iniciar sessão",
+        "signin": "Tente iniciar sessão com outra conta",
+        "oauthSignin": "Falha no início de sessão. Por favor, tente novamente ou utilize um método de início de sessão diferente.",
+        "redirectUriMismatch": "O URI de redirecionamento não corresponde à configuração da aplicação OAuth",
+        "oauthCallback": "Tente iniciar sessão com outra conta",
+        "oauthCreateAccount": "Tente iniciar sessão com outra conta",
+        "emailCreateAccount": "Tente iniciar sessão com outra conta",
+        "callback": "Tente iniciar sessão com outra conta",
+        "oauthAccountNotLinked": "Para confirmar a sua identidade, inicie sessão com a mesma conta utilizada anteriormente",
+        "emailSignin": "Não foi possível enviar o e-mail",
+        "emailVerify": "Por favor, verifique o seu e-mail. Foi enviada uma nova mensagem",
+        "credentialsSignin": "Erro ao iniciar sessão. Verifique se os dados fornecidos estão corretos",
+        "sessionRequired": "Por favor, inicie sessão para aceder a esta página"
+      }
+    },
+    "provider": {
+      "continue": "Continuar com {{provider}}"
+    }
+  },
+  "chat": {
+    "input": {
+      "placeholder": "Escreva a sua mensagem aqui...",
+      "actions": {
+        "send": "Enviar mensagem",
+        "stop": "Parar tarefa",
+        "attachFiles": "Anexar ficheiros"
+      }
+    },
+    "favorites": {
+      "use": "Utilizar mensagem favorita",
+      "headline": "Mensagens favoritas",
+      "remove": "Remover favorito",
+      "empty": {
+        "title": "Ainda não há prompts guardados",
+        "description": "Comece por enviar um prompt e marcá-lo com estrela, ou marque com estrela um prompt de conversas anteriores"
+      }
+    },
+    "commands": {
+      "button": "Ferramentas",
+      "changeTool": "Alterar ferramenta",
+      "availableTools": "Ferramentas disponíveis"
+    },
+    "speech": {
+      "start": "Iniciar gravação",
+      "stop": "Parar gravação",
+      "connecting": "A ligar"
+    },
+    "fileUpload": {
+      "dragDrop": "Arraste e largue ficheiros aqui",
+      "browse": "Procurar ficheiros",
+      "sizeLimit": "Limite:",
+      "errors": {
+        "failed": "Erro ao carregar",
+        "cancelled": "Carregamento cancelado de"
+      },
+      "actions": {
+        "cancelUpload": "Cancelar carregamento",
+        "removeAttachment": "Remover anexo"
+      }
+    },
+    "messages": {
+      "status": {
+        "using": "A utilizar",
+        "used": "Utilizado"
+      },
+      "actions": {
+        "copy": {
+          "button": "Copiar para a área de transferência",
+          "success": "Copiado!"
+        }
+      },
+      "feedback": {
+        "positive": "Útil",
+        "negative": "Não útil",
+        "edit": "Editar comentário",
+        "dialog": {
+          "title": "Adicionar um comentário",
+          "submit": "Enviar comentário",
+          "yourFeedback": "O seu comentário..."
+        },
+        "status": {
+          "updating": "A atualizar",
+          "updated": "Comentário atualizado"
+        }
+      }
+    },
+    "history": {
+      "title": "Últimas entradas",
+      "empty": "Está vazio...",
+      "show": "Mostrar histórico"
+    },
+    "settings": {
+      "title": "Painel de configurações",
+      "customize": "Personalize aqui as configurações do seu chat"
+    },
+    "watermark": "Os modelos de linguagem podem cometer erros. Verifique sempre informações importantes."
+  },
+  "threadHistory": {
+    "sidebar": {
+      "title": "Conversas anteriores",
+      "filters": {
+        "search": "Pesquisar",
+        "placeholder": "Pesquisar conversas..."
+      },
+      "timeframes": {
+        "today": "Hoje",
+        "yesterday": "Ontem",
+        "previous7days": "Últimos 7 dias",
+        "previous30days": "Últimos 30 dias"
+      },
+      "empty": "Nenhuma conversa encontrada",
+      "actions": {
+        "close": "Fechar barra lateral",
+        "open": "Abrir barra lateral"
+      }
+    },
+    "thread": {
+      "untitled": "Conversa sem título",
+      "menu": {
+        "rename": "Renomear",
+        "share": "Partilhar",
+        "delete": "Eliminar"
+      },
+      "actions": {
+        "share": {
+          "title": "Partilhar ligação do chat",
+          "button": "Partilhar",
+          "status": {
+            "copied": "Ligação copiada",
+            "created": "Ligação de partilha criada!",
+            "unshared": "Partilha desativada para esta conversa"
+          },
+          "error": {
+            "create": "Erro ao criar ligação de partilha",
+            "unshare": "Erro ao desativar a partilha"
+          }
+        },
+        "delete": {
+          "title": "Confirmar eliminação",
+          "description": "Irá eliminar a conversa e todos os seus conteúdos. Esta ação não pode ser anulada.",
+          "success": "Chat eliminado",
+          "inProgress": "A eliminar chat"
+        },
+        "rename": {
+          "title": "Renomear conversa",
+          "description": "Insira um novo nome para esta conversa",
+          "form": {
+            "name": {
+              "label": "Nome",
+              "placeholder": "Insira o novo nome"
+            }
+          },
+          "success": "Conversa renomeada!",
+          "inProgress": "A renomear conversa"
+        }
+      }
+    }
+  },
+  "navigation": {
+    "header": {
+      "chat": "Chat",
+      "readme": "Leia-me",
+      "theme": {
+        "light": "Tema claro",
+        "dark": "Tema escuro",
+        "system": "Seguir sistema"
+      }
+    },
+    "newChat": {
+      "button": "Novo chat",
+      "dialog": {
+        "title": "Criar novo chat",
+        "description": "Isto irá apagar o histórico de chat atual. Tem a certeza de que pretende continuar?",
+        "tooltip": "Novo chat"
+      }
+    },
+    "user": {
+      "menu": {
+        "settings": "Configurações",
+        "settingsKey": "S",
+        "apiKeys": "Chaves API",
+        "logout": "Terminar sessão"
+      }
+    }
+  },
+  "apiKeys": {
+    "title": "Chaves API necessárias",
+    "description": "Para utilizar esta aplicação, são necessárias as seguintes chaves API. As chaves são guardadas localmente no seu dispositivo.",
+    "success": {
+      "saved": "Guardado com sucesso"
+    }
+  },
+  "alerts": {
+    "info": "Informação",
+    "note": "Nota",
+    "tip": "Dica",
+    "important": "Importante",
+    "warning": "Aviso",
+    "caution": "Cuidado",
+    "debug": "Depuração",
+    "example": "Exemplo",
+    "success": "Sucesso",
+    "help": "Ajuda",
+    "idea": "Ideia",
+    "pending": "Pendente",
+    "security": "Segurança",
+    "beta": "Beta",
+    "best-practice": "Boa prática"
+  },
+  "components": {
+    "MultiSelectInput": {
+      "placeholder": "Selecionar..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "Escolher uma data",
+        "range": "Escolher um intervalo de datas"
+      }
+    }
+  }
+}
