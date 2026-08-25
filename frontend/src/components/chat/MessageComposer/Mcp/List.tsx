@@ -102,7 +102,7 @@ const McpItem = ({ mcp, onDelete, isLoading }: McpItemProps) => {
             )}
           />
           <h3 className="font-medium">{mcp.name}</h3>
-          <Badge variant="outline">{mcp.clientType}</Badge>
+          <Badge variant="outline">{mcp.type ?? mcp.clientType}</Badge>
         </div>
         <div className="flex items-center">
           <ReconnectMcpButton mcp={mcp} />
@@ -110,28 +110,36 @@ const McpItem = ({ mcp, onDelete, isLoading }: McpItemProps) => {
         </div>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        <div className="font-medium text-sm text-muted-foreground flex items-center">
-          {mcp.clientType === 'stdio' ? (
-            <SquareTerminal className="h-4 w-4 mr-2" />
-          ) : mcp.clientType === 'streamable-http' ? (
-            <Link className="h-4 w-4 mr-2 text-blue-500" />
-          ) : (
-            <Link className="h-4 w-4 mr-2" />
-          )}
-          {mcp.clientType === 'stdio'
-            ? 'Command'
-            : mcp.clientType === 'streamable-http'
+      {mcp.url && (
+        <div className="flex gap-2 flex-wrap">
+          <div className="font-medium text-sm text-muted-foreground flex items-center">
+            {mcp.clientType === 'streamable-http' ||
+            mcp.type === 'streamable-http' ? (
+              <Link className="h-4 w-4 mr-2 text-blue-500" />
+            ) : (
+              <Link className="h-4 w-4 mr-2" />
+            )}
+            {mcp.clientType === 'streamable-http' ||
+            mcp.type === 'streamable-http'
               ? 'HTTP URL'
               : 'URL'}
+          </div>
+          <div className="flex items-center w-full bg-accent px-3 py-1 rounded gap-2">
+            <pre className="text-sm font-mono flex-grow truncate">
+              {mcp.url}
+            </pre>
+            <CopyButton content={mcp.url} />
+          </div>
         </div>
-        <div className="flex items-center w-full bg-accent px-3 py-1 rounded gap-2">
-          <pre className="text-sm font-mono flex-grow truncate">
-            {mcp.command || mcp.url || 'N/A'}
-          </pre>
-          <CopyButton content={mcp.command || mcp.url} />
+      )}
+      {mcp.type === 'stdio' && (
+        <div className="flex gap-2 flex-wrap">
+          <div className="font-medium text-sm text-muted-foreground flex items-center">
+            <SquareTerminal className="h-4 w-4 mr-2" />
+            Server (stdio)
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="font-medium text-sm text-muted-foreground flex items-center">
         <Wrench className="h-4 w-4 mr-2" />
@@ -228,32 +236,16 @@ const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
       );
     };
 
-    if (mcp.clientType === 'stdio') {
+    if (mcp.isUserProvided && mcp.url && mcp.clientType) {
+      // User-provided MCP (SSE or streamable-http)
       toast.promise(
         apiClient
-          .connectStdioMCP(sessionId, mcp.name, mcp.command!)
-          .then(async (resp: any) => {
-            const { success, mcp: updatedMcp } = resp;
-            updateMcpStatus(success, updatedMcp);
-          })
-          .catch(() => {
-            updateMcpStatus(false);
-          })
-          .finally(() => setIsLoading(false)),
-        {
-          loading: 'Reconnecting MCP...',
-          success: () => 'MCP reconnected!',
-          error: (err) => <span>{err.message}</span>
-        }
-      );
-    } else if (mcp.clientType === 'streamable-http') {
-      toast.promise(
-        (apiClient as any)
-          .connectStreamableHttpMCP(
+          .connectUserMcp(
             sessionId,
             mcp.name,
-            mcp.url!,
-            (mcp as any).headers
+            mcp.clientType,
+            mcp.url,
+            mcp.headers
           )
           .then(async (resp: any) => {
             const { success, mcp: updatedMcp } = resp;
@@ -270,9 +262,10 @@ const ReconnectMcpButton = ({ mcp }: { mcp: IMcp }) => {
         }
       );
     } else {
+      // Named (developer-configured) MCP
       toast.promise(
-        (apiClient as any)
-          .connectSseMCP(sessionId, mcp.name, mcp.url!, (mcp as any).headers)
+        apiClient
+          .connectMcp(sessionId, mcp.name)
           .then(async (resp: any) => {
             const { success, mcp: updatedMcp } = resp;
             updateMcpStatus(success, updatedMcp);
