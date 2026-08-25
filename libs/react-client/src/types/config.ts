@@ -84,13 +84,11 @@ export interface IChainlitConfig {
     hot_swap_chat_profile?: boolean;
     mcp?: {
       enabled?: boolean;
-      sse?: {
-        enabled?: boolean;
-      };
-      streamable_http?: {
-        enabled?: boolean;
-      };
-      stdio?: {
+      servers?: Array<{
+        name: string;
+        type: 'stdio' | 'sse' | 'streamable-http';
+      }>;
+      user_servers?: {
         enabled?: boolean;
       };
     };
