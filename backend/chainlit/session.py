@@ -22,6 +22,42 @@ if TYPE_CHECKING:
 _CLOSE_TIMEOUT = 10.0  # seconds to wait for a background MCP task to finish
 
 
+async def stop_mcp_task(
+    task: asyncio.Task, stop_event: asyncio.Event, name: str
+) -> None:
+    """Signal an MCP background task to shut down and wait for it.
+
+    Extracted from ``McpSession.close`` so other callers (the ``/mcp``
+    connect handler in ``server.py``, for its timeout / blocked-destination
+    failure paths) can reuse the same bounded wait-then-cancel behaviour
+    instead of an ad-hoc ``await task``. The discriminator for what to do is
+    always "is the task done", not "did the wait raise" — cancelling a task
+    that is merely slow to close is what actually unsticks a hang: a
+    ``CancelledError`` raised inside ``initialize()`` is caught by the
+    runner's ``except BaseException`` and its ``finally: await
+    exit_stack.aclose()`` tears down the transport (and reaps any stdio
+    subprocess) regardless of why the task was still running.
+    """
+    stop_event.set()
+    try:
+        await asyncio.wait_for(task, timeout=_CLOSE_TIMEOUT)
+    except asyncio.TimeoutError:
+        logger.warning(
+            "MCP session %r did not shut down within %.1fs — cancelling",
+            name,
+            _CLOSE_TIMEOUT,
+        )
+        task.cancel()
+        try:
+            await task
+        except BaseException:
+            pass
+    except asyncio.CancelledError:
+        pass
+    except BaseException:
+        logger.debug("Error while closing MCP session %r", name, exc_info=True)
+
+
 @dataclass
 class McpSession:
     """Lifecycle wrapper for a single MCP connection.
@@ -45,24 +81,7 @@ class McpSession:
 
     async def close(self) -> None:
         """Signal the background task to shut down and wait for it."""
-        self.stop_event.set()
-        try:
-            await asyncio.wait_for(self.task, timeout=_CLOSE_TIMEOUT)
-        except asyncio.TimeoutError:
-            logger.warning(
-                "MCP session %r did not shut down within %.1fs — cancelling",
-                self.name,
-                _CLOSE_TIMEOUT,
-            )
-            self.task.cancel()
-            try:
-                await self.task
-            except BaseException:
-                pass
-        except asyncio.CancelledError:
-            pass
-        except BaseException:
-            logger.debug("Error while closing MCP session %r", self.name, exc_info=True)
+        await stop_mcp_task(self.task, self.stop_event, self.name)
 
     # Backward-compatible tuple unpacking.
     # The original Chainlit format is ``(ClientSession, AsyncExitStack)``.
@@ -369,6 +388,38 @@ class WebsocketSession(BaseSession):
         ws_sessions_sid[new_socket_id] = self
         self.socket_id = new_socket_id
         self.restored = True
+
+    def swap_mcp_session(
+        self, name: str, new_session: McpSession
+    ) -> Optional[McpSession]:
+        """Atomically replace the MCP session stored under ``name`` and
+        return whichever session was displaced (``None`` if there wasn't
+        one).
+
+        This is a plain, ``await``-free dict pop-then-insert. That's the
+        point: asyncio only ever switches between coroutines at an ``await``
+        (or task-boundary) point, so a synchronous block like this one can
+        never be interleaved with another coroutine's synchronous block --
+        it's atomic for free, no ``asyncio.Lock`` required.
+
+        This closes a race between two concurrent ``POST /mcp`` reconnects
+        for the same name: previously the connect handler did a separate
+        "check if present" / "pop" / (``await`` on ``on_mcp_disconnect`` and
+        ``close()``) / "store" sequence, with real ``await`` points sitting
+        between the check and the store. A second concurrent reconnect could
+        see the name already popped (skip eviction) and then have its own
+        freshly stored session silently overwritten once the first request
+        resumed and stored unconditionally -- orphaning the second session's
+        background task (a live stdio subprocess or open HTTP/SSE client)
+        forever, since it was never reachable from ``mcp_sessions`` again.
+
+        Callers are still responsible for tearing down the returned session
+        (``on_mcp_disconnect`` callback + ``close()``/``stop_mcp_task``) --
+        this method only makes the dict swap itself race-free.
+        """
+        old = self.mcp_sessions.pop(name, None)
+        self.mcp_sessions[name] = new_session
+        return old
 
     async def delete(self):
         """Delete the session."""
