@@ -39,7 +39,7 @@
       "errors": {
         "default": "Kunne ikke logge ind",
         "signin": "Prøv at logge ind med en anden konto",
-        "oauthSignin": "Prøv at logge ind med en anden konto",
+        "oauthSignin": "Log ind mislykkedes. Prøv igen, eller brug en anden loginmetode.",
         "redirectUriMismatch": "Omdirigerings-URI'en matcher ikke oauth-app konfigurationen",
         "oauthCallback": "Prøv at logge ind med en anden konto",
         "oauthCreateAccount": "Prøv at logge ind med en anden konto",

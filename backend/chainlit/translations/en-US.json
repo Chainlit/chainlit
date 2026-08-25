@@ -39,7 +39,7 @@
       "errors": {
         "default": "Unable to sign in",
         "signin": "Try signing in with a different account",
-        "oauthSignin": "Try signing in with a different account",
+        "oauthSignin": "Sign in failed. Please try again, or use a different sign-in method.",
         "redirectUriMismatch": "The redirect URI is not matching the oauth app configuration",
         "oauthCallback": "Try signing in with a different account",
         "oauthCreateAccount": "Try signing in with a different account",

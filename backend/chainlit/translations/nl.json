@@ -39,7 +39,7 @@
       "errors": {
         "default": "Kan niet inloggen",
         "signin": "Probeer in te loggen met een ander account",
-        "oauthSignin": "Probeer in te loggen met een ander account",
+        "oauthSignin": "Inloggen mislukt. Probeer het opnieuw of gebruik een andere aanmeldmethode.",
         "redirectUriMismatch": "De redirect URI komt niet overeen met de oauth app configuratie",
         "oauthCallback": "Probeer in te loggen met een ander account",
         "oauthCreateAccount": "Probeer in te loggen met een ander account",

@@ -39,7 +39,7 @@
       "errors": {
         "default": "Anmeldung fehlgeschlagen",
         "signin": "Versuche dich mit einem anderen Konto anzumelden",
-        "oauthSignin": "Versuche dich mit einem anderen Konto anzumelden",
+        "oauthSignin": "Anmeldung fehlgeschlagen. Bitte versuche es erneut oder verwende eine andere Anmeldemethode.",
         "redirectUriMismatch": "Der Redirect-URI stimmt nicht mit der Konfiguration der Oauth-Anwendung überein",
         "oauthCallback": "Versuche dich mit einem anderen Konto anzumelden",
         "oauthCreateAccount": "Versuche dich mit einem anderen Konto anzumelden",

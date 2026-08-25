@@ -39,7 +39,7 @@
       "errors": {
         "default": "Impossibile effettuare l'accesso",
         "signin": "Prova ad accedere con un account diverso",
-        "oauthSignin": "Prova ad accedere con un account diverso",
+        "oauthSignin": "Accesso non riuscito. Riprova o utilizza un metodo di accesso diverso.",
         "redirectUriMismatch": "L'URI di reindirizzamento non corrisponde alla configurazione dell'app OAuth",
         "oauthCallback": "Prova ad accedere con un account diverso",
         "oauthCreateAccount": "Prova ad accedere con un account diverso",
