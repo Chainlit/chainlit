@@ -241,13 +241,14 @@ export const currentThreadIdState = atom<string | undefined>({
 });
 
 const localStorageEffect =
-  <T>(key: string): AtomEffect<T> =>
+  <T>(key: string, migrate?: (value: unknown) => T): AtomEffect<T> =>
   ({ setSelf, onSet }) => {
     // When the atom is first initialized, try to get its value from localStorage
     const savedValue = localStorage.getItem(key);
     if (savedValue != null) {
       try {
-        setSelf(JSON.parse(savedValue));
+        const parsed = JSON.parse(savedValue);
+        setSelf(migrate ? migrate(parsed) : parsed);
       } catch (error) {
         console.error(
           `Error parsing localStorage value for key "${key}":`,
@@ -266,10 +267,79 @@ const localStorageEffect =
     });
   };
 
+const isPlainStringRecord = (value: unknown): value is Record<string, string> =>
+  !!value &&
+  typeof value === 'object' &&
+  !Array.isArray(value) &&
+  Object.values(value as Record<string, unknown>).every(
+    (v) => typeof v === 'string'
+  );
+
+const isStoredMcp = (entry: unknown): entry is IMcp => {
+  if (
+    !entry ||
+    typeof entry !== 'object' ||
+    typeof (entry as IMcp).name !== 'string' ||
+    !Array.isArray((entry as IMcp).tools) ||
+    typeof (entry as IMcp).status !== 'string'
+  ) {
+    return false;
+  }
+
+  const mcp = entry as IMcp;
+
+  if (mcp.type !== undefined && typeof mcp.type !== 'string') {
+    return false;
+  }
+  if (mcp.clientType !== undefined && typeof mcp.clientType !== 'string') {
+    return false;
+  }
+  if (mcp.url !== undefined && typeof mcp.url !== 'string') {
+    return false;
+  }
+  if (mcp.headers !== undefined && !isPlainStringRecord(mcp.headers)) {
+    return false;
+  }
+
+  return true;
+};
+
+// Entries persisted before `isUserProvided` existed never had it set, but by
+// construction only user-provided (SSE/streamable-http) connections ever had
+// both `url` and `clientType` -- named servers never had a client-supplied
+// `url`. Backfill the flag so old localStorage entries still route through
+// the (validated) user-provided reconnect flow instead of being mistaken for
+// a named, developer-configured server.
+// Exported for testing; also usable by consumers healing state outside of
+// this atom's own effect.
+export const migrateStoredMcps = (value: unknown): IMcp[] => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  return value
+    .filter(isStoredMcp)
+    .map((mcp) =>
+      mcp.isUserProvided === undefined && mcp.url && mcp.clientType
+        ? { ...mcp, isUserProvided: true }
+        : mcp
+    )
+    .map((mcp) =>
+      // clientType:'stdio' could only have come from a pre-fix backend describing a *named*
+      // server -- ConnectMCPRequest.clientType is Literal['sse','streamable-http'], so the
+      // browser could never have sent it. Backfill `type` so List.tsx:135's stdio indicator
+      // (which checks mcp.type only) still renders for entries stored before this release.
+      // (The cast below is needed because current-schema IMcp.clientType no longer admits
+      // 'stdio' -- only pre-fix localStorage entries can carry that legacy value.)
+      mcp.type === undefined && (mcp.clientType as string) === 'stdio'
+        ? { ...mcp, type: 'stdio' as const }
+        : mcp
+    );
+};
+
 export const mcpState = atom<IMcp[]>({
   key: 'Mcp',
   default: [],
-  effects: [localStorageEffect<IMcp[]>('mcp_storage_key')]
+  effects: [localStorageEffect<IMcp[]>('mcp_storage_key', migrateStoredMcps)]
 });
 
 export const favoriteMessagesState = atom<IStep[]>({
