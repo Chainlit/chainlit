@@ -46,10 +46,10 @@ from chainlit.config import (
     APP_ROOT,
     BACKEND_ROOT,
     DEFAULT_HOST,
-    FILES_DIRECTORY,
     PACKAGE_ROOT,
     ChainlitConfig,
     config,
+    get_files_directory,
     load_module,
     public_dir,
     reload_config,
@@ -188,8 +188,12 @@ async def lifespan(app: FastAPI):
         except asyncio.exceptions.CancelledError:
             pass
 
-        if FILES_DIRECTORY.is_dir():
-            shutil.rmtree(FILES_DIRECTORY)
+        files_dir = get_files_directory()
+        if files_dir.is_dir():
+            app_root = Path(APP_ROOT).resolve()
+            resolved = files_dir.resolve()
+            if resolved == app_root / ".files" or app_root in resolved.parents:
+                shutil.rmtree(files_dir)
 
         # Force exit the process to avoid potential AnyIO threads still running
         os._exit(0)
