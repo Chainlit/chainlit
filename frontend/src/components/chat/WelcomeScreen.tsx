@@ -45,37 +45,38 @@ export default function WelcomeScreen(props: Props) {
   }, []);
 
   const logo = useMemo(() => {
-    if (chatProfile && chatProfiles) {
-      const currentChatProfile = chatProfiles.find(
-        (cp) => cp.name === chatProfile
-      );
-      if (currentChatProfile?.icon) {
-        return (
-          <div className="flex flex-col gap-2 mb-2 items-center">
-            <img
-              className="h-16 w-16 rounded-full"
-              src={
-                currentChatProfile?.icon.startsWith('/public')
-                  ? apiClient.buildEndpoint(currentChatProfile?.icon)
-                  : currentChatProfile?.icon
-              }
-            />
-            {currentChatProfile?.markdown_description ? (
-              <Markdown
-                allowHtml={allowHtml}
-                latex={latex}
-                renderMarkdown={true}
-              >
-                {currentChatProfile.markdown_description}
-              </Markdown>
-            ) : null}
-          </div>
-        );
-      }
+    const currentChatProfile = chatProfiles?.find(
+      (cp) => cp.name === chatProfile
+    );
+
+    if (!currentChatProfile) {
+      return <Logo className="w-[200px] mb-2" />;
     }
 
-    return <Logo className="w-[200px] mb-2" />;
-  }, [chatProfiles, chatProfile]);
+    const icon = currentChatProfile.icon ? (
+      <img
+        className="h-16 w-16 rounded-full"
+        src={
+          currentChatProfile.icon.startsWith('/public')
+            ? apiClient.buildEndpoint(currentChatProfile.icon)
+            : currentChatProfile.icon
+        }
+      />
+    ) : (
+      <Logo className="w-[200px] mb-2" />
+    );
+
+    return (
+      <div className="flex flex-col gap-2 mb-2 items-center">
+        {icon}
+        {currentChatProfile.markdown_description ? (
+          <Markdown allowHtml={allowHtml} latex={latex} renderMarkdown={true}>
+            {currentChatProfile.markdown_description}
+          </Markdown>
+        ) : null}
+      </div>
+    );
+  }, [allowHtml, apiClient, chatProfile, chatProfiles, latex]);
 
   if (hasMessage(messages)) return null;
 
