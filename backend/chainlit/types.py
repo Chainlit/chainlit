@@ -167,6 +167,7 @@ class FileDict(TypedDict):
     path: Path
     size: int
     type: str
+    download_name: Optional[str]
 
 
 class MessagePayload(TypedDict):
