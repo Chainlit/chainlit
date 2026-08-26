@@ -72,6 +72,9 @@ class Element:
     thread_id: str = Field(default_factory=lambda: context.session.thread_id)
     # The type of the element. This will be used to determine how to display the element in the UI.
     type: ClassVar[ElementType]
+    _BROWSER_RENDERED_TYPES: ClassVar[frozenset[ElementType]] = frozenset(
+        {"image", "pdf", "audio", "video"}
+    )
     # Name of the element, this will be used to reference the element in the UI.
     name: str = ""
     # The ID of the element. This is set automatically when the element is sent to the UI.
@@ -205,6 +208,15 @@ class Element:
 
         else:
             return "file"
+
+    @classmethod
+    def get_content_disposition(cls) -> Literal["inline"] | None:
+        """Return HTTP Content-Disposition for persisted blob content.
+
+        This is independent of Element.display (UI placement: inline/side/page).
+        Frontend renders media by element.type, so disposition follows type.
+        """
+        return "inline" if cls.type in cls._BROWSER_RENDERED_TYPES else None
 
     async def _create(self, persist=True) -> bool:
         if self.persisted and not self.updatable:

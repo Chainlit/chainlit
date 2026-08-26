@@ -279,6 +279,7 @@ class DynamoDBDataLayer(BaseDataLayer):
             data=content,
             mime=element.mime,
             overwrite=True,
+            content_disposition=element.get_content_disposition(),
         )
         if not uploaded_file:
             raise ValueError(

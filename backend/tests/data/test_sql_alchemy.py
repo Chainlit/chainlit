@@ -1,6 +1,8 @@
 import json
 import uuid
 from pathlib import Path
+from typing import cast
+from unittest.mock import AsyncMock
 
 import pytest
 from sqlalchemy import text
@@ -9,7 +11,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from chainlit import User
 from chainlit.data.sql_alchemy import SQLAlchemyDataLayer
 from chainlit.data.storage_clients.base import BaseStorageClient
-from chainlit.element import Text
+from chainlit.element import Image, Pdf, Text
 
 
 @pytest.fixture
@@ -147,6 +149,78 @@ async def test_create_and_get_element(
     assert retrieved_element["name"] == text_element.name
     assert retrieved_element["mime"] == text_element.mime
     # The 'content' field is not part of the ElementDict, so we remove this assertion
+
+
+async def test_create_element_pdf_inline_disposition(
+    mock_chainlit_context, data_layer: SQLAlchemyDataLayer
+):
+    """PDF elements must get content_disposition=inline for Azure Blob iframe rendering."""
+    async with mock_chainlit_context:
+        pdf_element = Pdf(
+            id=str(uuid.uuid4()),
+            name="test.pdf",
+            mime="application/pdf",
+            content=b"%PDF-1.4 fake",
+            for_id="test_step_id",
+        )
+        await data_layer.create_element(pdf_element)
+
+    assert data_layer.storage_provider is not None
+    upload_file = cast(AsyncMock, data_layer.storage_provider.upload_file)
+    upload_file.assert_awaited_once()
+    upload_call = upload_file.await_args
+    assert upload_call is not None
+    assert upload_call.kwargs.get("content_disposition") == "inline", (
+        f"Expected content_disposition=inline for PDF, got {upload_call.kwargs}"
+    )
+
+
+async def test_create_element_text_default_disposition(
+    mock_chainlit_context, data_layer: SQLAlchemyDataLayer
+):
+    """Non-renderable elements must keep content_disposition=None (default)."""
+    async with mock_chainlit_context:
+        text_element = Text(
+            id=str(uuid.uuid4()),
+            name="test.txt",
+            mime="text/plain",
+            content="test content",
+            for_id="test_step_id",
+        )
+        await data_layer.create_element(text_element)
+
+    assert data_layer.storage_provider is not None
+    upload_file = cast(AsyncMock, data_layer.storage_provider.upload_file)
+    upload_file.assert_awaited_once()
+    upload_call = upload_file.await_args
+    assert upload_call is not None
+    assert upload_call.kwargs.get("content_disposition") is None, (
+        f"Expected content_disposition=None for text/plain, got {upload_call.kwargs}"
+    )
+
+
+async def test_create_element_image_inline_disposition(
+    mock_chainlit_context, data_layer: SQLAlchemyDataLayer
+):
+    """Image elements must get content_disposition=inline."""
+    async with mock_chainlit_context:
+        img_element = Image(
+            id=str(uuid.uuid4()),
+            name="test.png",
+            mime="image/png",
+            content=b"fake png",
+            for_id="test_step_id",
+        )
+        await data_layer.create_element(img_element)
+
+    assert data_layer.storage_provider is not None
+    upload_file = cast(AsyncMock, data_layer.storage_provider.upload_file)
+    upload_file.assert_awaited_once()
+    upload_call = upload_file.await_args
+    assert upload_call is not None
+    assert upload_call.kwargs.get("content_disposition") == "inline", (
+        f"Expected content_disposition=inline for image/png, got {upload_call.kwargs}"
+    )
 
 
 async def test_get_current_timestamp(data_layer: SQLAlchemyDataLayer):
