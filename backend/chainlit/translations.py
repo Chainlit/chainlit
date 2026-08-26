@@ -60,6 +60,11 @@ def compare_json_structures(truth, to_compare, path=""):
 
 
 def lint_translation_json(file, truth, to_compare):
+    """Print the structural differences between a translation and the truth.
+
+    Returns the list of differences so callers can distinguish a clean
+    translation from a broken one instead of relying on the printed output.
+    """
     _safe_print(f"\nLinting {file}...")
 
     errors = compare_json_structures(truth, to_compare)
@@ -69,3 +74,5 @@ def lint_translation_json(file, truth, to_compare):
             _safe_print(f"{error}")
     else:
         _safe_print(f"✅ No errors found in {file}")
+
+    return errors

@@ -860,22 +860,31 @@ def load_config():
     return ChainlitConfig(**settings)
 
 
-def lint_translations():
+def lint_translations() -> int:
+    """Lint the app's translation files against the packaged ``en-US.json``.
+
+    Returns the total number of structural differences found, so callers can
+    fail instead of reporting success on a broken translation.
+    """
     # Load the ground truth (en-US.json file from chainlit source code)
     src = os.path.join(TRANSLATIONS_DIR, "en-US.json")
     with open(src, encoding="utf-8") as f:
         truth = json.load(f)
 
-        # Find the local app translations
-        for file in os.listdir(config_translation_dir):
-            if file.endswith(".json"):
-                # Load the translation file
-                to_lint = os.path.join(config_translation_dir, file)
-                with open(to_lint, encoding="utf-8") as f2:
-                    translation = json.load(f2)
+    error_count = 0
 
-                    # Lint the translation file
-                    lint_translation_json(file, truth, translation)
+    # Find the local app translations. Sorted so the report is deterministic.
+    for file in sorted(os.listdir(config_translation_dir)):
+        if file.endswith(".json"):
+            # Load the translation file
+            to_lint = os.path.join(config_translation_dir, file)
+            with open(to_lint, encoding="utf-8") as f2:
+                translation = json.load(f2)
+
+            # Lint the translation file
+            error_count += len(lint_translation_json(file, truth, translation))
+
+    return error_count
 
 
 config = load_config()

@@ -1,8 +1,11 @@
+import json
 from io import BytesIO, StringIO, TextIOWrapper
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
+from chainlit import config as config_module
 from chainlit.translations import compare_json_structures, lint_translation_json
 
 
@@ -421,3 +424,80 @@ class TestTranslationsEdgeCases:
         missing_errors = [e for e in errors if "Missing" in e]
         assert len(extra_errors) == 2
         assert len(missing_errors) == 3
+
+
+class TestLintTranslationJsonReturnValue:
+    """``lint_translation_json`` must report differences to its caller.
+
+    It previously only printed them and returned ``None``, so every caller -
+    including the ``lint-translations`` CLI command - had no way to tell a
+    clean translation from a broken one.
+    """
+
+    def test_returns_the_errors_it_printed(self):
+        """A broken translation returns its differences."""
+        truth = {"key1": "value1", "key2": "value2"}
+        to_compare = {"key1": "value1"}
+
+        with patch("sys.stdout", new=StringIO()):
+            errors = lint_translation_json("broken.json", truth, to_compare)
+
+        assert errors == ["❌ Missing key: 'key2'"]
+
+    def test_returns_empty_list_for_a_clean_translation(self):
+        """A matching translation returns no differences."""
+        truth = {"key1": "value1"}
+
+        with patch("sys.stdout", new=StringIO()):
+            errors = lint_translation_json("clean.json", truth, {"key1": "value1"})
+
+        assert errors == []
+
+
+class TestLintTranslationsExitCode:
+    """``chainlit lint-translations`` must fail on a broken translation.
+
+    ``lint_translations()`` returned ``None`` and the CLI command ignored it,
+    so the command exited 0 even when keys were missing and could not be used
+    as a CI gate.
+    """
+
+    def _seed_translation_dir(self, tmp_path, mutate=None):
+        """Copy the packaged ground truth into a temp dir, optionally broken."""
+        truth_path = Path(config_module.TRANSLATIONS_DIR) / "en-US.json"
+        payload = json.loads(truth_path.read_text(encoding="utf-8"))
+        if mutate is not None:
+            mutate(payload)
+        (tmp_path / "en-US.json").write_text(
+            json.dumps(payload, ensure_ascii=False), encoding="utf-8"
+        )
+        return tmp_path
+
+    def test_returns_zero_when_translations_match(self, tmp_path):
+        """An untouched copy of the ground truth reports no differences."""
+        self._seed_translation_dir(tmp_path)
+
+        with patch("chainlit.config.config_translation_dir", str(tmp_path)):
+            with patch("sys.stdout", new=StringIO()):
+                assert config_module.lint_translations() == 0
+
+    def test_counts_differences_when_a_key_is_missing(self, tmp_path):
+        """Dropping a top-level key is reported as one difference."""
+
+        def drop_chat(payload):
+            payload.pop("chat", None)
+
+        self._seed_translation_dir(tmp_path, drop_chat)
+
+        with patch("chainlit.config.config_translation_dir", str(tmp_path)):
+            with patch("sys.stdout", new=StringIO()):
+                assert config_module.lint_translations() == 1
+
+    def test_ignores_non_json_files(self, tmp_path):
+        """Stray files in the translations directory are not linted."""
+        self._seed_translation_dir(tmp_path)
+        (tmp_path / "notes.txt").write_text("not a translation", encoding="utf-8")
+
+        with patch("chainlit.config.config_translation_dir", str(tmp_path)):
+            with patch("sys.stdout", new=StringIO()):
+                assert config_module.lint_translations() == 0
