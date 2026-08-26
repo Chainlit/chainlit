@@ -104,6 +104,7 @@ if TYPE_CHECKING:
     from chainlit.mistralai import instrument_mistralai
     from chainlit.openai import instrument_openai
     from chainlit.semantic_kernel import SemanticKernelFilter
+    from chainlit.taskmarket import TaskmarketTool
 
 
 def sleep(duration: int):
@@ -132,6 +133,7 @@ __getattr__ = make_module_getattr(
         "instrument_openai": "chainlit.openai",
         "instrument_mistralai": "chainlit.mistralai",
         "SemanticKernelFilter": "chainlit.semantic_kernel",
+        "TaskmarketTool": "chainlit.taskmarket",
         "server": "chainlit.server",
     }
 )
@@ -174,6 +176,7 @@ __all__ = [
     "Task",
     "TaskList",
     "TaskStatus",
+    "TaskmarketTool",
     "Text",
     "User",
     "Video",
