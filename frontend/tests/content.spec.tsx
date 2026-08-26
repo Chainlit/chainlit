@@ -104,3 +104,42 @@ it('highlights sources containing regex characters correctly', () => {
   expect(getByRole('link', { name: 'source(12)' })).toBeInTheDocument();
   expect(getByRole('link', { name: 'page{12}' })).toBeInTheDocument();
 });
+
+it('preserves natural-language colons parsed as text directives', () => {
+  const content = '💬 TV:n är stor; FN:s huvudkontor; foo:bar';
+  const { container } = render(
+    <MessageContent
+      message={{
+        threadId: 'test',
+        type: 'assistant_message',
+        output: content,
+        id: 'text-directive',
+        name: 'Assistant',
+        createdAt: 0
+      }}
+      elements={[]}
+    />
+  );
+
+  expect(container.textContent).toBe(content);
+});
+
+it('preserves the complete syntax of unhandled text directives', () => {
+  const content =
+    'A :abbr[lovely language]{title="HyperText Markup Language"}.';
+  const { container } = render(
+    <MessageContent
+      message={{
+        threadId: 'test',
+        type: 'assistant_message',
+        output: content,
+        id: 'unhandled-text-directive',
+        name: 'Assistant',
+        createdAt: 0
+      }}
+      elements={[]}
+    />
+  );
+
+  expect(container.textContent).toBe(content);
+});
