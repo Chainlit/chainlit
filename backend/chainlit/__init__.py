@@ -100,6 +100,7 @@ if TYPE_CHECKING:
         AsyncLangchainCallbackHandler,
         LangchainCallbackHandler,
     )
+    from chainlit.litellm import instrument_litellm
     from chainlit.llama_index.callbacks import LlamaIndexCallbackHandler
     from chainlit.mistralai import instrument_mistralai
     from chainlit.openai import instrument_openai
@@ -131,6 +132,7 @@ __getattr__ = make_module_getattr(
         "LlamaIndexCallbackHandler": "chainlit.llama_index.callbacks",
         "instrument_openai": "chainlit.openai",
         "instrument_mistralai": "chainlit.mistralai",
+        "instrument_litellm": "chainlit.litellm",
         "SemanticKernelFilter": "chainlit.semantic_kernel",
         "server": "chainlit.server",
     }
@@ -186,6 +188,7 @@ __all__ = [
     "data_layer",
     "header_auth_callback",
     "input_widget",
+    "instrument_litellm",
     "instrument_mistralai",
     "instrument_openai",
     "make_async",
