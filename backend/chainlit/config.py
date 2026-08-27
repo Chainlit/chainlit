@@ -201,6 +201,11 @@ name = "Assistant"
 # Default state of chat settings sidebar when location is "sidebar"
 # default_chat_settings_open = false
 
+# Layout for starters when starter_categories are defined.
+# "tabs" (default): show category pills; clicking one reveals its starters.
+# "list": render every category simultaneously as a card with its starters as rows.
+# starters_layout = "tabs"
+
 # Whether to prompt user confirmation on clicking 'New Chat'
 confirm_new_chat = true
 
@@ -445,6 +450,7 @@ class UISettings(BaseModel):
         "message_composer"
     )
     default_chat_settings_open: bool = False
+    starters_layout: Optional[Literal["tabs", "list"]] = "tabs"
     confirm_new_chat: bool = True
     github: Optional[str] = None
     custom_css: Optional[str] = None

@@ -44,6 +44,7 @@ export interface IChainlitConfig {
     default_sidebar_state?: 'open' | 'closed' | 'hidden';
     chat_settings_location?: 'message_composer' | 'sidebar';
     default_chat_settings_open?: boolean;
+    starters_layout?: 'tabs' | 'list';
     confirm_new_chat?: boolean;
     cot: 'hidden' | 'tool_call' | 'full';
     github?: string;

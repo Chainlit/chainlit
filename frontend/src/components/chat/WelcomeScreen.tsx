@@ -87,8 +87,10 @@ export default function WelcomeScreen(props: Props) {
         isVisible && 'opacity-100'
       )}
     >
-      {logo}
-      <MessageComposer {...props} />
+      <div id="welcome-logo">{logo}</div>
+      <div id="welcome-composer" className="w-full">
+        <MessageComposer {...props} />
+      </div>
       <Starters />
     </div>
   );

@@ -5,6 +5,7 @@ import { useChatSession, useConfig } from '@chainlit/react-client';
 
 import Starter from './Starter';
 import StarterCategory from './StarterCategory';
+import StarterCategoryCard from './StarterCategoryCard';
 
 interface Props {
   className?: string;
@@ -28,6 +29,25 @@ export default function Starters({ className }: Props) {
   }, [config, chatProfile]);
 
   const starterCategories = config?.starterCategories;
+  const layout = config?.ui?.starters_layout ?? 'tabs';
+
+  if (starterCategories?.length && layout === 'list') {
+    const visible = starterCategories.filter((c) => c.starters?.length);
+    if (!visible.length) return null;
+    return (
+      <div
+        id="starters"
+        className={cn(
+          'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full max-w-4xl',
+          className
+        )}
+      >
+        {visible.map((category) => (
+          <StarterCategoryCard key={category.label} category={category} />
+        ))}
+      </div>
+    );
+  }
 
   if (starterCategories?.length) {
     const selectedCategoryData = starterCategories.find(
