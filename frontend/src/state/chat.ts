@@ -1,4 +1,4 @@
-import { atom } from 'recoil';
+import { atom, atomFamily } from 'recoil';
 
 import { ICommand } from 'client-types/*';
 
@@ -18,6 +18,11 @@ export interface IAttachment {
 export const attachmentsState = atom<IAttachment[]>({
   key: 'Attachments',
   default: []
+});
+
+export const composerDraftState = atomFamily<string, string>({
+  key: 'ComposerDraft',
+  default: ''
 });
 
 export const persistentCommandState = atom<ICommand | undefined>({
