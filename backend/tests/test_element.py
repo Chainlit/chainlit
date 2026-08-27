@@ -383,7 +383,6 @@ class TestTaskListElement:
             assert "In Progress" in tasklist.content
 
 
-@pytest.mark.asyncio
 class TestTaskClass:
     """Test suite for Task class."""
 

@@ -5,6 +5,7 @@ from typing import Any, Coroutine, ParamSpec, TypeVar
 from asyncer import asyncify
 from syncer import sync
 
+from chainlit._reentrant_loop import run_coroutine_reentrant
 from chainlit.context import context_var
 
 make_async = asyncify
@@ -28,7 +29,16 @@ def run_sync(co: Coroutine[Any, Any, T_Retval]) -> T_Retval:
 
     # Execute from the main thread in the main event loop
     if threading.current_thread() == threading.main_thread():
-        return sync(context_preserving_coroutine())
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            # No loop is running, so there is nothing to re-enter: syncer
+            # drives a loop of its own to completion.
+            return sync(context_preserving_coroutine())
+
+        # The loop is already running and we are on its thread, which rules
+        # out both run_until_complete and run_coroutine_threadsafe.
+        return run_coroutine_reentrant(loop, context_preserving_coroutine())
     else:  # Execute from a thread in the main event loop
         result = asyncio.run_coroutine_threadsafe(
             context_preserving_coroutine(), loop=current_context.loop

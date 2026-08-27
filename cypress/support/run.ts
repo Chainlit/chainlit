@@ -47,7 +47,10 @@ export const runChainlit = async (
       env: {
         ...process.env,
         CHAINLIT_APP_ROOT: testDir
-      }
+      },
+      // Create a new process group so the entire tree (uv → chainlit → uvicorn)
+      // can be killed with process.kill(-pid, 'SIGKILL') in killChainlit().
+      detached: true
     };
 
     const chainlit = spawn(command, args, options);

@@ -47,7 +47,6 @@ def mock_modes():
     ]
 
 
-@pytest.mark.asyncio
 class TestModeOption:
     """Test suite for ModeOption dataclass."""
 
@@ -96,7 +95,6 @@ class TestModeOption:
         assert option_dict["default"] is True
 
 
-@pytest.mark.asyncio
 class TestMode:
     """Test suite for Mode dataclass."""
 
@@ -264,7 +262,6 @@ class TestEmitterSetModes:
         assert call_args[0][1][0]["id"] == "model"
 
 
-@pytest.mark.asyncio
 class TestModeExports:
     """Test that Mode and ModeOption are properly exported."""
 

@@ -476,7 +476,6 @@ class TestStepDecorator:
             ctx.emitter.send_step.assert_called()
 
 
-@pytest.mark.asyncio
 class TestStepHelperFunctions:
     """Test suite for Step helper functions."""
 

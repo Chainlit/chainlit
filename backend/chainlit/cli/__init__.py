@@ -1,16 +1,31 @@
+# nest_asyncio is deliberately NOT applied globally in this module, and is no
+# longer a dependency at all. See https://github.com/Chainlit/chainlit/issues/2767
+#
+# Why it breaks:
+#   nest_asyncio.apply() rebinds asyncio.Task and asyncio.Future to their pure
+#   Python implementations, while asyncio.current_task stays bound to the C
+#   accelerator. The two then disagree:
+#
+#     current_task() returns None inside running coroutines
+#       -> anyio, which weak-references it, raises NoEventLoopError
+#       -> every static-asset request fails (HTTP 500 / white page)
+#
+# Why it is not needed here:
+#   The entry point, asyncio.run(start()), is a top-level call and has never
+#   required a re-entrant loop.
+#
+# Where re-entrancy genuinely is required -- cl.run_sync() from the main
+# thread -- chainlit/_reentrant_loop.py provides it without rebinding, or
+# otherwise mutating, anything in asyncio.
+
 import asyncio
 import logging
 import os
 import sys
 
 import click
-import nest_asyncio
 import uvicorn
 
-# Not sure if it is necessary to call nest_asyncio.apply() before the other imports
-nest_asyncio.apply()
-
-# ruff: noqa: E402
 from chainlit.auth import ensure_jwt_secret
 from chainlit.cache import init_lc_cache
 from chainlit.config import (
