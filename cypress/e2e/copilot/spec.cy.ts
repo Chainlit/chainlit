@@ -189,6 +189,62 @@ describe('Copilot', { includeShadowDom: true }, () => {
       });
     });
 
+    it('should neutralize a host body transform while open and restore it', () => {
+      cy.step('Give the host a transform on <body>');
+      cy.document().then((doc) => {
+        doc.body.style.transform = 'translateZ(0px)';
+      });
+
+      mountCopilotWidget({ displayMode: 'sidebar', opened: true });
+
+      cy.get('#chainlit-copilot-chat').should('exist');
+      cy.step(
+        'Body transform is neutralized so the sidebar stays viewport-fixed'
+      );
+      cy.document().should((doc) => {
+        expect(doc.body.style.transform).to.equal('none');
+      });
+
+      cy.step('Close and verify the host transform is restored');
+      cy.get('#close-sidebar-button').click();
+      cy.get('#chainlit-copilot-chat').should('not.exist');
+      cy.document().should((doc) => {
+        expect(doc.body.style.transform).to.equal('translateZ(0px)');
+      });
+    });
+
+    it('should constrain a configured hostRoot instead of the body margin', () => {
+      cy.step('Add a host root element the widget should constrain');
+      cy.document().then((doc) => {
+        const el = doc.createElement('div');
+        el.id = 'test-host-root';
+        doc.body.appendChild(el);
+      });
+
+      mountCopilotWidget({
+        displayMode: 'sidebar',
+        opened: true,
+        hostRoot: '#test-host-root'
+      });
+
+      cy.get('#chainlit-copilot-chat').should('exist');
+      cy.step(
+        'hostRoot width is constrained and the body margin is left alone'
+      );
+      cy.get('#test-host-root').should(($el) => {
+        const el = $el[0];
+        const win = el.ownerDocument.defaultView;
+        if (!win) throw new Error('missing host window');
+        expect(el.getBoundingClientRect().width).to.be.closeTo(
+          win.innerWidth - 400,
+          2
+        );
+      });
+      cy.document().should((doc) => {
+        expect(doc.body.style.marginRight).to.not.equal('400px');
+      });
+    });
+
     it('should resize sidebar via drag handle', () => {
       mountCopilotWidget({ displayMode: 'sidebar', opened: true });
 
