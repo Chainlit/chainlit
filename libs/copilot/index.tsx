@@ -33,6 +33,7 @@ declare global {
     sendChainlitMessage: (message: IStep) => void;
     getChainlitCopilotThreadId: () => string | null;
     clearChainlitCopilotThreadId: (newThreadId?: string) => void;
+    setChainlitCopilotTheme: (theme: any) => void;
   }
 }
 
