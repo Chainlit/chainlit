@@ -24,6 +24,9 @@ def mock_chainlit_context(session=None):
     mock_loop = Mock(spec=asyncio.AbstractEventLoop)
     mock_session = session or Mock()
     mock_session.thread_id = "thread_123"
+    if session is None:
+        # Mirror a real session where no command is selected by default.
+        mock_session.current_command = None
 
     with patch("asyncio.get_running_loop", return_value=mock_loop):
         mock_emitter = AsyncMock()
@@ -755,3 +758,75 @@ class TestMessageEdgeCases:
             result = msg.to_dict()
 
             assert result["metadata"] == {}
+
+
+class TestUserMessageCommandAutoAttach:
+    """Auto-attaching the session command to user messages (e.g. from audio)."""
+
+    @staticmethod
+    def _session_with_command(command):
+        session = Mock()
+        session.thread_id = "thread_123"
+        session.current_command = command
+        return session
+
+    def test_user_message_auto_attaches_current_command(self):
+        """A user message without a command inherits the session command."""
+        session = self._session_with_command("search")
+        with mock_chainlit_context(session=session):
+            msg = Message(content="hello", type="user_message")
+            assert msg.command == "search"
+
+    def test_user_message_keeps_explicit_command(self):
+        """An explicitly provided command is never overridden."""
+        session = self._session_with_command("search")
+        with mock_chainlit_context(session=session):
+            msg = Message(content="hello", type="user_message", command="picture")
+            assert msg.command == "picture"
+
+    def test_user_message_without_current_command_stays_none(self):
+        """No session command means the user message command stays None."""
+        session = self._session_with_command(None)
+        with mock_chainlit_context(session=session):
+            msg = Message(content="hello", type="user_message")
+            assert msg.command is None
+
+    def test_assistant_message_does_not_auto_attach_command(self):
+        """Only user messages inherit the session command."""
+        session = self._session_with_command("search")
+        with mock_chainlit_context(session=session):
+            msg = Message(content="hello", type="assistant_message")
+            assert msg.command is None
+
+    def test_from_dict_user_message_does_not_inherit_session_command(self):
+        """Deserialized payloads (client messages, resume) never inherit it.
+
+        Guards against a concurrent command-less typed message (or resumed
+        history) picking up the active audio turn's command.
+        """
+        session = self._session_with_command("search")
+        step_dict = {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "createdAt": "2024-01-01T00:00:00Z",
+            "output": "typed while an audio turn was active",
+            "name": "User",
+            "type": "user_message",
+        }
+        with mock_chainlit_context(session=session):
+            msg = MessageBase.from_dict(step_dict)
+            assert msg.command is None
+
+    def test_from_dict_user_message_keeps_payload_command(self):
+        """A deserialized command stays authoritative over the session command."""
+        session = self._session_with_command("search")
+        step_dict = {
+            "id": "00000000-0000-4000-8000-000000000000",
+            "createdAt": "2024-01-01T00:00:00Z",
+            "output": "typed with a different command",
+            "name": "User",
+            "type": "user_message",
+            "command": "picture",
+        }
+        with mock_chainlit_context(session=session):
+            msg = MessageBase.from_dict(step_dict)
+            assert msg.command == "picture"

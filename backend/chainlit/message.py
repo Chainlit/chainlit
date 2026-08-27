@@ -58,10 +58,18 @@ class MessageBase(ABC):
         if not getattr(self, "id", None):
             self.id = str(uuid.uuid4())
 
+        # Auto-attach the command selected in the UI to user messages the app
+        # creates during an audio turn (e.g. the transcription in on_audio_end).
+        # Deserialized payloads are authoritative about their command and reset
+        # it in from_dict, so a command-less typed message (or resumed history)
+        # never inherits the audio turn's command.
+        if self.type == "user_message" and self.command is None:
+            self.command = context.session.current_command
+
     @classmethod
     def from_dict(self, _dict: StepDict):
         type = _dict.get("type", "assistant_message")
-        return Message(
+        message = Message(
             id=_dict["id"],
             parent_id=_dict.get("parentId"),
             created_at=_dict["createdAt"],
@@ -73,6 +81,12 @@ class MessageBase(ABC):
             language=_dict.get("language"),
             metadata=_dict.get("metadata", {}),
         )
+        # A deserialized payload is authoritative about its command: reset it from
+        # the payload so messages rebuilt here (incoming client messages, thread
+        # resume) never inherit an active audio turn's command that
+        # __post_init__ applies to command-less user messages.
+        message.command = _dict.get("command")
+        return message
 
     def to_dict(self) -> StepDict:
         _dict: StepDict = {

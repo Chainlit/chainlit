@@ -18,10 +18,13 @@ const useAudio = () => {
 
   const { startAudioStream, endAudioStream } = useChatInteract();
 
-  const startConversation = useCallback(async () => {
-    setAudioConnection('connecting');
-    await startAudioStream();
-  }, [startAudioStream]);
+  const startConversation = useCallback(
+    async (command?: string) => {
+      setAudioConnection('connecting');
+      await startAudioStream(command);
+    },
+    [startAudioStream]
+  );
 
   const endConversation = useCallback(async () => {
     setAudioConnection('off');

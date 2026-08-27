@@ -124,6 +124,7 @@ class BaseSession:
     thread_id_to_resume: Optional[str] = None
     client_type: ClientType
     current_task: Optional[asyncio.Task] = None
+    current_command: Optional[str] = None
     chat_started: bool = False
 
     def __init__(

@@ -8,6 +8,7 @@ from chainlit.socket import (
     _authenticate_connection,
     _get_token,
     _get_token_from_cookie,
+    audio_start,
     clean_session,
     connection_successful,
     load_user_env,
@@ -628,3 +629,43 @@ class TestConnectionSuccessfulIdempotency:
             await connection_successful("sid-1")
 
         assert on_chat_start.call_count == 1
+
+
+class TestAudioStartCommand:
+    """audio_start only keeps the UI-selected command when audio is accepted."""
+
+    async def _run(self, *, accepted, enabled=True, payload=None):
+        session = Mock()
+        session.current_command = "stale"
+        config = Mock()
+        config.features.audio.enabled = enabled
+        config.code.on_audio_start = AsyncMock(return_value=accepted)
+        session.get_config.return_value = config
+
+        context = Mock()
+        context.emitter.update_audio_connection = AsyncMock()
+
+        with (
+            patch("chainlit.socket.WebsocketSession") as mock_ws,
+            patch("chainlit.socket.init_ws_context", return_value=context),
+        ):
+            mock_ws.require.return_value = session
+            await audio_start("sid", payload)
+        return session
+
+    @pytest.mark.asyncio
+    async def test_accepted_start_keeps_command(self):
+        session = await self._run(accepted=True, payload={"command": "search"})
+        assert session.current_command == "search"
+
+    @pytest.mark.asyncio
+    async def test_declined_start_clears_command(self):
+        session = await self._run(accepted=False, payload={"command": "search"})
+        assert session.current_command is None
+
+    @pytest.mark.asyncio
+    async def test_disabled_audio_clears_command(self):
+        session = await self._run(
+            accepted=True, enabled=False, payload={"command": "search"}
+        )
+        assert session.current_command is None

@@ -133,9 +133,12 @@ const useChatInteract = () => {
     [session?.socket]
   );
 
-  const startAudioStream = useCallback(() => {
-    session?.socket.emit('audio_start');
-  }, [session?.socket]);
+  const startAudioStream = useCallback(
+    (command?: string) => {
+      session?.socket.emit('audio_start', { command });
+    },
+    [session?.socket]
+  );
 
   const sendAudioChunk = useCallback(
     (
