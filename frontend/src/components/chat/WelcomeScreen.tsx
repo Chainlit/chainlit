@@ -63,7 +63,7 @@ export default function WelcomeScreen(props: Props) {
         }
       />
     ) : (
-      <Logo className="w-[200px] mb-2" />
+      <Logo className="w-[200px]" />
     );
 
     return (
