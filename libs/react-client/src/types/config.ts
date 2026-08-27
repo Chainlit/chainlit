@@ -65,6 +65,13 @@ export interface IChainlitConfig {
       url: string;
       target?: '_blank' | '_self' | '_parent' | '_top';
     }[];
+    user_menu_links?: {
+      name: string;
+      url: string;
+      icon_url?: string;
+      display_name?: string;
+      target?: '_blank' | '_self' | '_parent' | '_top';
+    }[];
   };
   features: {
     spontaneous_file_upload?: {

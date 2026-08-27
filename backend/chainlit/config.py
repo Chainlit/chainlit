@@ -262,6 +262,15 @@ default_avatar_file_url = ""
 #     url = "https://github.com/Chainlit/chainlit/issues"
 #     target = "_blank" (default)  # Optional: "_self", "_parent", "_top".
 
+# Specify optional one or more custom links inside the user menu (the dropdown
+# opened by clicking the avatar in the top-right corner).
+# [[UI.user_menu_links]]
+#     name = "Account"
+#     url = "https://example.com/account"
+#     icon_url = "/public/account.svg"     # Optional. Renders to the right of the label.
+#     display_name = "Manage account"      # Optional. Defaults to `name`.
+#     target = "_blank"                    # Optional, defaults to "_blank". "_self", "_parent", "_top".
+
 [meta]
 generated_by = "{__version__}"
 """
@@ -433,6 +442,14 @@ class HeaderLink(BaseModel):
     target: Optional[Literal["_blank", "_self", "_parent", "_top"]] = None
 
 
+class UserMenuLink(BaseModel):
+    name: str
+    url: str
+    icon_url: Optional[str] = None
+    display_name: Optional[str] = None
+    target: Optional[Literal["_blank", "_self", "_parent", "_top"]] = None
+
+
 class UISettings(BaseModel):
     name: str
     description: str = ""
@@ -464,6 +481,7 @@ class UISettings(BaseModel):
     avatar_size: Optional[int] = None
     custom_build: Optional[str] = None
     header_links: Optional[List[HeaderLink]] = None
+    user_menu_links: Optional[List[UserMenuLink]] = None
 
 
 class CodeSettings(BaseModel):
