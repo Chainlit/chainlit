@@ -18,6 +18,11 @@ from chainlit.logger import logger
 from chainlit.types import FeedbackDict
 from chainlit.utils import utc_now
 
+# The event loop only keeps weak references to tasks, so a persistence task
+# whose only reference was the create_task() call can be garbage collected
+# before it reaches the data layer. Hold each one until it completes.
+_persistence_tasks: set[asyncio.Task] = set()
+
 
 def check_add_step_in_cot(step: "Step"):
     is_message = step.type in [
@@ -342,7 +347,9 @@ class Step:
 
         if data_layer:
             try:
-                asyncio.create_task(data_layer.update_step(step_dict.copy()))
+                _task = asyncio.create_task(data_layer.update_step(step_dict.copy()))
+                _persistence_tasks.add(_task)
+                _task.add_done_callback(_persistence_tasks.discard)
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -367,7 +374,9 @@ class Step:
 
         if data_layer:
             try:
-                asyncio.create_task(data_layer.delete_step(self.id))
+                _task = asyncio.create_task(data_layer.delete_step(self.id))
+                _persistence_tasks.add(_task)
+                _task.add_done_callback(_persistence_tasks.discard)
             except Exception as e:
                 if self.fail_on_persist_error:
                     raise e
@@ -393,7 +402,9 @@ class Step:
 
         if data_layer:
             try:
-                asyncio.create_task(data_layer.create_step(step_dict.copy()))
+                _task = asyncio.create_task(data_layer.create_step(step_dict.copy()))
+                _persistence_tasks.add(_task)
+                _task.add_done_callback(_persistence_tasks.discard)
                 self.persisted = True
             except Exception as e:
                 if self.fail_on_persist_error:
@@ -493,7 +504,9 @@ class Step:
                 self.parent_id = parent_step.id
         local_steps.set(previous_steps + [self])
 
-        asyncio.create_task(self.send())
+        _task = asyncio.create_task(self.send())
+        _persistence_tasks.add(_task)
+        _task.add_done_callback(_persistence_tasks.discard)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -508,4 +521,6 @@ class Step:
             current_steps.remove(self)
             local_steps.set(current_steps)
 
-        asyncio.create_task(self.update())
+        _task = asyncio.create_task(self.update())
+        _persistence_tasks.add(_task)
+        _task.add_done_callback(_persistence_tasks.discard)
