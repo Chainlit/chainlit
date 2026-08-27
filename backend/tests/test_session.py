@@ -764,6 +764,30 @@ class TestMcpSession:
 
         assert task.done()
 
+    @pytest.mark.asyncio
+    async def test_stop_mcp_task_used_directly_without_an_mcp_session(self):
+        """stop_mcp_task was extracted out of McpSession.close() so the /mcp
+        connect handler in server.py can reuse the same bounded
+        wait-then-cancel behavior on its timeout / blocked-destination /
+        on_mcp_connect-failure paths, where there is no McpSession yet (only
+        a bare task and stop_event). Verify it works standalone, not merely
+        as a private helper behind McpSession.close()."""
+        import asyncio
+
+        from chainlit.session import stop_mcp_task
+
+        stop = asyncio.Event()
+
+        async def _runner():
+            await stop.wait()
+
+        task = asyncio.create_task(_runner())
+
+        await stop_mcp_task(task, stop, "standalone")
+
+        assert stop.is_set()
+        assert task.done()
+
 
 def test_get_config_returns_global_config_by_default():
     """get_config() returns the global config when no profile is set."""

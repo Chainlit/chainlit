@@ -39,7 +39,7 @@
       "errors": {
         "default": "No se pudo iniciar sesión",
         "signin": "Intenta iniciar sesión con otra cuenta",
-        "oauthSignin": "Intenta iniciar sesión con otra cuenta",
+        "oauthSignin": "Error al iniciar sesión. Por favor, inténtalo de nuevo o usa un método de inicio de sesión diferente.",
         "redirectUriMismatch": "El URI de redirección no coincide con la configuración de la aplicación OAuth",
         "oauthCallback": "Intenta iniciar sesión con otra cuenta",
         "oauthCreateAccount": "Intenta iniciar sesión con otra cuenta",
