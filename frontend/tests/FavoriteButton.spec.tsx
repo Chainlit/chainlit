@@ -10,6 +10,8 @@ import {
 
 import { FavoriteButton } from '@/components/chat/MessageComposer/FavoriteButton';
 
+import { mountShadowHost } from './testUtils';
+
 const toggleMessageFavoriteMock = vi.fn();
 
 vi.mock('@/components/i18n/Translator', () => ({
@@ -41,14 +43,6 @@ vi.mock('@chainlit/react-client', async () => {
     })
   };
 });
-
-global.ResizeObserver = class ResizeObserver {
-  observe() {}
-  unobserve() {}
-  disconnect() {}
-};
-
-window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
 describe('FavoriteButton', () => {
   const mockOnSelect = vi.fn();
@@ -302,5 +296,60 @@ describe('FavoriteButton', () => {
     fireEvent.click(button);
     expect(screen.queryByText('Use favorite')).not.toBeInTheDocument();
     expect(screen.getByText('Favorites List')).toBeInTheDocument();
+  });
+});
+
+describe('FavoriteButton — shadow DOM popover positioning', () => {
+  const favorites: IStep[] = [
+    {
+      id: 'msg_1',
+      output: 'How do I center a div?',
+      createdAt: new Date('2023-10-01').getTime(),
+      type: 'assistant_message',
+      name: 'Assistant'
+    }
+  ];
+
+  const renderComponent = () =>
+    render(
+      <RecoilRoot
+        initializeState={({ set }) => set(favoriteMessagesState, favorites)}
+      >
+        <FavoriteButton onSelect={vi.fn()} />
+      </RecoilRoot>
+    );
+
+  beforeEach(() => {
+    (useConfig as any).mockReturnValue({
+      config: { features: { favorites: true } }
+    });
+  });
+
+  it('portals the popover into the widget shadow root', () => {
+    const shadowRoot = mountShadowHost();
+
+    renderComponent();
+    fireEvent.click(screen.getByRole('button'));
+
+    // Content lives inside the encapsulated shadow tree, not the light DOM.
+    expect(shadowRoot.textContent).toContain('Favorites List');
+    expect(document.body.textContent).not.toContain('Favorites List');
+  });
+
+  it('falls back to document.body when no shadow root is set (standalone app)', () => {
+    renderComponent();
+    fireEvent.click(screen.getByRole('button'));
+
+    expect(screen.getByText('Favorites List')).toBeInTheDocument();
+  });
+
+  it('gives the popover content a stacking z-index above the chat', () => {
+    renderComponent();
+    fireEvent.click(screen.getByRole('button'));
+
+    // jsdom has no layout engine, so we assert the stacking class Radix copies
+    // onto the popper wrapper rather than computed geometry (covered by e2e).
+    const content = document.querySelector('.z-\\[51\\]');
+    expect(content).toHaveTextContent('Favorites List');
   });
 });

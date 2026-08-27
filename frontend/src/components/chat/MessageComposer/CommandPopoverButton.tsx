@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import {
   Popover,
   PopoverContent,
+  PopoverPortal,
   PopoverTrigger
 } from '@radix-ui/react-popover';
 import { every } from 'lodash';
@@ -191,51 +192,53 @@ export const CommandPopoverButton = ({
           </Tooltip>
         </TooltipProvider>
 
-        <PopoverContent
-          id="command-popover"
-          align="start"
-          sideOffset={12}
-          data-popover-content
-          tabIndex={0}
-          className={cn(
-            'p-2 rounded-lg border shadow-md bg-background',
-            'animate-in fade-in-0 zoom-in-95 duration-200',
-            'focus:outline-none'
-          )}
-          onKeyDown={handleKeyDown}
-          onMouseLeave={handleMouseLeave}
-        >
-          <Command className="overflow-hidden bg-transparent">
-            <CommandListScrollable maxItems={5} className="custom-scrollbar">
-              <CommandGroup className="p-0">
-                {nonButtonCommands.map((command, index) => (
-                  <CommandItemAnimated
-                    key={command.id}
-                    index={index}
-                    isSelected={index === selectedIndex}
-                    onMouseMove={() => handleMouseMove(index)}
-                    onSelect={() => handleCommandSelect(command)} // Direct call for mouse clicks
-                    className="space-x-2"
-                  >
-                    <Icon
-                      name={command.icon}
-                      className={cn(
-                        '!size-5 text-muted-foreground transition-transform duration-150',
-                        index === selectedIndex && 'scale-110'
-                      )}
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium">{command.id}</div>
-                      <div className="text-sm text-muted-foreground">
-                        {command.description}
+        <PopoverPortal container={window.cl_shadowRootElement}>
+          <PopoverContent
+            id="command-popover"
+            align="start"
+            sideOffset={12}
+            data-popover-content
+            tabIndex={0}
+            className={cn(
+              'z-[51] p-2 rounded-lg border shadow-md bg-background',
+              'animate-in fade-in-0 zoom-in-95 duration-200',
+              'focus:outline-none'
+            )}
+            onKeyDown={handleKeyDown}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Command className="overflow-hidden bg-transparent">
+              <CommandListScrollable maxItems={5} className="custom-scrollbar">
+                <CommandGroup className="p-0">
+                  {nonButtonCommands.map((command, index) => (
+                    <CommandItemAnimated
+                      key={command.id}
+                      index={index}
+                      isSelected={index === selectedIndex}
+                      onMouseMove={() => handleMouseMove(index)}
+                      onSelect={() => handleCommandSelect(command)} // Direct call for mouse clicks
+                      className="space-x-2"
+                    >
+                      <Icon
+                        name={command.icon}
+                        className={cn(
+                          '!size-5 text-muted-foreground transition-transform duration-150',
+                          index === selectedIndex && 'scale-110'
+                        )}
+                      />
+                      <div className="flex-1">
+                        <div className="font-medium">{command.id}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {command.description}
+                        </div>
                       </div>
-                    </div>
-                  </CommandItemAnimated>
-                ))}
-              </CommandGroup>
-            </CommandListScrollable>
-          </Command>
-        </PopoverContent>
+                    </CommandItemAnimated>
+                  ))}
+                </CommandGroup>
+              </CommandListScrollable>
+            </Command>
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
     </div>
   );
