@@ -337,6 +337,7 @@ async def edit_message(sid, payload: MessagePayload):
         if message.id == payload["message"]["id"]:
             message.content = payload["message"]["output"]
             await message.update()
+            await message.remove_children()
             orig_message = message
 
     await context.emitter.task_start()
