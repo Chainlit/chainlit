@@ -255,6 +255,18 @@
         "single": "తేదీని ఎంచుకోండి",
         "range": "తేదీ పరిధిని ఎంచుకోండి"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "అన్నీ ఎంచుకోండి",
+      "deselectAll": "అన్నీ తొలగించండి",
+      "rowsCount": "{{total}} లో {{filtered}} వరుసలు",
+      "rowsPerPage": "{{count}} వరుసలు",
+      "filterPlaceholder": "ఫిల్టర్...",
+      "columns": "నిర్వాహికలు",
+      "pageSizePlaceholder": "పేజీ పరిమాణం",
+      "exportExcel": "Excel నిర్యాతం",
+      "clearFilters": "ఫిల్టర్లు తెరవండి",
+      "noResults": "ఫలితాలు లేవు."
     }
   }
 }

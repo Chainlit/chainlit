@@ -255,6 +255,18 @@
         "single": "தேதியைத் தேர்ந்தெடுக்கவும்",
         "range": "தேதி வரம்பைத் தேர்ந்தெடுக்கவும்"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "அனைத்தையும் தேர்ந்தெடு",
+      "deselectAll": "அனைத்தையும் நீக்கு",
+      "rowsCount": "{{total}} இல் {{filtered}} வரிசைகள்",
+      "rowsPerPage": "{{count}} வரிசைகள்",
+      "filterPlaceholder": "வடிகட்டு...",
+      "columns": "நிரல்கள்",
+      "pageSizePlaceholder": "பக்க அளவு",
+      "exportExcel": "Excel ஏற்றுமதி",
+      "clearFilters": "வடிகட்டை அழி",
+      "noResults": "உள்ளடக்கம் இல்லை."
     }
   }
 }

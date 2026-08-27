@@ -255,6 +255,18 @@
         "single": "একটি তারিখ বেছে নিন",
         "range": "তারিখের পরিসীমা বেছে নিন"
       }
+    },
+    "DataframeElement": {
+      "selectAll": "সব নির্বাচন করুন",
+      "deselectAll": "সব বাতিল করুন",
+      "rowsCount": "{{total}} এর মধ্যে {{filtered}} সারি",
+      "rowsPerPage": "{{count}} সারি",
+      "filterPlaceholder": "ফিল্টার...",
+      "columns": "কলাম",
+      "pageSizePlaceholder": "পেজ আকার",
+      "exportExcel": "Excel রপ্তানি করুন",
+      "clearFilters": "ফিল্টার মুছুন",
+      "noResults": "কোনো ফলাফল নেই।"
     }
   }
 }

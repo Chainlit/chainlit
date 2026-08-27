@@ -74,7 +74,12 @@ export type IPlotlyElement = TMessageElement<'plotly'>;
 
 export type ITasklistElement = TElement<'tasklist'>;
 
-export type IDataframeElement = TMessageElement<'dataframe'>;
+export interface IDataframeElement extends TMessageElement<'dataframe'> {
+  /** Show column visibility toggle dropdown (default: false) */
+  showColumnVisibility?: boolean;
+  /** Show per-column filter inputs (default: false) */
+  showColumnFilters?: boolean;
+}
 
 export interface ICustomElement extends TMessageElement<'custom'> {
   props: Record<string, unknown>;

@@ -13,6 +13,7 @@ from typing import (
     TypedDict,
     TypeVar,
     Union,
+    cast,
 )
 
 import filetype
@@ -178,6 +179,16 @@ class Element:
 
         elif type == "plotly":
             return Plotly(size=e_dict.get("size", "medium"), **common_params)  # type: ignore[arg-type]
+
+        elif type == "dataframe":
+            dataframe_dict = cast(DataframeDict, e_dict)
+            return Dataframe(
+                show_column_visibility=dataframe_dict.get(
+                    "showColumnVisibility", False
+                ),
+                show_column_filters=dataframe_dict.get("showColumnFilters", False),
+                **common_params,  # type: ignore[arg-type]
+            )
 
         elif type == "custom":
             return CustomElement(props=e_dict.get("props", {}), **common_params)  # type: ignore[arg-type]
@@ -426,6 +437,11 @@ class Plotly(Element):
         super().__post_init__()
 
 
+class DataframeDict(ElementDict, total=False):
+    showColumnVisibility: bool
+    showColumnFilters: bool
+
+
 @dataclass
 class Dataframe(Element):
     """Useful to send a pandas or polars DataFrame to the UI."""
@@ -433,6 +449,10 @@ class Dataframe(Element):
     type: ClassVar[ElementType] = "dataframe"
     size: ElementSize = "large"
     data: Any = None  # The type is Any because it is checked in __post_init__.
+    show_column_visibility: bool = False
+    """Show column visibility toggle dropdown. Defaults to False in the UI."""
+    show_column_filters: bool = False
+    """Show per-column filter inputs. Defaults to False in the UI."""
 
     @staticmethod
     def _is_pandas_dataframe(data: Any) -> bool:
@@ -456,21 +476,28 @@ class Dataframe(Element):
 
     def __post_init__(self) -> None:
         """Ensures the data is a pandas or polars DataFrame and converts it to JSON."""
-        if self._is_pandas_dataframe(self.data):
-            self.content = self.data.to_json(orient="split", date_format="iso")
-        elif self._is_polars_dataframe(self.data):
-            self.content = json.dumps(
-                {
-                    "columns": self.data.columns,
-                    "index": list(range(len(self.data))),
-                    "data": self.data.rows(),
-                },
-                default=str,
-            )
-        else:
-            raise TypeError("data must be a pandas.DataFrame or polars.DataFrame")
+        if self.data is not None:
+            if self._is_pandas_dataframe(self.data):
+                self.content = self.data.to_json(orient="split", date_format="iso")
+            elif self._is_polars_dataframe(self.data):
+                self.content = json.dumps(
+                    {
+                        "columns": self.data.columns,
+                        "index": list(range(len(self.data))),
+                        "data": self.data.rows(),
+                    },
+                    default=str,
+                )
+            else:
+                raise TypeError("data must be a pandas.DataFrame or polars.DataFrame")
 
         super().__post_init__()
+
+    def to_dict(self) -> DataframeDict:
+        d = DataframeDict(**super().to_dict())
+        d["showColumnVisibility"] = self.show_column_visibility
+        d["showColumnFilters"] = self.show_column_filters
+        return d
 
 
 @dataclass

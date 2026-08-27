@@ -10,7 +10,7 @@ const InlinedDataframeList = ({ items }: Props) => (
   <div className="flex gap-1">
     {items.map((element, i) => {
       return (
-        <div key={i} className="max-h-[450px] w-full">
+        <div key={i} className="w-full">
           <LazyDataframe element={element} />
         </div>
       );
