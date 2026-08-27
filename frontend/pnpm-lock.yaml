@@ -122,6 +122,9 @@ importers:
       highlight.js:
         specifier: ^11.9.0
         version: 11.9.0
+      highlightjs-structured-text:
+        specifier: ^1.7.3
+        version: 1.7.3
       i18next:
         specifier: ^23.7.16
         version: 23.7.16
@@ -3096,9 +3099,16 @@ packages:
   hastscript@8.0.0:
     resolution: {integrity: sha512-dMOtzCEd3ABUeSIISmrETiKuyydk1w0pa+gE/uormcTpSYuaNJPbX1NU3JLyscSLjwAQM8bWMhhIlnCqnRvDTw==}
 
+  highlight.js@11.11.1:
+    resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
+    engines: {node: '>=12.0.0'}
+
   highlight.js@11.9.0:
     resolution: {integrity: sha512-fJ7cW7fQGCYAkgv4CPfwFHrfd/cLS4Hau96JuJ+ZTOWhjnhoeN1ub1tFmALm/+lW5z4WCAuAV9bm05AP0mS6Gw==}
     engines: {node: '>=12.0.0'}
+
+  highlightjs-structured-text@1.7.3:
+    resolution: {integrity: sha512-OwIfpV9w7Wi8qvmUyksZnHB4ZcpenbJTAjISke51KflHcWm8V75denT3DiNa5Vl28FrBHF6BbVjgwyjmTehHFA==}
 
   hsluv@0.0.3:
     resolution: {integrity: sha512-08iL2VyCRbkQKBySkSh6m8zMUa3sADAxGVWs3Z1aPcUkTJeK0ETG4Fc27tEmQBGUAXZjIsXOZqBvacuVNSC/fQ==}
@@ -7701,7 +7711,13 @@ snapshots:
       property-information: 6.4.1
       space-separated-tokens: 2.0.2
 
+  highlight.js@11.11.1: {}
+
   highlight.js@11.9.0: {}
+
+  highlightjs-structured-text@1.7.3:
+    dependencies:
+      highlight.js: 11.11.1
 
   hsluv@0.0.3: {}
 
