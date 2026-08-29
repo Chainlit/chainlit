@@ -475,6 +475,33 @@ class TestStepDecorator:
             assert result == "result"
             ctx.emitter.send_step.assert_called()
 
+    async def test_step_instance_used_as_decorator(self, mock_chainlit_context):
+        """Test a Step instance used as a decorator (Step.__call__)."""
+        async with mock_chainlit_context as ctx:
+
+            @Step(name="decorating_step", type="tool")
+            async def decorated_function(value):
+                return value * 2
+
+            result = await decorated_function(3)
+
+            assert result == 6
+            ctx.emitter.send_step.assert_called()
+
+    async def test_step_decorator_forwards_thread_id(self, mock_chainlit_context):
+        """Test @step(thread_id=...) reaches the Step it creates."""
+        async with mock_chainlit_context:
+            custom_thread_id = "custom_thread_123"
+            seen = {}
+
+            @step(thread_id=custom_thread_id)
+            async def decorated_function():
+                seen["thread_id"] = local_steps.get()[-1].thread_id
+
+            await decorated_function()
+
+            assert seen["thread_id"] == custom_thread_id
+
 
 @pytest.mark.asyncio
 class TestStepHelperFunctions:
