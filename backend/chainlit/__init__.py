@@ -23,7 +23,7 @@ from chainlit.action import Action
 from chainlit.cache import cache
 from chainlit.chat_context import chat_context
 from chainlit.chat_settings import ChatSettings
-from chainlit.context import context
+from chainlit.context import ChainlitContextException, context
 from chainlit.element import (
     Audio,
     CustomElement,
@@ -113,6 +113,75 @@ def sleep(duration: int):
         duration (int): The duration in seconds.
     """
     return asyncio.sleep(duration)
+
+
+async def set_chat_profile(name: "str | None") -> bool:
+    """
+    Programmatically hot-swap the chat profile of the current websocket session.
+
+    Requires ``features.hot_swap_chat_profile`` to be enabled in the project
+    configuration — otherwise this is a no-op and returns ``False`` so the
+    legacy reconnect flow is preserved.
+
+    The new profile name must match one of the profiles returned by
+    ``@cl.set_chat_profiles``. Passing ``None`` clears the profile.
+
+    The new profile is persisted to the current thread's metadata (and, when
+    ``features.auto_tag_thread`` is enabled, overwrites the single thread tag)
+    so that resuming the conversation later picks up the last used profile.
+
+    Returns ``True`` on success, ``False`` if the feature is disabled, no
+    session is available, or the profile name is invalid.
+    """
+    from chainlit.config import config as global_config
+    from chainlit.data import get_data_layer
+    from chainlit.session import WebsocketSession
+
+    if not global_config.features.hot_swap_chat_profile:
+        return False
+
+    try:
+        session = context.session
+    except ChainlitContextException:
+        return False
+
+    if not isinstance(session, WebsocketSession):
+        return False
+
+    async with session._profile_lock:
+        ok = await session.set_chat_profile(name)
+        if not ok:
+            return False
+
+        data_layer = get_data_layer()
+        if data_layer and session.has_first_interaction and session.thread_id:
+            try:
+                await data_layer.update_thread(
+                    thread_id=session.thread_id,
+                    metadata=session.to_persistable(),
+                    tags=(
+                        [session.chat_profile]
+                        if (
+                            global_config.features.auto_tag_thread
+                            and session.chat_profile
+                        )
+                        else []
+                        if global_config.features.auto_tag_thread
+                        else None
+                    ),
+                )
+            except Exception as e:
+                logger.warning(f"Failed to persist hot-swapped chat profile: {e}")
+
+        try:
+            await context.emitter.emit(
+                "chat_profile_updated",
+                {"chatProfile": session.chat_profile, "ok": True},
+            )
+        except Exception:
+            pass
+
+        return True
 
 
 @dataclass()
@@ -212,6 +281,7 @@ __all__ = [
     "password_auth_callback",
     "run_sync",
     "send_window_message",
+    "set_chat_profile",
     "set_chat_profiles",
     "set_starter_categories",
     "set_starters",

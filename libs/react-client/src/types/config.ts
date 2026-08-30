@@ -81,6 +81,7 @@ export interface IChainlitConfig {
     user_message_markdown?: boolean;
     edit_message?: boolean;
     favorites?: boolean;
+    hot_swap_chat_profile?: boolean;
     mcp?: {
       enabled?: boolean;
       servers?: Array<{

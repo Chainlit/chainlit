@@ -93,8 +93,8 @@ async def resume_thread(session: WebsocketSession):
         if isinstance(metadata, str):
             metadata = json.loads(metadata)
         user_sessions[session.id] = metadata.copy()
-        if chat_profile := metadata.get("chat_profile"):
-            session.chat_profile = chat_profile
+        if "chat_profile" in metadata:
+            session.chat_profile = metadata["chat_profile"]
         if chat_settings := metadata.get("chat_settings"):
             session.chat_settings = chat_settings
 
@@ -250,6 +250,44 @@ async def clean_session(sid):
     session = WebsocketSession.get(sid)
     if session:
         session.to_clear = True
+
+
+@sio.on("set_chat_profile")  # pyright: ignore [reportOptionalCall]
+async def set_chat_profile(sid, payload: Dict[str, Any]):
+    """Hot-swap the chat profile of an existing session.
+
+    Only active when `features.hot_swap_chat_profile` is enabled. When the
+    feature is disabled we simply ignore the event so a misconfigured client
+    cannot bypass the legacy reconnect flow. Invalid profile names trigger a
+    toast and leave the current profile unchanged.
+    """
+    session = WebsocketSession.get(sid)
+    if not session:
+        return
+
+    context = init_ws_context(session)
+
+    if not config.features.hot_swap_chat_profile:
+        # Feature is opt-in; legacy clients that accidentally emit this event
+        # should not affect the session.
+        return
+
+    if not isinstance(payload, dict) or "chatProfile" not in payload:
+        return
+
+    new_profile: Optional[str] = payload["chatProfile"]
+    from chainlit import set_chat_profile as cl_set_chat_profile
+
+    ok = await cl_set_chat_profile(new_profile)
+    if not ok:
+        await context.emitter.send_toast(
+            f"Unknown chat profile: {new_profile}", type="error"
+        )
+        await context.emitter.emit(
+            "chat_profile_updated",
+            {"chatProfile": session.chat_profile, "ok": False},
+        )
+        return
 
 
 @sio.on("disconnect")  # pyright: ignore [reportOptionalCall]

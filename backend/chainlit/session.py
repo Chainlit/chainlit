@@ -111,8 +111,20 @@ def clean_metadata(metadata: Dict, max_size: int = 1048576):
     metadata_size = len(json.dumps(cleaned_metadata).encode("utf-8"))
     if metadata_size > max_size:
         # Redact the metadata if it exceeds the maximum size
+        chat_settings = cleaned_metadata.get("chat_settings")
+        if chat_settings:
+            try:
+                settings_size = len(json.dumps(chat_settings).encode("utf-8"))
+                if settings_size > max_size // 2:
+                    chat_settings = None
+            except Exception:
+                chat_settings = None
+
         cleaned_metadata = {
-            "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted."
+            "message": f"Metadata size exceeds the limit of {max_size} bytes. Redacted.",
+            "chat_profile": cleaned_metadata.get("chat_profile"),
+            "chat_settings": chat_settings,
+            "client_type": cleaned_metadata.get("client_type"),
         }
 
     return cleaned_metadata
@@ -345,6 +357,7 @@ class WebsocketSession(BaseSession):
         self.language = match.group(1) if match else "en-US"
 
         self.config: ChainlitConfig = self.get_config()
+        self._profile_lock = asyncio.Lock()
 
         ws_sessions_id[self.id] = self
         ws_sessions_sid[socket_id] = self
@@ -381,6 +394,50 @@ class WebsocketSession(BaseSession):
                 pass
         self.config = cfg
         return cfg
+
+    async def set_chat_profile(self, new_profile: Optional[str]) -> bool:
+        """
+        Update the chat profile of this session in place (hot-swap).
+        """
+        from chainlit.config import config as global_config
+        from chainlit.user_session import user_sessions
+
+        if new_profile == "":
+            return False
+
+        profiles = None
+        if new_profile is not None:
+            if not global_config.code.set_chat_profiles:
+                return False
+            try:
+                profiles = await global_config.code.set_chat_profiles(
+                    self.user, self.language
+                )
+            except Exception as e:
+                logger.error(f"Error in set_chat_profiles callback: {e}")
+                return False
+            if profiles is None or not any(p.name == new_profile for p in profiles):
+                return False
+
+        if new_profile == self.chat_profile:
+            return True
+
+        self.chat_profile = new_profile
+
+        # Recompute the per-session config with the new profile's overrides (if any).
+        cfg = global_config
+        if new_profile and profiles:
+            current_profile = next((p for p in profiles if p.name == new_profile), None)
+            if current_profile and getattr(current_profile, "config_overrides", None):
+                cfg = global_config.with_overrides(current_profile.config_overrides)
+        self.config = cfg
+
+        # Keep the user_session view in sync for callbacks that read
+        # `cl.user_session["chat_profile"]`.
+        if self.id in user_sessions:
+            user_sessions[self.id]["chat_profile"] = new_profile
+
+        return True
 
     def restore(self, new_socket_id: str):
         """Associate a new socket id to the session."""

@@ -264,11 +264,12 @@ class SQLAlchemyDataLayer(BaseDataLayer):
         base = {k: v for k, v in base.items() if k not in to_delete}
         metadata = {**base, **incoming}
 
+        is_new_thread = not thread_exists
+
         name_value = name
-        if name_value is None and metadata:
+        if name_value is None and is_new_thread and metadata:
             name_value = metadata.get("name")
 
-        is_new_thread = not thread_exists
         created_at_value = await self.get_current_timestamp() if is_new_thread else None
 
         data = {

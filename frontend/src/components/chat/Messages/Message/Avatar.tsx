@@ -23,16 +23,24 @@ interface Props {
   hide?: boolean;
   isError?: boolean;
   iconName?: string;
+  messageChatProfile?: string;
 }
 
-const MessageAvatar = ({ author, hide, isError, iconName }: Props) => {
+const MessageAvatar = ({
+  author,
+  hide,
+  isError,
+  iconName,
+  messageChatProfile
+}: Props) => {
   const apiClient = useContext(ChainlitContext);
   const { chatProfile } = useChatSession();
   const { config } = useConfig();
 
   const selectedChatProfile = useMemo(() => {
-    return config?.chatProfiles.find((profile) => profile.name === chatProfile);
-  }, [config, chatProfile]);
+    const profileName = messageChatProfile || chatProfile;
+    return config?.chatProfiles.find((profile) => profile.name === profileName);
+  }, [config, chatProfile, messageChatProfile]);
 
   const avatarUrl = useMemo(() => {
     if (config?.ui?.default_avatar_file_url)

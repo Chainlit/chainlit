@@ -594,12 +594,6 @@ class ChainlitDataLayer(BaseDataLayer):
         if metadata is None:
             metadata = {}
 
-        thread_name = truncate(
-            name
-            if name is not None
-            else (metadata.get("name") if metadata and "name" in metadata else None)
-        )
-
         existing = await self.execute_query(
             'SELECT "metadata" FROM "Thread" WHERE id = $1',
             {"thread_id": thread_id},
@@ -608,6 +602,16 @@ class ChainlitDataLayer(BaseDataLayer):
         thread_exists = isinstance(existing, list) and existing
         if thread_exists and not has_updates:
             return
+
+        thread_name = truncate(
+            name
+            if name is not None
+            else (
+                metadata.get("name")
+                if not thread_exists and metadata and "name" in metadata
+                else None
+            )
+        )
 
         base = {}
         if thread_exists:

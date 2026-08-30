@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { useCallback, useContext, useEffect } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import {
   useRecoilState,
   useRecoilValue,
@@ -84,6 +84,11 @@ const useChatSession = () => {
   const setChatSettingsInputs = useSetRecoilState(chatSettingsInputsState);
   const setTokenCount = useSetRecoilState(tokenCountState);
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
+  const chatProfileRef = useRef(chatProfile);
+  const ackChatProfileRef = useRef(chatProfile);
+  useEffect(() => {
+    chatProfileRef.current = chatProfile;
+  }, [chatProfile]);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
   const setFavoriteMessages = useSetRecoilState(favoriteMessagesState);
@@ -128,7 +133,9 @@ const useChatSession = () => {
           sessionId,
           threadId: idToResume || '',
           userEnv: JSON.stringify(userEnv),
-          chatProfile: chatProfile ? encodeURIComponent(chatProfile) : ''
+          chatProfile: chatProfileRef.current
+            ? encodeURIComponent(chatProfileRef.current)
+            : ''
         }
       });
       setSession((old) => {
@@ -140,6 +147,7 @@ const useChatSession = () => {
       });
 
       socket.on('connect', () => {
+        ackChatProfileRef.current = chatProfileRef.current;
         socket.emit('connection_successful');
         setSession((s) => ({ ...s!, error: false }));
         socket.emit('fetch_favorites');
@@ -271,6 +279,7 @@ const useChatSession = () => {
         }
         if (thread.metadata?.chat_profile) {
           setChatProfile(thread.metadata?.chat_profile);
+          ackChatProfileRef.current = thread.metadata?.chat_profile;
         }
         if (thread.metadata?.chat_settings) {
           setChatSettingsValue(thread.metadata?.chat_settings);
@@ -291,8 +300,23 @@ const useChatSession = () => {
         setThreadResumeError(error);
       });
 
+      const stampChatProfile = (message: IStep): IStep => {
+        const existing = message?.metadata?.chat_profile;
+        if (existing || !ackChatProfileRef.current) {
+          return message;
+        }
+        return {
+          ...message,
+          metadata: {
+            ...(message.metadata || {}),
+            chat_profile: ackChatProfileRef.current
+          }
+        };
+      };
+
       socket.on('new_message', (message: IStep) => {
-        setMessages((oldMessages) => addMessage(oldMessages, message));
+        const stamped = stampChatProfile(message);
+        setMessages((oldMessages) => addMessage(oldMessages, stamped));
       });
 
       socket.on(
@@ -316,7 +340,8 @@ const useChatSession = () => {
       });
 
       socket.on('stream_start', (message: IStep) => {
-        setMessages((oldMessages) => addMessage(oldMessages, message));
+        const stamped = stampChatProfile(message);
+        setMessages((oldMessages) => addMessage(oldMessages, stamped));
       });
 
       socket.on(
@@ -336,7 +361,8 @@ const useChatSession = () => {
 
       socket.on('ask', ({ msg, spec }, callback) => {
         setAskUser({ spec, callback, parentId: msg.parentId });
-        setMessages((oldMessages) => addMessage(oldMessages, msg));
+        const stamped = stampChatProfile(msg);
+        setMessages((oldMessages) => addMessage(oldMessages, stamped));
 
         setLoading(false);
       });
@@ -465,6 +491,16 @@ const useChatSession = () => {
         }
       });
 
+      socket.on(
+        'chat_profile_updated',
+        (data: { chatProfile: string | null; ok: boolean }) => {
+          if (data && typeof data.chatProfile !== 'undefined') {
+            setChatProfile(data.chatProfile ?? undefined);
+            ackChatProfileRef.current = data.chatProfile ?? undefined;
+          }
+        }
+      );
+
       socket.on('toast', (data: { message: string; type: string }) => {
         if (!data.message) {
           console.warn('No message received for toast.');
@@ -490,7 +526,12 @@ const useChatSession = () => {
         }
       });
     },
-    [setSession, sessionId, idToResume, chatProfile]
+    // NOTE: `chatProfile` is intentionally NOT in this dep array. It is read
+    // through `chatProfileRef.current` above so that changing the profile
+    // does not recreate `_connect` and thus does not force a socket reconnect.
+    // Profile switches should go through `hotSwapChatProfile` (see below)
+    // when `features.hot_swap_chat_profile` is enabled on the backend.
+    [setSession, sessionId, idToResume]
   );
 
   const connect = useCallback(debounce(_connect, 200), [_connect]);
@@ -502,6 +543,29 @@ const useChatSession = () => {
     }
   }, [session]);
 
+  /**
+   * Hot-swap the chat profile of the current websocket session without
+   * disconnecting or clearing the thread. The feature is opt-in on the
+   * backend via `features.hot_swap_chat_profile`; callers should gate this
+   * helper on that flag. Returns true if the event was emitted, false if
+   * no socket is currently connected.
+   */
+  const hotSwapChatProfile = useCallback(
+    (name: string | null) => {
+      if (!session?.socket?.connected) {
+        return false;
+      }
+      // Optimistically update local state so dependent UI (avatars, starters,
+      // welcome screen) reacts immediately. The server will echo the accepted
+      // value back via `chat_profile_updated` and the listener above will
+      // reconcile if needed.
+      setChatProfile(name ?? undefined);
+      session.socket.emit('set_chat_profile', { chatProfile: name });
+      return true;
+    },
+    [session, setChatProfile]
+  );
+
   return {
     connect,
     disconnect,
@@ -509,7 +573,8 @@ const useChatSession = () => {
     sessionId,
     chatProfile,
     idToResume,
-    setChatProfile
+    setChatProfile,
+    hotSwapChatProfile
   };
 };
 
