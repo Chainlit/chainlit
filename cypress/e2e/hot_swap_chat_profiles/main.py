@@ -2,7 +2,9 @@ import os
 from typing import Optional
 
 import chainlit as cl
+from chainlit.config import config
 
+config.features.hot_swap_chat_profile = True
 os.environ["CHAINLIT_AUTH_SECRET"] = "SUPER_SECRET"  # nosec B105
 
 starters = [

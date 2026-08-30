@@ -799,51 +799,65 @@ class TestWebsocketSessionChatProfile:
         from chainlit.types import ChatProfile
         from chainlit.user_session import user_sessions
 
-        session = WebsocketSession(
-            id="ws_id",
-            socket_id="socket_123",
-            emit=AsyncMock(),
-            emit_call=AsyncMock(),
-            user_env={},
-            client_type="webapp",
-        )
-        user_sessions[session.id] = {}
+        original_sessions = user_sessions.copy()
+        try:
+            session = WebsocketSession(
+                id="ws_id",
+                socket_id="socket_123",
+                emit=AsyncMock(),
+                emit_call=AsyncMock(),
+                user_env={},
+                client_type="webapp",
+            )
+            user_sessions[session.id] = {}
 
-        mock_get_profiles = AsyncMock(
-            return_value=[
-                ChatProfile(name="Profile A", markdown_description="Profile A desc"),
-                ChatProfile(name="Profile B", markdown_description="Profile B desc"),
-            ]
-        )
+            mock_get_profiles = AsyncMock(
+                return_value=[
+                    ChatProfile(
+                        name="Profile A", markdown_description="Profile A desc"
+                    ),
+                    ChatProfile(
+                        name="Profile B", markdown_description="Profile B desc"
+                    ),
+                ]
+            )
 
-        with patch.object(config.code, "set_chat_profiles", mock_get_profiles):
-            result = await session.set_chat_profile("Profile A")
+            with patch.object(config.code, "set_chat_profiles", mock_get_profiles):
+                result = await session.set_chat_profile("Profile A")
 
-            assert result is True
-            assert session.chat_profile == "Profile A"
-            assert user_sessions[session.id]["chat_profile"] == "Profile A"
+                assert result is True
+                assert session.chat_profile == "Profile A"
+                assert user_sessions[session.id]["chat_profile"] == "Profile A"
+        finally:
+            user_sessions.clear()
+            user_sessions.update(original_sessions)
 
     @pytest.mark.asyncio
     async def test_set_chat_profile_clear(self):
         """Test setting chat profile to None clears profile."""
         from chainlit.user_session import user_sessions
 
-        session = WebsocketSession(
-            id="ws_id",
-            socket_id="socket_123",
-            emit=AsyncMock(),
-            emit_call=AsyncMock(),
-            user_env={},
-            client_type="webapp",
-            chat_profile="Profile A",
-        )
-        user_sessions[session.id] = {"chat_profile": "Profile A"}
+        original_sessions = user_sessions.copy()
+        try:
+            session = WebsocketSession(
+                id="ws_id",
+                socket_id="socket_123",
+                emit=AsyncMock(),
+                emit_call=AsyncMock(),
+                user_env={},
+                client_type="webapp",
+                chat_profile="Profile A",
+            )
+            user_sessions[session.id] = {"chat_profile": "Profile A"}
 
-        result = await session.set_chat_profile(None)
+            result = await session.set_chat_profile(None)
 
-        assert result is True
-        assert session.chat_profile is None
-        assert user_sessions[session.id]["chat_profile"] is None
+            assert result is True
+            assert session.chat_profile is None
+            assert user_sessions[session.id]["chat_profile"] is None
+        finally:
+            user_sessions.clear()
+            user_sessions.update(original_sessions)
 
     @pytest.mark.asyncio
     async def test_set_chat_profile_empty_string_rejected(self):

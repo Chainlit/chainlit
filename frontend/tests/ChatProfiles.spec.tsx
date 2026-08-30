@@ -87,7 +87,22 @@ describe('ChatProfiles component', () => {
     });
   });
 
-  it('returns null when chatProfiles is empty or has only 1 profile', () => {
+  it('returns null when chatProfiles is empty', () => {
+    mockUseConfig.mockReturnValue({
+      config: {
+        chatProfiles: []
+      }
+    });
+
+    const { container } = render(
+      <RecoilRoot>
+        <ChatProfiles />
+      </RecoilRoot>
+    );
+    expect(container.firstChild).toBeNull();
+  });
+
+  it('returns null when chatProfiles has only 1 profile', () => {
     mockUseConfig.mockReturnValue({
       config: {
         chatProfiles: [sampleChatProfiles[0]]
@@ -203,8 +218,9 @@ describe('ChatProfiles component', () => {
       ).not.toBeInTheDocument();
       // hotSwapChatProfile called directly
       expect(mockHotSwapChatProfile).toHaveBeenCalledWith('GPT-4');
-      // clear() NOT called
+      // clear() and setChatProfile() NOT called
       expect(mockClear).not.toHaveBeenCalled();
+      expect(mockSetChatProfile).not.toHaveBeenCalled();
     });
 
     it('falls back to clear and setChatProfile if hotSwapChatProfile returns false', () => {
