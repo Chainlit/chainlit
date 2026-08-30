@@ -787,3 +787,187 @@ class TestMcpSession:
 
         assert stop.is_set()
         assert task.done()
+
+
+class TestWebsocketSessionChatProfile:
+    """Test suite for WebsocketSession chat profile hot-swapping"""
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_valid(self):
+        """Test setting a valid chat profile updates session and user_session."""
+        from chainlit.config import config
+        from chainlit.types import ChatProfile
+        from chainlit.user_session import user_sessions
+
+        session = WebsocketSession(
+            id="ws_id",
+            socket_id="socket_123",
+            emit=AsyncMock(),
+            emit_call=AsyncMock(),
+            user_env={},
+            client_type="webapp",
+        )
+        user_sessions[session.id] = {}
+
+        mock_get_profiles = AsyncMock(
+            return_value=[
+                ChatProfile(name="Profile A", markdown_description="Profile A desc"),
+                ChatProfile(name="Profile B", markdown_description="Profile B desc"),
+            ]
+        )
+
+        with patch.object(config.code, "set_chat_profiles", mock_get_profiles):
+            result = await session.set_chat_profile("Profile A")
+
+            assert result is True
+            assert session.chat_profile == "Profile A"
+            assert user_sessions[session.id]["chat_profile"] == "Profile A"
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_clear(self):
+        """Test setting chat profile to None clears profile."""
+        from chainlit.user_session import user_sessions
+
+        session = WebsocketSession(
+            id="ws_id",
+            socket_id="socket_123",
+            emit=AsyncMock(),
+            emit_call=AsyncMock(),
+            user_env={},
+            client_type="webapp",
+            chat_profile="Profile A",
+        )
+        user_sessions[session.id] = {"chat_profile": "Profile A"}
+
+        result = await session.set_chat_profile(None)
+
+        assert result is True
+        assert session.chat_profile is None
+        assert user_sessions[session.id]["chat_profile"] is None
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_empty_string_rejected(self):
+        """Test that setting chat profile to empty string returns False."""
+        session = WebsocketSession(
+            id="ws_id",
+            socket_id="socket_123",
+            emit=AsyncMock(),
+            emit_call=AsyncMock(),
+            user_env={},
+            client_type="webapp",
+        )
+
+        result = await session.set_chat_profile("")
+        assert result is False
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_unknown_profile_rejected(self):
+        """Test that setting unknown chat profile returns False."""
+        from chainlit.config import config
+        from chainlit.types import ChatProfile
+
+        session = WebsocketSession(
+            id="ws_id",
+            socket_id="socket_123",
+            emit=AsyncMock(),
+            emit_call=AsyncMock(),
+            user_env={},
+            client_type="webapp",
+            chat_profile="Profile A",
+        )
+
+        mock_get_profiles = AsyncMock(
+            return_value=[
+                ChatProfile(name="Profile A", markdown_description="Profile A desc"),
+            ]
+        )
+
+        with patch.object(config.code, "set_chat_profiles", mock_get_profiles):
+            result = await session.set_chat_profile("NonExistent")
+
+            assert result is False
+            assert session.chat_profile == "Profile A"
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_callback_raises_exception(self):
+        """Test that exception in set_chat_profiles callback returns False."""
+        from chainlit.config import config
+
+        session = WebsocketSession(
+            id="ws_id",
+            socket_id="socket_123",
+            emit=AsyncMock(),
+            emit_call=AsyncMock(),
+            user_env={},
+            client_type="webapp",
+        )
+
+        mock_get_profiles = AsyncMock(side_effect=RuntimeError("Callback failure"))
+
+        with patch.object(config.code, "set_chat_profiles", mock_get_profiles):
+            result = await session.set_chat_profile("Profile A")
+
+            assert result is False
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_same_profile_is_noop(self):
+        """Test setting same profile returns True without error."""
+        from chainlit.config import config
+        from chainlit.types import ChatProfile
+
+        session = WebsocketSession(
+            id="ws_id",
+            socket_id="socket_123",
+            emit=AsyncMock(),
+            emit_call=AsyncMock(),
+            user_env={},
+            client_type="webapp",
+            chat_profile="Profile A",
+        )
+
+        mock_get_profiles = AsyncMock(
+            return_value=[
+                ChatProfile(name="Profile A", markdown_description="Profile A desc"),
+            ]
+        )
+
+        with patch.object(config.code, "set_chat_profiles", mock_get_profiles):
+            result = await session.set_chat_profile("Profile A")
+            assert result is True
+            assert session.chat_profile == "Profile A"
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_with_config_overrides(self):
+        """Test that profile config_overrides update session.config."""
+        from chainlit.config import (
+            ChainlitConfigOverrides,
+            UISettings,
+            config,
+        )
+        from chainlit.types import ChatProfile
+
+        session = WebsocketSession(
+            id="ws_id",
+            socket_id="socket_123",
+            emit=AsyncMock(),
+            emit_call=AsyncMock(),
+            user_env={},
+            client_type="webapp",
+        )
+
+        overrides = ChainlitConfigOverrides(ui=UISettings(name="Custom Profile UI"))
+
+        async def mock_get_profiles(user, lang):
+            return [
+                ChatProfile(
+                    name="Profile Overrides",
+                    markdown_description="Profile Overrides desc",
+                    config_overrides=overrides,
+                ),
+            ]
+
+        with patch.object(config.code, "set_chat_profiles", mock_get_profiles):
+            result = await session.set_chat_profile("Profile Overrides")
+
+            assert result is True
+            assert session.config.ui.name == "Custom Profile UI"

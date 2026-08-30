@@ -14,6 +14,7 @@ from chainlit.socket import (
     persist_user_session,
     restore_existing_session,
     resume_thread,
+    set_chat_profile,
 )
 
 
@@ -628,3 +629,113 @@ class TestConnectionSuccessfulIdempotency:
             await connection_successful("sid-1")
 
         assert on_chat_start.call_count == 1
+
+
+class TestSocketSetChatProfile:
+    """Test suite for set_chat_profile socket event handler."""
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_session_not_found(self):
+        """Test set_chat_profile does nothing if session is not found."""
+        with patch.object(WebsocketSession, "get", return_value=None):
+            # Should safely return without raising
+            await set_chat_profile("unknown_sid", {"chatProfile": "GPT-4"})
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_feature_disabled(self, mock_session_factory):
+        """Test set_chat_profile ignored when hot_swap_chat_profile is False."""
+        session = mock_session_factory()
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.features.hot_swap_chat_profile = False
+
+        with (
+            patch.object(WebsocketSession, "get", return_value=session),
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+            patch("chainlit.set_chat_profile", new_callable=AsyncMock) as mock_set,
+        ):
+            await set_chat_profile("sid_123", {"chatProfile": "GPT-4"})
+            mock_set.assert_not_called()
+            mock_context.emitter.emit.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_invalid_payload(self, mock_session_factory):
+        """Test set_chat_profile ignored when payload is not a dict or missing chatProfile."""
+        session = mock_session_factory()
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.features.hot_swap_chat_profile = True
+
+        with (
+            patch.object(WebsocketSession, "get", return_value=session),
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+            patch("chainlit.set_chat_profile", new_callable=AsyncMock) as mock_set,
+        ):
+            await set_chat_profile("sid_123", "not a dict")
+            mock_set.assert_not_called()
+
+            await set_chat_profile("sid_123", {"otherKey": "value"})
+            mock_set.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_failure_sends_toast_and_event(
+        self, mock_session_factory
+    ):
+        """Test failed hot-swap sends error toast and chat_profile_updated with ok=False."""
+        session = mock_session_factory(chat_profile="GPT-3.5")
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.features.hot_swap_chat_profile = True
+
+        with (
+            patch.object(WebsocketSession, "get", return_value=session),
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+            patch(
+                "chainlit.set_chat_profile", new_callable=AsyncMock, return_value=False
+            ),
+        ):
+            await set_chat_profile("sid_123", {"chatProfile": "UnknownProfile"})
+
+            mock_context.emitter.send_toast.assert_called_once_with(
+                "Unknown chat profile: UnknownProfile", type="error"
+            )
+            mock_context.emitter.emit.assert_called_once_with(
+                "chat_profile_updated",
+                {"chatProfile": "GPT-3.5", "ok": False},
+            )
+
+    @pytest.mark.asyncio
+    async def test_set_chat_profile_success(self, mock_session_factory):
+        """Test successful hot-swap delegates to cl.set_chat_profile without extra error handling."""
+        session = mock_session_factory(chat_profile="GPT-3.5")
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.features.hot_swap_chat_profile = True
+
+        with (
+            patch.object(WebsocketSession, "get", return_value=session),
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+            patch(
+                "chainlit.set_chat_profile", new_callable=AsyncMock, return_value=True
+            ) as mock_set,
+        ):
+            await set_chat_profile("sid_123", {"chatProfile": "GPT-4"})
+
+            mock_set.assert_called_once_with("GPT-4")
+            mock_context.emitter.send_toast.assert_not_called()
