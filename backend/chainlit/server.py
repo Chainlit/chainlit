@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from contextlib import AsyncExitStack, asynccontextmanager
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import socketio
 from fastapi import (
@@ -1433,7 +1433,7 @@ async def connect_mcp(
         get_default_environment,
         stdio_client,
     )
-    from mcp.client.streamable_http import streamablehttp_client
+    from mcp.client.streamable_http import streamable_http_client
 
     from chainlit.config import SseMcpServer, StdioMcpServer, StreamableHttpMcpServer
     from chainlit.context import init_ws_context
@@ -1449,10 +1449,14 @@ async def connect_mcp(
         _destination_in_allowlist,
         _destination_on_origin,
         make_mcp_http_client_factory,
+        make_mcp_streamable_http_client,
         validate_mcp_headers,
         validate_mcp_url,
+        warn_if_mcp_1x,
     )
     from chainlit.session import McpSession, WebsocketSession, stop_mcp_task
+
+    warn_if_mcp_1x()
 
     session = WebsocketSession.get_by_id(payload.sessionId)
     context = init_ws_context(session)
@@ -1658,7 +1662,13 @@ async def connect_mcp(
                         sse_client(
                             url=mcp_connection.url,
                             headers=mcp_connection.headers,
-                            httpx_client_factory=mcp_http_client_factory,
+                            # The factory builds its client from whichever HTTP
+                            # library the installed SDK dispatches with, which is
+                            # only known at runtime (see _mcp_http_module). Under
+                            # mcp>=2 that is httpx2, so the httpx-flavoured
+                            # annotation no longer matches the SDK's parameter
+                            # type even though the object is the right one.
+                            httpx_client_factory=cast(Any, mcp_http_client_factory),
                         )
                     )
                 elif isinstance(mcp_connection, StdioMcpConnection):
@@ -1676,14 +1686,22 @@ async def connect_mcp(
                     )
                 elif isinstance(mcp_connection, HttpMcpConnection):
                     assert mcp_http_client_factory is not None
-                    # NOTE: streamablehttp_client is deprecated from mcp 1.24.0
-                    # (renamed streamable_http_client, taking http_client= instead
-                    # of a factory) and removed in 2.0.0 — update this on bump.
-                    transport = await exit_stack.enter_async_context(
-                        streamablehttp_client(
-                            url=mcp_connection.url,
+                    # streamable_http_client takes a ready-made client rather
+                    # than a factory, and only closes one it created itself, so
+                    # this one is ours to close. Entered before the transport so
+                    # the exit stack unwinds it last — terminate_on_close sends a
+                    # DELETE through it while the transport is shutting down.
+                    http_client = await exit_stack.enter_async_context(
+                        make_mcp_streamable_http_client(
+                            mcp_http_client_factory,
                             headers=mcp_connection.headers,
-                            httpx_client_factory=mcp_http_client_factory,
+                        )
+                    )
+                    transport = await exit_stack.enter_async_context(
+                        streamable_http_client(
+                            url=mcp_connection.url,
+                            # Same runtime-flavour mismatch as the SSE branch.
+                            http_client=cast(Any, http_client),
                         )
                     )
                 else:

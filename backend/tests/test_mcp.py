@@ -1,4 +1,5 @@
 import asyncio
+import importlib
 import inspect
 import logging
 import time
@@ -13,6 +14,8 @@ from pydantic import ValidationError
 
 from chainlit.auth import get_current_user
 from chainlit.mcp import (
+    _MCP_HTTP_SSE_READ_TIMEOUT,
+    _MCP_HTTP_TIMEOUT,
     _RESTRICTED_HEADERS,
     HttpMcpConnection,
     McpDestinationError,
@@ -20,7 +23,9 @@ from chainlit.mcp import (
     StdioMcpConnection,
     _destination_in_allowlist,
     _destination_on_origin,
+    _mcp_http_module,
     make_mcp_http_client_factory,
+    make_mcp_streamable_http_client,
     validate_mcp_headers,
     validate_mcp_url,
 )
@@ -626,12 +631,12 @@ class TestMakeMcpHttpClientFactory:
     async def test_default_timeout_is_30_seconds(self):
         client = make_mcp_http_client_factory(_noop_check)()
         try:
-            assert client.timeout == httpx.Timeout(30.0)
+            assert client.timeout == _mcp_http_module().Timeout(30.0)
         finally:
             await client.aclose()
 
     async def test_passed_timeout_is_honored(self):
-        custom_timeout = httpx.Timeout(5.0)
+        custom_timeout = _mcp_http_module().Timeout(5.0)
         client = make_mcp_http_client_factory(_noop_check)(timeout=custom_timeout)
         try:
             assert client.timeout == custom_timeout
@@ -646,7 +651,7 @@ class TestMakeMcpHttpClientFactory:
             await client.aclose()
 
     async def test_passed_auth_is_honored(self):
-        class DummyAuth(httpx.Auth):
+        class DummyAuth(_mcp_http_module().Auth):
             def auth_flow(self, request):
                 yield request
 
@@ -667,12 +672,34 @@ class TestMakeMcpHttpClientFactory:
         sig = inspect.signature(sse_client)
         assert "httpx_client_factory" in sig.parameters
 
-    def test_streamablehttp_client_accepts_httpx_client_factory_kwarg(self):
-        """Same regression guard as above, for the streamable-http transport."""
-        from mcp.client.streamable_http import streamablehttp_client
+    def test_streamable_http_client_accepts_http_client_kwarg(self):
+        """Same regression guard as above, for the streamable-http transport.
 
-        sig = inspect.signature(streamablehttp_client)
-        assert "httpx_client_factory" in sig.parameters
+        That transport takes a ready-made `http_client=` rather than a
+        factory (the `streamablehttp_client` wrapper that took one was
+        removed in mcp 2.0.0), so this parameter is how our guarded client
+        gets in. If a future SDK drops it, connect_mcp would silently fall
+        back to the SDK's own client — follow_redirects=True and no
+        destination hook — reopening 1.5a."""
+        from mcp.client.streamable_http import streamable_http_client
+
+        sig = inspect.signature(streamable_http_client)
+        assert "http_client" in sig.parameters
+
+    async def test_resolved_http_module_matches_what_the_sdk_builds(self):
+        """`mcp<2` dispatches with `httpx`, `mcp>=2` with `httpx2`, and the
+        two are not interchangeable at runtime. `_mcp_http_module` reads the
+        choice off the SDK rather than guessing from what is importable; pin
+        it against the client the SDK's own factory actually returns, so an
+        SDK that changes the binding fails here instead of at connect time
+        with a client the transport rejects."""
+        from mcp.shared._httpx_utils import create_mcp_http_client
+
+        client = create_mcp_http_client()
+        try:
+            assert type(client) is _mcp_http_module().AsyncClient
+        finally:
+            await client.aclose()
 
     async def test_request_hook_calls_check_destination_for_every_request(self):
         """The whole point of hooking the client (rather than validating the
@@ -721,6 +748,75 @@ class TestMakeMcpHttpClientFactory:
         assert len(holder) == 1
         assert isinstance(holder[0], McpDestinationError)
         assert "evil.example.com" in str(holder[0])
+
+
+class TestMakeMcpStreamableHttpClient:
+    """The streamable-http transport takes a ready-made client, so the
+    guarantees the factory used to get from the SDK's own wrapper now have to
+    hold on the client we build ourselves."""
+
+    async def test_disables_redirects(self):
+        """Same guard as the factory's: this client reaches the transport
+        directly, so if it ever ships with redirects enabled the
+        SSRF-via-redirect hole (1.5a) is open on streamable-http."""
+        client = make_mcp_streamable_http_client(
+            make_mcp_http_client_factory(_noop_check)
+        )
+        try:
+            assert client.follow_redirects is False
+        finally:
+            await client.aclose()
+
+    async def test_read_timeout_covers_long_lived_streams(self):
+        """The removed `streamablehttp_client` wrapper built its client with
+        `Timeout(30, read=300)`. Passing `http_client=` makes that ours to
+        set, and falling through to the factory's bare 30s default would cut
+        a long-lived GET stream at 30 seconds instead of 300."""
+        http = _mcp_http_module()
+        client = make_mcp_streamable_http_client(
+            make_mcp_http_client_factory(_noop_check)
+        )
+        try:
+            assert client.timeout == http.Timeout(
+                _MCP_HTTP_TIMEOUT, read=_MCP_HTTP_SSE_READ_TIMEOUT
+            )
+        finally:
+            await client.aclose()
+
+    async def test_headers_are_applied(self):
+        """`streamable_http_client` has no `headers=` parameter, so the
+        connection's headers only reach the wire if they are set on this
+        client."""
+        client = make_mcp_streamable_http_client(
+            make_mcp_http_client_factory(_noop_check),
+            headers={"Authorization": "Bearer token"},
+        )
+        try:
+            assert client.headers["authorization"] == "Bearer token"
+        finally:
+            await client.aclose()
+
+    async def test_destination_hook_is_wired(self):
+        """The client carries the same per-request destination check as the
+        SSE path — it is built from the factory already bound to this
+        connection's grant, so the two cannot drift apart."""
+        calls = []
+
+        client = make_mcp_streamable_http_client(
+            make_mcp_http_client_factory(calls.append)
+        )
+        try:
+            hook = client.event_hooks["request"][0]
+            # Built from the same resolved module as the client itself
+            # (httpx on mcp<2, httpx2 on mcp>=2) so this exercises the
+            # request flavour the transport actually hands the hook, not
+            # whichever one happens to be importable.
+            request = _mcp_http_module().Request("GET", "https://example.com/anything")
+            await hook(request)
+        finally:
+            await client.aclose()
+
+        assert calls == ["https://example.com/anything"]
 
 
 class TestDestinationInAllowlistHook:
@@ -882,8 +978,9 @@ def mock_mcp_transport(monkeypatch: pytest.MonkeyPatch):
             return await fake_list_tools()
 
     # What the transports were actually handed. Without this a test can only
-    # check that the factory was *built*, not that it reached the transport --
-    # so dropping the httpx_client_factory kwarg would go unnoticed.
+    # check that the guarded client was *built*, not that it reached the
+    # transport -- so dropping the httpx_client_factory kwarg (SSE) or the
+    # http_client kwarg (streamable-http) would go unnoticed.
     captured: dict = {}
 
     @asynccontextmanager
@@ -893,16 +990,19 @@ def mock_mcp_transport(monkeypatch: pytest.MonkeyPatch):
         yield (AsyncMock(), AsyncMock())
 
     @asynccontextmanager
-    async def fake_streamablehttp_client(
-        url, headers=None, httpx_client_factory=None, **kwargs
-    ):
+    async def fake_streamable_http_client(url, http_client=None, **kwargs):
+        # Real mcp>=2 streamable_http_client yields a 2-tuple (the
+        # get_session_id callable from 1.x is gone); matching that shape here
+        # means a stray transport[2] fails this test instead of only failing
+        # against the real 2.x transport.
         captured["url"] = url
-        captured["httpx_client_factory"] = httpx_client_factory
-        yield (AsyncMock(), AsyncMock(), AsyncMock())
+        captured["http_client"] = http_client
+        yield (AsyncMock(), AsyncMock())
 
     monkeypatch.setattr("mcp.client.sse.sse_client", fake_sse_client)
     monkeypatch.setattr(
-        "mcp.client.streamable_http.streamablehttp_client", fake_streamablehttp_client
+        "mcp.client.streamable_http.streamable_http_client",
+        fake_streamable_http_client,
     )
     monkeypatch.setattr("mcp.ClientSession", FakeClientSession)
 
@@ -1789,15 +1889,13 @@ class TestConnectMcpErrorHygiene:
         ]
 
         @asynccontextmanager
-        async def failing_streamablehttp_client(
-            url, headers=None, httpx_client_factory=None, **kwargs
-        ):
+        async def failing_streamable_http_client(url, http_client=None, **kwargs):
             raise httpx.ConnectError(f"All connection attempts failed to {url}")
             yield  # pragma: no cover - unreachable; required for generator shape
 
         monkeypatch.setattr(
-            "mcp.client.streamable_http.streamablehttp_client",
-            failing_streamablehttp_client,
+            "mcp.client.streamable_http.streamable_http_client",
+            failing_streamable_http_client,
         )
 
         response = test_client.post(
@@ -2161,10 +2259,11 @@ class TestConnectMcpBindsDestination:
 
     The unit tests elsewhere prove the factory and its hook behave correctly in
     isolation, and the endpoint tests prove connect_mcp responds correctly --
-    but neither notices if the `httpx_client_factory=` argument is dropped, so
-    the factory would be built and silently discarded and every request would
+    but neither notices if the argument carrying it is dropped --
+    `httpx_client_factory=` for SSE, `http_client=` for streamable-http -- so
+    the guard would be built and silently discarded and every request would
     go out unchecked. That is the SPL-2026-002 bypass, so it needs its own
-    guard: take the factory the transport was handed and prove it blocks.
+    guard: take what the transport was handed and prove it blocks.
     """
 
     @staticmethod
@@ -2256,6 +2355,54 @@ class TestConnectMcpBindsDestination:
             factory, "https://named.example.com/messages/?s=1"
         )
         assert not await self._hook_verdict(factory, "https://evil.example.com/sse")
+
+    @pytest.mark.asyncio
+    async def test_streamable_http_transport_gets_bound_client(
+        self,
+        test_client: TestClient,
+        test_config,
+        mcp_session_get_by_id_patched: Mock,
+        mock_get_current_user: Mock,
+        mock_mcp_transport,
+    ):
+        """Same guard for streamable-http, which carries the grant on
+        `http_client=` rather than a factory. Dropping it would leave the SDK
+        to build its own client -- follow_redirects=True, no destination hook
+        -- so assert on the client the transport was actually handed."""
+        mock_get_current_user.return_value = None
+        test_config.features.mcp.enabled = True
+        test_config.features.mcp.user_servers.enabled = True
+        test_config.features.mcp.user_servers.allowed_urls = [
+            "https://allowed.example.com/mcp/alice"
+        ]
+
+        response = test_client.post(
+            "/mcp",
+            json={
+                "sessionId": mcp_session_get_by_id_patched.id,
+                "name": "custom",
+                "url": "https://allowed.example.com/mcp/alice",
+                "clientType": "streamable-http",
+            },
+        )
+        assert response.status_code == 200
+
+        client = mock_mcp_transport.captured["http_client"]
+        assert client is not None, "transport was not given a bound http client"
+        assert client.follow_redirects is False
+
+        hook = client.event_hooks["request"][0]
+
+        async def allows(url: str) -> bool:
+            try:
+                await hook(httpx.Request("POST", url))
+                return True
+            except McpDestinationError:
+                return False
+
+        assert await allows("https://allowed.example.com/mcp/alice/messages/?s=1")
+        assert not await allows("https://allowed.example.com/admin")
+        assert not await allows("https://evil.example.com/mcp")
 
 
 class TestConnectMcpStdioEnv:
@@ -2440,3 +2587,60 @@ class TestProjectSettingsMcpHygiene:
             assert "command" not in server
             assert "url" not in server
             assert "headers" not in server
+
+
+@pytest.mark.parametrize(
+    ("installed", "expected"),
+    [("1.29.1", True), ("1.28.1", True), ("2.1.1", False), ("2.0.0", False)],
+)
+def test_mcp_1x_notice_is_logged_only_for_1x(monkeypatch, caplog, installed, expected):
+    """The 1.x deprecation notice has to actually reach the user.
+
+    It is logged rather than raised as a DeprecationWarning because Python's
+    default filters hide that category outside __main__, so a warnings-based
+    notice from this module would be invisible to the 1.x users it is for.
+    """
+    import chainlit.mcp as mcp_module
+
+    monkeypatch.setattr(mcp_module, "_mcp_1x_notice_emitted", False)
+    monkeypatch.setattr(mcp_module, "version", lambda _: installed)
+
+    with caplog.at_level(logging.WARNING, logger="chainlit"):
+        mcp_module.warn_if_mcp_1x()
+
+    emitted = [r for r in caplog.records if "mcp<2 is deprecated" in r.getMessage()]
+    assert bool(emitted) is expected
+    if expected:
+        assert installed in emitted[0].getMessage()
+
+
+def test_mcp_1x_notice_is_logged_once(monkeypatch, caplog):
+    """Repeated MCP connections must not repeat the notice."""
+    import chainlit.mcp as mcp_module
+
+    monkeypatch.setattr(mcp_module, "_mcp_1x_notice_emitted", False)
+    monkeypatch.setattr(mcp_module, "version", lambda _: "1.29.1")
+
+    with caplog.at_level(logging.WARNING, logger="chainlit"):
+        mcp_module.warn_if_mcp_1x()
+        mcp_module.warn_if_mcp_1x()
+        mcp_module.warn_if_mcp_1x()
+
+    emitted = [r for r in caplog.records if "mcp<2 is deprecated" in r.getMessage()]
+    assert len(emitted) == 1
+
+
+def test_importing_chainlit_emits_no_warning_on_mcp_1x():
+    """Importing chainlit must not warn, whatever the resolved SDK.
+
+    A warning raised during import becomes an exception under
+    PYTHONWARNINGS=error, which would make a deprecation notice a hard import
+    failure for the 1.x users it targets.
+    """
+    import warnings
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        importlib.reload(importlib.import_module("chainlit.mcp"))
+
+    assert [w for w in caught if "mcp<2" in str(w.message)] == []

@@ -1,8 +1,12 @@
+from importlib.metadata import version
+from types import ModuleType
 from typing import Callable, Dict, Literal, Optional, Union
 from urllib.parse import unquote, urlparse
 
 import httpx
 from pydantic import BaseModel
+
+from chainlit.logger import logger
 
 
 class StdioMcpConnection(BaseModel):
@@ -137,9 +141,12 @@ def validate_mcp_url(url: str, allowed_urls: list[str]) -> None:
             "Configure features.mcp.user_servers.allowed_urls in your config."
         )
 
-    # Parse the request URL through httpx, which is what the MCP transports
-    # dispatch with. Validating anything else risks approving a URL that
-    # differs from the one that actually goes on the wire.
+    # Parse with chainlit's own httpx rather than the installed SDK's flavour
+    # (httpx on mcp<2, httpx2 on mcp>=2). Deliberate: URL parsing showed zero
+    # divergence between the two across traversal, IDN, userinfo, port and
+    # encoded-separator cases, and validating anything other than what the
+    # transport actually dispatches with risks approving a URL that differs
+    # from the one that goes on the wire.
     try:
         parsed = httpx.URL(url)
     except Exception as exc:
@@ -242,6 +249,72 @@ McpHttpClientFactory = Callable[..., httpx.AsyncClient]
 _MCP_CONNECT_TIMEOUT_STDIO = 120.0  # npx -y can cold-download on first run
 _MCP_CONNECT_TIMEOUT_HTTP = 30.0
 
+# The SDK's own transport defaults, from
+# ``mcp.shared._httpx_utils.create_mcp_http_client``: 30s for
+# connect/write/pool and 300s for read, the long read budget being what keeps
+# a long-lived SSE or streamable-http GET stream from being cut mid-stream.
+# Mirrored rather than imported because they live in a private module.
+_MCP_HTTP_TIMEOUT = 30.0
+_MCP_HTTP_SSE_READ_TIMEOUT = 300.0
+
+
+_mcp_1x_notice_emitted = False
+
+
+def warn_if_mcp_1x() -> None:
+    """Log once, on first MCP use, when the resolved SDK is still on 1.x.
+
+    chainlit supports ``mcp>=1.28.1,<3.0.0`` but only resolves and tests
+    against 2.x. 1.x still works today and the floor is deliberately left
+    where it is, so this is a heads-up rather than a breakage: the intent is
+    to raise the floor to ``>=2`` once 1.x stops being worth carrying, and
+    anyone pinned below that wants notice before it happens.
+
+    Logged rather than raised as a ``DeprecationWarning`` for two reasons.
+    Python's default filters hide ``DeprecationWarning`` outside ``__main__``,
+    so from a library module the notice would never reach the users it is for.
+    And a warning raised while ``chainlit`` is being imported becomes an
+    exception under ``PYTHONWARNINGS=error``, which would turn a deprecation
+    notice into a hard import failure for the 1.x users it targets. Called
+    from the MCP connection path so it costs nothing for apps that never use
+    MCP.
+    """
+    global _mcp_1x_notice_emitted
+
+    if _mcp_1x_notice_emitted:
+        return
+    installed = version("mcp")
+    if not installed.startswith("1."):
+        return
+
+    _mcp_1x_notice_emitted = True
+    logger.warning(
+        "chainlit resolved mcp %s. Support for mcp<2 is deprecated and will be "
+        "removed in a future release; pin mcp>=2 to stay ahead of it.",
+        installed,
+    )
+
+
+def _mcp_http_module() -> ModuleType:
+    """Return the HTTP library the installed MCP SDK dispatches with.
+
+    ``mcp<2`` builds its clients from ``httpx``; ``mcp>=2`` moved to
+    ``httpx2``. Those are separate distributions with separate class
+    hierarchies, and a transport only accepts a client built from its own, so
+    the guarded client below has to come from whichever one the installed SDK
+    uses.
+
+    Resolved from the SDK's own factory module rather than by importing
+    whichever library happens to be present: ``httpx2`` can be installed for
+    unrelated reasons while ``mcp`` is still on 1.x, and guessing wrong would
+    hand the transport a client it rejects. ``test_mcp.py`` pins this against
+    what ``create_mcp_http_client`` actually returns, so an SDK that changes
+    the binding fails loudly instead of silently degrading.
+    """
+    from mcp.shared import _httpx_utils
+
+    return getattr(_httpx_utils, "httpx2", None) or httpx
+
 
 def make_mcp_http_client_factory(
     check_destination: Callable[[str], None],
@@ -275,10 +348,19 @@ def make_mcp_http_client_factory(
     threaded through here) so this module stays free of asyncio primitives
     and stays synchronously testable.
 
-    Passed as ``httpx_client_factory=`` to ``sse_client`` and
-    ``streamablehttp_client``. That parameter is present unchanged across the
-    supported ``mcp>=1.11.0,<2.0.0`` range.
+    Passed as ``httpx_client_factory=`` to ``sse_client``, and used to build
+    the ``http_client=`` handed to ``streamable_http_client`` (see
+    ``make_mcp_streamable_http_client``). Both parameters are present
+    unchanged across the supported ``mcp>=1.28.1,<3.0.0`` range.
+
+    The client is built from whichever HTTP library the installed SDK
+    dispatches with, not from ``httpx`` directly — ``mcp>=2`` uses ``httpx2``,
+    and the two are not interchangeable at runtime. The annotations below name
+    the ``httpx`` classes because that is the flavour chainlit itself depends
+    on; the ``httpx2`` equivalents are API-compatible for everything used
+    here.
     """
+    http = _mcp_http_module()
 
     def factory(
         headers: Optional[Dict[str, str]] = None,
@@ -293,12 +375,40 @@ def make_mcp_http_client_factory(
                     on_blocked(exc)
                 raise
 
-        return httpx.AsyncClient(
+        return http.AsyncClient(
             follow_redirects=False,
-            timeout=timeout if timeout is not None else httpx.Timeout(30.0),
+            timeout=timeout if timeout is not None else http.Timeout(_MCP_HTTP_TIMEOUT),
             headers=headers,
             auth=auth,
             event_hooks={"request": [_check_request]},
         )
 
     return factory
+
+
+def make_mcp_streamable_http_client(
+    factory: McpHttpClientFactory,
+    headers: Optional[Dict[str, str]] = None,
+) -> httpx.AsyncClient:
+    """Build the guarded client passed to ``streamable_http_client``.
+
+    ``streamable_http_client`` takes a ready-made ``http_client=`` rather than
+    the factory the deprecated ``streamablehttp_client`` wrapper used, so the
+    timeout that wrapper used to supply has to be supplied here: it called the
+    factory with ``Timeout(30, read=300)``, and leaving the factory's own
+    30-second default in place would cut a long-lived GET stream at 30s.
+
+    Takes the factory already bound to this connection's destination grant
+    rather than re-deriving it, so the guard cannot drift from the one the SSE
+    path uses.
+
+    The caller owns the returned client: ``streamable_http_client`` only closes
+    a client it created itself, so this one must be closed by whoever passes it
+    (``server.py`` enters it into the connection's ``AsyncExitStack``).
+    """
+    http = _mcp_http_module()
+
+    return factory(
+        headers=headers,
+        timeout=http.Timeout(_MCP_HTTP_TIMEOUT, read=_MCP_HTTP_SSE_READ_TIMEOUT),
+    )
