@@ -1,10 +1,4 @@
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -12,6 +6,7 @@ import {
   FileSpec,
   IStep,
   commandsState,
+  sessionIdState,
   useAuth,
   useChatData,
   useChatInteract,
@@ -37,6 +32,7 @@ import { chatSettingsOpenState } from '@/state/project';
 import {
   IAttachment,
   attachmentsState,
+  messageDraftState,
   persistentCommandState
 } from 'state/chat';
 
@@ -65,7 +61,30 @@ export default function MessageComposer({
   autoScrollRef
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
-  const [value, setValue] = useState('');
+  const sessionId = useRecoilValue(sessionIdState);
+  const [messageDraft, setMessageDraft] = useRecoilState(messageDraftState);
+  const isCurrentDraft = messageDraft.sessionId === sessionId;
+  const value = isCurrentDraft ? messageDraft.value : '';
+  const promptUsed = isCurrentDraft && messageDraft.promptUsed;
+  const setValue = useCallback(
+    (value: string) => {
+      setMessageDraft((current) => ({
+        sessionId,
+        value,
+        promptUsed: current.sessionId === sessionId ? current.promptUsed : false
+      }));
+    },
+    [sessionId, setMessageDraft]
+  );
+
+  useEffect(() => {
+    setMessageDraft((current) =>
+      current.sessionId === sessionId
+        ? current
+        : { sessionId, value: '', promptUsed: false }
+    );
+  }, [sessionId, setMessageDraft]);
+
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
@@ -130,14 +149,12 @@ export default function MessageComposer({
     console.warn('Could not parse query parameters');
   }
 
-  const [promptUsed, setPromptUsed] = useState(false);
-
-  const onFavoriteSelect = useCallback((content: string) => {
-    setValue(content);
-    if (inputRef.current) {
-      inputRef.current.setValueExtern(content);
-    }
-  }, []);
+  const onFavoriteSelect = useCallback(
+    (content: string) => {
+      setValue(content);
+    },
+    [setValue]
+  );
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -241,23 +258,23 @@ export default function MessageComposer({
     attachments,
     selectedCommand,
     setAttachments,
+    setValue,
     onSubmit,
     onReply
   ]);
 
   useEffect(() => {
-    if (inputRef.current && promptValue && !promptUsed) {
-      const prompt = promptValue;
-      if (prompt) {
-        if (prompt.length > 1000) {
-          inputRef.current?.setValueExtern(prompt.slice(0, 1000));
-        } else {
-          inputRef.current?.setValueExtern(prompt);
-        }
-        setPromptUsed(true);
-      }
-    }
-  }, [promptValue, promptUsed]);
+    if (!promptValue || promptUsed) return;
+
+    setMessageDraft((current) => {
+      const currentValue = current.sessionId === sessionId ? current.value : '';
+      return {
+        sessionId,
+        value: currentValue || promptValue.slice(0, 1000),
+        promptUsed: true
+      };
+    });
+  }, [promptValue, promptUsed, sessionId, setMessageDraft]);
 
   return (
     <div
@@ -273,6 +290,7 @@ export default function MessageComposer({
         ref={inputRef}
         id="chat-input"
         autoFocus={!isMobile}
+        value={value}
         selectedCommand={selectedCommand}
         setSelectedCommand={setSelectedCommand}
         onChange={setValue}

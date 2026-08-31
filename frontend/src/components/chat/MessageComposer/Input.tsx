@@ -26,6 +26,7 @@ interface Props {
   className?: string;
   autoFocus?: boolean;
   placeholder?: string;
+  value: string;
   selectedCommand?: ICommand;
   setSelectedCommand: (command: ICommand | undefined) => void;
   onChange: (value: string) => void;
@@ -35,7 +36,6 @@ interface Props {
 
 export interface InputMethods {
   reset: () => void;
-  setValueExtern: (value: string) => void;
 }
 
 const Input = forwardRef<InputMethods, Props>(
@@ -47,6 +47,7 @@ const Input = forwardRef<InputMethods, Props>(
       autoFocus,
       selectedCommand,
       setSelectedCommand,
+      value,
       onChange,
       onEnter,
       onPaste
@@ -57,7 +58,6 @@ const Input = forwardRef<InputMethods, Props>(
     const [isComposing, setIsComposing] = useState(false);
     const [showCommands, setShowCommands] = useState(false);
     const [commandInput, setCommandInput] = useState('');
-    const [value, setValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const normalizedInput = commandInput.toLowerCase().slice(1);
@@ -88,7 +88,6 @@ const Input = forwardRef<InputMethods, Props>(
     });
 
     const reset = () => {
-      setValue('');
       if (!selectedCommand?.persistent) {
         setSelectedCommand(undefined);
       }
@@ -97,13 +96,7 @@ const Input = forwardRef<InputMethods, Props>(
       onChange('');
     };
 
-    useImperativeHandle(ref, () => ({
-      reset,
-      setValueExtern: (value: string) => {
-        setValue(value);
-        onChange(value);
-      }
-    }));
+    useImperativeHandle(ref, () => ({ reset }));
 
     useEffect(() => {
       if (textareaRef.current && autoFocus) {
@@ -113,7 +106,6 @@ const Input = forwardRef<InputMethods, Props>(
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       const newValue = e.target.value;
-      setValue(newValue);
       onChange(newValue);
 
       // Command detection for dropdown
@@ -133,7 +125,6 @@ const Input = forwardRef<InputMethods, Props>(
 
       // Remove the command text from the input
       const newValue = value.replace(commandInput, '').trimStart();
-      setValue(newValue);
       onChange(newValue);
 
       setCommandInput('');

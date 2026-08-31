@@ -20,6 +20,17 @@ export const attachmentsState = atom<IAttachment[]>({
   default: []
 });
 
+interface MessageDraft {
+  sessionId?: string;
+  value: string;
+  promptUsed: boolean;
+}
+
+export const messageDraftState = atom<MessageDraft>({
+  key: 'MessageDraft',
+  default: { value: '', promptUsed: false }
+});
+
 export const persistentCommandState = atom<ICommand | undefined>({
   key: 'PersistentCommand',
   default: undefined
