@@ -1,4 +1,4 @@
-import { atom, atomFamily } from 'recoil';
+import { atom } from 'recoil';
 
 import { ICommand } from 'client-types/*';
 
@@ -20,9 +20,15 @@ export const attachmentsState = atom<IAttachment[]>({
   default: []
 });
 
-export const messageDraftState = atomFamily<string, string>({
+interface MessageDraft {
+  sessionId?: string;
+  value: string;
+  promptUsed: boolean;
+}
+
+export const messageDraftState = atom<MessageDraft>({
   key: 'MessageDraft',
-  default: ''
+  default: { value: '', promptUsed: false }
 });
 
 export const persistentCommandState = atom<ICommand | undefined>({

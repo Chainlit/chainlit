@@ -1,10 +1,4 @@
-import {
-  MutableRefObject,
-  useCallback,
-  useEffect,
-  useRef,
-  useState
-} from 'react';
+import { MutableRefObject, useCallback, useEffect, useRef } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -68,7 +62,29 @@ export default function MessageComposer({
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
   const sessionId = useRecoilValue(sessionIdState);
-  const [value, setValue] = useRecoilState(messageDraftState(sessionId));
+  const [messageDraft, setMessageDraft] = useRecoilState(messageDraftState);
+  const isCurrentDraft = messageDraft.sessionId === sessionId;
+  const value = isCurrentDraft ? messageDraft.value : '';
+  const promptUsed = isCurrentDraft && messageDraft.promptUsed;
+  const setValue = useCallback(
+    (value: string) => {
+      setMessageDraft((current) => ({
+        sessionId,
+        value,
+        promptUsed: current.sessionId === sessionId ? current.promptUsed : false
+      }));
+    },
+    [sessionId, setMessageDraft]
+  );
+
+  useEffect(() => {
+    setMessageDraft((current) =>
+      current.sessionId === sessionId
+        ? current
+        : { sessionId, value: '', promptUsed: false }
+    );
+  }, [sessionId, setMessageDraft]);
+
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
@@ -133,14 +149,9 @@ export default function MessageComposer({
     console.warn('Could not parse query parameters');
   }
 
-  const [promptUsed, setPromptUsed] = useState(false);
-
   const onFavoriteSelect = useCallback(
     (content: string) => {
       setValue(content);
-      if (inputRef.current) {
-        inputRef.current.setValueExtern(content);
-      }
     },
     [setValue]
   );
@@ -255,15 +266,15 @@ export default function MessageComposer({
   useEffect(() => {
     if (!promptValue || promptUsed) return;
 
-    setPromptUsed(true);
-    if (inputRef.current && !value) {
-      if (promptValue.length > 1000) {
-        inputRef.current.setValueExtern(promptValue.slice(0, 1000));
-      } else {
-        inputRef.current.setValueExtern(promptValue);
-      }
-    }
-  }, [promptValue, promptUsed, value]);
+    setMessageDraft((current) => {
+      const currentValue = current.sessionId === sessionId ? current.value : '';
+      return {
+        sessionId,
+        value: currentValue || promptValue.slice(0, 1000),
+        promptUsed: true
+      };
+    });
+  }, [promptValue, promptUsed, sessionId, setMessageDraft]);
 
   return (
     <div

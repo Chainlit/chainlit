@@ -132,7 +132,7 @@ describe('MessageComposer', () => {
     expect(screen.getByRole('button')).not.toBeDisabled();
   });
 
-  it('does not retain a draft after the session changes', async () => {
+  it('discards a draft when the session changes', async () => {
     const view = render(<ComposerOwners />);
 
     fireEvent.change(screen.getByRole('textbox'), {
@@ -140,6 +140,11 @@ describe('MessageComposer', () => {
     });
     view.rerender(<ComposerOwners sessionId="b" />);
 
+    await waitFor(() => {
+      expect(screen.getByRole('textbox')).toHaveValue('');
+    });
+
+    view.rerender(<ComposerOwners sessionId="a" />);
     await waitFor(() => {
       expect(screen.getByRole('textbox')).toHaveValue('');
     });
@@ -168,5 +173,30 @@ describe('MessageComposer', () => {
     view.rerender(<ComposerOwners />);
 
     expect(screen.getByRole('textbox')).toHaveValue('edited draft');
+  });
+
+  it('does not restore a URL prompt that the user deleted', async () => {
+    queryParams.set('prompt', 'initial prompt');
+    const view = render(<ComposerOwners />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('textbox')).toHaveValue('initial prompt');
+    });
+    fireEvent.change(screen.getByRole('textbox'), {
+      target: { value: '' }
+    });
+
+    messages = [
+      {
+        id: 'message-1',
+        name: 'Assistant',
+        type: 'assistant_message',
+        output: 'Hello',
+        createdAt: 0
+      }
+    ];
+    view.rerender(<ComposerOwners />);
+
+    expect(screen.getByRole('textbox')).toHaveValue('');
   });
 });
