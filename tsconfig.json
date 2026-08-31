@@ -6,5 +6,5 @@
     "esModuleInterop": true
   },
   "include": ["cypress/**/*.ts", "cypress.config.ts"],
-  "exclude": ["cypress/**/*.test.ts"]
+  "exclude": ["cypress/support/retryReport.test.ts"]
 }
