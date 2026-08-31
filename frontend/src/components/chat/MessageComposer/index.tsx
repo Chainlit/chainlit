@@ -12,6 +12,7 @@ import {
   FileSpec,
   IStep,
   commandsState,
+  sessionIdState,
   useAuth,
   useChatData,
   useChatInteract,
@@ -37,6 +38,7 @@ import { chatSettingsOpenState } from '@/state/project';
 import {
   IAttachment,
   attachmentsState,
+  messageDraftState,
   persistentCommandState
 } from 'state/chat';
 
@@ -65,7 +67,8 @@ export default function MessageComposer({
   autoScrollRef
 }: Props) {
   const inputRef = useRef<InputMethods>(null);
-  const [value, setValue] = useState('');
+  const sessionId = useRecoilValue(sessionIdState);
+  const [value, setValue] = useRecoilState(messageDraftState(sessionId));
   const [selectedCommand, setSelectedCommand] = useRecoilState(
     persistentCommandState
   );
@@ -132,12 +135,15 @@ export default function MessageComposer({
 
   const [promptUsed, setPromptUsed] = useState(false);
 
-  const onFavoriteSelect = useCallback((content: string) => {
-    setValue(content);
-    if (inputRef.current) {
-      inputRef.current.setValueExtern(content);
-    }
-  }, []);
+  const onFavoriteSelect = useCallback(
+    (content: string) => {
+      setValue(content);
+      if (inputRef.current) {
+        inputRef.current.setValueExtern(content);
+      }
+    },
+    [setValue]
+  );
 
   const onPaste = useCallback(
     (event: ClipboardEvent) => {
@@ -241,23 +247,23 @@ export default function MessageComposer({
     attachments,
     selectedCommand,
     setAttachments,
+    setValue,
     onSubmit,
     onReply
   ]);
 
   useEffect(() => {
-    if (inputRef.current && promptValue && !promptUsed) {
-      const prompt = promptValue;
-      if (prompt) {
-        if (prompt.length > 1000) {
-          inputRef.current?.setValueExtern(prompt.slice(0, 1000));
-        } else {
-          inputRef.current?.setValueExtern(prompt);
-        }
-        setPromptUsed(true);
+    if (!promptValue || promptUsed) return;
+
+    setPromptUsed(true);
+    if (inputRef.current && !value) {
+      if (promptValue.length > 1000) {
+        inputRef.current.setValueExtern(promptValue.slice(0, 1000));
+      } else {
+        inputRef.current.setValueExtern(promptValue);
       }
     }
-  }, [promptValue, promptUsed]);
+  }, [promptValue, promptUsed, value]);
 
   return (
     <div
@@ -273,6 +279,7 @@ export default function MessageComposer({
         ref={inputRef}
         id="chat-input"
         autoFocus={!isMobile}
+        value={value}
         selectedCommand={selectedCommand}
         setSelectedCommand={setSelectedCommand}
         onChange={setValue}
