@@ -16,7 +16,12 @@ export const LoginError = new Error(
 export default function Login() {
   const query = useQuery();
   const { data: config, user, setUserFromAPI } = useAuth();
-  const [error, setError] = useState('');
+  // Read the error param synchronously on mount instead of via effect, so the
+  // first render already carries it. Otherwise `error` starts empty, flows
+  // into `LoginForm`'s own `useState(error)` initial value, and only catches
+  // up once both components' effects have flushed -- a two-hop async chain
+  // that a slow test runner can lose a race against (chainlit#3023).
+  const [error, setError] = useState(() => query.get('error') || '');
   const apiClient = useContext(ChainlitContext);
   const navigate = useNavigate();
   const { variant } = useTheme();
