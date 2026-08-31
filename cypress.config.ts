@@ -1,10 +1,25 @@
 import { defineConfig } from 'cypress';
 import cypressSplit from 'cypress-split';
 import fkill from 'fkill';
+import { mkdir, writeFile } from 'fs/promises';
+import { dirname, join } from 'path';
 
+import {
+  RetriedTest,
+  collectRetriedTests
+} from './cypress/support/retryReport';
 import { runChainlit } from './cypress/support/run';
 
 export const CHAINLIT_APP_PORT = 8000;
+
+// Per-shard record of tests that failed at least once but passed on retry,
+// written after every spec so a killed job still leaves partial data behind.
+const RETRY_REPORT_PATH = join(
+  process.cwd(),
+  'cypress',
+  'reports',
+  'retries.json'
+);
 
 async function killChainlit() {
   await fkill(`:${CHAINLIT_APP_PORT}`, {
@@ -41,12 +56,21 @@ export default defineConfig({
       await killChainlit(); // Fallback to ensure no previous instance is running
       await runChainlit(); // Start Chainlit before running tests as Cypress require
 
+      const retriedTests: RetriedTest[] = [];
+
       on('before:spec', async (spec) => {
         await killChainlit();
         await runChainlit(spec);
       });
 
-      on('after:spec', async () => {
+      on('after:spec', async (spec, results) => {
+        retriedTests.push(...collectRetriedTests(spec.relative, results.tests));
+        await mkdir(dirname(RETRY_REPORT_PATH), { recursive: true });
+        await writeFile(
+          RETRY_REPORT_PATH,
+          JSON.stringify(retriedTests, null, 2)
+        );
+
         await killChainlit();
       });
 
