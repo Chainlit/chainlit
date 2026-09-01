@@ -99,6 +99,7 @@
     },
     "messages": {
       "status": {
+        "generating": "Generating response",
         "using": "A utilizar",
         "used": "Utilizado"
       },

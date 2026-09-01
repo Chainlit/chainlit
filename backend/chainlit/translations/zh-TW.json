@@ -99,6 +99,7 @@
     },
     "messages": {
       "status": {
+        "generating": "Generating response",
         "using": "正在使用",
         "used": "已使用"
       },

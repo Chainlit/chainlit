@@ -99,6 +99,7 @@
     },
     "messages": {
       "status": {
+        "generating": "Generating response",
         "using": "વાપરી રહ્યા છે",
         "used": "વપરાયેલ"
       },

@@ -107,7 +107,15 @@ const Message = memo(
                   </UserMessage>
                 </div>
               ) : (
-                <div className="ai-message flex gap-4 w-full">
+                <div
+                  className="ai-message flex gap-4 w-full"
+                  /*
+                    An errored reply is only marked visually, by a red avatar
+                    and red text, so announce it. A complete message rather
+                    than a streamed one, so alert does not re-read.
+                  */
+                  role={message.isError ? 'alert' : undefined}
+                >
                   {!isStep || !indent ? (
                     <MessageAvatar
                       author={message.metadata?.avatarName || message.name}
