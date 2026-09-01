@@ -19,6 +19,21 @@ from chainlit.config import (
 from chainlit.version import __version__
 
 
+class TestLoadSettingsMetaGuard:
+    """Regression test: meta section with missing generated_by must not raise TypeError."""
+
+    def test_meta_section_without_generated_by_raises_value_error(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ):
+        """[meta] present but lacking 'generated_by' should raise ValueError, not TypeError."""
+        toml_content = '[meta]\nsome_other_key = "value"\n'
+        cfg_file = tmp_path / "config.toml"
+        cfg_file.write_text(toml_content, encoding="utf-8")
+        monkeypatch.setattr(chainlit_config, "config_file", str(cfg_file))
+        with pytest.raises(ValueError, match="outdated"):
+            chainlit_config.load_settings()
+
+
 @pytest.fixture
 def translation_dir(tmp_path: Path) -> Path:
     """Minimal translation directory with a controlled set of locale files."""

@@ -474,8 +474,8 @@ class CodeSettings(BaseModel):
     module: Any = None
 
     # App life cycle callbacks
-    on_app_startup: Optional[Callable[[], Union[None, Awaitable[None]]]] = None
-    on_app_shutdown: Optional[Callable[[], Union[None, Awaitable[None]]]] = None
+    on_app_startup: Optional[Callable[[], Union[Awaitable[None], None]]] = None
+    on_app_shutdown: Optional[Callable[[], Union[Awaitable[None], None]]] = None
 
     # Session life cycle callbacks
     on_logout: Optional[Callable[["Request", "Response"], Any]] = None
@@ -802,7 +802,8 @@ def load_settings():
         ui_settings = toml_dict.get("UI", {})
         meta = toml_dict.get("meta")
 
-        if not meta or meta.get("generated_by") <= "0.3.0":
+        generated_by = meta.get("generated_by") if meta else None
+        if not generated_by or generated_by <= "0.3.0":
             raise ValueError(
                 f"Your config file '{config_file}' is outdated. Please delete it and restart the app to regenerate it."
             )
