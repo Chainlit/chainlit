@@ -100,7 +100,9 @@
     "messages": {
       "status": {
         "using": "वापरत आहे",
-        "used": "वापरले"
+        "used": "वापरले",
+        "usedSteps": "{{count}} पायऱ्या वापरल्या",
+        "usedTools": "{{count}} साधने वापरली"
       },
       "actions": {
         "copy": {

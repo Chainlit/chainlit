@@ -99,7 +99,9 @@
     "messages": {
       "status": {
         "using": "使用中",
-        "used": "使用済み"
+        "used": "使用済み",
+        "usedSteps": "{{count}}個のステップを使用",
+        "usedTools": "{{count}}個のツールを使用"
       },
       "actions": {
         "copy": {

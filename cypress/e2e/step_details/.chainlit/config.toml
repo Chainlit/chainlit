@@ -1,0 +1,12 @@
+[project]
+allow_origins = ["*"]
+
+[UI]
+name = "Assistant"
+cot = "full"
+
+# Hide input/output detail; the nested step hierarchy must still be visible.
+show_step_details = false
+
+[meta]
+generated_by = "2.11.1"

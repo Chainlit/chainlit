@@ -1,0 +1,14 @@
+[project]
+allow_origins = ["*"]
+
+[UI]
+name = "Assistant"
+
+# Show every step of the chain of thought.
+cot = "full"
+
+# Collapse the chain of thought steps into a single compact summary line.
+cot_display = "compact"
+
+[meta]
+generated_by = "2.11.1"

@@ -99,7 +99,9 @@
     "messages": {
       "status": {
         "using": "Bruger",
-        "used": "Brugte"
+        "used": "Brugte",
+        "usedSteps": "Brugte {{count}} trin",
+        "usedTools": "Brugte {{count}} værktøjer"
       },
       "actions": {
         "copy": {

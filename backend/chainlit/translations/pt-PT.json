@@ -100,7 +100,9 @@
     "messages": {
       "status": {
         "using": "A utilizar",
-        "used": "Utilizado"
+        "used": "Utilizado",
+        "usedSteps": "{{count}} passos utilizados",
+        "usedTools": "{{count}} ferramentas utilizadas"
       },
       "actions": {
         "copy": {
