@@ -50,8 +50,13 @@ window.matchMedia =
 
 describe('Login', () => {
   let container: HTMLDivElement | null = null;
+  let root: ReturnType<typeof createRoot> | null = null;
 
   afterEach(() => {
+    if (root) {
+      root.unmount();
+      root = null;
+    }
     if (container) {
       document.body.removeChild(container);
       container = null;
@@ -67,7 +72,7 @@ describe('Login', () => {
   it('renders the [role="alert"] error message on the first synchronous commit', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
-    const root = createRoot(container);
+    root = createRoot(container);
 
     flushSync(() => {
       root.render(
@@ -83,7 +88,7 @@ describe('Login', () => {
   it('renders no [role="alert"] on the first synchronous commit when there is no error param', () => {
     container = document.createElement('div');
     document.body.appendChild(container);
-    const root = createRoot(container);
+    root = createRoot(container);
 
     flushSync(() => {
       root.render(
