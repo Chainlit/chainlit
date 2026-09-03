@@ -3,7 +3,9 @@
     "lib": ["ESNext", "dom"],
     "types": ["cypress", "cypress-plugin-steps", "node"],
     "baseUrl": ".",
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
   "include": ["cypress/**/*.ts", "cypress.config.ts"]
 }

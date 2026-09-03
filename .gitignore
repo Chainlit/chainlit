@@ -17,6 +17,7 @@ chainlit.md
 cypress/screenshots
 cypress/videos
 cypress/downloads
+cypress/reports
 
 __pycache__
 

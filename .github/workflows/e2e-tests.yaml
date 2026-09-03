@@ -73,3 +73,119 @@ jobs:
         with:
           name: cypress-screenshots-${{ matrix.os }}-${{ matrix.containers }}
           path: cypress/screenshots
+      - name: Upload retry report
+        uses: actions/upload-artifact@v7
+        if: always() && hashFiles('cypress/reports/retries.json') != ''
+        with:
+          name: cypress-retries-${{ matrix.os }}-${{ matrix.containers }}
+          path: cypress/reports/retries.json
+
+  report-retries:
+    name: Report flaky test retries
+    needs: e2e-tests
+    if: always()
+    runs-on: ubuntu-slim
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Download retry reports
+        uses: actions/download-artifact@v8
+        with:
+          pattern: cypress-retries-*
+          path: retry-reports
+        continue-on-error: true
+      - name: Summarize retried tests
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const root = 'retry-reports';
+            const retries = [];
+
+            if (fs.existsSync(root)) {
+              for (const shard of fs.readdirSync(root)) {
+                const reportFile = path.join(root, shard, 'retries.json');
+                if (!fs.existsSync(reportFile)) continue;
+                const entries = JSON.parse(fs.readFileSync(reportFile, 'utf8'));
+                for (const entry of entries) {
+                  retries.push({ shard, ...entry });
+                }
+              }
+            }
+
+            if (retries.length === 0) {
+              await core.summary
+                .addHeading('Cypress retries', 3)
+                .addRaw('No specs needed a retry in this run.')
+                .write();
+            } else {
+              await core.summary
+                .addHeading('Cypress retries', 3)
+                .addTable([
+                  [
+                    { data: 'Shard', header: true },
+                    { data: 'Spec', header: true },
+                    { data: 'Test', header: true },
+                    { data: 'Attempts', header: true }
+                  ],
+                  ...retries.map((retry) => [
+                    retry.shard,
+                    retry.spec,
+                    retry.title,
+                    String(retry.attempts)
+                  ])
+                ])
+                .write();
+            }
+
+            // Best-effort PR comment: on forked PRs GITHUB_TOKEN is read-only,
+            // so a failure here must not fail the job. The step summary above
+            // is the primary, always-available output.
+            const pullRequest = context.payload.pull_request;
+            const isFork =
+              pullRequest &&
+              pullRequest.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`;
+            if (!pullRequest || isFork) return;
+
+            const marker = '<!-- cypress-retry-report -->';
+            const body =
+              retries.length === 0
+                ? `${marker}\n**No specs needed a retry in this run.**`
+                : `${marker}\n**${retries.length} Cypress test(s) were retried in this run.** See the job summary for details.`;
+
+            try {
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pullRequest.number
+                }
+              );
+              const existingComment = comments.find((comment) =>
+                comment.body?.includes(marker)
+              );
+
+              if (existingComment) {
+                // Keep the marker comment in sync, including clearing it back
+                // to "no retries" so a fixed run doesn't leave a stale report.
+                await github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: existingComment.id,
+                  body
+                });
+              } else if (retries.length > 0) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pullRequest.number,
+                  body
+                });
+              }
+            } catch (error) {
+              core.warning(`Could not post the retry-report comment: ${error.message}`);
+            }

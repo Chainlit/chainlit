@@ -27,6 +27,9 @@ jobs:
     secrets: inherit
   e2e-tests:
     uses: ./.github/workflows/e2e-tests.yaml
+    permissions:
+      contents: read
+      pull-requests: write
     secrets: inherit
   ci:
     runs-on: ubuntu-slim
