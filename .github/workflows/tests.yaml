@@ -26,3 +26,6 @@ jobs:
         run: uv run --no-project pytest --cov=chainlit/
       - name: Run frontend tests
         run: pnpm run test
+      - name: Run cypress support unit tests
+        if: matrix.python-version == '3.13'
+        run: pnpm test:unit

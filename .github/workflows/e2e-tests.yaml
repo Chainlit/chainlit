@@ -121,26 +121,25 @@ jobs:
                 .addHeading('Cypress retries', 3)
                 .addRaw('No specs needed a retry in this run.')
                 .write();
-              return;
-            }
-
-            await core.summary
-              .addHeading('Cypress retries', 3)
-              .addTable([
-                [
-                  { data: 'Shard', header: true },
-                  { data: 'Spec', header: true },
-                  { data: 'Test', header: true },
-                  { data: 'Attempts', header: true }
-                ],
-                ...retries.map((retry) => [
-                  retry.shard,
-                  retry.spec,
-                  retry.title,
-                  String(retry.attempts)
+            } else {
+              await core.summary
+                .addHeading('Cypress retries', 3)
+                .addTable([
+                  [
+                    { data: 'Shard', header: true },
+                    { data: 'Spec', header: true },
+                    { data: 'Test', header: true },
+                    { data: 'Attempts', header: true }
+                  ],
+                  ...retries.map((retry) => [
+                    retry.shard,
+                    retry.spec,
+                    retry.title,
+                    String(retry.attempts)
+                  ])
                 ])
-              ])
-              .write();
+                .write();
+            }
 
             // Best-effort PR comment: on forked PRs GITHUB_TOKEN is read-only,
             // so a failure here must not fail the job. The step summary above
@@ -152,26 +151,34 @@ jobs:
             if (!pullRequest || isFork) return;
 
             const marker = '<!-- cypress-retry-report -->';
-            const body = `${marker}\n**${retries.length} Cypress test attempt(s) were retried in this run.** See the job summary for details.`;
+            const body =
+              retries.length === 0
+                ? `${marker}\n**No specs needed a retry in this run.**`
+                : `${marker}\n**${retries.length} Cypress test(s) were retried in this run.** See the job summary for details.`;
 
             try {
-              const { data: comments } = await github.rest.issues.listComments({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pullRequest.number
-              });
+              const comments = await github.paginate(
+                github.rest.issues.listComments,
+                {
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pullRequest.number
+                }
+              );
               const existingComment = comments.find((comment) =>
                 comment.body?.includes(marker)
               );
 
               if (existingComment) {
+                // Keep the marker comment in sync, including clearing it back
+                // to "no retries" so a fixed run doesn't leave a stale report.
                 await github.rest.issues.updateComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   comment_id: existingComment.id,
                   body
                 });
-              } else {
+              } else if (retries.length > 0) {
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,

@@ -64,7 +64,13 @@ export default defineConfig({
       });
 
       on('after:spec', async (spec, results) => {
-        retriedTests.push(...collectRetriedTests(spec.relative, results.tests));
+        // `results` is undefined under `cypress open` (no run results are
+        // collected in interactive mode), so guard before reading it.
+        if (results) {
+          retriedTests.push(
+            ...collectRetriedTests(spec.relative, results.tests)
+          );
+        }
         await mkdir(dirname(RETRY_REPORT_PATH), { recursive: true });
         await writeFile(
           RETRY_REPORT_PATH,
