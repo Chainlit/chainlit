@@ -4,7 +4,8 @@ from datetime import datetime
 from unittest.mock import Mock
 from uuid import uuid4
 
-from langchain_core.messages import AIMessage, HumanMessage
+import pytest
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 
 from chainlit.langchain.callbacks import (
     FinalStreamHelper,
@@ -110,6 +111,102 @@ class TestGenerationHelper:
         assert provider == "openai"
         assert model == "gpt-4"
         assert settings["temperature"] == 0.7
+
+    @pytest.mark.parametrize("serialized", [False, True])
+    @pytest.mark.parametrize("content", ["Checking the weather.", []])
+    def test_convert_standard_tool_calls(self, serialized, content):
+        message = AIMessage(
+            content=content,
+            tool_calls=[
+                {"name": "weather", "args": {"city": "上海"}, "id": "call_weather"},
+                {"name": "clock", "args": {}, "id": "call_clock"},
+            ],
+        )
+        original = message.model_dump()
+        result = GenerationHelper()._convert_message(
+            message.to_json() if serialized else message
+        )
+
+        assert result["tool_calls"] == [
+            {
+                "id": "call_weather",
+                "type": "function",
+                "function": {"name": "weather", "arguments": {"city": "上海"}},
+            },
+            {
+                "id": "call_clock",
+                "type": "function",
+                "function": {"name": "clock", "arguments": {}},
+            },
+        ]
+        assert result["content"] == (content or "")
+        assert message.model_dump() == original
+
+    @pytest.mark.parametrize("serialized", [False, True])
+    def test_convert_tool_result_preserves_call_id(self, serialized):
+        message = ToolMessage(
+            content="Sunny", tool_call_id="call_weather", name="weather"
+        )
+        result = GenerationHelper()._convert_message(
+            message.to_json() if serialized else message
+        )
+
+        assert result == {
+            "role": "tool",
+            "content": "Sunny",
+            "name": "weather",
+            "tool_call_id": "call_weather",
+        }
+
+    @pytest.mark.parametrize("serialized", [False, True])
+    @pytest.mark.parametrize("normalized", [False, True])
+    def test_convert_anthropic_tool_calls_without_duplicates(
+        self, serialized, normalized
+    ):
+        message = AIMessage(
+            content=[
+                {"type": "text", "text": "Checking."},
+                {
+                    "type": "tool_use",
+                    "id": "call_weather",
+                    "name": "weather",
+                    "input": {"city": "Paris"},
+                },
+            ],
+            tool_calls=(
+                [{"name": "weather", "args": {"city": "Paris"}, "id": "call_weather"}]
+                if normalized
+                else []
+            ),
+        )
+        result = GenerationHelper()._convert_message(
+            message.to_json() if serialized else message
+        )
+
+        assert result["tool_calls"] == [
+            {
+                "id": "call_weather",
+                "type": "function",
+                "function": {"name": "weather", "arguments": {"city": "Paris"}},
+            }
+        ]
+        assert result["content"] == [{"type": "text", "text": "Checking."}]
+
+    @pytest.mark.parametrize("serialized", [False, True])
+    def test_convert_legacy_function_call(self, serialized):
+        function_call = {"name": "weather", "arguments": '{"city":"Paris"}'}
+        message = AIMessage(
+            content="", additional_kwargs={"function_call": function_call}
+        )
+        result = GenerationHelper()._convert_message(
+            message.to_json() if serialized else message
+        )
+
+        assert result == {
+            "role": "assistant",
+            "content": "",
+            "function_call": function_call,
+        }
 
 
 async def test_should_ignore_run(mock_chainlit_context):

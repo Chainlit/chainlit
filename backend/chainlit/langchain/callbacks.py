@@ -167,6 +167,8 @@ class GenerationHelper:
         )
         if name := kwargs.get("name"):
             msg["name"] = name
+        if tool_call_id := kwargs.get("tool_call_id"):
+            msg["tool_call_id"] = tool_call_id
         if function_call:
             msg["function_call"] = function_call
         else:
@@ -196,7 +198,24 @@ class GenerationHelper:
             else:
                 msg["content"] = content  # type: ignore
 
+        if normalized_tool_calls := kwargs.get("tool_calls"):
+            msg["tool_calls"] = self._convert_tool_calls(normalized_tool_calls)
+
         return msg
+
+    def _convert_tool_calls(self, tool_calls: List[Dict]) -> List[Dict]:
+        """Convert LangChain's normalized tool calls to the generation format."""
+        return [
+            {
+                "id": tool_call.get("id"),
+                "type": "function",
+                "function": {
+                    "name": tool_call["name"],
+                    "arguments": tool_call["args"],
+                },
+            }
+            for tool_call in tool_calls
+        ]
 
     def _convert_message(
         self,
@@ -220,6 +239,8 @@ class GenerationHelper:
 
         if name := getattr(message, "name", None):
             msg["name"] = name
+        if tool_call_id := getattr(message, "tool_call_id", None):
+            msg["tool_call_id"] = tool_call_id
 
         if function_call:
             msg["function_call"] = function_call
@@ -250,6 +271,9 @@ class GenerationHelper:
                     msg["content"] = content_parts  # type: ignore
             else:
                 msg["content"] = message.content  # type: ignore
+
+        if normalized_tool_calls := getattr(message, "tool_calls", None):
+            msg["tool_calls"] = self._convert_tool_calls(normalized_tool_calls)
 
         return msg
 
