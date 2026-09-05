@@ -142,6 +142,9 @@ reaction_on_message_received = false
 [features.audio]
     # Enable audio features
     enabled = false
+    # "realtime" streams audio to Python callbacks; "browser" dictates into the composer.
+    # Browser dictation requires Web Speech API support and may use a browser vendor's cloud service.
+    mode = "realtime"
     # Sample rate of the audio
     sample_rate = 24000
 
@@ -315,6 +318,7 @@ class SpontaneousFileUploadFeature(BaseModel):
 class AudioFeature(BaseModel):
     sample_rate: int = 24000
     enabled: bool = False
+    mode: Literal["realtime", "browser"] = "realtime"
 
 
 class SlackFeature(BaseModel):

@@ -102,6 +102,20 @@ chainlit run demo.py -w
 
 <img src="/images/quick-start.png" alt="Quick Start"></img>
 
+### Browser dictation
+
+To dictate text into the message composer without Python audio callbacks, set the following in `.chainlit/config.toml`:
+
+```toml
+[features.audio]
+enabled = true
+mode = "browser"
+```
+
+Click the microphone, allow microphone access, and speak. You can stop recording, edit the recognized text, and send it as a normal message. The existing audio streaming mode remains the default (`mode = "realtime"`).
+
+Browser dictation requires Web Speech API support, such as `SpeechRecognition` or `webkitSpeechRecognition`. Some browsers send audio to their vendor's recognition service, so this mode does not guarantee offline processing. The microphone button is disabled when the browser does not support recognition.
+
 ## 📚 More Examples - Cookbook
 
 You can find various examples of Chainlit apps [here](https://github.com/Chainlit/cookbook) that leverage tools and services such as OpenAI, Anthropiс, LangChain, LlamaIndex, ChromaDB, Pinecone and more.

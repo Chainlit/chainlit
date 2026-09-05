@@ -82,7 +82,10 @@
     "speech": {
       "start": "Start recording",
       "stop": "Stop recording",
-      "connecting": "Connecting"
+      "connecting": "Connecting",
+      "dictate": "Dictate a message",
+      "unsupported": "Speech recognition is not supported by this browser",
+      "failed": "Speech recognition failed: {{error}}"
     },
     "fileUpload": {
       "dragDrop": "Drag and drop files here",
