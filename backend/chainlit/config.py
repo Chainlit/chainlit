@@ -173,6 +173,18 @@ reaction_on_message_received = false
     # type = "streamable-http"
     # url = "https://mcp.example.com/mcp"
 
+    # Parallel Search: web_search and web_fetch without an account or API key.
+    # Free anonymous access is rate limited. Setup: set enabled = true above,
+    # uncomment the four lines below, restart the app, and connect parallel-search
+    # in the MCP menu. Disconnect it there to stop using its tools.
+    # Once connected, your app/agent can call the tools, sending queries, URLs,
+    # and any supplied objectives, context, or metadata to Parallel.
+    # https://docs.parallel.ai/integrations/mcp/search-mcp
+    # [[features.mcp.servers]]
+    # name = "parallel-search"
+    # type = "streamable-http"
+    # url = "https://search.parallel.ai/mcp"
+
     [features.mcp.user_servers]
         # Opt-in: allow end-users to connect their own SSE or streamable-http MCP servers.
         # stdio is never user-provided (server-side config only).
