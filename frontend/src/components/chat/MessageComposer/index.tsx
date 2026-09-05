@@ -6,6 +6,7 @@ import {
   useState
 } from 'react';
 import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
+import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
@@ -32,6 +33,7 @@ import { useTranslation } from 'components/i18n/Translator';
 
 import { useQuery } from '@/hooks/query';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useBrowserSpeechRecognition } from '@/hooks/useBrowserSpeechRecognition';
 
 import { chatSettingsOpenState } from '@/state/project';
 import {
@@ -43,6 +45,7 @@ import {
 import { Attachments } from './Attachments';
 import CommandButtons from './CommandButtons';
 import CommandButton from './CommandPopoverButton';
+import DictationButton from './DictationButton';
 import FavoriteButton from './FavoriteButton';
 import Input, { InputMethods } from './Input';
 import McpButton from './Mcp';
@@ -80,7 +83,7 @@ export default function MessageComposer({
     }
   }, [commands]);
   const [attachments, setAttachments] = useRecoilState(attachmentsState);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const { user } = useAuth();
   const { sendMessage, replyMessage } = useChatInteract();
@@ -89,6 +92,17 @@ export default function MessageComposer({
   const disabled = _disabled || !!attachments.find((a) => !a.uploaded);
 
   const { config } = useConfig();
+  const browserDictation =
+    !!config?.features.audio.enabled &&
+    config.features.audio.mode === 'browser';
+  const dictation = useBrowserSpeechRecognition({
+    enabled: browserDictation && !disabled,
+    language: i18n.language,
+    onTranscript: (text) => {
+      inputRef.current?.setValueExtern([value, text].filter(Boolean).join(' '));
+    },
+    onError: (error) => toast.error(t('chat.speech.failed', { error }))
+  });
   const showSettingsInComposer =
     config?.ui?.chat_settings_location !== 'sidebar' &&
     chatSettingsInputs.length > 0;
@@ -231,6 +245,7 @@ export default function MessageComposer({
       onSubmit(value, attachments, selectedCommand?.id);
     }
 
+    dictation.cancel();
     setAttachments([]);
     setValue(''); // Clear the value state
     inputRef.current?.reset();
@@ -242,7 +257,8 @@ export default function MessageComposer({
     selectedCommand,
     setAttachments,
     onSubmit,
-    onReply
+    onReply,
+    dictation.cancel
   ]);
 
   useEffect(() => {
@@ -282,7 +298,16 @@ export default function MessageComposer({
       />
       <div className="flex items-center justify-between">
         <div className="flex items-center -ml-1.5">
-          <VoiceButton disabled={disabled} />
+          {browserDictation ? (
+            <DictationButton
+              disabled={disabled}
+              supported={dictation.supported}
+              listening={dictation.listening}
+              onClick={dictation.toggle}
+            />
+          ) : (
+            <VoiceButton disabled={disabled} />
+          )}
           <UploadButton
             disabled={disabled}
             fileSpec={fileSpec}

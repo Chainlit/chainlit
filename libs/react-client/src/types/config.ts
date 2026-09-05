@@ -23,6 +23,7 @@ export interface ChatProfile {
 export interface IAudioConfig {
   enabled: boolean;
   sample_rate: number;
+  mode?: 'realtime' | 'browser';
 }
 
 export interface IAuthConfig {

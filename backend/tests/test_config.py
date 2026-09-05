@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from chainlit import config as chainlit_config
 from chainlit.config import (
+    AudioFeature,
     ChainlitConfig,
     ChainlitConfigOverrides,
     FeaturesSettings,
@@ -17,6 +18,20 @@ from chainlit.config import (
     StreamableHttpMcpServer,
 )
 from chainlit.version import __version__
+
+
+def test_audio_mode_defaults_to_realtime():
+    assert AudioFeature(enabled=True).mode == "realtime"
+
+
+def test_browser_audio_mode_is_serialized():
+    features = FeaturesSettings(audio={"enabled": True, "mode": "browser"})
+    assert features.model_dump()["audio"]["mode"] == "browser"
+
+
+def test_unknown_audio_mode_is_rejected():
+    with pytest.raises(ValidationError, match="mode"):
+        AudioFeature(mode="unknown")
 
 
 @pytest.fixture
