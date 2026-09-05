@@ -5,7 +5,9 @@ from unittest.mock import AsyncMock, Mock, patch
 from uuid import uuid4
 
 import pytest
-from langchain_core.outputs import GenerationChunk
+from langchain_core.callbacks import AsyncCallbackManager
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+from langchain_core.outputs import ChatGeneration, GenerationChunk, LLMResult
 
 from chainlit.langchain.callbacks import LangchainTracer
 from chainlit.step import Step
@@ -166,3 +168,34 @@ async def test_error_handling(mock_chainlit_context):
 
         assert step.is_error is True
         assert step.output == "Test error"
+
+
+async def test_generation_trace_preserves_tool_exchange(mock_chainlit_context):
+    """Tool calls and results stay correlated in the persisted generation payload."""
+    call = AIMessage(
+        content="",
+        tool_calls=[{"name": "weather", "args": {"city": "Paris"}, "id": "call_1"}],
+    )
+    result = ToolMessage(content="Sunny", tool_call_id="call_1")
+    async with mock_chainlit_context:
+        tracer = LangchainTracer()
+        manager = AsyncCallbackManager([tracer])
+        runs = await manager.on_chat_model_start(
+            serialized={"name": "test_llm"},
+            messages=[[HumanMessage(content="Weather?"), call, result]],
+            invocation_params={"_type": "test", "model": "test-model"},
+        )
+        step = tracer.steps[str(runs[0].run_id)]
+
+        with patch.object(step, "update", new_callable=AsyncMock):
+            await runs[0].on_llm_end(
+                LLMResult(generations=[[ChatGeneration(message=call)]])
+            )
+
+        generation = step.generation
+        assert generation.messages[1]["tool_calls"][0]["id"] == "call_1"
+        assert generation.messages[2]["tool_call_id"] == "call_1"
+        assert generation.message_completion["tool_calls"][0]["function"] == {
+            "name": "weather",
+            "arguments": {"city": "Paris"},
+        }
