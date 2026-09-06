@@ -21,8 +21,8 @@
       "title": "Accedi per utilizzare l'app",
       "form": {
         "email": {
-          "label": "Indirizzo email",
-          "required": "l'email è un campo obbligatorio",
+          "label": "Nome utente o email",
+          "required": "il nome utente o l'email è un campo obbligatorio",
           "placeholder": "me@example.com"
         },
         "password": {

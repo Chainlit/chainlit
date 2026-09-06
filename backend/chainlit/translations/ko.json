@@ -21,8 +21,8 @@
       "title": "앱에 접근하려면 로그인하세요",
       "form": {
         "email": {
-          "label": "이메일 주소",
-          "required": "이메일은 필수 입력 항목입니다",
+          "label": "사용자 이름 또는 이메일",
+          "required": "사용자 이름 또는 이메일은 필수 입력 항목입니다",
           "placeholder": "me@example.com"
         },
         "password": {

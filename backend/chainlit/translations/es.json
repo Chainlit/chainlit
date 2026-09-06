@@ -21,8 +21,8 @@
       "title": "Inicia sesión para acceder a la aplicación",
       "form": {
         "email": {
-          "label": "Correo electrónico",
-          "required": "el correo electrónico es obligatorio",
+          "label": "Nombre de usuario o correo electrónico",
+          "required": "el nombre de usuario o el correo electrónico es obligatorio",
           "placeholder": "me@example.com"
         },
         "password": {

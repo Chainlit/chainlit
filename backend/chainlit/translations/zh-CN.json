@@ -21,8 +21,8 @@
       "title": "登录以访问应用",
       "form": {
         "email": {
-          "label": "电子邮箱",
-          "required": "邮箱是必填项",
+          "label": "用户名或邮箱",
+          "required": "用户名或邮箱是必填项",
           "placeholder": "me@example.com"
         },
         "password": {

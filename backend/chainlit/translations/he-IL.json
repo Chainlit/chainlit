@@ -21,8 +21,8 @@
       "title": "התחבר כדי לגשת לאפליקציה",
       "form": {
         "email": {
-          "label": "כתובת אימייל",
-          "required": "שדה האימייל הוא שדה חובה",
+          "label": "שם משתמש או אימייל",
+          "required": "שם המשתמש או האימייל הוא שדה חובה",
           "placeholder": "me@example.com"
         },
         "password": {

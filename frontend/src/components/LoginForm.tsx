@@ -18,7 +18,7 @@ interface Props {
   providers: string[];
   callbackUrl: string;
   onPasswordSignIn?: (
-    email: string,
+    username: string,
     password: string,
     callbackUrl: string
   ) => Promise<any>;
@@ -26,7 +26,7 @@ interface Props {
 }
 
 interface FormValues {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -49,7 +49,7 @@ export function LoginForm({
     formState: { errors, touchedFields }
   } = useForm<FormValues>({
     defaultValues: {
-      email: '',
+      username: '',
       password: ''
     }
   });
@@ -63,7 +63,7 @@ export function LoginForm({
 
     setLoading(true);
     try {
-      await onPasswordSignIn(data.email, data.password, callbackUrl);
+      await onPasswordSignIn(data.username, data.password, callbackUrl);
     } catch (err) {
       if (err instanceof ClientError && err.detail) {
         setErrorState(err.detail);
@@ -102,24 +102,26 @@ export function LoginForm({
         {onPasswordSignIn && (
           <>
             <div className="grid gap-2">
-              <Label htmlFor="email">
+              <Label htmlFor="username">
                 <Translator path="auth.login.form.email.label" />
               </Label>
               <Input
-                id="email"
+                id="username"
                 disabled={loading}
                 autoFocus
                 placeholder={t('auth.login.form.email.placeholder')}
-                {...register('email', {
+                {...register('username', {
                   required: t('auth.login.form.email.required')
                 })}
                 className={cn(
-                  touchedFields.email && errors.email && 'border-destructive'
+                  touchedFields.username &&
+                    errors.username &&
+                    'border-destructive'
                 )}
               />
-              {touchedFields.email && errors.email && (
+              {touchedFields.username && errors.username && (
                 <p className="text-sm text-destructive">
-                  {errors.email.message}
+                  {errors.username.message}
                 </p>
               )}
             </div>

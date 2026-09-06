@@ -21,8 +21,8 @@
       "title": "アプリにログイン",
       "form": {
         "email": {
-          "label": "メールアドレス",
-          "required": "メールアドレスは必須項目です",
+          "label": "ユーザー名またはメールアドレス",
+          "required": "ユーザー名またはメールアドレスは必須項目です",
           "placeholder": "me@example.com"
         },
         "password": {

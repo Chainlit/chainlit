@@ -21,8 +21,8 @@
       "title": "Melde dich an, um auf die App zuzugreifen",
       "form": {
         "email": {
-          "label": "E-Mail Adresse",
-          "required": "E-Mail Adresse ist ein Pflichtfeld",
+          "label": "Benutzername oder E-Mail",
+          "required": "Benutzername oder E-Mail ist ein Pflichtfeld",
           "placeholder": "me@example.com"
         },
         "password": {

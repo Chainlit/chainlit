@@ -21,8 +21,8 @@
       "title": "Log ind for at få adgang til appen",
       "form": {
         "email": {
-          "label": "E-mailadresse",
-          "required": "e-mail er et påkrævet felt",
+          "label": "Brugernavn eller e-mail",
+          "required": "brugernavn eller e-mail er et påkrævet felt",
           "placeholder": "me@example.com"
         },
         "password": {
