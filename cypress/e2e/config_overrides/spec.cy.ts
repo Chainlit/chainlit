@@ -3,7 +3,7 @@ import { submitMessage } from '../../support/testUtils';
 describe('Config overrides with chat profiles', () => {
   it('should be able to select a chat profile and test MCP button visibility', () => {
     cy.visit('/');
-    cy.get("input[name='email']").type('admin');
+    cy.get("input[name='username']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
 
@@ -86,7 +86,7 @@ describe('Config overrides with chat profiles', () => {
 
   it('should keep chat profile description visible when hovering over a link', () => {
     cy.visit('/');
-    cy.get("input[name='email']").type('admin');
+    cy.get("input[name='username']").type('admin');
     cy.get("input[name='password']").type('admin');
     cy.get("button[type='submit']").click();
 

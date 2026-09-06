@@ -14,7 +14,7 @@ describe('Password Auth', () => {
 
       it('should redirect to login dialog', () => {
         cy.location('pathname').should('eq', '/login');
-        cy.get("input[name='email']").should('exist');
+        cy.get("input[name='username']").should('exist');
         cy.get("input[name='password']").should('exist');
       });
     });
@@ -26,7 +26,7 @@ describe('Password Auth', () => {
 
       describe('submitting incorrect credentials', () => {
         it('should fail to login with wrong credentials', () => {
-          cy.get("input[name='email']").type('user');
+          cy.get("input[name='username']").type('user');
           cy.get("input[name='password']").type('user');
           cy.get("button[type='submit']").click();
           cy.get('body').should('contain', 'Unauthorized');
@@ -35,7 +35,7 @@ describe('Password Auth', () => {
 
       describe('submitting correct credentials', () => {
         beforeEach(() => {
-          cy.get("input[name='email']").type('admin');
+          cy.get("input[name='username']").type('admin');
           cy.get("input[name='password']").type('admin');
 
           cy.intercept('POST', '/login').as('login');
@@ -68,7 +68,7 @@ describe('Password Auth', () => {
           });
 
           it('should not contain a login form', () => {
-            cy.get("input[name='email']").should('not.exist');
+            cy.get("input[name='username']").should('not.exist');
             cy.get("input[name='password']").should('not.exist');
           });
 

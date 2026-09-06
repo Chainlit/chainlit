@@ -12,7 +12,7 @@ describe('Custom Element Auth', () => {
     cy.intercept('POST', '/login').as('login');
     cy.intercept('POST', '/set-session-cookie').as('setSession');
 
-    cy.get('input[name="email"]').type('admin');
+    cy.get('input[name="username"]').type('admin');
     cy.get('input[name="password"]').type('admin');
     cy.get('button[type="submit"]').click();
 

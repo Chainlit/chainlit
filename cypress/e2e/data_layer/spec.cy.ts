@@ -5,7 +5,7 @@ import { setupWebSocketListener, submitMessage } from '../../support/testUtils';
 
 // Constants
 const SELECTORS = {
-  EMAIL_INPUT: '#email',
+  USERNAME_INPUT: '#username',
   PASSWORD_INPUT: '#password',
   AI_MESSAGE: "[data-step-type='assistant_message']",
   CHAT_SUBMIT: '#chat-submit',
@@ -32,7 +32,7 @@ const login = (username: string = 'user1', password: string = 'user1') => {
 
   cy.location('pathname').should('eq', '/login');
 
-  cy.get(SELECTORS.EMAIL_INPUT).should('be.visible').type(username);
+  cy.get(SELECTORS.USERNAME_INPUT).should('be.visible').type(username);
   cy.get(SELECTORS.PASSWORD_INPUT)
     .should('be.visible')
     .type(`${password}{enter}`);
