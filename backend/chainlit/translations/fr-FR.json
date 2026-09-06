@@ -21,8 +21,8 @@
       "title": "Connectez-vous pour accéder à l'application",
       "form": {
         "email": {
-          "label": "Adresse e-mail",
-          "required": "l'e-mail est un champ obligatoire",
+          "label": "Nom d'utilisateur ou e-mail",
+          "required": "le nom d'utilisateur ou l'e-mail est un champ obligatoire",
           "placeholder": "me@example.com"
         },
         "password": {

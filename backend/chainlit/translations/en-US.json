@@ -21,8 +21,8 @@
       "title": "Login to access the app",
       "form": {
         "email": {
-          "label": "Email address",
-          "required": "email is a required field",
+          "label": "Username or email",
+          "required": "username or email is a required field",
           "placeholder": "me@example.com"
         },
         "password": {

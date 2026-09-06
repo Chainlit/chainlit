@@ -21,8 +21,8 @@
       "title": "Inloggen om toegang te krijgen tot de app",
       "form": {
         "email": {
-          "label": "E-mailadres",
-          "required": "e-mail is een verplicht veld",
+          "label": "Gebruikersnaam of e-mail",
+          "required": "gebruikersnaam of e-mail is een verplicht veld",
           "placeholder": "me@example.com"
         },
         "password": {

@@ -21,8 +21,8 @@
       "title": "登入以存取應用程式",
       "form": {
         "email": {
-          "label": "電子信箱",
-          "required": "信箱是必填項目",
+          "label": "使用者名稱或信箱",
+          "required": "使用者名稱或信箱是必填項目",
           "placeholder": "me@example.com"
         },
         "password": {

@@ -21,8 +21,8 @@
       "title": "Inicie sessão para aceder à aplicação",
       "form": {
         "email": {
-          "label": "E-mail",
-          "required": "o e-mail é obrigatório",
+          "label": "Nome de utilizador ou e-mail",
+          "required": "o nome de utilizador ou o e-mail é obrigatório",
           "placeholder": "me@example.com"
         },
         "password": {

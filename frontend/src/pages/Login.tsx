@@ -53,9 +53,9 @@ export default function Login() {
     await handleAuth(jsonPromise, '/');
   };
 
-  const handlePasswordLogin = async (email: string, password: string) => {
+  const handlePasswordLogin = async (username: string, password: string) => {
     const formData = new FormData();
-    formData.append('username', email);
+    formData.append('username', username);
     formData.append('password', password);
 
     const jsonPromise = apiClient.passwordAuth(formData);
