@@ -249,6 +249,12 @@
   "components": {
     "MultiSelectInput": {
       "placeholder": "선택..."
+    },
+    "DatePickerInput": {
+      "placeholder": {
+        "single": "Pick a date",
+        "range": "Pick a date range"
+      }
     }
   }
 }
