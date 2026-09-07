@@ -71,7 +71,8 @@
       "empty": {
         "title": "Ingen gemte prompts endnu",
         "description": "Start med at sende en prompt og markere den med en stjerne, eller vælg en prompt fra tidligere samtaler"
-      }
+      },
+      "remove": "Remove favorite"
     },
     "commands": {
       "button": "Værktøjer",
