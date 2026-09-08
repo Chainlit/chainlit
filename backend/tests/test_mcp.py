@@ -867,6 +867,28 @@ class TestListAllMcpTools:
         tools = await list_all_mcp_tools(Session())
         assert tools == []
 
+    async def test_page_timeout_raises(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                await asyncio.Event().wait()
+
+        with pytest.raises(asyncio.TimeoutError):
+            await list_all_mcp_tools(Session(), page_timeout=0.05, total_timeout=1)
+
+    async def test_total_timeout_raises_across_slow_pages(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                await asyncio.sleep(0.08)
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="a")],
+                        nextCursor="p2",
+                    )
+                return SimpleNamespace(tools=[SimpleNamespace(name="b")])
+
+        with pytest.raises(asyncio.TimeoutError):
+            await list_all_mcp_tools(Session(), page_timeout=1, total_timeout=0.1)
+
 
 # ── /mcp (connect_mcp) endpoint tests ──────────────────────────────────────
 
@@ -1071,6 +1093,91 @@ class TestConnectMcpEndpoint:
         assert response.status_code == 200, response.text
         names = [t["name"] for t in response.json()["mcp"]["tools"]]
         assert names == ["tool_a", "tool_b"]
+
+    def test_list_tools_timeout_does_not_store_session(
+        self,
+        test_client: TestClient,
+        test_config,
+        mcp_session_get_by_id_patched: Mock,
+        mock_get_current_user: Mock,
+        mock_mcp_transport,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        """A hung tools/list must 400 and must not land a session in
+        mcp_sessions — the connect timeout does not cover listing."""
+        from chainlit.config import SseMcpServer
+
+        mock_get_current_user.return_value = None
+        test_config.features.mcp.enabled = True
+        test_config.features.mcp.servers = [
+            SseMcpServer(type="sse", name="github", url="https://mcp.example.com/sse")
+        ]
+        monkeypatch.setattr("chainlit.mcp._MCP_CONNECT_TIMEOUT_HTTP", 0.1)
+
+        class HangingClientSession(mock_mcp_transport):
+            async def list_tools(self, cursor=None, **kwargs):
+                await asyncio.Event().wait()
+
+        monkeypatch.setattr("mcp.ClientSession", HangingClientSession)
+
+        response = test_client.post(
+            "/mcp",
+            json={
+                "sessionId": mcp_session_get_by_id_patched.id,
+                "name": "github",
+            },
+        )
+
+        assert response.status_code == 400, response.text
+        assert "github" not in mcp_session_get_by_id_patched.mcp_sessions
+
+    def test_later_list_tools_page_failure_does_not_evict_existing_session(
+        self,
+        test_client: TestClient,
+        test_config,
+        mcp_session_get_by_id_patched: Mock,
+        mock_get_current_user: Mock,
+        mock_mcp_transport,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        """Page 2 raising must not swap in the new session or drop the old
+        one. Named-server errors stay generic (no exception text)."""
+        from chainlit.config import SseMcpServer
+
+        mock_get_current_user.return_value = None
+        test_config.features.mcp.enabled = True
+        test_config.features.mcp.servers = [
+            SseMcpServer(type="sse", name="github", url="https://mcp.example.com/sse")
+        ]
+        sentinel_existing_session = Mock(name="pre-existing-mcp-session")
+        mcp_session_get_by_id_patched.mcp_sessions["github"] = sentinel_existing_session
+
+        class PagingFailClientSession(mock_mcp_transport):
+            async def list_tools(self, cursor=None, **kwargs):
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="tool_a")],
+                        nextCursor="page-2",
+                    )
+                raise RuntimeError("page-2 failed")
+
+        monkeypatch.setattr("mcp.ClientSession", PagingFailClientSession)
+
+        response = test_client.post(
+            "/mcp",
+            json={
+                "sessionId": mcp_session_get_by_id_patched.id,
+                "name": "github",
+            },
+        )
+
+        assert response.status_code == 400, response.text
+        assert "page-2 failed" not in response.text
+        assert "check the server logs" in response.text.lower()
+        assert (
+            mcp_session_get_by_id_patched.mcp_sessions["github"]
+            is sentinel_existing_session
+        )
 
     def test_unknown_named_server_returns_400(
         self,
