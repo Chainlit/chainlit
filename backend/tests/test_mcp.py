@@ -20,6 +20,7 @@ from chainlit.mcp import (
     StdioMcpConnection,
     _destination_in_allowlist,
     _destination_on_origin,
+    list_all_mcp_tools,
     make_mcp_http_client_factory,
     validate_mcp_headers,
     validate_mcp_url,
@@ -785,6 +786,110 @@ class TestDestinationOnOriginHook:
             await client.aclose()
 
 
+class TestListAllMcpTools:
+    """ClientSession.list_tools() returns one page; connect_mcp must walk
+    nextCursor or the composer MCP list silently drops tools."""
+
+    async def test_single_page_without_cursor(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                assert cursor is None
+                return SimpleNamespace(tools=[SimpleNamespace(name="only")])
+
+        tools = await list_all_mcp_tools(Session())
+        assert [t.name for t in tools] == ["only"]
+
+    async def test_follows_nextCursor_across_pages(self):
+        calls: list = []
+
+        class Session:
+            async def list_tools(self, cursor=None):
+                calls.append(cursor)
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="a")],
+                        nextCursor="p2",
+                    )
+                if cursor == "p2":
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="b")],
+                        nextCursor="p3",
+                    )
+                if cursor == "p3":
+                    return SimpleNamespace(tools=[SimpleNamespace(name="c")])
+                raise AssertionError(cursor)
+
+        tools = await list_all_mcp_tools(Session())
+        assert [t.name for t in tools] == ["a", "b", "c"]
+        assert calls == [None, "p2", "p3"]
+
+    async def test_follows_snake_case_next_cursor(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="a")],
+                        next_cursor="p2",
+                    )
+                return SimpleNamespace(tools=[SimpleNamespace(name="b")])
+
+        tools = await list_all_mcp_tools(Session())
+        assert [t.name for t in tools] == ["a", "b"]
+
+    async def test_stops_on_repeated_cursor(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                return SimpleNamespace(
+                    tools=[SimpleNamespace(name="loop")],
+                    nextCursor="same",
+                )
+
+        tools = await list_all_mcp_tools(Session())
+        assert [t.name for t in tools] == ["loop", "loop"]
+
+    async def test_caps_pages(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                n = 0 if cursor is None else int(cursor)
+                return SimpleNamespace(
+                    tools=[SimpleNamespace(name=f"t{n}")],
+                    nextCursor=str(n + 1),
+                )
+
+        tools = await list_all_mcp_tools(Session(), max_pages=3)
+        assert [t.name for t in tools] == ["t0", "t1", "t2"]
+
+    async def test_empty_tools(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                return SimpleNamespace(tools=[])
+
+        tools = await list_all_mcp_tools(Session())
+        assert tools == []
+
+    async def test_page_timeout_raises(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                await asyncio.Event().wait()
+
+        with pytest.raises(asyncio.TimeoutError):
+            await list_all_mcp_tools(Session(), page_timeout=0.05, total_timeout=1)
+
+    async def test_total_timeout_raises_across_slow_pages(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                await asyncio.sleep(0.08)
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="a")],
+                        nextCursor="p2",
+                    )
+                return SimpleNamespace(tools=[SimpleNamespace(name="b")])
+
+        with pytest.raises(asyncio.TimeoutError):
+            await list_all_mcp_tools(Session(), page_timeout=1, total_timeout=0.1)
+
+
 # ── /mcp (connect_mcp) endpoint tests ──────────────────────────────────────
 
 
@@ -944,6 +1049,135 @@ class TestConnectMcpEndpoint:
         assert data["mcp"]["isUserProvided"] is False
         assert data["mcp"]["url"] is None
         assert data["mcp"]["headers"] is None
+
+    def test_connect_follows_list_tools_pagination(
+        self,
+        test_client: TestClient,
+        test_config,
+        mcp_session_get_by_id_patched: Mock,
+        mock_get_current_user: Mock,
+        mock_mcp_transport,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        from chainlit.config import SseMcpServer
+
+        mock_get_current_user.return_value = None
+        test_config.features.mcp.enabled = True
+        test_config.features.mcp.servers = [
+            SseMcpServer(type="sse", name="github", url="https://mcp.example.com/sse")
+        ]
+
+        class PagingClientSession(mock_mcp_transport):
+            async def list_tools(self, cursor=None, **kwargs):
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="tool_a")],
+                        nextCursor="page-2",
+                    )
+                if cursor == "page-2":
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="tool_b")],
+                    )
+                raise AssertionError(f"unexpected cursor {cursor!r}")
+
+        monkeypatch.setattr("mcp.ClientSession", PagingClientSession)
+
+        response = test_client.post(
+            "/mcp",
+            json={
+                "sessionId": mcp_session_get_by_id_patched.id,
+                "name": "github",
+            },
+        )
+
+        assert response.status_code == 200, response.text
+        names = [t["name"] for t in response.json()["mcp"]["tools"]]
+        assert names == ["tool_a", "tool_b"]
+
+    def test_list_tools_timeout_does_not_store_session(
+        self,
+        test_client: TestClient,
+        test_config,
+        mcp_session_get_by_id_patched: Mock,
+        mock_get_current_user: Mock,
+        mock_mcp_transport,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        """A hung tools/list must 400 and must not land a session in
+        mcp_sessions — the connect timeout does not cover listing."""
+        from chainlit.config import SseMcpServer
+
+        mock_get_current_user.return_value = None
+        test_config.features.mcp.enabled = True
+        test_config.features.mcp.servers = [
+            SseMcpServer(type="sse", name="github", url="https://mcp.example.com/sse")
+        ]
+        monkeypatch.setattr("chainlit.mcp._MCP_CONNECT_TIMEOUT_HTTP", 0.1)
+
+        class HangingClientSession(mock_mcp_transport):
+            async def list_tools(self, cursor=None, **kwargs):
+                await asyncio.Event().wait()
+
+        monkeypatch.setattr("mcp.ClientSession", HangingClientSession)
+
+        response = test_client.post(
+            "/mcp",
+            json={
+                "sessionId": mcp_session_get_by_id_patched.id,
+                "name": "github",
+            },
+        )
+
+        assert response.status_code == 400, response.text
+        assert "github" not in mcp_session_get_by_id_patched.mcp_sessions
+
+    def test_later_list_tools_page_failure_does_not_evict_existing_session(
+        self,
+        test_client: TestClient,
+        test_config,
+        mcp_session_get_by_id_patched: Mock,
+        mock_get_current_user: Mock,
+        mock_mcp_transport,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        """Page 2 raising must not swap in the new session or drop the old
+        one. Named-server errors stay generic (no exception text)."""
+        from chainlit.config import SseMcpServer
+
+        mock_get_current_user.return_value = None
+        test_config.features.mcp.enabled = True
+        test_config.features.mcp.servers = [
+            SseMcpServer(type="sse", name="github", url="https://mcp.example.com/sse")
+        ]
+        sentinel_existing_session = Mock(name="pre-existing-mcp-session")
+        mcp_session_get_by_id_patched.mcp_sessions["github"] = sentinel_existing_session
+
+        class PagingFailClientSession(mock_mcp_transport):
+            async def list_tools(self, cursor=None, **kwargs):
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="tool_a")],
+                        nextCursor="page-2",
+                    )
+                raise RuntimeError("page-2 failed")
+
+        monkeypatch.setattr("mcp.ClientSession", PagingFailClientSession)
+
+        response = test_client.post(
+            "/mcp",
+            json={
+                "sessionId": mcp_session_get_by_id_patched.id,
+                "name": "github",
+            },
+        )
+
+        assert response.status_code == 400, response.text
+        assert "page-2 failed" not in response.text
+        assert "check the server logs" in response.text.lower()
+        assert (
+            mcp_session_get_by_id_patched.mcp_sessions["github"]
+            is sentinel_existing_session
+        )
 
     def test_unknown_named_server_returns_400(
         self,

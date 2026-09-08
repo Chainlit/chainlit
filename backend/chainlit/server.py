@@ -1448,6 +1448,7 @@ async def connect_mcp(
         StdioMcpConnection,
         _destination_in_allowlist,
         _destination_on_origin,
+        list_all_mcp_tools,
         make_mcp_http_client_factory,
         validate_mcp_headers,
         validate_mcp_url,
@@ -1495,12 +1496,12 @@ async def connect_mcp(
     #
     # Runs before the eviction block below (moved further down, right
     # before "Store the session"): a reconnect that fails validation, fails
-    # to connect, times out, is blocked, or has its on_mcp_connect callback
-    # raise must not first kill the working session it was trying to
-    # replace. `session.mcp_sessions[name]` is written exactly once, after
-    # `on_mcp_connect` succeeds, so no two same-named sessions ever coexist
-    # under that key and no tool-name collision or emitter-ordering change
-    # results from this reordering.
+    # to connect, times out, is blocked, has its on_mcp_connect callback
+    # raise, or fails tools/list must not first kill the working session it
+    # was trying to replace. `session.mcp_sessions[name]` is written
+    # exactly once, after `on_mcp_connect` and tools/list succeed, so no
+    # two same-named sessions ever coexist under that key and no tool-name
+    # collision or emitter-ordering change results from this reordering.
     mcp_connection: McpConnection
     # Computed once and reused both by the destination-binding httpx factory
     # (below) and the connect-response / error-hygiene branches (below that).
@@ -1820,11 +1821,41 @@ async def connect_mcp(
                 content={"detail": detail},
             )
 
+    try:
+        tools = await list_all_mcp_tools(
+            mcp_client_session,
+            page_timeout=connect_timeout,
+            total_timeout=connect_timeout,
+        )
+    except Exception as e:
+        # Same teardown as a rejecting on_mcp_connect: tools/list is part of
+        # making the connection usable, and it runs *before* swap so a
+        # failed listing (timeout, later page error) does not evict a
+        # working session or leave a half-connected task in mcp_sessions.
+        await stop_mcp_task(task, stop_event, payload.name)
+        if is_user_provided:
+            detail = f"Could not connect to the MCP: {e!s}"
+        else:
+            logger.error(
+                "Listing MCP tools failed for MCP server %r",
+                payload.name,
+                exc_info=e,
+            )
+            detail = (
+                "Could not connect to the MCP server. Check the server "
+                "logs for details."
+            )
+        return JSONResponse(
+            status_code=400,
+            content={"detail": detail},
+        )
+
     # Disconnect previous session for this name (reconnection). Runs only
-    # now that on_mcp_connect has succeeded — a reconnect that failed for
-    # any reason above (bad creds, server down, blocked destination,
-    # timeout, a rejecting callback) leaves the old working session intact
-    # instead of evicting it before knowing the replacement would work.
+    # now that on_mcp_connect and tools/list have succeeded — a reconnect
+    # that failed for any reason above (bad creds, server down, blocked
+    # destination, timeout, a rejecting callback, a failed or hung
+    # tools/list) leaves the old working session intact instead of evicting
+    # it before knowing the replacement would work.
     # Trade-off: if the old session was already silently dead, it keeps
     # showing "connected" until this succeeds — pre-existing (McpSession has
     # no liveness probe), not made worse here.
@@ -1870,15 +1901,13 @@ async def connect_mcp(
                 "Error closing old MCP session %s", payload.name, exc_info=True
             )
 
-    tool_list = await mcp_client_session.list_tools()
-
     # `type` (named servers) vs `clientType` (user-provided) — IMcp in
     # libs/react-client/src/types/mcp.ts declares both as optional, not
     # nullable, so the field that doesn't apply is omitted rather than sent
     # as null.
     mcp_payload: Dict[str, object] = {
         "name": mcp_connection.name,
-        "tools": [{"name": t.name} for t in tool_list.tools],
+        "tools": [{"name": t.name} for t in tools],
         "isUserProvided": is_user_provided,
         # Only echo url/headers back for user-provided servers — the client
         # already sent those. For named servers they come from the
