@@ -1448,6 +1448,7 @@ async def connect_mcp(
         StdioMcpConnection,
         _destination_in_allowlist,
         _destination_on_origin,
+        list_all_mcp_tools,
         make_mcp_http_client_factory,
         validate_mcp_headers,
         validate_mcp_url,
@@ -1870,7 +1871,7 @@ async def connect_mcp(
                 "Error closing old MCP session %s", payload.name, exc_info=True
             )
 
-    tool_list = await mcp_client_session.list_tools()
+    tools = await list_all_mcp_tools(mcp_client_session)
 
     # `type` (named servers) vs `clientType` (user-provided) — IMcp in
     # libs/react-client/src/types/mcp.ts declares both as optional, not
@@ -1878,7 +1879,7 @@ async def connect_mcp(
     # as null.
     mcp_payload: Dict[str, object] = {
         "name": mcp_connection.name,
-        "tools": [{"name": t.name} for t in tool_list.tools],
+        "tools": [{"name": t.name} for t in tools],
         "isUserProvided": is_user_provided,
         # Only echo url/headers back for user-provided servers — the client
         # already sent those. For named servers they come from the

@@ -1,8 +1,10 @@
-from typing import Callable, Dict, Literal, Optional, Union
+from typing import Callable, Dict, List, Literal, Optional, Union
 from urllib.parse import unquote, urlparse
 
 import httpx
 from pydantic import BaseModel
+
+from chainlit.logger import logger
 
 
 class StdioMcpConnection(BaseModel):
@@ -241,6 +243,73 @@ McpHttpClientFactory = Callable[..., httpx.AsyncClient]
 # too low a value breaks `npx -y` cold starts — in a security release.
 _MCP_CONNECT_TIMEOUT_STDIO = 120.0  # npx -y can cold-download on first run
 _MCP_CONNECT_TIMEOUT_HTTP = 30.0
+
+# tools/list is cursor-paginated. A single list_tools() call is only the
+# first page, so the connect payload (and the composer MCP list) would
+# silently drop tools on servers that page. Cap the walk so a server that
+# never omits nextCursor cannot hang the connect handler.
+_MCP_LIST_TOOLS_MAX_PAGES = 100
+
+
+def _mcp_next_cursor(page) -> Optional[str]:
+    """Return the pagination cursor from a tools/list result, if any.
+
+    The MCP Python SDK exposes the spec field as ``nextCursor``; some
+    mocks/results use the snake_case alias. Treat empty strings as absent.
+    """
+    cursor = getattr(page, "nextCursor", None)
+    if cursor is None:
+        cursor = getattr(page, "next_cursor", None)
+    if not cursor:
+        return None
+    return str(cursor)
+
+
+async def list_all_mcp_tools(
+    mcp_client_session,
+    *,
+    max_pages: int = _MCP_LIST_TOOLS_MAX_PAGES,
+) -> List:
+    """Return every tool from an MCP session, following ``nextCursor``.
+
+    ``ClientSession.list_tools`` does not walk pages itself; callers must
+    pass the previous page's cursor until the server omits it.
+    """
+    tools: List = []
+    cursor: Optional[str] = None
+    seen_cursors: set[str] = set()
+
+    for page_index in range(max_pages):
+        if cursor is None:
+            page = await mcp_client_session.list_tools()
+        else:
+            page = await mcp_client_session.list_tools(cursor=cursor)
+
+        page_tools = getattr(page, "tools", None) or []
+        tools.extend(page_tools)
+
+        next_cursor = _mcp_next_cursor(page)
+        if not next_cursor:
+            return tools
+        if next_cursor in seen_cursors:
+            logger.warning(
+                "MCP tools/list repeated nextCursor %r after %s page(s); "
+                "stopping pagination with %s tool(s) collected",
+                next_cursor,
+                page_index + 1,
+                len(tools),
+            )
+            return tools
+        seen_cursors.add(next_cursor)
+        cursor = next_cursor
+
+    logger.warning(
+        "MCP tools/list still offered nextCursor after %s pages; "
+        "returning %s tool(s) collected so far",
+        max_pages,
+        len(tools),
+    )
+    return tools
 
 
 def make_mcp_http_client_factory(

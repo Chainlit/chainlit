@@ -20,6 +20,7 @@ from chainlit.mcp import (
     StdioMcpConnection,
     _destination_in_allowlist,
     _destination_on_origin,
+    list_all_mcp_tools,
     make_mcp_http_client_factory,
     validate_mcp_headers,
     validate_mcp_url,
@@ -785,6 +786,88 @@ class TestDestinationOnOriginHook:
             await client.aclose()
 
 
+class TestListAllMcpTools:
+    """ClientSession.list_tools() returns one page; connect_mcp must walk
+    nextCursor or the composer MCP list silently drops tools."""
+
+    async def test_single_page_without_cursor(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                assert cursor is None
+                return SimpleNamespace(tools=[SimpleNamespace(name="only")])
+
+        tools = await list_all_mcp_tools(Session())
+        assert [t.name for t in tools] == ["only"]
+
+    async def test_follows_nextCursor_across_pages(self):
+        calls: list = []
+
+        class Session:
+            async def list_tools(self, cursor=None):
+                calls.append(cursor)
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="a")],
+                        nextCursor="p2",
+                    )
+                if cursor == "p2":
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="b")],
+                        nextCursor="p3",
+                    )
+                if cursor == "p3":
+                    return SimpleNamespace(tools=[SimpleNamespace(name="c")])
+                raise AssertionError(cursor)
+
+        tools = await list_all_mcp_tools(Session())
+        assert [t.name for t in tools] == ["a", "b", "c"]
+        assert calls == [None, "p2", "p3"]
+
+    async def test_follows_snake_case_next_cursor(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="a")],
+                        next_cursor="p2",
+                    )
+                return SimpleNamespace(tools=[SimpleNamespace(name="b")])
+
+        tools = await list_all_mcp_tools(Session())
+        assert [t.name for t in tools] == ["a", "b"]
+
+    async def test_stops_on_repeated_cursor(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                return SimpleNamespace(
+                    tools=[SimpleNamespace(name="loop")],
+                    nextCursor="same",
+                )
+
+        tools = await list_all_mcp_tools(Session())
+        assert [t.name for t in tools] == ["loop", "loop"]
+
+    async def test_caps_pages(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                n = 0 if cursor is None else int(cursor)
+                return SimpleNamespace(
+                    tools=[SimpleNamespace(name=f"t{n}")],
+                    nextCursor=str(n + 1),
+                )
+
+        tools = await list_all_mcp_tools(Session(), max_pages=3)
+        assert [t.name for t in tools] == ["t0", "t1", "t2"]
+
+    async def test_empty_tools(self):
+        class Session:
+            async def list_tools(self, cursor=None):
+                return SimpleNamespace(tools=[])
+
+        tools = await list_all_mcp_tools(Session())
+        assert tools == []
+
+
 # ── /mcp (connect_mcp) endpoint tests ──────────────────────────────────────
 
 
@@ -944,6 +1027,50 @@ class TestConnectMcpEndpoint:
         assert data["mcp"]["isUserProvided"] is False
         assert data["mcp"]["url"] is None
         assert data["mcp"]["headers"] is None
+
+    def test_connect_follows_list_tools_pagination(
+        self,
+        test_client: TestClient,
+        test_config,
+        mcp_session_get_by_id_patched: Mock,
+        mock_get_current_user: Mock,
+        mock_mcp_transport,
+        monkeypatch: pytest.MonkeyPatch,
+    ):
+        from chainlit.config import SseMcpServer
+
+        mock_get_current_user.return_value = None
+        test_config.features.mcp.enabled = True
+        test_config.features.mcp.servers = [
+            SseMcpServer(type="sse", name="github", url="https://mcp.example.com/sse")
+        ]
+
+        class PagingClientSession(mock_mcp_transport):
+            async def list_tools(self, cursor=None, **kwargs):
+                if cursor is None:
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="tool_a")],
+                        nextCursor="page-2",
+                    )
+                if cursor == "page-2":
+                    return SimpleNamespace(
+                        tools=[SimpleNamespace(name="tool_b")],
+                    )
+                raise AssertionError(f"unexpected cursor {cursor!r}")
+
+        monkeypatch.setattr("mcp.ClientSession", PagingClientSession)
+
+        response = test_client.post(
+            "/mcp",
+            json={
+                "sessionId": mcp_session_get_by_id_patched.id,
+                "name": "github",
+            },
+        )
+
+        assert response.status_code == 200, response.text
+        names = [t["name"] for t in response.json()["mcp"]["tools"]]
+        assert names == ["tool_a", "tool_b"]
 
     def test_unknown_named_server_returns_400(
         self,
