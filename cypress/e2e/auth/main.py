@@ -32,14 +32,17 @@ async def custom_token_auth() -> Response:
     return response
 
 
-catch_all_route = None
-for route in app.routes:
-    if route.path == "/{full_path:path}":
-        catch_all_route = route
-
-if catch_all_route:
-    app.routes.remove(catch_all_route)
-    app.routes.append(catch_all_route)
+# Chainlit's catch-all SPA route (`/{full_path:path}`) matches every path
+# and Starlette dispatch is first-match-wins, so without reordering it would
+# shadow the custom routes above. Move the custom routes to the very front
+# of app.routes instead of trying to relocate the catch-all itself — this
+# works whether the catch-all is a top-level route or (fastapi >= 0.141)
+# nested inside an internal router-include wrapper.
+_custom_paths = {"/auth/custom", "/auth/token"}
+_custom_routes = [r for r in app.routes if getattr(r, "path", None) in _custom_paths]
+for _route in _custom_routes:
+    app.routes.remove(_route)
+app.routes[:0] = _custom_routes
 
 
 @cl.on_chat_start
