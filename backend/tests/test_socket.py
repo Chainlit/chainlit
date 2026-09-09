@@ -10,6 +10,7 @@ from chainlit.socket import (
     _get_token_from_cookie,
     clean_session,
     connection_successful,
+    disconnect,
     load_user_env,
     persist_user_session,
     restore_existing_session,
@@ -443,6 +444,47 @@ class TestCleanSession:
 
             # Should not raise an error
             await clean_session("socket_123")
+
+
+class TestDisconnectCleanup:
+    @pytest.mark.asyncio
+    async def test_cleanup_runs_when_persisting_user_session_fails(self):
+        """Disconnect cleanup must run even when persistence raises."""
+        from chainlit.chat_context import chat_contexts
+        from chainlit.user_session import user_sessions
+
+        mock_session = Mock(spec=WebsocketSession)
+        mock_session.id = "session_123"
+        mock_session.thread_id = "thread_123"
+        mock_session.has_first_interaction = True
+        mock_session.to_clear = True
+        mock_session.to_persistable.return_value = {}
+        mock_session.delete = AsyncMock()
+
+        user_sessions["session_123"] = {"key": "value"}
+        chat_contexts["session_123"] = [Mock()]
+
+        try:
+            with (
+                patch.object(WebsocketSession, "get", return_value=mock_session),
+                patch("chainlit.socket.init_ws_context"),
+                patch("chainlit.socket.config") as mock_config,
+                patch(
+                    "chainlit.socket.persist_user_session",
+                    new=AsyncMock(side_effect=RuntimeError("database unavailable")),
+                ),
+            ):
+                mock_config.code.on_chat_end = None
+
+                with pytest.raises(RuntimeError, match="database unavailable"):
+                    await disconnect("socket_123")
+
+            assert "session_123" not in user_sessions
+            assert "session_123" not in chat_contexts
+            mock_session.delete.assert_awaited_once_with()
+        finally:
+            user_sessions.pop("session_123", None)
+            chat_contexts.pop("session_123", None)
 
 
 class TestSocketEdgeCases:
