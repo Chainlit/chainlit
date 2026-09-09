@@ -33,6 +33,7 @@
     "format:files": "pnpm format-check:files --write",
     "format": "pnpm format-check --write",
     "type-check": "pnpm run --parallel type-check",
+    "check-overrides": "node scripts/check-pnpm-overrides.mjs",
     "test": "pnpm run --recursive test",
     "test:e2e": "cypress run",
     "test:e2e:interactive": "cypress open"
@@ -50,8 +51,7 @@
       "undici@>=6.0.0 <6.28.0": ">=6.28.0 <7.0.0",
       "qs@>=6.0.0 <6.15.2": ">=6.15.2 <7.0.0",
       "tmp@>=0.2.0 <0.2.7": ">=0.2.7 <0.3.0",
-      "yaml@>=2.0.0 <2.8.3": ">=2.8.3 <3.0.0",
-      "@babel/core@>=7.0.0 <7.29.6": ">=7.29.6 <8.0.0"
+      "yaml@>=2.0.0 <2.8.3": ">=2.8.3 <3.0.0"
     }
   },
   "packageManager": "pnpm@9.15.9"

@@ -134,6 +134,76 @@ def test_overwrite_shorter_token_unchunked(client):
     assert len(chunk_cookies) == 0, f"Found {len(chunk_cookies)} residual cookies"
 
 
+def test_cookie_path_uses_chainlit_root_path_value(monkeypatch):
+    """CHAINLIT_ROOT_PATH must be used as the cookie path directly.
+
+    Before the fix, the code read::
+
+        _cookie_path = os.environ.get(_cookie_root_path, "/")
+
+    where ``_cookie_root_path`` was the *value* of ``CHAINLIT_ROOT_PATH``,
+    not a key.  This caused ``_cookie_path`` to always be ``"/"`` (the
+    default) whenever ``CHAINLIT_ROOT_PATH`` was set, because the value
+    (e.g. ``"/app"``) is not a valid environment variable name.  Cookie
+    deletion then used the wrong path, leaving stale cookies on the client.
+    """
+    monkeypatch.setenv("CHAINLIT_ROOT_PATH", "/myapp")
+    monkeypatch.delenv("CHAINLIT_AUTH_COOKIE_PATH", raising=False)
+    try:
+        importlib.reload(cookie_module)
+        assert cookie_module._cookie_path == "/myapp", (
+            f"Expected _cookie_path to be '/myapp' but got '{cookie_module._cookie_path}'. "
+            "CHAINLIT_ROOT_PATH value should be used directly as the cookie path."
+        )
+    finally:
+        # Reload with the patched env removed so module state is restored and
+        # this test does not leak _cookie_path="/myapp" into other tests.
+        monkeypatch.undo()
+        importlib.reload(cookie_module)
+
+
+def test_validate_oauth_state_cookie_rejects_missing_state(monkeypatch):
+    """validate_oauth_state_cookie must raise when the state cookie is absent."""
+    from starlette.requests import Request as StarletteRequest
+
+    from chainlit.auth.cookie import validate_oauth_state_cookie
+
+    scope = {
+        "type": "http",
+        "headers": [],
+        "query_string": b"",
+        "method": "GET",
+        "path": "/",
+    }
+    request = StarletteRequest(scope)
+    # Cookies dict is empty — oauth_state cookie is absent
+    with pytest.raises(Exception, match="oauth state does not correspond"):
+        validate_oauth_state_cookie(request, "expected_state")
+
+
+def test_validate_oauth_state_cookie_accepts_correct_state():
+    """validate_oauth_state_cookie must not raise when states match."""
+    from starlette.requests import Request as StarletteRequest
+
+    from chainlit.auth.cookie import validate_oauth_state_cookie
+
+    state_value = "secret_state_token"
+
+    # Build a minimal request with the oauth_state cookie set
+    scope = {
+        "type": "http",
+        "headers": [
+            (b"cookie", f"oauth_state={state_value}".encode()),
+        ],
+        "query_string": b"",
+        "method": "GET",
+        "path": "/",
+    }
+    request = StarletteRequest(scope)
+    # Should not raise
+    validate_oauth_state_cookie(request, state_value)
+
+
 def test_state_cookie_lifetime_default(monkeypatch):
     """Test that _state_cookie_lifetime defaults to 180 seconds (3 minutes)."""
     monkeypatch.delenv("CHAINLIT_STATE_COOKIE_LIFETIME", raising=False)
