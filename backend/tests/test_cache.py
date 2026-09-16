@@ -129,6 +129,25 @@ class TestCacheDecorator:
         assert result3 == 8
         assert call_count == 2  # Different z value
 
+    @pytest.mark.parametrize("keyword_first", [False, True])
+    def test_cache_distinguishes_positional_tuple_from_keyword(self, keyword_first):
+        call_count = 0
+
+        @cache
+        def identity(value):
+            nonlocal call_count
+            call_count += 1
+            return value
+
+        calls = [((("value", 1),), {}, ("value", 1)), ((), {"value": 1}, 1)]
+        if keyword_first:
+            calls.reverse()
+
+        for _ in range(2):
+            for args, kwargs, expected in calls:
+                assert identity(*args, **kwargs) == expected
+            assert call_count == 2
+
     def test_cache_with_no_arguments(self):
         """Test cache with functions that take no arguments."""
         call_count = 0
