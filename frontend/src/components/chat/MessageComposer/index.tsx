@@ -1,6 +1,7 @@
 import {
   MutableRefObject,
   useCallback,
+  useContext,
   useEffect,
   useRef,
   useState
@@ -9,6 +10,7 @@ import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  ChainlitContext,
   FileSpec,
   IStep,
   commandsState,
@@ -50,6 +52,7 @@ import ModePicker from './ModePicker';
 import SubmitButton from './SubmitButton';
 import UploadButton from './UploadButton';
 import VoiceButton from './VoiceButton';
+import { shouldAutoFocusMessageComposer } from './autoFocus';
 
 interface Props {
   fileSpec: FileSpec;
@@ -94,6 +97,7 @@ export default function MessageComposer({
     chatSettingsInputs.length > 0;
 
   const isMobile = useIsMobile();
+  const apiClient = useContext(ChainlitContext);
 
   // Get/set available modes from state - selections are tracked via the 'default' flag on options
   const [modes, setModes] = useRecoilState(modesState);
@@ -272,7 +276,7 @@ export default function MessageComposer({
       <Input
         ref={inputRef}
         id="chat-input"
-        autoFocus={!isMobile}
+        autoFocus={shouldAutoFocusMessageComposer(apiClient.type, isMobile)}
         selectedCommand={selectedCommand}
         setSelectedCommand={setSelectedCommand}
         onChange={setValue}
