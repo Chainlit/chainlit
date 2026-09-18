@@ -225,7 +225,7 @@ class AzureADOAuthProvider(OAuthProvider):
     async def get_token(self, code: str, url: str):
         json = await self.get_raw_token_response(code, url)
 
-        token = json["access_token"]
+        token = json.get("access_token")
         refresh_token = json.get("refresh_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
@@ -322,7 +322,7 @@ class AzureADHybridOAuthProvider(OAuthProvider):
     async def get_token(self, code: str, url: str):
         json = await self.get_raw_token_response(code, url)
 
-        token = json["access_token"]
+        token = json.get("access_token")
         refresh_token = json.get("refresh_token")
         if not token:
             raise HTTPException(status_code=400, detail=ACCESS_TOKEN_MISSING)
