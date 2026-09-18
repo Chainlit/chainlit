@@ -177,8 +177,8 @@ class DynamoDBDataLayer(BaseDataLayer):
 
         # feedback id = THREAD#{thread_id}::STEP#{step_id}
         thread_id, step_id = feedback_id.split("::")
-        thread_id = thread_id.strip("THREAD#")
-        step_id = step_id.strip("STEP#")
+        thread_id = thread_id.removeprefix("THREAD#")
+        step_id = step_id.removeprefix("STEP#")
 
         self.client.update_item(
             TableName=self.table_name,
@@ -500,8 +500,8 @@ class DynamoDBDataLayer(BaseDataLayer):
         for item in response["Items"]:
             deserialized_item: Dict[str, Any] = self._deserialize_item(item)
             thread = ThreadDict(  # type: ignore
-                id=deserialized_item["PK"].strip("THREAD#"),
-                createdAt=deserialized_item["UserThreadSK"].strip("TS#"),
+                id=deserialized_item["PK"].removeprefix("THREAD#"),
+                createdAt=deserialized_item["UserThreadSK"].removeprefix("TS#"),
                 name=deserialized_item["name"],
             )
             paginated_response.data.append(thread)
