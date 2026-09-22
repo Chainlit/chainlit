@@ -60,6 +60,7 @@ from chainlit.logger import logger
 from chainlit.markdown import get_markdown_str
 from chainlit.oauth_providers import get_oauth_provider
 from chainlit.secret import random_secret
+from chainlit.thread_metadata import public_thread
 from chainlit.types import (
     AskFileSpec,
     CallActionRequest,
@@ -970,7 +971,13 @@ async def get_user_threads(
     payload: GetThreadsRequest,
     current_user: UserParam,
 ):
-    """Get the threads page by page."""
+    """Get paginated threads with public metadata.
+
+    Args:
+        request: Incoming HTTP request.
+        payload: Pagination and thread filters.
+        current_user: Authenticated owner of the requested threads.
+    """
 
     data_layer = get_data_layer()
 
@@ -989,7 +996,9 @@ async def get_user_threads(
         payload.filter.userId = current_user.id
 
     res = await data_layer.list_threads(payload.pagination, payload.filter)
-    return JSONResponse(content=res.to_dict())
+    response = res.to_dict()
+    response["data"] = [public_thread(thread) for thread in response["data"]]
+    return JSONResponse(content=response)
 
 
 @router.get("/project/thread/{thread_id}")
@@ -998,7 +1007,13 @@ async def get_thread(
     thread_id: str,
     current_user: UserParam,
 ):
-    """Get a specific thread."""
+    """Get an owner's thread with public metadata.
+
+    Args:
+        request: Incoming HTTP request.
+        thread_id: Identifier of the requested thread.
+        current_user: Authenticated thread owner.
+    """
     data_layer = get_data_layer()
 
     if not data_layer:
@@ -1010,7 +1025,7 @@ async def get_thread(
     await is_thread_author(current_user.identifier, thread_id)
 
     res = await data_layer.get_thread(thread_id)
-    return JSONResponse(content=res)
+    return JSONResponse(content=public_thread(res, include_settings=True))
 
 
 @router.get("/project/share/{thread_id}")
@@ -1024,6 +1039,11 @@ async def get_shared_thread(
     This endpoint is separate from the resume endpoint and does not require the caller
     to be the author of the thread. It only returns the thread if its metadata
     contains is_shared=True. Otherwise, it returns 404 to avoid leaking existence.
+
+    Args:
+        request: Incoming HTTP request.
+        thread_id: Identifier of the requested shared thread.
+        current_user: Viewer passed to the optional access callback.
     """
 
     data_layer = get_data_layer()
@@ -1061,11 +1081,7 @@ async def get_shared_thread(
     if (not user_can_view) and (not is_shared):
         raise HTTPException(status_code=404, detail="Thread not found")
 
-    metadata.pop("chat_profile", None)
-    metadata.pop("chat_settings", None)
-    metadata.pop("env", None)
-    thread["metadata"] = metadata
-    return JSONResponse(content=thread)
+    return JSONResponse(content=public_thread(thread))
 
 
 @router.get("/project/thread/{thread_id}/element/{element_id}")
