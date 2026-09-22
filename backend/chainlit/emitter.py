@@ -199,7 +199,9 @@ class ChainlitEmitter(BaseChainlitEmitter):
         Args:
             thread_dict: Internal thread whose session metadata must be preserved.
         """
-        return self.emit("resume_thread", public_thread(thread_dict, include_settings=True))
+        return self.emit(
+            "resume_thread", public_thread(thread_dict, include_settings=True)
+        )
 
     def send_resume_thread_error(self, error: str):
         """Send a thread resume error to the UI"""

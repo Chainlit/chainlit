@@ -33,7 +33,5 @@ def public_thread(
 
     return {
         **thread,
-        "metadata": {
-            key: value for key, value in metadata.items() if key in allowed
-        },
+        "metadata": {key: value for key, value in metadata.items() if key in allowed},
     }
