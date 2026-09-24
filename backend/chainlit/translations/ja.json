@@ -86,6 +86,7 @@
     },
     "fileUpload": {
       "dragDrop": "ここにファイルをドラッグ＆ドロップ",
+      "browse": "ファイルを参照",
       "sizeLimit": "制限：",
       "errors": {
         "failed": "アップロードに失敗しました",

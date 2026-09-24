@@ -1,9 +1,37 @@
+import json
 from io import BytesIO, StringIO, TextIOWrapper
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 
 from chainlit.translations import compare_json_structures, lint_translation_json
+
+# The real, shipped locale files, resolved from the repo source tree (not the
+# consuming app's ``.chainlit/`` copy that ``chainlit lint-translations`` reads).
+TRANSLATIONS_DIR = Path(__file__).resolve().parents[1] / "chainlit" / "translations"
+GROUND_TRUTH_LOCALE = "en-US.json"
+
+
+def _translation_files():
+    """Every shipped locale file except the ground truth, sorted for stable ids."""
+    return sorted(
+        p.name for p in TRANSLATIONS_DIR.glob("*.json") if p.name != GROUND_TRUTH_LOCALE
+    )
+
+
+def _all_locale_files():
+    """Every shipped locale file, including the ground truth, sorted for stable ids."""
+    return sorted(p.name for p in TRANSLATIONS_DIR.glob("*.json"))
+
+
+def _string_leaves(data, path=""):
+    """Yield ``(dotted_path, value)`` for every string leaf in a nested dict."""
+    if isinstance(data, dict):
+        for key, value in data.items():
+            yield from _string_leaves(value, f"{path}.{key}" if path else key)
+    elif isinstance(data, str):
+        yield path, data
 
 
 class TestCompareJsonStructures:
@@ -421,3 +449,52 @@ class TestTranslationsEdgeCases:
         missing_errors = [e for e in errors if "Missing" in e]
         assert len(extra_errors) == 2
         assert len(missing_errors) == 3
+
+
+class TestTranslationFilesParity:
+    """Parity guard for the real locale files in ``backend/chainlit/translations``.
+
+    The suite above validates ``compare_json_structures`` against synthetic
+    dictionaries. These tests instead load the actual shipped locale files and
+    assert every one carries the full key structure of the ground-truth
+    ``en-US.json``. A PR that adds a key to ``en-US.json`` and forgets the other
+    locales fails here, in CI, instead of silently shipping a missing-key render.
+    See https://github.com/Chainlit/chainlit/issues/2993.
+    """
+
+    def test_ground_truth_locale_exists(self):
+        assert (TRANSLATIONS_DIR / GROUND_TRUTH_LOCALE).is_file(), (
+            f"Ground-truth locale {GROUND_TRUTH_LOCALE} not found in {TRANSLATIONS_DIR}"
+        )
+
+    def test_translation_files_are_discovered(self):
+        # Guard against discovery finding nothing (e.g. if the directory ever
+        # moves): otherwise the parametrized parity test would pass vacuously.
+        assert _translation_files(), f"No locale files discovered in {TRANSLATIONS_DIR}"
+
+    @pytest.mark.parametrize("locale_file", _translation_files())
+    def test_locale_matches_ground_truth(self, locale_file):
+        truth = json.loads(
+            (TRANSLATIONS_DIR / GROUND_TRUTH_LOCALE).read_text(encoding="utf-8")
+        )
+        translation = json.loads(
+            (TRANSLATIONS_DIR / locale_file).read_text(encoding="utf-8")
+        )
+        errors = compare_json_structures(truth, translation)
+        assert not errors, (
+            f"{locale_file} is out of sync with {GROUND_TRUTH_LOCALE}:\n"
+            + "\n".join(errors)
+        )
+
+    @pytest.mark.parametrize("locale_file", _all_locale_files())
+    def test_locale_has_no_empty_strings(self, locale_file):
+        # compare_json_structures only checks key structure, not leaf values, so a
+        # key whose value is an empty string would pass the parity test above yet
+        # still render blank -- the exact symptom this guards against. Assert every
+        # string leaf carries actual text.
+        data = json.loads((TRANSLATIONS_DIR / locale_file).read_text(encoding="utf-8"))
+        empty = [path for path, value in _string_leaves(data) if not value.strip()]
+        assert not empty, (
+            f"{locale_file} has empty translation values (they render blank):\n"
+            + "\n".join(empty)
+        )
