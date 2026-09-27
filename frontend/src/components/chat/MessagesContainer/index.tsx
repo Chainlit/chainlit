@@ -164,22 +164,30 @@ const MessagesContainer = ({ navigate }: Props) => {
       showFeedbackButtons: enableFeedback,
       uiName: config?.ui?.name || '',
       cot: config?.ui?.cot || 'hidden',
+      cotDisplay: config?.ui?.cot_display || 'list',
+      showStepDetails: config?.ui?.show_step_details ?? true,
       onElementRefClick,
       onError,
       onFeedbackUpdated,
       onFeedbackDeleted
     };
   }, [
+    uploadFile,
     askUser,
     enableFeedback,
     loading,
     config?.ui?.name,
     config?.ui?.cot,
+    config?.ui?.cot_display,
+    config?.ui?.show_step_details,
     config?.features?.unsafe_allow_html,
+    config?.features?.latex,
     config?.features?.user_message_markdown,
+    config?.features?.edit_message,
     onElementRefClick,
     onError,
-    onFeedbackUpdated
+    onFeedbackUpdated,
+    onFeedbackDeleted
   ]);
 
   return (

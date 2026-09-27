@@ -12,6 +12,8 @@ interface IMessageContext {
     onProgress: (progress: number) => void
   ) => { xhr: XMLHttpRequest; promise: Promise<IFileRef> };
   cot: 'hidden' | 'tool_call' | 'full';
+  cotDisplay: 'list' | 'compact';
+  showStepDetails: boolean;
   askUser?: IAsk;
   editable: boolean;
   loading: boolean;

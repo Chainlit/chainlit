@@ -86,6 +86,16 @@ const Message = memo(
       );
     }
 
+    const nestedSteps = message.steps ? (
+      <Messages
+        messages={message.steps.filter((s) => !s.type.includes('message'))}
+        elements={elements}
+        actions={actions}
+        indent={indent + 1}
+        isRunning={isRunning}
+      />
+    ) : null;
+
     return (
       <>
         <div data-step-type={message.type} className="step py-2">
@@ -117,7 +127,11 @@ const Message = memo(
                   ) : null}
                   {/* Display the step and its children */}
                   {isStep ? (
-                    <Step step={message} isRunning={isRunning}>
+                    <Step
+                      step={message}
+                      isRunning={isRunning}
+                      nestedSteps={nestedSteps}
+                    >
                       {showInputSection ? (
                         <MessageContent
                           elements={elements}
@@ -128,17 +142,7 @@ const Message = memo(
                           sections={['input']}
                         />
                       ) : null}
-                      {message.steps ? (
-                        <Messages
-                          messages={message.steps.filter(
-                            (s) => !s.type.includes('message')
-                          )}
-                          elements={elements}
-                          actions={actions}
-                          indent={indent + 1}
-                          isRunning={isRunning}
-                        />
-                      ) : null}
+                      {nestedSteps}
                       {shouldRenderOutput ? (
                         <MessageContent
                           ref={contentRef}

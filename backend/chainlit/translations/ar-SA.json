@@ -99,7 +99,9 @@
     "messages": {
       "status": {
         "using": "يستخدم",
-        "used": "مستخدم"
+        "used": "مستخدم",
+        "usedSteps": "الخطوات المستخدمة: {{count}}",
+        "usedTools": "الأدوات المستخدمة: {{count}}"
       },
       "actions": {
         "copy": {

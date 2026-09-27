@@ -100,7 +100,9 @@
     "messages": {
       "status": {
         "using": "正在使用",
-        "used": "已使用"
+        "used": "已使用",
+        "usedSteps": "使用了 {{count}} 個步驟",
+        "usedTools": "使用了 {{count}} 個工具"
       },
       "actions": {
         "copy": {

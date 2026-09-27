@@ -1,5 +1,13 @@
 import { cn } from '@/lib/utils';
-import { PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import { MessageContext } from 'contexts/MessageContext';
+import {
+  PropsWithChildren,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
 
 import type { IStep } from '@chainlit/react-client';
 
@@ -14,18 +22,28 @@ import { Translator } from 'components/i18n';
 interface Props {
   step: IStep;
   isRunning?: boolean;
+  nestedSteps?: ReactNode;
 }
 
 export default function Step({
   step,
   children,
-  isRunning
+  isRunning,
+  nestedSteps
 }: PropsWithChildren<Props>) {
+  const { showStepDetails } = useContext(MessageContext);
+
   const using = useMemo(() => {
     return isRunning && step.start && !step.end && !step.isError;
   }, [step, isRunning]);
 
-  const hasContent = step.input || step.output || step.steps?.length;
+  const hasSubSteps = !!step.steps?.length;
+  const hasContent = step.input || step.output || hasSubSteps;
+  // Flat mode's accordion body renders only non-message sub-steps, so a step whose
+  // children are all messages isn't expandable there (it would open to nothing).
+  const hasVisibleSubSteps =
+    step.steps?.some((s) => !s.type.includes('message')) ?? false;
+  const expandable = showStepDetails ? Boolean(hasContent) : hasVisibleSubSteps;
   const isError = step.isError;
   const stepName = step.name;
 
@@ -40,13 +58,13 @@ export default function Step({
     }
   }, [using, step.autoCollapse]);
 
-  // If there's no content, just render the status without accordion
-  if (!hasContent) {
+  // Nothing to expand: render a flat status label.
+  if (!expandable) {
     return (
       <div className="flex flex-col flex-grow w-0">
         <p
           className={cn(
-            'flex items-center gap-1 font-medium',
+            'flex items-center gap-1 font-medium mt-[3px]',
             isError && 'text-red-500',
             !using && 'text-muted-foreground',
             using && 'loading-shimmer'
@@ -79,7 +97,7 @@ export default function Step({
         <AccordionItem value={step.id} className="border-none">
           <AccordionTrigger
             className={cn(
-              'flex items-center gap-1 justify-start transition-none p-0 hover:no-underline',
+              'flex items-center gap-1 justify-start transition-none p-0 hover:no-underline mt-[3px]',
               isError && 'text-red-500',
               !using && 'text-muted-foreground hover:text-foreground',
               using && 'loading-shimmer'
@@ -98,7 +116,7 @@ export default function Step({
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex-grow mt-4 ml-1 pl-4 border-l-2 border-primary">
-              {children}
+              {showStepDetails ? children : nestedSteps}
             </div>
           </AccordionContent>
         </AccordionItem>
