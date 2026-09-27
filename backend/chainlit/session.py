@@ -124,6 +124,9 @@ class BaseSession:
     thread_id_to_resume: Optional[str] = None
     client_type: ClientType
     current_task: Optional[asyncio.Task] = None
+    current_command: Optional[str] = None
+    # Bumped on each audio_start so audio_end won't clear a newer turn's command.
+    audio_turn: int = 0
     chat_started: bool = False
 
     def __init__(

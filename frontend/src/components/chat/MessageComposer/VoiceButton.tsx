@@ -1,5 +1,6 @@
 import { X } from 'lucide-react';
 import { useHotkeys } from 'react-hotkeys-hook';
+import { useRecoilValue } from 'recoil';
 
 import { useAudio, useConfig } from '@chainlit/react-client';
 
@@ -12,6 +13,8 @@ import {
 } from '@/components/ui/tooltip';
 import { Translator } from 'components/i18n';
 
+import { persistentCommandState } from '@/state/chat';
+
 import { Loader } from '../../Loader';
 import { VoiceLines } from '../../icons/VoiceLines';
 import { Button } from '../../ui/button';
@@ -23,6 +26,7 @@ interface Props {
 const VoiceButton = ({ disabled }: Props) => {
   const { config } = useConfig();
   const { startConversation, endConversation, audioConnection } = useAudio();
+  const selectedCommand = useRecoilValue(persistentCommandState);
   const isEnabled = !!config?.features.audio.enabled;
 
   useHotkeys(
@@ -56,13 +60,19 @@ const VoiceButton = ({ disabled }: Props) => {
       }
 
       if (audioConnection === 'on') return endConversation();
-      return startConversation();
+      return startConversation(selectedCommand?.id);
     },
     {
       enableOnFormTags: false,
       preventDefault: false // Don't prevent default - let letters be typed
     },
-    [isEnabled, audioConnection, startConversation, endConversation]
+    [
+      isEnabled,
+      audioConnection,
+      startConversation,
+      endConversation,
+      selectedCommand
+    ]
   );
 
   if (!isEnabled) return null;
@@ -90,7 +100,7 @@ const VoiceButton = ({ disabled }: Props) => {
                 audioConnection === 'on'
                   ? endConversation
                   : audioConnection === 'off'
-                    ? startConversation
+                    ? () => startConversation(selectedCommand?.id)
                     : undefined
               }
             >

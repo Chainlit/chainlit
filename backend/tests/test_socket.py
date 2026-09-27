@@ -8,6 +8,8 @@ from chainlit.socket import (
     _authenticate_connection,
     _get_token,
     _get_token_from_cookie,
+    audio_end,
+    audio_start,
     clean_session,
     connection_successful,
     load_user_env,
@@ -628,3 +630,100 @@ class TestConnectionSuccessfulIdempotency:
             await connection_successful("sid-1")
 
         assert on_chat_start.call_count == 1
+
+
+class TestAudioStartCommand:
+    """audio_start only keeps the UI-selected command when audio is accepted."""
+
+    async def _run(self, *, accepted, enabled=True, payload=None):
+        session = Mock()
+        session.current_command = "stale"
+        session.audio_turn = 0
+        config = Mock()
+        config.features.audio.enabled = enabled
+        config.code.on_audio_start = AsyncMock(return_value=accepted)
+        session.get_config.return_value = config
+
+        context = Mock()
+        context.emitter.update_audio_connection = AsyncMock()
+
+        with (
+            patch("chainlit.socket.WebsocketSession") as mock_ws,
+            patch("chainlit.socket.init_ws_context", return_value=context),
+        ):
+            mock_ws.require.return_value = session
+            await audio_start("sid", payload)
+        return session
+
+    @pytest.mark.asyncio
+    async def test_accepted_start_keeps_command(self):
+        session = await self._run(accepted=True, payload={"command": "search"})
+        assert session.current_command == "search"
+
+    @pytest.mark.asyncio
+    async def test_declined_start_clears_command(self):
+        session = await self._run(accepted=False, payload={"command": "search"})
+        assert session.current_command is None
+
+    @pytest.mark.asyncio
+    async def test_disabled_audio_clears_command(self):
+        session = await self._run(
+            accepted=True, enabled=False, payload={"command": "search"}
+        )
+        assert session.current_command is None
+
+    @pytest.mark.asyncio
+    async def test_accepted_start_without_payload_clears_command(self):
+        # An older frontend may send audio_start with no payload at all.
+        session = await self._run(accepted=True, payload=None)
+        assert session.current_command is None
+
+    @pytest.mark.asyncio
+    async def test_accepted_start_empty_payload_clears_command(self):
+        session = await self._run(accepted=True, payload={})
+        assert session.current_command is None
+
+
+class TestAudioTurnGuard:
+    """audio_end clears the command only for the turn it actually ended."""
+
+    @pytest.mark.asyncio
+    async def test_older_audio_end_keeps_newer_turn_command(self):
+        """A slow on_audio_end must not wipe a command a newer turn already set."""
+        session = Mock()
+        session.audio_turn = 0
+        session.current_command = None
+        session.has_first_interaction = True
+
+        config = Mock()
+        config.features.audio.enabled = True
+        config.code.on_audio_start = AsyncMock(return_value=True)
+        session.get_config.return_value = config
+
+        context = Mock()
+        context.emitter.task_start = AsyncMock()
+        context.emitter.task_end = AsyncMock()
+        context.emitter.update_audio_connection = AsyncMock()
+
+        with (
+            patch("chainlit.socket.WebsocketSession") as mock_ws,
+            patch("chainlit.socket.init_ws_context", return_value=context),
+        ):
+            mock_ws.require.return_value = session
+
+            # Turn A owns the command.
+            await audio_start("sid", {"command": "A"})
+            assert session.current_command == "A"
+
+            # Turn B starts while turn A's on_audio_end is still running.
+            async def start_newer_turn():
+                await audio_start("sid", {"command": "B"})
+
+            config.code.on_audio_end = AsyncMock(side_effect=start_newer_turn)
+            await audio_end("sid")
+            assert session.current_command == "B"  # older audio_end left it alone
+
+            # Turn B's own audio_end owns the turn and clears it.
+            config.code.on_audio_end = AsyncMock()
+            await audio_end("sid")
+            assert session.current_command is None
