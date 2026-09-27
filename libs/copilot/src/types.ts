@@ -16,4 +16,8 @@ export interface IWidgetConfig {
   language?: string;
   opened?: boolean;
   displayMode?: DisplayMode;
+  // CSS selector for a viewport-filling host root (e.g. a full-screen map/dashboard
+  // shell). In sidebar mode its width is constrained instead of nudging the body margin,
+  // which a `100vw` / `position: absolute inset` layout would ignore.
+  hostRoot?: string;
 }

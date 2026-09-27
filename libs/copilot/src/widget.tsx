@@ -36,7 +36,8 @@ const Widget = ({ config, error }: Props) => {
   const projectConfig = useConfig();
   const { sidebarWidth, handleMouseDown } = useSidebarResize({
     displayMode,
-    isOpen
+    isOpen,
+    hostRoot: config?.hostRoot
   });
 
   useEffect(() => {
