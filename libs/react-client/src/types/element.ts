@@ -37,6 +37,8 @@ interface TElement<T> {
 interface TMessageElement<T> extends TElement<T> {
   name: string;
   display: 'inline' | 'side' | 'page';
+  /** Whether a live update may open the side panel. Defaults to true. */
+  autoExpand?: boolean;
 }
 
 export interface IImageElement extends TMessageElement<'image'> {

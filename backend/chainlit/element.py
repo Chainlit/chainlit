@@ -61,6 +61,7 @@ class ElementDict(TypedDict, total=False):
     page: Optional[int]
     props: Optional[Dict]
     autoPlay: Optional[bool]
+    autoExpand: bool
     playerConfig: Optional[dict]
     forId: Optional[str]
     mime: Optional[str]
@@ -96,6 +97,9 @@ class Element:
     language: Optional[str] = None
     # Mime type, inferred based on content if not provided
     mime: Optional[str] = None
+
+    # Live presentation hint; excluded from persistence to avoid schema migrations.
+    auto_expand: bool = Field(default=True, kw_only=True)
 
     def __post_init__(self) -> None:
         self.persisted = False
@@ -258,7 +262,10 @@ class Element:
         if not self.url and not self.chainlit_key:
             raise ValueError("Must provide url or chainlit key to send element")
 
-        await context.emitter.send_element(self.to_dict())
+        payload = self.to_dict()
+        if not self.auto_expand:
+            payload["autoExpand"] = False
+        await context.emitter.send_element(payload)
 
 
 ElementBased = TypeVar("ElementBased", bound=Element)

@@ -1149,6 +1149,52 @@ def test_share_thread_endpoint_sets_flags(
     data_mod._data_layer_initialized = False
 
 
+def test_update_custom_element_keeps_auto_expand_hint(
+    test_client: TestClient,
+    mock_session: Mock,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    import importlib
+
+    from chainlit.context import ChainlitContext, context_var
+    from chainlit.server import app as _app, get_current_user as _get_current_user
+    from chainlit.session import WebsocketSession
+
+    emitter = Mock()
+    emitter.send_element = AsyncMock()
+
+    def init_context(session: WebsocketSession) -> ChainlitContext:
+        context = ChainlitContext(session, emitter=emitter)
+        context_var.set(context)
+        return context
+
+    monkeypatch.setattr(WebsocketSession, "get_by_id", lambda _: mock_session)
+    monkeypatch.setattr(
+        importlib.import_module("chainlit.context"), "init_ws_context", init_context
+    )
+    _app.dependency_overrides[_get_current_user] = lambda: None
+    try:
+        response = test_client.put(
+            "/project/element",
+            json={
+                "sessionId": mock_session.id,
+                "element": {
+                    "id": "custom-1",
+                    "type": "custom",
+                    "name": "Sources",
+                    "display": "side",
+                    "props": {"label": "Reference"},
+                    "autoExpand": False,
+                },
+            },
+        )
+        assert response.status_code == 200
+        assert response.json() == {"success": True}
+        assert emitter.send_element.call_args.args[0]["autoExpand"] is False
+    finally:
+        del _app.dependency_overrides[_get_current_user]
+
+
 def test_health_check(test_client: TestClient):
     response = test_client.get("/health")
     assert response.status_code == 200

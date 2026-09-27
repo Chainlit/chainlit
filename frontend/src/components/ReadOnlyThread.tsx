@@ -24,6 +24,7 @@ import { useLayoutMaxWidth } from 'hooks/useLayoutMaxWidth';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Loader } from './Loader';
 import { Messages } from './chat/Messages';
+import { createMessageSideView } from './chat/MessagesContainer/useSideElements';
 
 type Props = {
   id: string;
@@ -132,7 +133,7 @@ const ReadOnlyThread = ({ id }: Props) => {
   const onElementRefClick = useCallback(
     (element: IMessageElement) => {
       if (element.display === 'side') {
-        setSideView({ title: element.name, elements: [element] });
+        setSideView(createMessageSideView([element]));
         return;
       }
 

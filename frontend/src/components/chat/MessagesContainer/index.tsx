@@ -1,5 +1,5 @@
 import { MessageContext } from '@/contexts/MessageContext';
-import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useContext, useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -20,6 +20,8 @@ import {
 
 import { Messages } from '@/components/chat/Messages';
 import { useTranslation } from 'components/i18n/Translator';
+
+import { createMessageSideView, useSideElements } from './useSideElements';
 
 interface Props {
   navigate?: (to: string) => void;
@@ -91,39 +93,7 @@ const MessagesContainer = ({ navigate }: Props) => {
     []
   );
 
-  const knownSideElementsRef = useRef<Map<string, IMessageElement>>(new Map());
-  const knownSideOrderRef = useRef<string[]>([]);
-
-  useEffect(() => {
-    const sideElements = elements.filter((e) => e.display === 'side');
-
-    if (sideElements.length === 0) {
-      knownSideElementsRef.current = new Map();
-      knownSideOrderRef.current = [];
-      setSideView(undefined);
-      return;
-    }
-
-    const prevMap = knownSideElementsRef.current;
-    const prevOrder = knownSideOrderRef.current;
-    const currentIds = sideElements.map((e) => e.id);
-
-    const hasChanged =
-      currentIds.length !== prevOrder.length ||
-      currentIds.some((id, i) => prevOrder[i] !== id) ||
-      sideElements.some((e) => prevMap.get(e.id) !== e);
-
-    if (hasChanged) {
-      const newMap = new Map<string, IMessageElement>();
-      sideElements.forEach((e) => newMap.set(e.id, e));
-      knownSideElementsRef.current = newMap;
-      knownSideOrderRef.current = currentIds;
-      setSideView({
-        title: sideElements[sideElements.length - 1].name,
-        elements: sideElements
-      });
-    }
-  }, [elements]);
+  useSideElements(elements, setSideView);
 
   const onElementRefClick = useCallback(
     (element: IMessageElement) => {
@@ -131,7 +101,7 @@ const MessagesContainer = ({ navigate }: Props) => {
         element.display === 'side' ||
         (element.display === 'page' && !navigate)
       ) {
-        setSideView({ title: element.name, elements: [element] });
+        setSideView(createMessageSideView([element]));
         return;
       }
 

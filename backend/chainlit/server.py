@@ -1172,6 +1172,7 @@ def _sanitize_custom_element(element_dict: "ElementDict") -> "CustomElement":
         name=element_dict["name"],
         props=element_dict.get("props") or {},
         display=element_dict["display"],
+        auto_expand=element_dict.get("autoExpand", True),
     )
 
 
