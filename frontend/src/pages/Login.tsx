@@ -107,8 +107,11 @@ export default function Login() {
         <div className="relative hidden bg-muted lg:block overflow-hidden">
           <img
             src={
-              config?.ui?.login_page_image ||
-              apiClient.buildEndpoint('/favicon')
+              config?.ui?.login_page_image
+                ? config.ui.login_page_image.startsWith('/public')
+                  ? apiClient.buildEndpoint(config.ui.login_page_image)
+                  : config.ui.login_page_image
+                : apiClient.buildEndpoint('/favicon')
             }
             alt="Image"
             className={`absolute inset-0 h-full w-full object-cover ${

@@ -35,11 +35,16 @@ const MessageAvatar = ({ author, hide, isError, iconName }: Props) => {
   }, [config, chatProfile]);
 
   const avatarUrl = useMemo(() => {
-    if (config?.ui?.default_avatar_file_url)
-      return config?.ui?.default_avatar_file_url;
+    if (config?.ui?.default_avatar_file_url) {
+      return config.ui.default_avatar_file_url.startsWith('/public')
+        ? apiClient?.buildEndpoint(config.ui.default_avatar_file_url)
+        : config.ui.default_avatar_file_url;
+    }
     const isAssistant = !author || author === config?.ui.name;
     if (isAssistant && selectedChatProfile?.icon) {
-      return selectedChatProfile.icon;
+      return selectedChatProfile.icon.startsWith('/public')
+        ? apiClient?.buildEndpoint(selectedChatProfile.icon)
+        : selectedChatProfile.icon;
     }
     return apiClient?.buildEndpoint(`/avatars/${author || 'default'}`);
   }, [apiClient, selectedChatProfile, config, author]);

@@ -349,7 +349,11 @@ export class ChainlitAPI extends APIBase {
   }
 
   getLogoEndpoint(theme: string, configuredLogoUrl?: string) {
-    if (configuredLogoUrl) return configuredLogoUrl;
+    if (configuredLogoUrl) {
+      return configuredLogoUrl.startsWith('/public')
+        ? this.buildEndpoint(configuredLogoUrl)
+        : configuredLogoUrl;
+    }
     return this.buildEndpoint(`/logo?theme=${theme}`);
   }
 
