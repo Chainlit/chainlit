@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Translator } from 'components/i18n';
 
 import { InlinedElements } from './Content/InlinedElements';
+import { MessageTimestamp } from './MessageTimestamp';
 
 interface Props {
   message: IStep;
@@ -64,6 +65,12 @@ const UserMessage = memo(function UserMessage({
   return (
     <div className="flex flex-col w-full gap-1">
       <InlinedElements elements={inlineElements} className="items-end" />
+
+      {config?.ui?.show_message_timestamps ? (
+        <div className="flex justify-end">
+          <MessageTimestamp createdAt={message.createdAt} />
+        </div>
+      ) : null}
 
       <div className="flex flex-row items-center gap-1 w-full group">
         {!isEditing && editable && (

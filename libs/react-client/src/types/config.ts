@@ -45,6 +45,7 @@ export interface IChainlitConfig {
     chat_settings_location?: 'message_composer' | 'sidebar';
     default_chat_settings_open?: boolean;
     confirm_new_chat?: boolean;
+    show_message_timestamps?: boolean;
     cot: 'hidden' | 'tool_call' | 'full';
     github?: string;
     custom_css?: string;

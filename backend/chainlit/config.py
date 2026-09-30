@@ -446,6 +446,7 @@ class UISettings(BaseModel):
     )
     default_chat_settings_open: bool = False
     confirm_new_chat: bool = True
+    show_message_timestamps: bool = False
     github: Optional[str] = None
     custom_css: Optional[str] = None
     custom_css_attributes: Optional[str] = ""

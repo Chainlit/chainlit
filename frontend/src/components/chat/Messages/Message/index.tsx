@@ -16,6 +16,7 @@ import { AskFileButton } from './AskFileButton';
 import { MessageAvatar } from './Avatar';
 import { MessageButtons } from './Buttons';
 import { MessageContent } from './Content';
+import { MessageTimestamp } from './MessageTimestamp';
 import Step from './Step';
 import UserMessage from './UserMessage';
 
@@ -159,6 +160,7 @@ const Message = memo(
                   ) : (
                     // Display an assistant message
                     <div className="flex flex-col items-start min-w-[150px] flex-grow gap-2">
+                      <MessageTimestamp createdAt={message.createdAt} />
                       <MessageContent
                         ref={contentRef}
                         elements={elements}
