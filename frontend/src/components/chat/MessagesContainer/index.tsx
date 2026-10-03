@@ -1,5 +1,5 @@
 import { MessageContext } from '@/contexts/MessageContext';
-import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
 
@@ -91,39 +91,38 @@ const MessagesContainer = ({ navigate }: Props) => {
     []
   );
 
-  const knownSideElementsRef = useRef<Map<string, IMessageElement>>(new Map());
-  const knownSideOrderRef = useRef<string[]>([]);
-
   useEffect(() => {
-    const sideElements = elements.filter((e) => e.display === 'side');
-
-    if (sideElements.length === 0) {
-      knownSideElementsRef.current = new Map();
-      knownSideOrderRef.current = [];
-      setSideView(undefined);
-      return;
-    }
-
-    const prevMap = knownSideElementsRef.current;
-    const prevOrder = knownSideOrderRef.current;
-    const currentIds = sideElements.map((e) => e.id);
-
-    const hasChanged =
-      currentIds.length !== prevOrder.length ||
-      currentIds.some((id, i) => prevOrder[i] !== id) ||
-      sideElements.some((e) => prevMap.get(e.id) !== e);
-
-    if (hasChanged) {
-      const newMap = new Map<string, IMessageElement>();
-      sideElements.forEach((e) => newMap.set(e.id, e));
-      knownSideElementsRef.current = newMap;
-      knownSideOrderRef.current = currentIds;
-      setSideView({
-        title: sideElements[sideElements.length - 1].name,
-        elements: sideElements
-      });
-    }
-  }, [elements]);
+    // Refresh only the current selection. Do not open previews for unrelated
+    // elements, and remove side/page selections that no longer exist.
+    setSideView((current) => {
+      if (!current) return current;
+      const updatedElements = current.elements
+        .map((selected) => {
+          const updated = elements.find(
+            (element) => element.id === selected.id
+          );
+          if (updated) return updated;
+          return selected.display === 'side' || selected.display === 'page'
+            ? undefined
+            : selected;
+        })
+        .filter((element): element is IMessageElement => element !== undefined);
+      if (updatedElements.length === 0) return undefined;
+      if (
+        updatedElements.every(
+          (element, index) => element === current.elements[index]
+        )
+      ) {
+        return current;
+      }
+      const title =
+        current.elements.length === 1 &&
+        current.title === current.elements[0].name
+          ? updatedElements[0].name
+          : current.title;
+      return { ...current, title, elements: updatedElements };
+    });
+  }, [elements, setSideView]);
 
   const onElementRefClick = useCallback(
     (element: IMessageElement) => {
