@@ -288,6 +288,7 @@ class WebsocketSession(BaseSession):
     """
 
     to_clear: bool = False
+    unavailable_chat_profile: str | None = None
 
     mcp_sessions: dict[str, McpSession]
 

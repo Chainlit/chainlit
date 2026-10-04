@@ -3,8 +3,10 @@ import { useRecoilValue, useResetRecoilState, useSetRecoilState } from 'recoil';
 import {
   actionState,
   askUserState,
+  chatProfileState,
   chatSettingsInputsState,
   chatSettingsValueState,
+  configState,
   currentThreadIdState,
   elementState,
   favoriteMessagesState,
@@ -16,7 +18,8 @@ import {
   sideViewState,
   tasklistState,
   threadIdToResumeState,
-  tokenCountState
+  tokenCountState,
+  unavailableThreadIdState
 } from 'src/state';
 import { IFileRef, IStep } from 'src/types';
 import { addMessage } from 'src/utils/message';
@@ -31,10 +34,14 @@ const useChatInteract = () => {
   const session = useRecoilValue(sessionState);
   const askUser = useRecoilValue(askUserState);
   const sessionId = useRecoilValue(sessionIdState);
+  const unavailableThreadId = useRecoilValue(unavailableThreadIdState);
+  const config = useRecoilValue(configState);
+  const setChatProfile = useSetRecoilState(chatProfileState);
 
   const resetChatSettings = useResetRecoilState(chatSettingsInputsState);
   const resetSessionId = useResetRecoilState(sessionIdState);
   const resetChatSettingsValue = useResetRecoilState(chatSettingsValueState);
+  const resetUnavailableThread = useResetRecoilState(unavailableThreadIdState);
 
   const setFirstUserInteraction = useSetRecoilState(firstUserInteraction);
   const setLoading = useSetRecoilState(loadingState);
@@ -49,6 +56,14 @@ const useChatInteract = () => {
   const setFavoriteMessages = useSetRecoilState(favoriteMessagesState);
 
   const clear = useCallback(() => {
+    if (unavailableThreadId) {
+      setChatProfile((profile) => {
+        const profiles = config?.chatProfiles ?? [];
+        if (profiles.some((item) => item.name === profile)) return profile;
+        return (profiles.find((item) => item.default) ?? profiles[0])?.name;
+      });
+    }
+    resetUnavailableThread();
     session?.socket.emit('clear_session');
     session?.socket.disconnect();
     setIdToResume(undefined);
@@ -63,7 +78,7 @@ const useChatInteract = () => {
     resetChatSettingsValue();
     setSideView(undefined);
     setCurrentThreadId(undefined);
-  }, [session]);
+  }, [session, unavailableThreadId, config, setChatProfile]);
 
   const sendMessage = useCallback(
     (

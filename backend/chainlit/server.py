@@ -1291,8 +1291,6 @@ async def call_action(
     context = init_ws_context(session)
     config: ChainlitConfig = session.get_config()
 
-    action = Action(**payload.action)
-
     if current_user:
         if (
             not context.session.user
@@ -1303,6 +1301,13 @@ async def call_action(
                 detail="You are not authorized to upload files for this session",
             )
 
+    if session.unavailable_chat_profile:
+        raise HTTPException(
+            status_code=409,
+            detail="This conversation is read-only because its chat profile is unavailable.",
+        )
+
+    action = Action(**payload.action)
     callback = config.code.action_callbacks.get(action.name)
     if callback:
         if not context.session.has_first_interaction:

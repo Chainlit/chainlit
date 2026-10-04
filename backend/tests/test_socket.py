@@ -15,6 +15,7 @@ from chainlit.socket import (
     restore_existing_session,
     resume_thread,
 )
+from chainlit.types import ChatProfile
 
 
 class TestGetTokenFromCookie:
@@ -295,7 +296,7 @@ class TestResumeThread:
             assert result is None
 
     @pytest.mark.asyncio
-    async def test_resume_thread_success(self):
+    async def test_resume_thread_success(self, monkeypatch):
         """Test successful thread resumption."""
         from chainlit.user_session import user_sessions
 
@@ -303,6 +304,13 @@ class TestResumeThread:
         mock_session.user = Mock(identifier="user123")
         mock_session.thread_id_to_resume = "thread_123"
         mock_session.id = "session_123"
+        mock_session.language = "en-US"
+        monkeypatch.setattr(
+            "chainlit.socket.config.code.set_chat_profiles",
+            AsyncMock(
+                return_value=[ChatProfile(name="gpt-4", markdown_description="GPT")]
+            ),
+        )
 
         metadata = {
             "chat_profile": "gpt-4",
@@ -329,7 +337,7 @@ class TestResumeThread:
             user_sessions.update(original_sessions)
 
     @pytest.mark.asyncio
-    async def test_resume_thread_with_string_metadata(self):
+    async def test_resume_thread_with_string_metadata(self, monkeypatch):
         """Test thread resumption with JSON string metadata."""
         from chainlit.user_session import user_sessions
 
@@ -337,6 +345,13 @@ class TestResumeThread:
         mock_session.user = Mock(identifier="user123")
         mock_session.thread_id_to_resume = "thread_123"
         mock_session.id = "session_123"
+        mock_session.language = "en-US"
+        monkeypatch.setattr(
+            "chainlit.socket.config.code.set_chat_profiles",
+            AsyncMock(
+                return_value=[ChatProfile(name="gpt-4", markdown_description="GPT")]
+            ),
+        )
 
         metadata_dict = {"chat_profile": "gpt-4"}
         thread = {

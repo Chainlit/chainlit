@@ -37,6 +37,11 @@ export const resumeThreadErrorState = atom<string | undefined>({
   default: undefined
 });
 
+export const unavailableThreadIdState = atom<string | undefined>({
+  key: 'UnavailableThreadId',
+  default: undefined
+});
+
 export const chatProfileState = atom<string | undefined>({
   key: 'ChatProfile',
   default: undefined

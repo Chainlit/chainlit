@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { useSetRecoilState } from 'recoil';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
 
 import Page from 'pages/Page';
 
 import {
   threadHistoryState,
+  unavailableThreadIdState,
+  useChatInteract,
   useChatMessages,
   useConfig
 } from '@chainlit/react-client';
@@ -25,6 +27,13 @@ export default function ThreadPage() {
   const { threadId } = useChatMessages();
 
   const isCurrentThread = threadId === id;
+  const unavailableThreadId = useRecoilValue(unavailableThreadIdState);
+  const isUnavailableThread = !!id && unavailableThreadId === id;
+  const { clear } = useChatInteract();
+
+  useEffect(() => {
+    if (!id && unavailableThreadId) clear();
+  }, [id, unavailableThreadId, clear]);
 
   useEffect(() => {
     setThreadHistory((prev) => {
@@ -38,11 +47,16 @@ export default function ThreadPage() {
   return (
     <Page>
       <>
-        {isSharedRoute ? <ReadOnlyThread id={id!} /> : null}
-        {config?.threadResumable && !isCurrentThread && !isSharedRoute ? (
+        {isSharedRoute || isUnavailableThread ? (
+          <ReadOnlyThread id={id!} />
+        ) : null}
+        {config?.threadResumable &&
+        !isCurrentThread &&
+        !isSharedRoute &&
+        !isUnavailableThread ? (
           <AutoResumeThread id={id!} />
         ) : null}
-        {config?.threadResumable && !isSharedRoute ? (
+        {config?.threadResumable && !isSharedRoute && !isUnavailableThread ? (
           isCurrentThread ? (
             <Chat />
           ) : (
@@ -51,7 +65,10 @@ export default function ThreadPage() {
             </div>
           )
         ) : null}
-        {config && !config.threadResumable && !isSharedRoute ? (
+        {config &&
+        !config.threadResumable &&
+        !isSharedRoute &&
+        !isUnavailableThread ? (
           isCurrentThread ? (
             <Chat />
           ) : (

@@ -33,6 +33,7 @@ import {
   tasklistState,
   threadIdToResumeState,
   tokenCountState,
+  unavailableThreadIdState,
   wavRecorderState,
   wavStreamPlayerState
 } from 'src/state';
@@ -86,6 +87,7 @@ const useChatSession = () => {
   const [chatProfile, setChatProfile] = useRecoilState(chatProfileState);
   const idToResume = useRecoilValue(threadIdToResumeState);
   const setThreadResumeError = useSetRecoilState(resumeThreadErrorState);
+  const setUnavailableThreadId = useSetRecoilState(unavailableThreadIdState);
   const setFavoriteMessages = useSetRecoilState(favoriteMessagesState);
 
   const [currentThreadId, setCurrentThreadId] =
@@ -290,6 +292,16 @@ const useChatSession = () => {
       socket.on('resume_thread_error', (error?: string) => {
         setThreadResumeError(error);
       });
+
+      socket.on(
+        'resume_thread_unavailable',
+        (event: { thread_id: string; message: string }) => {
+          if (event.thread_id !== idToResume) return;
+          setUnavailableThreadId(event.thread_id);
+          setLoading(false);
+          toast.info(event.message);
+        }
+      );
 
       socket.on('new_message', (message: IStep) => {
         setMessages((oldMessages) => addMessage(oldMessages, message));
