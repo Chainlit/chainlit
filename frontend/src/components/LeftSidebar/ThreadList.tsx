@@ -211,6 +211,7 @@ export function ThreadList({
       threadIdToDelete === currentThreadId
     ) {
       clear();
+      navigate('/');
       await new Promise((resolve) => setTimeout(resolve, 300));
     }
 
