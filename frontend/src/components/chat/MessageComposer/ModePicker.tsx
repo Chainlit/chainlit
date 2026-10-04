@@ -2,6 +2,7 @@ import { cn } from '@/lib/utils';
 import {
   Popover,
   PopoverContent,
+  PopoverPortal,
   PopoverTrigger
 } from '@radix-ui/react-popover';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -155,57 +156,59 @@ export const ModePicker = ({
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent
-          id={`mode-picker-popover-${mode.id}`}
-          align="start"
-          side="top"
-          sideOffset={4}
-          className={cn(
-            'p-1 rounded-md border shadow-lg bg-popover',
-            'animate-in fade-in-0 zoom-in-95 duration-150',
-            'w-[280px]'
-          )}
-          onKeyDown={handleKeyDown}
-          onMouseLeave={handleMouseLeave}
-        >
-          <Command className="overflow-hidden bg-transparent">
-            <CommandListScrollable maxItems={6} className="custom-scrollbar">
-              <CommandGroup className="p-0">
-                {options.map((option, index) => (
-                  <CommandItemAnimated
-                    key={option.id}
-                    index={index}
-                    isSelected={index === selectedIndex}
-                    onMouseMove={() => handleMouseMove(index)}
-                    onSelect={() => handleOptionSelect(option)}
-                    className={cn(
-                      'flex items-start gap-2 px-2 py-2 cursor-pointer',
-                      selectedOptionId === option.id && 'bg-accent'
-                    )}
-                  >
-                    {renderIcon(
-                      option.icon,
-                      cn(
-                        '!size-5 mt-0.5 text-muted-foreground flex-shrink-0',
-                        index === selectedIndex && 'text-foreground'
-                      )
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium text-sm leading-tight">
-                        {option.name}
-                      </div>
-                      {option.description && (
-                        <div className="text-xs text-muted-foreground mt-0.5 leading-tight">
-                          {option.description}
-                        </div>
+        <PopoverPortal container={window.cl_shadowRootElement}>
+          <PopoverContent
+            id={`mode-picker-popover-${mode.id}`}
+            align="start"
+            side="top"
+            sideOffset={4}
+            className={cn(
+              'z-[51] p-1 rounded-md border shadow-lg bg-popover',
+              'animate-in fade-in-0 zoom-in-95 duration-150',
+              'w-[280px]'
+            )}
+            onKeyDown={handleKeyDown}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Command className="overflow-hidden bg-transparent">
+              <CommandListScrollable maxItems={6} className="custom-scrollbar">
+                <CommandGroup className="p-0">
+                  {options.map((option, index) => (
+                    <CommandItemAnimated
+                      key={option.id}
+                      index={index}
+                      isSelected={index === selectedIndex}
+                      onMouseMove={() => handleMouseMove(index)}
+                      onSelect={() => handleOptionSelect(option)}
+                      className={cn(
+                        'flex items-start gap-2 px-2 py-2 cursor-pointer',
+                        selectedOptionId === option.id && 'bg-accent'
                       )}
-                    </div>
-                  </CommandItemAnimated>
-                ))}
-              </CommandGroup>
-            </CommandListScrollable>
-          </Command>
-        </PopoverContent>
+                    >
+                      {renderIcon(
+                        option.icon,
+                        cn(
+                          '!size-5 mt-0.5 text-muted-foreground flex-shrink-0',
+                          index === selectedIndex && 'text-foreground'
+                        )
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-sm leading-tight">
+                          {option.name}
+                        </div>
+                        {option.description && (
+                          <div className="text-xs text-muted-foreground mt-0.5 leading-tight">
+                            {option.description}
+                          </div>
+                        )}
+                      </div>
+                    </CommandItemAnimated>
+                  ))}
+                </CommandGroup>
+              </CommandListScrollable>
+            </Command>
+          </PopoverContent>
+        </PopoverPortal>
       </Popover>
     </div>
   );
