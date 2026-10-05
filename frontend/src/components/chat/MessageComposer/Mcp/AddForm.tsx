@@ -4,6 +4,8 @@ import { toast } from 'sonner';
 
 import {
   ChainlitContext,
+  IMcp,
+  IMcpAuthorizationRequired,
   mcpState,
   sessionIdState,
   useConfig
@@ -11,6 +13,7 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -43,6 +46,7 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
   );
   const [serverUrl, setServerUrl] = useState('');
   const [headersInput, setHeadersInput] = useState('');
+  const [useOAuth, setUseOAuth] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const isUserFormValid = () => {
@@ -56,7 +60,36 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
     setServerType('sse');
     setServerUrl('');
     setHeadersInput('');
+    setUseOAuth(false);
   };
+
+  // The server has sent the user to sign in. List it as connecting until
+  // mcp_connected or mcp_connection_failed arrives over the socket.
+  const addAwaitingSignIn = (
+    { mcp, url }: IMcpAuthorizationRequired,
+    extra: Partial<IMcp> = {}
+  ) => {
+    setMcps((prev) =>
+      prev.some((existingMcp) => existingMcp.name === mcp.name)
+        ? prev
+        : [
+            ...prev,
+            {
+              ...mcp,
+              url: mcp.url ?? undefined,
+              headers: mcp.headers ?? undefined,
+              ...extra,
+              status: 'connecting',
+              authorizationUrl: url
+            }
+          ]
+    );
+  };
+
+  const connectedMessage = (result: unknown) =>
+    result === 'authorization_required'
+      ? 'Waiting for you to sign in...'
+      : 'MCP connected!';
 
   const connectNamedServer = (name: string) => {
     setIsLoading(true);
@@ -64,6 +97,11 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
       apiClient
         .connectMcp(sessionId, name)
         .then(async (resp: any) => {
+          if (resp.status === 'authorization_required') {
+            addAwaitingSignIn(resp);
+            onSuccess();
+            return 'authorization_required';
+          }
           const { success, mcp, error } = resp;
           if (!success) {
             throw new Error(error || 'Could not connect to the MCP server');
@@ -76,7 +114,7 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
         .finally(() => setIsLoading(false)),
       {
         loading: 'Connecting MCP...',
-        success: () => 'MCP connected!',
+        success: connectedMessage,
         error: (err) => <span>{err.message}</span>
       }
     );
@@ -103,9 +141,21 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
           serverName,
           serverType,
           serverUrl,
-          headersObj
+          headersObj,
+          useOAuth
         )
         .then(async (resp: any) => {
+          if (resp.status === 'authorization_required') {
+            addAwaitingSignIn(resp, {
+              clientType: serverType,
+              url: serverUrl,
+              isUserProvided: true,
+              useOAuth: true
+            });
+            resetUserForm();
+            onSuccess();
+            return 'authorization_required';
+          }
           const { success, mcp, error } = resp;
           if (!success) {
             throw new Error(error || 'Could not connect to the MCP server');
@@ -118,6 +168,7 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
                 clientType: serverType,
                 url: serverUrl,
                 isUserProvided: true,
+                ...(useOAuth ? { useOAuth: true } : {}),
                 status: 'connected'
               }
             ]);
@@ -128,7 +179,10 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
         .finally(() => setIsLoading(false)),
       {
         loading: 'Adding MCP...',
-        success: () => 'MCP added!',
+        success: (result: unknown) =>
+          result === 'authorization_required'
+            ? connectedMessage(result)
+            : 'MCP added!',
         error: (err) => <span>{err.message}</span>
       }
     );
@@ -267,6 +321,18 @@ export const McpAddForm = ({ onSuccess, onCancel }: McpAddFormProps) => {
               onChange={(e) => setHeadersInput(e.target.value)}
               disabled={isLoading}
             />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="use-oauth"
+              checked={useOAuth}
+              onCheckedChange={(checked) => setUseOAuth(checked === true)}
+              disabled={isLoading}
+            />
+            <Label htmlFor="use-oauth" className="text-foreground/70 text-sm">
+              Sign in with OAuth
+            </Label>
           </div>
 
           <div className="flex justify-end items-center gap-2 mt-auto">

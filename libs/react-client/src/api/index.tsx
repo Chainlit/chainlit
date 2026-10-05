@@ -326,14 +326,16 @@ export class ChainlitAPI extends APIBase {
     name: string,
     clientType: 'sse' | 'streamable-http',
     url: string,
-    headers?: Record<string, string>
+    headers?: Record<string, string>,
+    useOAuth?: boolean
   ) {
     const res = await this.post(`/mcp`, {
       sessionId,
       name,
       clientType,
       url,
-      ...(headers ? { headers } : {})
+      ...(headers ? { headers } : {}),
+      ...(useOAuth ? { useOAuth: true } : {})
     });
     return res.json();
   }

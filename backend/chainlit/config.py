@@ -16,9 +16,10 @@ from typing import (
     Optional,
     Union,
 )
+from urllib.parse import urlsplit
 
 import tomli
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings
 from starlette.datastructures import Headers
 
@@ -172,6 +173,10 @@ reaction_on_message_received = false
     # name = "my-http-server"
     # type = "streamable-http"
     # url = "https://mcp.example.com/mcp"
+    # # Optional, for "sse" and "streamable-http": obtain a token per logged-in user
+    # # through OAuth instead of sending static headers. Needs authentication enabled.
+    # # OAuth requests may reach the server's own origin plus the origins listed here.
+    # oauth = {{ authorization_origins = ["https://auth.example.com"] }}
 
     [features.mcp.user_servers]
         # Opt-in: allow end-users to connect their own SSE or streamable-http MCP servers.
@@ -179,6 +184,8 @@ reaction_on_message_received = false
         enabled = false
         # Allowlist of permitted URL prefixes. Empty list = deny all.
         # Example: allowed_urls = ["https://mcp.example.com"]
+        # A user-provided server connected with OAuth also needs its authorization
+        # server covered here, since every OAuth request is checked against this list.
         allowed_urls = []
 
 [UI]
@@ -334,11 +341,48 @@ class StdioMcpServer(BaseModel):
     env: Optional[dict[str, str]] = None
 
 
+class McpServerOAuth(BaseModel):
+    """Per-user OAuth for an SSE or streamable-http server.
+
+    The MCP SDK makes the discovery, client registration and token requests
+    from this process, through the same destination check as the connection
+    itself, which holds a named server to its own origin. An authorization
+    server hosted anywhere else has to be granted here. Origins rather than
+    URL prefixes, because discovery lives under ``/.well-known/`` wherever the
+    authorization server's own endpoints are.
+    """
+
+    authorization_origins: list[str] = []
+
+    @field_validator("authorization_origins")
+    @classmethod
+    def _check_bare_origins(cls, origins: list[str]) -> list[str]:
+        for origin in origins:
+            parsed = urlsplit(origin)
+            if (
+                parsed.scheme not in ("http", "https")
+                or not parsed.hostname
+                or parsed.path not in ("", "/")
+                or parsed.query
+                or parsed.fragment
+                or parsed.username is not None
+                or parsed.password is not None
+            ):
+                raise ValueError(
+                    f"MCP OAuth authorization origin {origin!r} must be a bare "
+                    "http(s) origin, such as 'https://auth.example.com'."
+                )
+            _ = parsed.port  # raises ValueError on an invalid port
+        return origins
+
+
 class SseMcpServer(BaseModel):
     name: str
     type: Literal["sse"]  # discriminator; see StdioMcpServer
     url: str
     headers: Optional[dict[str, str]] = None
+    # Set to obtain a per-user token via OAuth; see McpServerOAuth.
+    oauth: Optional[McpServerOAuth] = None
 
 
 class StreamableHttpMcpServer(BaseModel):
@@ -346,6 +390,8 @@ class StreamableHttpMcpServer(BaseModel):
     type: Literal["streamable-http"]  # discriminator; see StdioMcpServer
     url: str
     headers: Optional[dict[str, str]] = None
+    # Set to obtain a per-user token via OAuth; see McpServerOAuth.
+    oauth: Optional[McpServerOAuth] = None
 
 
 McpServerConfig = Annotated[

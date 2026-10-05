@@ -258,6 +258,9 @@ class ConnectMCPRequest(BaseModel):
     clientType: Optional[Literal["sse", "streamable-http"]] = None
     url: Optional[str] = None
     headers: Optional[Dict[str, str]] = None
+    # User-provided connections only: obtain a per-user token via OAuth instead
+    # of relying on a static header. Configured servers set `oauth` in config.
+    useOAuth: bool = False
 
     @model_validator(mode="after")
     def validate_user_provided_consistency(self) -> "ConnectMCPRequest":

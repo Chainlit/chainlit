@@ -257,4 +257,38 @@ describe('migrateStoredMcps', () => {
     const sse = migrated.find((mcp) => mcp.name === 'my-sse-server');
     expect(sse?.isUserProvided).toBe(true);
   });
+
+  it('keeps useOAuth on a stored entry but drops a stale sign-in link', () => {
+    const stored = [
+      {
+        name: 'jira',
+        tools: [],
+        status: 'connecting',
+        clientType: 'streamable-http',
+        url: 'https://example.com/mcp',
+        isUserProvided: true,
+        useOAuth: true,
+        authorizationUrl: 'https://auth.example.com/authorize?state=old'
+      }
+    ];
+
+    const [migrated] = migrateStoredMcps(stored);
+    expect(migrated.useOAuth).toBe(true);
+    expect(migrated).not.toHaveProperty('authorizationUrl');
+  });
+
+  it('drops an entry whose `useOAuth` is not a boolean', () => {
+    const malformed = [
+      {
+        name: 'x',
+        tools: [],
+        status: 'connected',
+        clientType: 'sse',
+        url: 'https://example.com/mcp',
+        useOAuth: 'yes'
+      }
+    ];
+
+    expect(migrateStoredMcps(malformed)).toEqual([]);
+  });
 });

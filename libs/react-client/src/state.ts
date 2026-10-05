@@ -300,6 +300,9 @@ const isStoredMcp = (entry: unknown): entry is IMcp => {
   if (mcp.headers !== undefined && !isPlainStringRecord(mcp.headers)) {
     return false;
   }
+  if (mcp.useOAuth !== undefined && typeof mcp.useOAuth !== 'boolean') {
+    return false;
+  }
 
   return true;
 };
@@ -318,6 +321,11 @@ export const migrateStoredMcps = (value: unknown): IMcp[] => {
   }
   return value
     .filter(isStoredMcp)
+    .map(
+      // A sign-in link is only good for the connection attempt that asked for
+      // it; reconnecting after a reload asks for a fresh one if it's needed.
+      ({ authorizationUrl: _authorizationUrl, ...mcp }) => mcp
+    )
     .map((mcp) =>
       mcp.isUserProvided === undefined && mcp.url && mcp.clientType
         ? { ...mcp, isUserProvided: true }

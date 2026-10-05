@@ -9,6 +9,7 @@ export * from './types';
 export * from './context';
 export * from './state';
 export * from './utils/message';
+export * from './utils/mcp';
 
 export { Socket } from 'socket.io-client';
 

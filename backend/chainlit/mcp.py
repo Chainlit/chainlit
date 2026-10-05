@@ -1,4 +1,4 @@
-from typing import Callable, Dict, Literal, Optional, Union
+from typing import Callable, Dict, Literal, Optional, Sequence, Union
 from urllib.parse import unquote, urlparse
 
 import httpx
@@ -208,26 +208,31 @@ def _destination_in_allowlist(allowed_urls: list[str]):
     return check
 
 
-def _destination_on_origin(configured_url: str):
+def _destination_on_origin(configured_url: str, extra_origins: Sequence[str] = ()):
     """Permit any path on the configured server's own origin.
 
     Named servers are pinned to their origin rather than their path subtree:
     the MCP SSE transport routinely advertises a message endpoint on a sibling
     path (``/sse`` handing off to ``/messages/``), so a path constraint would
     reject conforming servers. Cross-origin movement is still refused.
+
+    ``extra_origins`` admits further origins under the same rule. OAuth uses it
+    for an authorization server the developer granted in the server's config,
+    since the SDK's discovery and token requests travel through this check too.
     """
-    expected = httpx.URL(configured_url)
+    expected = [httpx.URL(configured_url), *(httpx.URL(o) for o in extra_origins)]
 
     def check(url: str) -> None:
         actual = httpx.URL(url)
-        if (
-            actual.scheme != expected.scheme
-            or actual.host != expected.host
-            or _effective_port(actual) != _effective_port(expected)
+        if not any(
+            actual.scheme == allowed.scheme
+            and actual.host == allowed.host
+            and _effective_port(actual) == _effective_port(allowed)
+            for allowed in expected
         ):
             raise McpDestinationError(
                 f"MCP server tried to reach {actual.scheme}://{actual.netloc.decode()}, "
-                "which is not the origin it was configured with."
+                "which is not an origin it was configured with."
             )
 
     return check
