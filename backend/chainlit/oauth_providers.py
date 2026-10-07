@@ -21,6 +21,10 @@ class OAuthProvider:
     authorize_params: Dict[str, str]
     default_prompt: Optional[str] = None
 
+    # Set to True by providers whose authorization request carries an OIDC
+    # ``nonce`` that must be generated per login and verified on return.
+    uses_per_login_nonce: bool = False
+
     def is_configured(self):
         return all([os.environ.get(env) for env in self.env])
 
@@ -269,6 +273,7 @@ class AzureADOAuthProvider(OAuthProvider):
 
 class AzureADHybridOAuthProvider(OAuthProvider):
     id = "azure-ad-hybrid"
+    uses_per_login_nonce = True
     env = [
         "OAUTH_AZURE_AD_HYBRID_CLIENT_ID",
         "OAUTH_AZURE_AD_HYBRID_CLIENT_SECRET",
@@ -288,7 +293,12 @@ class AzureADHybridOAuthProvider(OAuthProvider):
     def __init__(self):
         self.client_id = os.environ.get("OAUTH_AZURE_AD_HYBRID_CLIENT_ID")
         self.client_secret = os.environ.get("OAUTH_AZURE_AD_HYBRID_CLIENT_SECRET")
-        nonce = random_secret(16)
+        # NOTE: the OIDC ``nonce`` is intentionally NOT set here. Provider
+        # instances are constructed once at module import, so a nonce stored on
+        # ``self.authorize_params`` would be identical for every login for the
+        # lifetime of the process and could never provide replay protection.
+        # The nonce is generated per authorization request in ``oauth_login``
+        # and verified against the returned ``id_token`` in the callback.
         self.authorize_params = {
             "tenant": os.environ.get("OAUTH_AZURE_AD_HYBRID_TENANT_ID"),
             "response_type": "code id_token",
@@ -297,7 +307,6 @@ class AzureADHybridOAuthProvider(OAuthProvider):
                 "https://graph.microsoft.com/User.Read https://graph.microsoft.com/openid offline_access",
             ),
             "response_mode": "form_post",
-            "nonce": nonce,
         }
 
         if prompt := self.get_prompt():

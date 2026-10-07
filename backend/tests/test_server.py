@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import pathlib
+import urllib.parse
 from pathlib import Path
 from typing import Callable
 from unittest.mock import AsyncMock, Mock, create_autospec, mock_open
@@ -1312,6 +1313,140 @@ def test_oauth_azure_hf_callback_get_token_error_redirects(
     )
     assert response.status_code == 303
     assert "error=oauthSignin" in response.headers["location"]
+
+
+# ---------------------------------------------------------------------------
+# Azure AD hybrid callback hardening: OAuth state + id_token verification
+# ---------------------------------------------------------------------------
+
+
+def test_azure_hf_callback_missing_state_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """azure-ad-hybrid callback must require the OAuth state form field."""
+    callback = AsyncMock()
+    test_config.code.oauth_callback = callback
+    response = test_client.post(
+        "/auth/oauth/azure-ad-hybrid/callback",
+        data={"code": "fake_code", "id_token": "a.b.c"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]
+    callback.assert_not_awaited()
+
+
+def test_azure_hf_callback_missing_id_token_redirects(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """azure-ad-hybrid callback must require an id_token to verify."""
+    callback = AsyncMock()
+    test_config.code.oauth_callback = callback
+    response = test_client.post(
+        "/auth/oauth/azure-ad-hybrid/callback",
+        data={"code": "fake_code", "state": "valid_state"},
+        cookies={"oauth_state": "valid_state"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]
+    callback.assert_not_awaited()
+
+
+def test_azure_hf_callback_rejects_forged_id_token(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A client-supplied id_token that fails verification must not authenticate."""
+    verified = []
+
+    def fake_verify(provider, id_token, expected_nonce):
+        verified.append(id_token)
+        raise Exception("signature verification failed")
+
+    monkeypatch.setattr("chainlit.server._verify_azure_hf_id_token", fake_verify)
+
+    callback = AsyncMock()
+    test_config.code.oauth_callback = callback
+
+    response = test_client.post(
+        "/auth/oauth/azure-ad-hybrid/callback",
+        data={"code": "fake_code", "state": "valid_state", "id_token": "forged"},
+        cookies={"oauth_state": "valid_state", "oauth_nonce": "login_nonce"},
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert "error=oauthSignin" in response.headers["location"]
+    assert verified == ["forged"]
+    callback.assert_not_awaited()
+    assert "access_token" not in response.cookies
+
+
+def test_azure_hf_callback_verifies_id_token_with_login_nonce(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Verification must receive the id_token and the nonce bound to this login."""
+    captured = {}
+
+    def fake_verify(provider, id_token, expected_nonce):
+        captured["id_token"] = id_token
+        captured["nonce"] = expected_nonce
+        return {"upn": "user@example.com"}
+
+    monkeypatch.setattr("chainlit.server._verify_azure_hf_id_token", fake_verify)
+    monkeypatch.setattr(
+        "chainlit.server._authenticate_user", AsyncMock(return_value=Mock())
+    )
+
+    test_config.code.oauth_callback = AsyncMock(return_value=Mock())
+
+    response = test_client.post(
+        "/auth/oauth/azure-ad-hybrid/callback",
+        data={"code": "fake_code", "state": "valid_state", "id_token": "good"},
+        cookies={"oauth_state": "valid_state", "oauth_nonce": "login_nonce"},
+        follow_redirects=False,
+    )
+
+    assert response.status_code == 303
+    assert "error=oauthSignin" not in response.headers.get("location", "")
+    assert captured == {"id_token": "good", "nonce": "login_nonce"}
+
+
+def test_azure_hf_login_nonce_differs_per_request(
+    test_client: TestClient,
+    test_config,
+    mock_oauth_provider,
+):
+    """Each authorization request must carry a fresh, non-reused nonce."""
+    test_config.code.oauth_callback = AsyncMock()
+    mock_oauth_provider.authorize_params = {}
+    mock_oauth_provider.authorize_url = (
+        "https://login.microsoftonline.com/common/oauth2/v2.0/authorize"
+    )
+    mock_oauth_provider.uses_per_login_nonce = True
+
+    nonces = []
+    for _ in range(2):
+        response = test_client.get(
+            "/auth/oauth/azure-ad-hybrid", follow_redirects=False
+        )
+        assert response.status_code in (302, 307)
+        query = urllib.parse.parse_qs(
+            urllib.parse.urlparse(response.headers["location"]).query
+        )
+        nonces.append(query.get("nonce", [None])[0])
+
+    assert nonces[0] and nonces[1]
+    assert nonces[0] != nonces[1]
 
 
 def test_oauth_azure_hf_callback_none_user_redirects(
