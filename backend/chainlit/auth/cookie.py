@@ -34,6 +34,7 @@ _state_cookie_lifetime = int(
 )
 _auth_cookie_name = os.environ.get("CHAINLIT_AUTH_COOKIE_NAME", "access_token")
 _state_cookie_name = "oauth_state"
+_nonce_cookie_name = "oauth_nonce"
 
 
 class OAuth2PasswordBearerWithCookie(SecurityBase):
@@ -205,6 +206,28 @@ def validate_oauth_state_cookie(request: Request, state: str):
 
     if oauth_state is None or not hmac.compare_digest(oauth_state, state):
         raise Exception("oauth state does not correspond")
+
+
+def set_oauth_nonce_cookie(response: Response, token: str):
+    """Bind the OIDC nonce of an in-flight authorization request to the browser."""
+    response.set_cookie(
+        _nonce_cookie_name,
+        token,
+        httponly=True,
+        samesite=_cookie_samesite,
+        secure=_cookie_secure,
+        max_age=_state_cookie_lifetime,
+    )
+
+
+def get_oauth_nonce_cookie(request: Request) -> Optional[str]:
+    """Read the OIDC nonce bound to the browser's in-flight login request."""
+    return request.cookies.get(_nonce_cookie_name)
+
+
+def clear_oauth_nonce_cookie(response: Response):
+    """Oauth complete, delete nonce token."""
+    response.delete_cookie(_nonce_cookie_name)
 
 
 def clear_oauth_state_cookie(response: Response):
