@@ -1,3 +1,4 @@
+import getRouterBasename from '@/lib/router';
 import { useCallback, useContext, useMemo, useState } from 'react';
 import { useRecoilValue, useSetRecoilState } from 'recoil';
 import { toast } from 'sonner';
@@ -47,7 +48,8 @@ export function ShareDialog({
 
   const shareLink = useMemo(() => {
     const id = sharedThreadId || threadId || '';
-    return `${window.location.origin}/share/${id}`;
+    const basename = getRouterBasename().replace(/\/$/, '');
+    return `${window.location.origin}${basename}/share/${id}`;
   }, [sharedThreadId, threadId]);
 
   const handleCopy = async () => {
