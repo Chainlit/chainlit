@@ -178,6 +178,8 @@ reaction_on_message_received = false
         # stdio is never user-provided (server-side config only).
         enabled = false
         # Allowlist of permitted URL prefixes. Empty list = deny all.
+        # Each entry may use '*' as a wildcard in the host and/or path, e.g.
+        # "https://*.example.com" or "https://mcp.example.com/api/*".
         # Example: allowed_urls = ["https://mcp.example.com"]
         allowed_urls = []
 
