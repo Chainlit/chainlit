@@ -404,6 +404,80 @@ class TestHttpMcpConnection:
             None,
             id="positive-explicit-default-https-port",
         ),
+        # Wildcard host: '*' covers subdomains but not the apex or a lookalike
+        pytest.param(
+            "https://mcp.example.com/sse",
+            ["https://*.example.com"],
+            False,
+            None,
+            id="wildcard-host-subdomain-allowed",
+        ),
+        pytest.param(
+            "https://a.b.example.com/sse",
+            ["https://*.example.com"],
+            False,
+            None,
+            id="wildcard-host-nested-subdomain-allowed",
+        ),
+        pytest.param(
+            "https://example.com/sse",
+            ["https://*.example.com"],
+            True,
+            "not in the allowed",
+            id="wildcard-host-apex-blocked",
+        ),
+        pytest.param(
+            "https://example.com.evil.com/sse",
+            ["https://*.example.com"],
+            True,
+            "not in the allowed",
+            id="wildcard-host-lookalike-blocked",
+        ),
+        pytest.param(
+            "https://evil.com/sse",
+            ["https://*.example.com"],
+            True,
+            "not in the allowed",
+            id="wildcard-host-other-domain-blocked",
+        ),
+        # Wildcard path: covers a subtree, still refuses a sibling prefix
+        pytest.param(
+            "https://api.example.com/api/v1/mcp",
+            ["https://api.example.com/api/*"],
+            False,
+            None,
+            id="wildcard-path-subpath-allowed",
+        ),
+        pytest.param(
+            "https://api.example.com/api",
+            ["https://api.example.com/api/*"],
+            True,
+            "not in the allowed",
+            id="wildcard-path-bare-prefix-blocked",
+        ),
+        pytest.param(
+            "https://api.example.com/api-evil/mcp",
+            ["https://api.example.com/api/*"],
+            True,
+            "not in the allowed",
+            id="wildcard-path-sibling-blocked",
+        ),
+        # '*' must not be honoured inside a traversal-shaped path
+        pytest.param(
+            "https://allowed.com/api/../admin",
+            ["https://allowed.com/api/*"],
+            True,
+            "not in the allowed",
+            id="wildcard-path-traversal-still-blocked",
+        ),
+        # A wildcard scheme is not supported and must not widen access
+        pytest.param(
+            "https://api.example.com/mcp",
+            ["*://api.example.com"],
+            True,
+            "not in the allowed",
+            id="wildcard-scheme-blocked",
+        ),
     ],
 )
 def test_validate_mcp_url(url, allowed_urls, should_raise, error_match):

@@ -1,3 +1,4 @@
+import re
 from typing import Callable, Dict, Literal, Optional, Union
 from urllib.parse import unquote, urlparse
 
@@ -82,9 +83,40 @@ def _path_matches(req_path: str, allowed_path: str) -> bool:
     no path component, e.g. "https://example.com"), all sub-paths on that host
     are permitted. Use a path-restricted entry (e.g. "https://example.com/api")
     to limit access to a sub-tree.
+
+    A '*' in allowed_path is a wildcard that matches any run of characters, so
+    "https://example.com/api/*" permits the whole subtree while still refusing
+    sibling paths such as '/api-evil'.
     """
+    if "*" in allowed_path:
+        return _wildcard_matches(allowed_path, req_path)
     norm = allowed_path.rstrip("/") + "/"
     return req_path == norm.rstrip("/") or req_path.startswith(norm)
+
+
+def _wildcard_matches(pattern: str, value: str) -> bool:
+    """Match ``value`` against ``pattern`` where '*' is the only wildcard.
+
+    Every other character is treated literally, so an allowlist entry cannot
+    pick up regex behaviour the operator did not intend.
+    """
+    regex = "^" + re.escape(pattern).replace(r"\*", ".*") + "$"
+    return re.match(regex, value) is not None
+
+
+def _host_matches(host: Optional[str], allowed_host: Optional[str]) -> bool:
+    """True if ``host`` matches an allowlist host, which may contain '*'.
+
+    Without a wildcard the hosts must be equal. With one, '*' matches any run
+    of characters, so "*.example.com" covers every subdomain but not the apex
+    "example.com" itself, and never spills into a different registrable domain
+    such as "example.com.evil.com".
+    """
+    if host is None or allowed_host is None:
+        return False
+    if "*" not in allowed_host:
+        return host == allowed_host
+    return _wildcard_matches(allowed_host, host)
 
 
 def _has_ambiguous_path(raw_path: str) -> bool:
@@ -165,7 +197,7 @@ def validate_mcp_url(url: str, allowed_urls: list[str]) -> None:
         allowed_parsed = urlparse(allowed)
         if (
             parsed.scheme == allowed_parsed.scheme
-            and parsed.host == allowed_parsed.hostname
+            and _host_matches(parsed.host, allowed_parsed.hostname)
             and _effective_port(parsed) == _effective_port(allowed_parsed)
             and _path_matches(parsed.path or "/", allowed_parsed.path or "/")
         ):
