@@ -213,36 +213,65 @@ async def connection_successful(sid):
     await context.emitter.clear("clear_ask")
     await context.emitter.clear("clear_call_fn")
 
-    if context.session.restored and not context.session.has_first_interaction:
+    async with context.session._thread_resume_lock:
+        if context.session.restored and not context.session.thread_id_to_resume:
+            if (
+                not context.session.has_first_interaction
+                and config.code.on_chat_start
+                and not context.session.chat_started
+            ):
+                context.session.chat_started = True
+                task = asyncio.create_task(config.code.on_chat_start())
+                context.session.current_task = task
+            return
+
+        if context.session.thread_id_to_resume and config.code.on_chat_resume:
+            thread = context.session._resumed_thread
+            interaction_sid = None
+            if thread is None:
+                thread = await resume_thread(context.session)
+                if thread:
+                    context.session.has_first_interaction = True
+                    interaction_sid = context.session.socket_id
+                    await context.emitter.emit(
+                        "first_interaction",
+                        {"interaction": "resume", "thread_id": thread.get("id")},
+                    )
+                    await config.code.on_chat_resume(thread)
+
+                    for step in thread.get("steps", []):
+                        if "message" in step["type"]:
+                            chat_context.add(Message.from_dict(step))
+
+                    # Server initialization is complete even if delivery needs a retry.
+                    context.session._resumed_thread = thread
+
+            if thread:
+                delivery_sid = context.session.socket_id
+                if not sio.manager.is_connected(delivery_sid, "/"):
+                    return
+                if interaction_sid != delivery_sid:
+                    await context.emitter.emit(
+                        "first_interaction",
+                        {"interaction": "resume", "thread_id": thread.get("id")},
+                    )
+                await context.emitter.resume_thread(thread)
+                if (
+                    context.session.socket_id != delivery_sid
+                    or not sio.manager.is_connected(delivery_sid, "/")
+                ):
+                    return
+                context.session.thread_id_to_resume = None
+                context.session._resumed_thread = None
+                return
+            else:
+                await context.emitter.send_resume_thread_error("Thread not found.")
+                context.session.thread_id_to_resume = None
+
         if config.code.on_chat_start and not context.session.chat_started:
             context.session.chat_started = True
             task = asyncio.create_task(config.code.on_chat_start())
             context.session.current_task = task
-        return
-
-    if context.session.thread_id_to_resume and config.code.on_chat_resume:
-        thread = await resume_thread(context.session)
-        if thread:
-            context.session.has_first_interaction = True
-            await context.emitter.emit(
-                "first_interaction",
-                {"interaction": "resume", "thread_id": thread.get("id")},
-            )
-            await config.code.on_chat_resume(thread)
-
-            for step in thread.get("steps", []):
-                if "message" in step["type"]:
-                    chat_context.add(Message.from_dict(step))
-
-            await context.emitter.resume_thread(thread)
-            return
-        else:
-            await context.emitter.send_resume_thread_error("Thread not found.")
-
-    if config.code.on_chat_start and not context.session.chat_started:
-        context.session.chat_started = True
-        task = asyncio.create_task(config.code.on_chat_start())
-        context.session.current_task = task
 
 
 @sio.on("clear_session")  # pyright: ignore [reportOptionalCall]

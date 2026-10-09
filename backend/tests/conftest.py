@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -41,6 +42,8 @@ def mock_session_factory(persisted_test_user: PersistedUser) -> Callable[..., Mo
         mock.has_first_interaction = kwargs.get("has_first_interaction", True)
         mock.files = kwargs.get("files", {})
         mock.files_spec = kwargs.get("files_spec", {})
+        mock._thread_resume_lock = asyncio.Lock()
+        mock._resumed_thread = None
 
         return mock
 

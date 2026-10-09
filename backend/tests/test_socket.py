@@ -1,3 +1,4 @@
+import asyncio
 import json
 from unittest.mock import AsyncMock, Mock, patch
 
@@ -534,6 +535,54 @@ class TestConnectionSuccessfulIdempotency:
     Refs chainlit#2535, chainlit#2549, chainlit#2228.
     """
 
+    @pytest.fixture(autouse=True)
+    def socket_is_connected(self):
+        # Sessions in these unit tests represent connected Socket.IO clients.
+        with patch(
+            "chainlit.socket.sio.manager.is_connected", return_value=True
+        ) as connected:
+            yield connected
+
+    @pytest.mark.asyncio
+    async def test_on_chat_resume_not_duplicated_on_reconnect(
+        self, mock_session_factory
+    ):
+        """A live session reconnect must not reload its persisted thread."""
+        session = mock_session_factory(has_first_interaction=False)
+        session.socket_id = "sid-1"
+        session.restored = False
+        session.thread_id_to_resume = "thread-1"
+        session.chat_started = False
+
+        mock_context = Mock()
+        mock_context.session = session
+        mock_context.emitter = AsyncMock()
+
+        mock_config = Mock()
+        mock_config.code.on_chat_start = None
+        mock_config.code.on_chat_resume = AsyncMock()
+        thread = {"id": "thread-1", "steps": [{"type": "user_message"}]}
+
+        with (
+            patch("chainlit.socket.init_ws_context", return_value=mock_context),
+            patch("chainlit.socket.config", mock_config),
+            patch(
+                "chainlit.socket.resume_thread", new_callable=AsyncMock
+            ) as load_thread,
+            patch("chainlit.socket.Message.from_dict") as from_dict,
+            patch("chainlit.socket.chat_context.add") as add_to_chat_context,
+        ):
+            load_thread.return_value = thread
+            await connection_successful("sid-1")
+            session.restored = True
+            await connection_successful("sid-2")
+
+        load_thread.assert_awaited_once_with(session)
+        mock_config.code.on_chat_resume.assert_awaited_once_with(thread)
+        mock_context.emitter.resume_thread.assert_awaited_once_with(thread)
+        from_dict.assert_called_once_with(thread["steps"][0])
+        add_to_chat_context.assert_called_once_with(from_dict.return_value)
+
     @pytest.mark.asyncio
     async def test_on_chat_start_not_duplicated_on_reconnect(
         self, mock_session_factory
@@ -628,3 +677,248 @@ class TestConnectionSuccessfulIdempotency:
             await connection_successful("sid-1")
 
         assert on_chat_start.call_count == 1
+
+    @pytest.fixture
+    def pending_resume(self, persisted_test_user):
+        thread = {
+            "id": "thread-1",
+            "userIdentifier": persisted_test_user.identifier,
+            "metadata": {},
+            "steps": [
+                {
+                    "id": "message-1",
+                    "threadId": "thread-1",
+                    "type": "user_message",
+                    "name": "User",
+                    "createdAt": "2026-09-29T00:00:00Z",
+                    "output": "Persisted message",
+                }
+            ],
+        }
+        data_layer = AsyncMock()
+        data_layer.get_thread.return_value = thread
+        on_chat_resume = AsyncMock()
+
+        with (
+            patch.dict("chainlit.session.ws_sessions_id", clear=True),
+            patch.dict("chainlit.session.ws_sessions_sid", clear=True),
+            patch.dict("chainlit.chat_context.chat_contexts", clear=True),
+            patch.dict("chainlit.user_session.user_sessions", clear=True),
+            patch("chainlit.socket.get_data_layer", return_value=data_layer),
+            patch("chainlit.socket.config.code.on_chat_resume", on_chat_resume),
+            patch("chainlit.socket.config.code.on_chat_start", None),
+        ):
+            session = WebsocketSession(
+                id="session-1",
+                socket_id="sid-1",
+                emit=AsyncMock(),
+                emit_call=AsyncMock(),
+                user_env={},
+                client_type="webapp",
+                thread_id="thread-1",
+                user=persisted_test_user,
+            )
+            yield session, thread, data_layer, on_chat_resume
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("failure_stage", [None, "callback", "delivery"])
+    async def test_pending_thread_resumed_on_reconnect(
+        self, pending_resume, failure_stage
+    ):
+        """Reconnect finishes pending work without replaying a completed resume."""
+        from chainlit.chat_context import chat_context
+
+        session, _, data_layer, on_chat_resume = pending_resume
+
+        if failure_stage == "callback":
+            on_chat_resume.side_effect = [RuntimeError("Resume interrupted"), None]
+        elif failure_stage == "delivery":
+            delivery_failed = False
+
+            async def emit(event, data):
+                nonlocal delivery_failed
+                if event == "resume_thread" and not delivery_failed:
+                    delivery_failed = True
+                    raise RuntimeError("Resume interrupted")
+
+            session.emit.side_effect = emit
+
+        if failure_stage:
+            with pytest.raises(RuntimeError, match="Resume interrupted"):
+                await connection_successful("sid-1")
+            assert session.thread_id_to_resume == "thread-1"
+
+        # The first socket disappears before its successful resume delivery.
+        assert restore_existing_session(
+            "sid-2", session.id, session.emit, session.emit_call, {}, user=session.user
+        )
+        await connection_successful("sid-2")
+        assert chat_context.to_openai() == [
+            {"role": "user", "content": "Persisted message"}
+        ]
+
+        # Once loaded, further reconnects must not replay the thread.
+        assert restore_existing_session(
+            "sid-3", session.id, session.emit, session.emit_call, {}, user=session.user
+        )
+        await connection_successful("sid-3")
+        assert chat_context.to_openai() == [
+            {"role": "user", "content": "Persisted message"}
+        ]
+
+        expected_attempts = 2 if failure_stage == "callback" else 1
+        assert data_layer.get_thread.await_count == expected_attempts
+        assert on_chat_resume.await_count == expected_attempts
+        delivery_attempts = sum(
+            call.args[0] == "resume_thread" for call in session.emit.await_args_list
+        )
+        assert delivery_attempts == (2 if failure_stage == "delivery" else 1)
+
+    @pytest.mark.asyncio
+    async def test_missing_thread_error_not_replayed_on_reconnect(self, pending_resume):
+        """A terminal missing-thread result is reported only once."""
+        session, _, data_layer, on_chat_resume = pending_resume
+        data_layer.get_thread.return_value = None
+
+        await connection_successful("sid-1")
+        assert restore_existing_session(
+            "sid-2", session.id, session.emit, session.emit_call, {}, user=session.user
+        )
+        await connection_successful("sid-2")
+
+        data_layer.get_thread.assert_awaited_once_with(thread_id="thread-1")
+        on_chat_resume.assert_not_awaited()
+        assert (
+            sum(
+                call.args[0] == "resume_thread_error"
+                for call in session.emit.await_args_list
+            )
+            == 1
+        )
+
+    @pytest.mark.asyncio
+    async def test_concurrent_reconnect_does_not_replay_resume(self, pending_resume):
+        """A reconnect waits for an already-running resume of the same session."""
+        from chainlit.chat_context import chat_context
+        from chainlit.context import init_ws_context
+
+        session, thread, data_layer, on_chat_resume = pending_resume
+        callback_started = asyncio.Event()
+        finish_resume = asyncio.Event()
+        reconnect_ready = asyncio.Event()
+        interaction_sids = []
+
+        async def resume(thread):
+            callback_started.set()
+            await finish_resume.wait()
+
+        async def emit(event, data):
+            if event == "first_interaction":
+                interaction_sids.append(session.socket_id)
+            if session.restored and event == "clear_call_fn":
+                reconnect_ready.set()
+
+        on_chat_resume.side_effect = resume
+        session.emit.side_effect = emit
+        first = asyncio.create_task(connection_successful("sid-1"))
+        second = None
+        try:
+            await asyncio.wait_for(callback_started.wait(), timeout=1)
+            assert restore_existing_session(
+                "sid-2",
+                session.id,
+                session.emit,
+                session.emit_call,
+                {},
+                user=session.user,
+            )
+            second = asyncio.create_task(connection_successful("sid-2"))
+            await asyncio.wait_for(reconnect_ready.wait(), timeout=1)
+        finally:
+            finish_resume.set()
+            await asyncio.wait_for(
+                asyncio.gather(first, *([second] if second else [])), timeout=1
+            )
+
+        init_ws_context(session)
+        assert chat_context.to_openai() == [
+            {"role": "user", "content": "Persisted message"}
+        ]
+        data_layer.get_thread.assert_awaited_once_with(thread_id="thread-1")
+        on_chat_resume.assert_awaited_once_with(thread)
+        assert (
+            sum(
+                call.args[0] == "resume_thread" for call in session.emit.await_args_list
+            )
+            == 1
+        )
+
+        assert interaction_sids == ["sid-1", "sid-2"]
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("loss_stage", ["callback", "delivery", "new_socket"])
+    async def test_silent_resume_delivery_retried_after_disconnect(
+        self, pending_resume, socket_is_connected, loss_stage
+    ):
+        """A silent emit to a dropped socket must leave the restore pending."""
+        from chainlit.chat_context import chat_context
+
+        session, thread, data_layer, on_chat_resume = pending_resume
+        connected = {"sid-1"}
+        delivered = []
+        interactions = []
+        socket_is_connected.side_effect = lambda sid, namespace: sid in connected
+
+        async def resume(_thread):
+            if loss_stage == "callback":
+                connected.discard("sid-1")
+
+        async def first_emit(event, data):
+            if event == "resume_thread":
+                connected.discard("sid-1")
+                if loss_stage == "new_socket":
+                    connected.add("sid-2")
+                    restore_existing_session(
+                        "sid-2",
+                        session.id,
+                        session.emit,
+                        session.emit_call,
+                        {},
+                        user=session.user,
+                    )
+                # Socket.IO emits to empty rooms without raising.
+
+        on_chat_resume.side_effect = resume
+        session.emit.side_effect = first_emit
+        await connection_successful("sid-1")
+        assert session.thread_id_to_resume == "thread-1"
+        assert session._resumed_thread is thread
+
+        async def second_emit(event, data):
+            if event == "resume_thread":
+                delivered.append(data)
+            elif event == "first_interaction":
+                interactions.append(data)
+
+        connected.add("sid-2")
+        assert restore_existing_session(
+            "sid-2",
+            session.id,
+            AsyncMock(side_effect=second_emit),
+            session.emit_call,
+            {},
+            user=session.user,
+        )
+        await connection_successful("sid-2")
+        assert delivered == [thread]
+        assert interactions == [{"interaction": "resume", "thread_id": "thread-1"}]
+        assert session.thread_id_to_resume is None
+        assert session._resumed_thread is None
+        data_layer.get_thread.assert_awaited_once_with(thread_id="thread-1")
+        on_chat_resume.assert_awaited_once_with(thread)
+        assert chat_context.to_openai() == [
+            {"role": "user", "content": "Persisted message"}
+        ]
+
+        await connection_successful("sid-2")
+        assert delivered == [thread]
