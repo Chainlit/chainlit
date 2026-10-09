@@ -118,6 +118,16 @@ def clean_metadata(metadata: Dict, max_size: int = 1048576):
     return cleaned_metadata
 
 
+_SESSION_ID_PATTERN = re.compile(r"[A-Za-z0-9_-]{1,128}")
+
+
+def is_valid_session_id(session_id: Any) -> bool:
+    """Whether the id is safe to use as a single path component."""
+    return isinstance(session_id, str) and bool(
+        _SESSION_ID_PATTERN.fullmatch(session_id)
+    )
+
+
 class BaseSession:
     """Base object."""
 
@@ -166,6 +176,10 @@ class BaseSession:
     @property
     def files_dir(self):
         from chainlit.config import FILES_DIRECTORY
+
+        # The id ends up in a path that is removed recursively on delete.
+        if not is_valid_session_id(self.id):
+            raise ValueError("Invalid session id")
 
         return FILES_DIRECTORY / self.id
 

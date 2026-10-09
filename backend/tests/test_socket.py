@@ -9,6 +9,7 @@ from chainlit.socket import (
     _get_token,
     _get_token_from_cookie,
     clean_session,
+    connect,
     connection_successful,
     load_user_env,
     persist_user_session,
@@ -628,3 +629,36 @@ class TestConnectionSuccessfulIdempotency:
             await connection_successful("sid-1")
 
         assert on_chat_start.call_count == 1
+
+
+class TestConnectSessionIdValidation:
+    """The client-supplied sessionId is used as a path component of the session files directory."""
+
+    @pytest.mark.parametrize(
+        "session_id",
+        ["../../etc", "/tmp/x", "a/b", "..", "", None, 123, "a" * 129],
+    )
+    async def test_connect_refuses_unsafe_session_id(self, session_id):
+        auth = {"sessionId": session_id, "clientType": "webapp"}
+
+        with patch("chainlit.socket.WebsocketSession") as mock_session:
+            with pytest.raises(ConnectionRefusedError):
+                await connect("sid", {}, auth)
+
+        mock_session.assert_not_called()
+
+    async def test_connect_refuses_missing_session_id(self):
+        with pytest.raises(ConnectionRefusedError):
+            await connect("sid", {}, {"clientType": "webapp"})
+
+    async def test_connect_accepts_uuid_session_id(self):
+        auth = {
+            "sessionId": "5d6c2b0e-3b9a-4e0e-9a43-1f7c8a1f2b44",
+            "clientType": "webapp",
+        }
+
+        with (
+            patch("chainlit.socket.require_login", return_value=False),
+            patch("chainlit.socket.restore_existing_session", return_value=True),
+        ):
+            assert await connect("sid", {}, auth) is True
