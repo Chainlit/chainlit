@@ -1,4 +1,6 @@
+import subprocess
 import sys
+import textwrap
 import threading
 from unittest.mock import Mock, patch
 
@@ -20,6 +22,48 @@ class TestCacheDecorator:
     def teardown_method(self):
         """Clear the cache after each test."""
         cache_module._cache.clear()
+
+    def test_cache_nested_and_recursive_calls(self):
+        # A subprocess bounds a deadlock without leaving a blocked worker behind.
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-c",
+                textwrap.dedent(
+                    """
+                    from chainlit.cache import cache
+
+                    calls = []
+
+                    @cache
+                    def inner(value):
+                        calls.append(value)
+                        return value * 2
+
+                    @cache
+                    def outer(value):
+                        return inner(value) + 1
+
+                    assert outer(3) == 7
+                    assert outer(3) == 7
+                    assert inner(3) == 6
+                    assert calls == [3]
+
+                    @cache
+                    def fibonacci(value):
+                        if value < 2:
+                            return value
+                        return fibonacci(value - 1) + fibonacci(value - 2)
+
+                    assert fibonacci(8) == 21
+                    """
+                ),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=15,
+        )
+        assert result.returncode == 0, result.stderr
 
     def test_cache_basic_function(self):
         """Test that cache decorator caches function results."""
