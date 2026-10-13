@@ -41,7 +41,8 @@ def init_lc_cache():
 
 
 _cache: dict[tuple, Any] = {}
-_cache_lock = threading.Lock()
+# Resource loaders may call other cached loaders while holding this lock.
+_cache_lock = threading.RLock()
 
 
 def cache(func):
